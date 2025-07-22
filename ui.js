@@ -116,7 +116,7 @@ class SkipBoUI {
             cardEl.className = 'card back';
             cardEl.dataset.card = card;
             cardEl.dataset.source = 'hand';
-            cardEl.dataset.index = index;
+            cardEl.dataset.index = index.toString();
             this.elements.aiHand.appendChild(cardEl);
         });
 
@@ -130,7 +130,7 @@ class SkipBoUI {
 
     updateBuildPiles() {
         this.elements.buildPiles.innerHTML = '';
-        this.game.buildPiles.forEach((pile, index) => {
+        this.game.buildPiles.piles.forEach((pile, index) => {
             const pileEl = document.createElement('div');
             if (pile.length > 0) {
                 pileEl.className = 'card';
@@ -145,7 +145,7 @@ class SkipBoUI {
     }
 
     updateDeckUI() {
-        this.elements.deckCount.textContent = this.game.deck.length;
+        this.elements.deckCount.textContent = this.game.deck.size();
         this.elements.deck.innerHTML = '';
     }
 

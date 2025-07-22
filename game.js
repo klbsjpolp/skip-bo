@@ -3,17 +3,16 @@ import { Player } from './player.js';
 import { Deck } from './deck.js';
 import { BuildPilesManager } from './buildPilesManager.js';
 import { GameStateManager } from './gameStateManager.js';
-import { AIStrategy } from './aiStrategy.js';
-import { GameEvents } from './gameEvents.js';
+import { ValidationService } from './validationService.js';
 
-// Game logic module
-class SkipBoGame {
+export default class SkipBoGame {
     constructor() {
         this.deck = new Deck();
         this.buildPiles = new BuildPilesManager();
         this.gameState = new GameStateManager();
-        this.events = new GameEvents();
-        this.aiStrategy = new AIStrategy();
+        this.selectedCard = null;
+        this.gameIsOver = false;
+        this.currentPlayerIndex = 0;
 
         this.players = [
             new Player(false), // Human player
@@ -23,19 +22,25 @@ class SkipBoGame {
 
     initializeGame() {
         this.deck.create().shuffle();
-        this.dealCards();
-        this.drawInitialHands();
+        this.buildPiles.reset();
         this.gameState.reset();
+        this.gameIsOver = false;
+        this.currentPlayerIndex = 0;
+        this.selectedCard = null;
 
-        this.events.emit('gameInitialized', {
-            players: this.players,
-            deck: this.deck,
-            buildPiles: this.buildPiles
-        });
+        // Deal stock piles
+        this.dealCards();
+
+        // Draw initial hands
+        this.drawInitialHands();
     }
 
     dealCards() {
         for (let i = 0; i < this.players.length; i++) {
+            this.players[i].stock = [];
+            this.players[i].hand = [];
+            this.players[i].discard = [[], [], [], []];
+
             for (let j = 0; j < CONFIG.GAME.STOCK_PILE_SIZE; j++) {
                 if (this.deck.size() > 0) {
                     this.players[i].stock.push(this.deck.draw());
@@ -53,215 +58,157 @@ class SkipBoGame {
     drawHand(playerIndex) {
         const player = this.players[playerIndex];
 
-        while (player.needsCards() && this.deck.size() > 0) {
-            player.addCardToHand(this.deck.draw());
+        // Fill hand to 5 cards
+        while (player.hand.length < CONFIG.GAME.HAND_SIZE && this.deck.size() > 0) {
+            player.hand.push(this.deck.draw());
         }
 
-        // If deck is empty, try to reshuffle
-        if (player.needsCards() && this.deck.isEmpty()) {
-            const reshuffleResult = this.deck.reshuffleFromCompletedPiles(this.buildPiles.piles);
-
-            if (reshuffleResult.success) {
-                this.events.emit('deckReshuffled', reshuffleResult);
-
-                // Continue drawing after reshuffle
-                while (player.needsCards() && this.deck.size() > 0) {
-                    player.addCardToHand(this.deck.draw());
-                }
-            } else {
-                this.events.emit('deckEmpty', { playerIndex });
-                return { success: false, message: CONFIG.MESSAGES.DECK_EMPTY_NO_CARDS };
-            }
-        }
-
-        return { success: true };
-    }
-
-    canPlayCard(card, pileIndex) {
-        return this.buildPiles.canPlayCard(card, pileIndex);
-    }
-
-    playCard(playerIndex, card, source, sourceIndex, targetPileIndex = null) {
-        const player = this.players[playerIndex];
-
-        const executePlay = (pileIndex) => {
-            const result = this.buildPiles.playCard(card, pileIndex);
-
-            if (!result.success) return false;
-
-            // Remove card from source
-            this.removeCardFromSource(player, source, sourceIndex);
-
-            // Handle completed build pile
-            if (result.completed) {
-                this.deck.addCompletedBuildPile(result.completedCards);
-                this.events.emit('buildPileCompleted', result);
-            }
-
-            this.gameState.addAction({
-                type: 'play',
-                playerIndex,
-                card,
-                source,
-                sourceIndex,
-                targetPile: pileIndex
-            });
-
-            this.events.emit('cardPlayed', {
-                playerIndex,
-                card,
-                source,
-                targetPile: pileIndex,
-                result
-            });
-
-            return true;
+        return {
+            success: true,
+            message: 'Hand drawn successfully'
         };
+    }
 
-        if (targetPileIndex !== null) {
-            return executePlay(targetPileIndex);
-        } else {
-            // AI logic - try all piles
+    playCard(playerIndex, cardValue, source, sourceIndex = 0, targetPileIndex = null) {
+        const player = this.players[playerIndex];
+
+        // If no target pile specified, find the first valid one
+        if (targetPileIndex === null) {
             for (let i = 0; i < this.buildPiles.piles.length; i++) {
-                if (executePlay(i)) return true;
+                if (this.buildPiles.canPlayCard(cardValue, i)) {
+                    targetPileIndex = i;
+                    break;
+                }
             }
         }
-        return false;
-    }
 
-    removeCardFromSource(player, source, sourceIndex) {
-        switch (source) {
-            case 'stock':
-                player.removeCardFromStock();
-                break;
-            case 'hand':
-                player.removeCardFromHand(sourceIndex);
-                break;
-            case 'discard':
-                player.removeCardFromDiscard(sourceIndex);
-                break;
+        // Validate the play
+        if (targetPileIndex === null || !this.buildPiles.canPlayCard(cardValue, targetPileIndex)) {
+            return false;
         }
-    }
 
-    discardCard(playerIndex, cardIndex, discardPileIndex) {
-        const player = this.players[playerIndex];
-        if (player.hand.length === 0 || cardIndex >= player.hand.length) return false;
+        // Remove card from source
+        let removedCard;
+        if (source === 'stock') {
+            if (player.stock.length === 0) return false;
+            removedCard = player.stock.pop();
+        } else if (source === 'hand') {
+            if (sourceIndex < 0 || sourceIndex >= player.hand.length) return false;
+            removedCard = player.hand.splice(sourceIndex, 1)[0];
+        } else if (source === 'discard') {
+            if (sourceIndex < 0 || sourceIndex >= player.discard.length) return false;
+            if (player.discard[sourceIndex].length === 0) return false;
+            removedCard = player.discard[sourceIndex].pop();
+        } else {
+            return false;
+        }
 
-        const card = player.removeCardFromHand(cardIndex);
-        player.addCardToDiscard(card, discardPileIndex);
+        // Verify the card matches what we expected
+        if (removedCard !== cardValue) {
+            // Put the card back if there's a mismatch
+            if (source === 'stock') {
+                player.stock.push(removedCard);
+            } else if (source === 'hand') {
+                player.hand.splice(sourceIndex, 0, removedCard);
+            } else if (source === 'discard') {
+                player.discard[sourceIndex].push(removedCard);
+            }
+            return false;
+        }
 
-        this.gameState.addAction({
-            type: 'discard',
-            playerIndex,
-            card,
-            discardPile: discardPileIndex
-        });
+        // Play the card to the build pile
+        const success = this.buildPiles.playCard(cardValue, targetPileIndex);
 
-        this.events.emit('cardDiscarded', {
-            playerIndex,
-            card,
-            discardPile: discardPileIndex
-        });
+        if (!success) {
+            // Put the card back if play failed
+            if (source === 'stock') {
+                player.stock.push(removedCard);
+            } else if (source === 'hand') {
+                player.hand.splice(sourceIndex, 0, removedCard);
+            } else if (source === 'discard') {
+                player.discard[sourceIndex].push(removedCard);
+            }
+            return false;
+        }
 
         return true;
     }
 
-    checkForWinner() {
-        for (let i = 0; i < this.players.length; i++) {
-            if (this.players[i].hasWon()) {
-                this.gameState.endGame(i);
-                this.events.emit('gameEnded', {
-                    winnerIndex: i,
-                    isAI: this.players[i].isAI
-                });
-                return {
-                    hasWinner: true,
-                    winnerIndex: i
-                };
-            }
-        }
-        return { hasWinner: false };
-    }
+    discardCard(playerIndex, handIndex, discardPileIndex) {
+        const player = this.players[playerIndex];
 
-    getCurrentPlayer() {
-        return this.gameState.getCurrentPlayer(this.players);
+        if (handIndex < 0 || handIndex >= player.hand.length) return false;
+        if (discardPileIndex < 0 || discardPileIndex >= player.discard.length) return false;
+
+        const card = player.hand.splice(handIndex, 1)[0];
+        player.discard[discardPileIndex].push(card);
+
+        return true;
     }
 
     switchTurn() {
-        this.gameState.switchTurn(this.players);
-        this.events.emit('turnChanged', {
-            currentPlayerIndex: this.gameState.currentPlayerIndex,
-            currentPlayer: this.getCurrentPlayer()
-        });
+        this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
     }
 
-    executeAITurn() {
-        const aiPlayer = this.players[1];
-        const move = this.aiStrategy.findBestMove(aiPlayer, this.buildPiles.piles, this.gameState);
+    getCurrentPlayer() {
+        return this.players[this.currentPlayerIndex];
+    }
 
-        if (!move) return false;
-
-        if (move.type === 'play') {
-            return this.playCard(1, move.card, move.source, move.sourceIndex, move.targetPile);
-        } else if (move.type === 'discard') {
-            return this.discardCard(1, move.sourceIndex, move.targetPile);
+    checkForWinner() {
+        for (let i = 0; i < this.players.length; i++) {
+            if (this.players[i].stock.length === 0) {
+                this.gameIsOver = true;
+                return {
+                    hasWinner: true,
+                    winnerIndex: i,
+                    isAI: this.players[i].isAI
+                };
+            }
         }
 
-        return false;
-    }
-
-    getGameState() {
         return {
-            players: this.players,
-            buildPiles: this.buildPiles.getState(),
-            currentPlayerIndex: this.gameState.currentPlayerIndex,
-            deckSize: this.deck.size(),
-            gameStats: this.gameState.getGameStats(this.players)
+            hasWinner: false,
+            winnerIndex: -1,
+            isAI: false
         };
     }
 
-    // Legacy compatibility methods - can be removed once UI is updated
-    get currentPlayerIndex() {
-        return this.gameState.currentPlayerIndex;
-    }
-
-    get gameIsOver() {
-        return this.gameState.isGameOver();
-    }
-
-    get selectedCard() {
-        return this.gameState.selectedCard;
-    }
-
-    set selectedCard(value) {
-        this.gameState.selectedCard = value;
-    }
-
-    // Legacy methods for backward compatibility with existing UI
-    createDeck() {
-        return this.deck.create().cards;
-    }
-
-    shuffleDeck() {
-        this.deck.shuffle();
-    }
-
-    reshuffleCompletedBuildPiles() {
-        return this.deck.reshuffleFromCompletedPiles(this.buildPiles.piles);
-    }
-
-    // Selection methods for UI compatibility
-    clearSelection() {
-        this.gameState.selectedCard = null;
-    }
-
+    // Selection methods for UI
     setSelection(cardData) {
-        this.gameState.selectedCard = cardData;
+        this.selectedCard = cardData;
     }
 
-    getSelection() {
-        return this.gameState.selectedCard;
+    clearSelection() {
+        this.selectedCard = null;
+    }
+
+    // Validation methods
+    canPlayCard(cardValue, pileIndex) {
+        return this.buildPiles.canPlayCard(cardValue, pileIndex);
+    }
+
+    validateMove(playerIndex, cardValue, source, sourceIndex, targetPileIndex) {
+        return ValidationService.isValidBuildPilePlay(cardValue, this.buildPiles.piles[targetPileIndex]);
+    }
+
+    getPlayableCards(playerIndex) {
+        return ValidationService.getPlayableCards(this.players[playerIndex], this.buildPiles);
+    }
+
+    validateGameState() {
+        return ValidationService.validateGameState(this);
+    }
+
+    // Getters for UI
+    get buildPilesState() {
+        return this.buildPiles.getAllPiles();
+    }
+
+    get deckCount() {
+        return this.deck.size();
+    }
+
+    get isGameOver() {
+        return this.gameIsOver;
     }
 }
-
-export default SkipBoGame;

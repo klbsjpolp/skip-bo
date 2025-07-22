@@ -1,102 +1,185 @@
 import CONFIG from './config.js';
 
 export class ValidationService {
-    static validateCardPlay(card, pile, gameRules = {}) {
-        const rules = { ...CONFIG.GAME, ...gameRules };
+    static isValidCard(card) {
+        return card === 'SB' || (Number.isInteger(card) && card >= 1 && card <= 12);
+    }
 
-        if (!card || (!Number.isInteger(card) && card !== 'SB')) {
-            return { valid: false, reason: 'Invalid card value' };
+    static isValidBuildPilePlay(card, pile) {
+        if (!this.isValidCard(card)) {
+            return false;
         }
 
-        if (!Array.isArray(pile)) {
-            return { valid: false, reason: 'Invalid pile' };
-        }
-
-        const topValue = pile.length > 0 ? pile[pile.length - 1] : 0;
-        const expectedValue = topValue + 1;
-
+        // Skip-Bo cards can always be played
         if (card === 'SB') {
-            return { valid: true, playedAs: expectedValue };
+            return true;
         }
 
-        if (card === expectedValue) {
-            return { valid: true, playedAs: card };
+        // Empty pile - only 1 can be played
+        if (pile.length === 0) {
+            return card === 1;
         }
 
-        return {
-            valid: false,
-            reason: `Expected ${expectedValue}, got ${card}`
-        };
+        // Get the effective value of the top card
+        const topCard = pile[pile.length - 1];
+        const expectedNext = this.getExpectedNextValue(pile);
+
+        return card === expectedNext;
     }
 
-    static validatePlayerMove(player, source, sourceIndex) {
-        if (!player) {
-            return { valid: false, reason: 'No player specified' };
+    static getExpectedNextValue(pile) {
+        if (pile.length === 0) {
+            return 1;
         }
 
-        switch (source) {
-            case 'stock':
-                if (player.stock.length === 0) {
-                    return { valid: false, reason: 'Stock pile is empty' };
-                }
-                return { valid: true };
+        const topCard = pile[pile.length - 1];
 
-            case 'hand':
-                if (sourceIndex < 0 || sourceIndex >= player.hand.length) {
-                    return { valid: false, reason: 'Invalid hand index' };
-                }
-                return { valid: true };
-
-            case 'discard':
-                if (sourceIndex < 0 || sourceIndex >= player.discard.length) {
-                    return { valid: false, reason: 'Invalid discard pile index' };
-                }
-                if (player.discard[sourceIndex].length === 0) {
-                    return { valid: false, reason: 'Discard pile is empty' };
-                }
-                return { valid: true };
-
-            default:
-                return { valid: false, reason: 'Invalid source' };
+        if (topCard === 'SB') {
+            // Find the effective value of the Skip-Bo card
+            const effectiveValue = this.getSkipBoEffectiveValue(pile);
+            return effectiveValue < 12 ? effectiveValue + 1 : null;
         }
+
+        return topCard < 12 ? topCard + 1 : null;
     }
 
-    static validateGameState(gameState) {
+    static getSkipBoEffectiveValue(pile) {
+        // Find the last non-Skip-Bo card to determine what value the Skip-Bo represents
+        for (let i = pile.length - 1; i >= 0; i--) {
+            if (pile[i] !== 'SB') {
+                return pile[i];
+            }
+        }
+        // If all cards are Skip-Bo from the beginning, they represent consecutive values starting from 1
+        return pile.length;
+    }
+
+    static canDiscardToDiscardPile(card, discardPile) {
+        // Any card can be discarded to any discard pile
+        return this.isValidCard(card);
+    }
+
+    static isGameWinnable(player) {
+        // Check if player has any playable cards
+        return player.stock.length === 0;
+    }
+
+    static validateGameState(game) {
         const errors = [];
 
-        if (!gameState.players || gameState.players.length < 2) {
-            errors.push('Game must have at least 2 players');
+        // Validate players
+        if (!game.players || game.players.length !== 2) {
+            errors.push('Game must have exactly 2 players');
         }
 
-        if (!gameState.buildPiles || gameState.buildPiles.length !== CONFIG.GAME.BUILD_PILES_COUNT) {
-            errors.push(`Game must have exactly ${CONFIG.GAME.BUILD_PILES_COUNT} build piles`);
+        // Validate deck
+        if (!game.deck) {
+            errors.push('Game must have a deck');
         }
 
-        gameState.players.forEach((player, index) => {
-            if (!player.discard || player.discard.length !== CONFIG.GAME.DISCARD_PILES_COUNT) {
-                errors.push(`Player ${index} must have exactly ${CONFIG.GAME.DISCARD_PILES_COUNT} discard piles`);
-            }
+        // Validate build piles
+        if (!game.buildPiles || !game.buildPiles.piles) {
+            errors.push('Game must have build piles');
+        } else if (game.buildPiles.piles.length !== 4) {
+            errors.push('Game must have exactly 4 build piles');
+        }
 
-            if (player.hand.length > CONFIG.GAME.HAND_SIZE) {
-                errors.push(`Player ${index} has too many cards in hand`);
+        // Validate build pile sequences
+        game.buildPiles.piles.forEach((pile, index) => {
+            const validationError = this.validateBuildPileSequence(pile);
+            if (validationError) {
+                errors.push(`Build pile ${index + 1}: ${validationError}`);
             }
         });
 
         return {
-            valid: errors.length === 0,
-            errors
+            isValid: errors.length === 0,
+            errors: errors
         };
     }
 
-    static validateDiscardMove(player, cardIndex, discardPileIndex) {
-        if (cardIndex < 0 || cardIndex >= player.hand.length) {
-            return { valid: false, reason: 'Invalid card index' };
+    static validateBuildPileSequence(pile) {
+        if (pile.length === 0) {
+            return null; // Empty pile is valid
         }
 
-        if (discardPileIndex < 0 || discardPileIndex >= CONFIG.GAME.DISCARD_PILES_COUNT) {
-            return { valid: false, reason: 'Invalid discard pile index' };
+        // First card must be 1 or Skip-Bo
+        if (pile[0] !== 'SB' && pile[0] !== 1) {
+            return 'First card must be 1 or Skip-Bo';
         }
 
-        return { valid: true };
+        // Check sequence
+        let expectedValue = 1;
+        for (let i = 0; i < pile.length; i++) {
+            const card = pile[i];
+
+            if (card === 'SB') {
+                // Skip-Bo represents the expected value
+                expectedValue++;
+            } else if (card === expectedValue) {
+                expectedValue++;
+            } else {
+                return `Card at position ${i + 1} should be ${expectedValue} but found ${card}`;
+            }
+
+            // Check if we've exceeded the maximum pile value
+            if (expectedValue > 13) { // 13 because we increment after placing 12
+                return 'Pile sequence exceeds maximum value of 12';
+            }
+        }
+
+        return null; // Sequence is valid
+    }
+
+    static getPlayableCards(player, buildPiles) {
+        const playableCards = [];
+
+        // Check stock pile top card
+        if (player.stock.length > 0) {
+            const stockCard = player.stock[player.stock.length - 1];
+            const stockPlayable = buildPiles.piles.some((pile, index) =>
+                buildPiles.canPlayCard(stockCard, index)
+            );
+            if (stockPlayable) {
+                playableCards.push({
+                    card: stockCard,
+                    source: 'stock',
+                    index: player.stock.length - 1
+                });
+            }
+        }
+
+        // Check hand cards
+        player.hand.forEach((card, index) => {
+            const handPlayable = buildPiles.piles.some((pile, pileIndex) =>
+                buildPiles.canPlayCard(card, pileIndex)
+            );
+            if (handPlayable) {
+                playableCards.push({
+                    card: card,
+                    source: 'hand',
+                    index: index
+                });
+            }
+        });
+
+        // Check discard pile top cards
+        player.discard.forEach((discardPile, pileIndex) => {
+            if (discardPile.length > 0) {
+                const topCard = discardPile[discardPile.length - 1];
+                const discardPlayable = buildPiles.piles.some((pile, buildPileIndex) =>
+                    buildPiles.canPlayCard(topCard, buildPileIndex)
+                );
+                if (discardPlayable) {
+                    playableCards.push({
+                        card: topCard,
+                        source: 'discard',
+                        index: pileIndex
+                    });
+                }
+            }
+        });
+
+        return playableCards;
     }
 }

@@ -29,13 +29,13 @@ export class Card {
         // Add numbered cards (1-12, 12 of each)
         for (let i = 0; i < 12; i++) {
             for (let j = 1; j <= CONFIG.GAME.MAX_BUILD_PILE_VALUE; j++) {
-                cards.push(new Card(j));
+                cards.push(j); // Return simple numeric values instead of Card objects
             }
         }
 
         // Add Skip-Bo cards
-        for (let i = 0; i < CONFIG.GAME.SKIPBO_CARDS_COUNT; i++) {
-            cards.push(new Card('SB'));
+        for (let i = 0; i < CONFIG.GAME.SKIP_BO_CARDS; i++) {
+            cards.push('SB'); // Return simple string values instead of Card objects
         }
 
         return cards;
