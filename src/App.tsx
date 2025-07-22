@@ -5,7 +5,7 @@ import { GameBoard } from '@/components/GameBoard';
 import { Button } from '@/components/ui/button';
 
 function App() {
-  const { gameState, initializeGame } = useSkipBoGame();
+  const { gameState, initializeGame, selectCard, playCard, discardCard, clearSelection, canPlayCard } = useSkipBoGame();
 
   useEffect(() => {
     initializeGame();
@@ -15,7 +15,14 @@ function App() {
     <div className="min-h-screen p-4 md:p-10 bg-background text-foreground">
       <div className="max-w-7xl mx-auto">
         <ThemeSwitcher />
-        <GameBoard gameState={gameState} />
+        <GameBoard 
+          gameState={gameState} 
+          selectCard={selectCard}
+          playCard={playCard}
+          discardCard={discardCard}
+          clearSelection={clearSelection}
+          canPlayCard={canPlayCard}
+        />
 
         {gameState.gameIsOver && (
           <div className="text-center mt-5">

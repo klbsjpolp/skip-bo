@@ -1,7 +1,7 @@
 import { Player, GameState } from '@/types';
 import { Card } from '@/components/Card';
 import { cn } from '@/lib/utils';
-import { useSkipBoGame } from '@/hooks/useSkipBoGame';
+import {EmptyCard} from "@/components/EmptyCard.tsx";
 
 interface PlayerAreaProps {
   player: Player;
@@ -9,11 +9,20 @@ interface PlayerAreaProps {
   title: string;
   isCurrentPlayer: boolean;
   gameState: GameState;
+  selectCard: (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void;
+  discardCard: (discardPileIndex: number) => { success: boolean; message: string };
 }
 
-export function PlayerArea({ player, playerIndex, title, isCurrentPlayer, gameState }: PlayerAreaProps) {
+export function PlayerArea({ 
+  player, 
+  playerIndex, 
+  title, 
+  isCurrentPlayer, 
+  gameState,
+  selectCard,
+  discardCard
+}: PlayerAreaProps) {
   const isHuman = !player.isAI;
-  const { selectCard, discardCard } = useSkipBoGame();
 
   return (
     <div className={cn(
@@ -32,7 +41,7 @@ export function PlayerArea({ player, playerIndex, title, isCurrentPlayer, gameSt
             {player.stockPile.length > 0 ? (
               <Card
                 card={player.stockPile[player.stockPile.length - 1]}
-                isRevealed={isHuman}
+                isRevealed={true}
                 onClick={() => {
                   if (isHuman && isCurrentPlayer) {
                     selectCard('stock', player.stockPile.length - 1);
@@ -44,7 +53,7 @@ export function PlayerArea({ player, playerIndex, title, isCurrentPlayer, gameSt
                 }
               />
             ) : (
-              <div className="card opacity-50">Vide</div>
+              <EmptyCard />
             )}
           </div>
         </div>
@@ -97,16 +106,13 @@ export function PlayerArea({ player, playerIndex, title, isCurrentPlayer, gameSt
                     }
                   />
                 ) : (
-                  <div
-                    className="card opacity-30 hover:opacity-60"
+                  <EmptyCard
                     onClick={() => {
                       if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
                         discardCard(pileIndex);
                       }
                     }}
-                  >
-                    Vide
-                  </div>
+                  />
                 )}
               </div>
             ))}

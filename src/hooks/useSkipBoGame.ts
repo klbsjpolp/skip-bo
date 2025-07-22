@@ -137,14 +137,11 @@ export const useSkipBoGame = () => {
       };
       const player = newState.players[newState.currentPlayerIndex];
 
-      // Add card to build pile
-      newState.buildPiles[buildPileIndex].push(selectedCard.card);
-
       // Remove card from source
       if (selectedCard.source === 'hand') {
         player.hand.splice(selectedCard.index, 1);
-        // Draw new card if possible
-        if (newState.deck.length > 0) {
+        // Draw new card only if hand is empty after playing
+        if (player.hand.length === 0 && newState.deck.length > 0) {
           player.hand.push(newState.deck.pop()!);
         }
       } else if (selectedCard.source === 'stock') {
@@ -196,10 +193,7 @@ export const useSkipBoGame = () => {
       // Remove card from hand
       player.hand.splice(selectedCard.index, 1);
 
-      // Draw new card if possible
-      if (newState.deck.length > 0) {
-        player.hand.push(newState.deck.pop()!);
-      }
+      // No automatic card drawing after discarding
 
       // End turn after discarding
       newState.currentPlayerIndex = 1 - newState.currentPlayerIndex;
@@ -221,6 +215,30 @@ export const useSkipBoGame = () => {
       message: MESSAGES.SELECT_CARD,
     }));
   }, []);
+
+  // Effect to draw cards at the beginning of a player's turn
+  useEffect(() => {
+    if (!gameState.gameIsOver) {
+      setGameState(prev => {
+        const player = prev.players[prev.currentPlayerIndex];
+
+        // Draw cards at the beginning of the turn if hand is not full
+        if (player.hand.length < CONFIG.HAND_SIZE && prev.deck.length > 0) {
+          const newState = { ...prev };
+          const cardsNeeded = CONFIG.HAND_SIZE - player.hand.length;
+          const cardsToDraw = Math.min(cardsNeeded, newState.deck.length);
+
+          for (let i = 0; i < cardsToDraw; i++) {
+            player.hand.push(newState.deck.pop()!);
+          }
+
+          return newState;
+        }
+
+        return prev;
+      });
+    }
+  }, [gameState.currentPlayerIndex, gameState.gameIsOver]);
 
   // Add AI turn handling effect
   useEffect(() => {

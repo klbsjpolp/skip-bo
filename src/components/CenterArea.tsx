@@ -1,13 +1,13 @@
 import { GameState } from '@/types';
 import { Card } from '@/components/Card';
-import { useSkipBoGame } from '@/hooks/useSkipBoGame';
+import {EmptyCard} from "@/components/EmptyCard.tsx";
 
 interface CenterAreaProps {
   gameState: GameState;
+  playCard: (buildPileIndex: number) => { success: boolean; message: string };
 }
 
-export function CenterArea({ gameState }: CenterAreaProps) {
-  const { playCard } = useSkipBoGame();
+export function CenterArea({ gameState, playCard }: CenterAreaProps) {
 
   return (
     <div className="center-area">
@@ -25,7 +25,7 @@ export function CenterArea({ gameState }: CenterAreaProps) {
                 className="shadow-lg"
               />
             ) : (
-              <div className="card opacity-50">Vide</div>
+              <EmptyCard />
             )}
           </div>
         </div>
@@ -51,9 +51,7 @@ export function CenterArea({ gameState }: CenterAreaProps) {
                     className="hover:ring-2 hover:ring-blue-400"
                   />
                 ) : (
-                  <div className="card border-dashed border-2 border-gray-400 bg-gray-100 hover:bg-gray-200">
-                    {gameState.selectedCard ? '?' : 'Vide'}
-                  </div>
+                  <EmptyCard />
                 )}
                 {/* Pile indicator */}
                 <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 text-xs bg-gray-600 text-white px-1 rounded">
