@@ -40,6 +40,7 @@ export function GameBoard({
       <CenterArea 
         gameState={gameState} 
         playCard={playCard}
+        canPlayCard={canPlayCard}
       />
 
       {/* Game Message */}

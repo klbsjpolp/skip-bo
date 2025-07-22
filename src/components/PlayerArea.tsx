@@ -51,6 +51,7 @@ export function PlayerArea({
                   gameState.selectedCard?.source === 'stock' &&
                   gameState.currentPlayerIndex === playerIndex
                 }
+                canBeGrabbed={isHuman && isCurrentPlayer}
               />
             ) : (
               <EmptyCard />
@@ -79,6 +80,7 @@ export function PlayerArea({
                   gameState.selectedCard.index === index &&
                   gameState.currentPlayerIndex === playerIndex
                 }
+                canBeGrabbed={isHuman && isCurrentPlayer}
               />
             ))}
           </div>
@@ -91,20 +93,27 @@ export function PlayerArea({
             {player.discardPiles.map((pile, pileIndex) => (
               <div key={`discard-${pileIndex}`} className="discard-pile-stack">
                 {pile.length > 0 ? (
-                  <Card
-                    card={pile[pile.length - 1]}
-                    isRevealed={true}
+                  <div
+                    className={`${isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand' ? 'cursor-pointer hover:ring-2 hover:ring-blue-400' : 'cursor-default'}`}
                     onClick={() => {
-                      if (isHuman && isCurrentPlayer) {
+                      if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
+                        discardCard(pileIndex);
+                      } else if (isHuman && isCurrentPlayer) {
                         selectCard('discard', pile.length - 1, pileIndex);
                       }
                     }}
-                    isSelected={
-                      gameState.selectedCard?.source === 'discard' &&
-                      gameState.selectedCard.discardPileIndex === pileIndex &&
-                      gameState.currentPlayerIndex === playerIndex
-                    }
-                  />
+                  >
+                    <Card
+                      card={pile[pile.length - 1]}
+                      isRevealed={true}
+                      isSelected={
+                        gameState.selectedCard?.source === 'discard' &&
+                        gameState.selectedCard.discardPileIndex === pileIndex &&
+                        gameState.currentPlayerIndex === playerIndex
+                      }
+                      canBeGrabbed={isHuman && isCurrentPlayer}
+                    />
+                  </div>
                 ) : (
                   <EmptyCard
                     onClick={() => {
@@ -112,6 +121,7 @@ export function PlayerArea({
                         discardCard(pileIndex);
                       }
                     }}
+                    canDropCard={isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand'}
                   />
                 )}
               </div>

@@ -1,13 +1,14 @@
-import { GameState } from '@/types';
+import { GameState, Card as CardType } from '@/types';
 import { Card } from '@/components/Card';
 import {EmptyCard} from "@/components/EmptyCard.tsx";
 
 interface CenterAreaProps {
   gameState: GameState;
   playCard: (buildPileIndex: number) => { success: boolean; message: string };
+  canPlayCard: (card: Card, buildPileIndex: number, gameState: GameState) => boolean;
 }
 
-export function CenterArea({ gameState, playCard }: CenterAreaProps) {
+export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps) {
 
   return (
     <div className="center-area">
@@ -23,9 +24,10 @@ export function CenterArea({ gameState, playCard }: CenterAreaProps) {
                 card={{ value: 0, isSkipBo: false }}
                 isRevealed={false}
                 className="shadow-lg"
+                canBeGrabbed={false}
               />
             ) : (
-              <EmptyCard />
+              <EmptyCard canDropCard={false} />
             )}
           </div>
         </div>
@@ -37,7 +39,7 @@ export function CenterArea({ gameState, playCard }: CenterAreaProps) {
             {gameState.buildPiles.map((pile, index) => (
               <div
                 key={`build-${index}`}
-                className="relative cursor-pointer"
+                className={`relative ${gameState.selectedCard && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState) ? 'cursor-pointer hover:ring-2 hover:ring-blue-400' : 'cursor-default'}`}
                 onClick={() => {
                   if (gameState.selectedCard && gameState.currentPlayerIndex === 0) {
                     playCard(index);
@@ -48,10 +50,10 @@ export function CenterArea({ gameState, playCard }: CenterAreaProps) {
                   <Card
                     card={pile[pile.length - 1]}
                     isRevealed={true}
-                    className="hover:ring-2 hover:ring-blue-400"
+                    canBeGrabbed={false}
                   />
                 ) : (
-                  <EmptyCard />
+                  <EmptyCard canDropCard={gameState.selectedCard !== null && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState)} />
                 )}
                 {/* Pile indicator */}
                 <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 text-xs bg-gray-600 text-white px-1 rounded">

@@ -7,9 +7,10 @@ interface CardProps {
   isSelected?: boolean;
   onClick?: () => void;
   className?: string;
+  canBeGrabbed?: boolean;
 }
 
-export function Card({ card, isRevealed = true, isSelected = false, onClick, className }: CardProps) {
+export function Card({ card, isRevealed = true, isSelected = false, onClick, className, canBeGrabbed = false }: CardProps) {
   const displayValue = () => {
     if (!isRevealed) return '?';
     if (card.isSkipBo) return 'SB';
@@ -23,7 +24,8 @@ export function Card({ card, isRevealed = true, isSelected = false, onClick, cla
         !isRevealed && 'back',
         card.isSkipBo && isRevealed && 'skip-bo',
         isSelected && 'selected',
-        onClick && 'hover:shadow-lg hover:transform hover:scale-105',
+        onClick && canBeGrabbed && 'hover:shadow-lg hover:transform hover:scale-105 cursor-pointer',
+        onClick && !canBeGrabbed && 'cursor-default',
         className
       )}
       onClick={onClick}
