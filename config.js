@@ -1,12 +1,15 @@
 // Game configuration constants
 const CONFIG = {
     GAME: {
-        STOCK_PILE_SIZE: 30,
         HAND_SIZE: 5,
-        BUILD_PILES_COUNT: 4,
-        DISCARD_PILES_COUNT: 4,
-        MAX_BUILD_PILE_VALUE: 12,
-        SKIPBO_CARDS_COUNT: 18
+        STOCK_PILE_SIZE: 30,
+        DISCARD_PILES: 4,
+        DISCARD_PILES_COUNT: 4, // Adding this for UI compatibility
+        BUILD_PILES: 4,
+        DECK_SIZE: 162,
+        CARDS_PER_NUMBER: 12,
+        SKIP_BO_CARDS: 18,
+        MAX_BUILD_PILE_VALUE: 12
     },
     GAME_MODES: {
         CLASSIC: {
@@ -67,6 +70,10 @@ const CONFIG = {
         HAND_EMPTY_REFILL: "Main vide ! Pige de nouvelles cartes...",
         AI_WINS: "Le Joueur IA gagnez !",
         PLAYER_WINS: "Vous gagnez !"
+    },
+    CARD_TYPES: {
+        SKIP_BO: 0,
+        NUMBERED: 'numbered'
     }
 };
 

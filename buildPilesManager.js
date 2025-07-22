@@ -2,67 +2,142 @@ import CONFIG from './config.js';
 
 export class BuildPilesManager {
     constructor() {
-        this.piles = [[], [], [], []];
+        this.piles = [];
+        this.reset();
+    }
+
+    reset() {
+        // Initialize 4 empty build piles
+        this.piles = Array(CONFIG.GAME.BUILD_PILES).fill(null).map(() => []);
     }
 
     canPlayCard(card, pileIndex) {
+        if (pileIndex < 0 || pileIndex >= this.piles.length) {
+            return false;
+        }
+
         const pile = this.piles[pileIndex];
-        const topValue = pile.length > 0 ? pile[pile.length - 1] : 0;
-        const cardValue = card === 'SB' ? topValue + 1 : card;
+        const cardValue = this.getCardValue(card);
+
+        // Empty pile can only accept 1 or Skip-Bo
+        if (pile.length === 0) {
+            return cardValue === 1 || cardValue === 0; // 1 or Skip-Bo
+        }
+
+        const topCard = pile[pile.length - 1];
+        const topValue = this.getCardValue(topCard);
+
+        // Skip-Bo cards can be played as any needed value
+        if (cardValue === 0) {
+            return topValue < CONFIG.GAME.MAX_BUILD_PILE_VALUE;
+        }
+
+        // Regular cards must be exactly one higher than the top card
         return cardValue === topValue + 1;
     }
 
     playCard(card, pileIndex) {
         if (!this.canPlayCard(card, pileIndex)) {
-            return { success: false, message: 'Invalid move' };
+            return false;
+        }
+
+        this.piles[pileIndex].push(card);
+
+        // Check if pile is complete (reached 12)
+        if (this.piles[pileIndex].length === CONFIG.GAME.MAX_BUILD_PILE_VALUE) {
+            return this.completePile(pileIndex);
+        }
+
+        return true;
+    }
+
+    completePile(pileIndex) {
+        if (pileIndex >= 0 && pileIndex < this.piles.length) {
+            const completedPile = this.piles[pileIndex];
+            this.piles[pileIndex] = []; // Reset pile to empty
+            return completedPile;
+        }
+        return null;
+    }
+
+    getCardValue(card) {
+        if (!card) return -1;
+
+        // Handle different card formats
+        if (typeof card === 'object') {
+            if (card.isSkipBo || card.value === 0) return 0;
+            return card.value || card.number || -1;
+        }
+
+        // Handle string/primitive formats
+        if (card === 'SB' || card === 'SKIP_BO') return 0;
+        return parseInt(card) || -1;
+    }
+
+    getPileTop(pileIndex) {
+        if (pileIndex < 0 || pileIndex >= this.piles.length) {
+            return null;
         }
 
         const pile = this.piles[pileIndex];
-        const cardValue = card === 'SB' ?
-            (pile.length > 0 ? pile[pile.length - 1] + 1 : 1) : card;
+        return pile.length > 0 ? pile[pile.length - 1] : null;
+    }
 
-        pile.push(cardValue);
+    getPileSize(pileIndex) {
+        if (pileIndex < 0 || pileIndex >= this.piles.length) {
+            return 0;
+        }
+        return this.piles[pileIndex].length;
+    }
 
-        // Check if pile is complete
-        if (pile.length === CONFIG.GAME.MAX_BUILD_PILE_VALUE) {
-            const completedCards = [...pile];
-            pile.length = 0; // Clear the pile
-            return {
-                success: true,
-                completed: true,
-                completedCards,
-                pileIndex
-            };
+    getAllPiles() {
+        return this.piles;
+    }
+
+    getNextRequiredValue(pileIndex) {
+        if (pileIndex < 0 || pileIndex >= this.piles.length) {
+            return -1;
         }
 
-        return { success: true, completed: false };
-    }
-
-    getTopCard(pileIndex) {
         const pile = this.piles[pileIndex];
-        return pile.length > 0 ? pile[pile.length - 1] : 0;
+        if (pile.length === 0) {
+            return 1; // Empty pile needs a 1
+        }
+
+        const topValue = this.getCardValue(pile[pile.length - 1]);
+        if (topValue >= CONFIG.GAME.MAX_BUILD_PILE_VALUE) {
+            return -1; // Pile is complete
+        }
+
+        return topValue + 1;
     }
 
-    isEmpty(pileIndex) {
-        return this.piles[pileIndex].length === 0;
+    getAvailablePiles() {
+        const available = [];
+        for (let i = 0; i < this.piles.length; i++) {
+            if (this.piles[i].length < CONFIG.GAME.MAX_BUILD_PILE_VALUE) {
+                available.push(i);
+            }
+        }
+        return available;
     }
 
-    getNextExpectedValue(pileIndex) {
-        return this.getTopCard(pileIndex) + 1;
+    isEmpty() {
+        return this.piles.every(pile => pile.length === 0);
     }
 
-    reset() {
-        this.piles = [[], [], [], []];
+    // Method to make buildPiles iterable for UI compatibility
+    forEach(callback) {
+        this.piles.forEach(callback);
     }
 
-    getState() {
-        return this.piles.map(pile => [...pile]);
+    // Allow array-like access
+    get length() {
+        return this.piles.length;
     }
 
-    findValidPiles(card) {
-        return this.piles
-            .map((pile, index) => ({ pile, index }))
-            .filter(({ pile, index }) => this.canPlayCard(card, index))
-            .map(({ index }) => index);
+    // Array-like indexing
+    [Symbol.iterator]() {
+        return this.piles[Symbol.iterator]();
     }
 }
