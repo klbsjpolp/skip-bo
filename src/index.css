@@ -1,0 +1,289 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Tailwind CSS variables */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+
+    /* Skip-Bo game theme variables - Light theme (default) */
+    --bg-color: #e5e7eb;
+    --zone-bg-color: #f9fafb;
+    --text-color: #374151;
+    --title-color: #374151;
+    --card-bg: white;
+    --card-border: #9ca3af;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    --card-radius: 8px;
+    --skipbo-bg: #fca5a5;
+    --skipbo-text: #991b1b;
+    --deck-bg: #3b82f6;
+    --selected-border: #f59e0b;
+    --active-turn-color: #22c55e;
+    --button-bg: #4f46e5;
+    --button-hover-bg: #4338ca;
+  }
+
+  .dark {
+    /* Tailwind CSS variables for dark theme */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+
+    /* Skip-Bo game theme variables - Dark theme */
+    --bg-color: #111827;
+    --zone-bg-color: #1f2937;
+    --text-color: #d1d5db;
+    --title-color: #f9fafb;
+    --card-bg: #374151;
+    --card-border: #6b7280;
+    --skipbo-bg: #991b1b;
+    --skipbo-text: #fecaca;
+    --deck-bg: #1d4ed8;
+    --selected-border: #f59e0b;
+    --active-turn-color: #4ade80;
+    --button-bg: #6366f1;
+    --button-hover-bg: #4f46e5;
+  }
+
+  .metro {
+    /* Skip-Bo game theme variables - Metro theme */
+    --bg-color: #1d1d1d;
+    --zone-bg-color: #2d2d2d;
+    --text-color: #ffffff;
+    --title-color: #ffffff;
+    --card-bg: #3c3c3c;
+    --card-border: #5e5e5e;
+    --card-shadow: none;
+    --card-radius: 2px;
+    --skipbo-bg: #e51400;
+    --skipbo-text: #ffffff;
+    --deck-bg: #00a3a3;
+    --selected-border: #1ba1e2;
+    --active-turn-color: #60a917;
+    --button-bg: #60a917;
+    --button-hover-bg: #4c8712;
+  }
+
+  .neon {
+    /* Skip-Bo game theme variables - Neon theme */
+    --bg-color: #0a0a0a;
+    --zone-bg-color: #1a1a1a;
+    --text-color: #00ff88;
+    --title-color: #ff0099;
+    --card-bg: #1a1a1a;
+    --card-border: #00ff88;
+    --card-shadow: 0 0 10px rgba(0,255,136,0.3);
+    --card-radius: 12px;
+    --skipbo-bg: #ff0099;
+    --skipbo-text: #ffffff;
+    --deck-bg: #0066ff;
+    --selected-border: #ffff00;
+    --active-turn-color: #00ff88;
+    --button-bg: #ff0099;
+    --button-hover-bg: #cc0077;
+  }
+
+  .retro {
+    /* Skip-Bo game theme variables - Retro theme */
+    --bg-color: #f4f1de;
+    --zone-bg-color: #e9c46a;
+    --text-color: #264653;
+    --title-color: #2a9d8f;
+    --card-bg: #f4a261;
+    --card-border: #e76f51;
+    --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    --card-radius: 15px;
+    --skipbo-bg: #e76f51;
+    --skipbo-text: #f4f1de;
+    --deck-bg: #2a9d8f;
+    --selected-border: #e9c46a;
+    --active-turn-color: #264653;
+    --button-bg: #2a9d8f;
+    --button-hover-bg: #21867a;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
+}
+
+/* Custom Skip-Bo card styles */
+.card {
+  width: 70px;
+  height: 100px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+  background-color: var(--card-bg);
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  color: var(--text-color);
+  box-shadow: var(--card-shadow);
+}
+
+.card.skip-bo {
+  background-color: var(--skipbo-bg);
+  color: var(--skipbo-text);
+}
+
+.card.back {
+  background-color: var(--deck-bg);
+  color: white;
+}
+
+.card.selected {
+  border-color: var(--selected-border);
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px var(--selected-border);
+}
+
+.card-corner-number {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.placeholder {
+  width: 70px;
+  height: 100px;
+  border: 2px dashed var(--card-border);
+  border-radius: var(--card-radius);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  color: var(--card-border);
+  cursor: pointer;
+}
+
+.hand, .discard-piles, .build-piles, .hand-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.discard-piles, .build-piles {
+  width: 320px; /* 4 cards + gaps */
+}
+
+.hand-area {
+  width: 250px; /* 3 cards + gaps */
+  height: 210px; /* 2 cards + gaps */
+}
+
+.discard-pile-stack {
+  position: relative;
+  width: 72px;
+  height: 130px;
+}
+
+.discard-pile-stack .card, .discard-pile-stack .placeholder {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-shadow: var(--card-shadow);
+}
+
+.player-area, .center-area {
+  padding: 20px;
+  border: 2px solid transparent;
+  border-radius: var(--card-radius);
+  margin-bottom: 20px;
+  background-color: var(--zone-bg-color);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.3s;
+}
+
+.player-area.active-turn, .center-area.active-turn {
+  border-color: var(--active-turn-color);
+}
+
+h2, h3 {
+  text-align: center;
+  color: var(--title-color);
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+/* Theme-specific special effects */
+.metro .card.back {
+  background: linear-gradient(45deg, #00a3a3 25%, #004d4d 25%, #004d4d 50%, #00a3a3 50%, #00a3a3 75%, #004d4d 75%, #004d4d);
+  background-size: 8px 8px;
+}
+
+.neon .card {
+  box-shadow: 0 0 5px var(--card-border);
+  border: 2px solid var(--card-border);
+}
+
+.neon .card.back {
+  box-shadow: 0 0 15px var(--deck-bg);
+  border: 2px solid var(--deck-bg);
+}
+
+.neon .card.selected {
+  box-shadow: 0 0 20px var(--selected-border);
+}
+
+.retro .card {
+  box-shadow: 3px 3px 0 var(--card-border);
+  border: 2px solid var(--card-border);
+}
