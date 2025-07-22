@@ -50,6 +50,42 @@ body.theme-metro {
     --button-hover-bg: #4c8712;
 }
 
+body.theme-neon {
+    --bg-color: #0a0a0a;
+    --zone-bg-color: #1a1a1a;
+    --text-color: #00ff88;
+    --title-color: #ff0099;
+    --card-bg: #1a1a1a;
+    --card-border: #00ff88;
+    --card-shadow: 0 0 10px rgba(0,255,136,0.3);
+    --card-radius: 12px;
+    --skipbo-bg: #ff0099;
+    --skipbo-text: #ffffff;
+    --deck-bg: #0066ff;
+    --selected-border: #ffff00;
+    --active-turn-color: #00ff88;
+    --button-bg: #ff0099;
+    --button-hover-bg: #cc0077;
+}
+
+body.theme-retro {
+    --bg-color: #f4f1de;
+    --zone-bg-color: #e9c46a;
+    --text-color: #264653;
+    --title-color: #2a9d8f;
+    --card-bg: #f4a261;
+    --card-border: #e76f51;
+    --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    --card-radius: 15px;
+    --skipbo-bg: #e76f51;
+    --skipbo-text: #f4f1de;
+    --deck-bg: #2a9d8f;
+    --selected-border: #e9c46a;
+    --active-turn-color: #264653;
+    --button-bg: #2a9d8f;
+    --button-hover-bg: #21867a;
+}
+
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-color);
@@ -79,6 +115,10 @@ body {
     color: var(--skipbo-text);
 }
 
+.card.back {
+    background-color: var(--deck-bg);
+}
+
 .card.selected {
     border-color: var(--selected-border);
     transform: translateY(-5px);
@@ -106,7 +146,7 @@ body {
     cursor: pointer;
 }
 
-.hand, .discard-piles, .build-piles, .player-hand-area {
+.hand, .discard-piles, .build-piles, .hand-area {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -117,11 +157,11 @@ body {
     width: 320px; /* 4 cards + gaps */
 }
 
-.player-hand-area, .player-hand-area-width {
+.hand-area {
     width: 250px; /* 3 cards + gaps */
 }
 
-.player-hand-area {
+.hand-area {
     height: 210px; /* 2 cards + gaps */
 }
 
@@ -170,18 +210,114 @@ h3 {
 }
 
 .theme-switcher button {
-    background-color: var(--button-bg);
-    color: white;
     padding: 8px 16px;
     border-radius: 6px;
     font-weight: bold;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
+    border: 2px solid transparent;
 }
 
-.theme-switcher button:hover {
-    background-color: var(--button-hover-bg);
+.theme-switcher button[data-theme="light"] {
+    background-color: #f9fafb;
+    color: #374151;
+    border-color: #d1d5db;
+}
+
+.theme-switcher button[data-theme="light"]:hover {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.theme-switcher button[data-theme="dark"] {
+    background-color: #1f2937;
+    color: #f9fafb;
+    border-color: #4b5563;
+}
+
+.theme-switcher button[data-theme="dark"]:hover {
+    background-color: #111827;
+    border-color: #6b7280;
+}
+
+.theme-switcher button[data-theme="metro"] {
+    background-color: #1d1d1d;
+    color: #ffffff;
+    border-color: #5e5e5e;
+}
+
+.theme-switcher button[data-theme="metro"]:hover {
+    background-color: #2d2d2d;
+    border-color: #1ba1e2;
+}
+
+.theme-switcher button[data-theme="neon"] {
+    background-color: #0a0a0a;
+    color: #00ff88;
+    border-color: #00ff88;
+    box-shadow: 0 0 5px rgba(0,255,136,0.3);
+}
+
+.theme-switcher button[data-theme="neon"]:hover {
+    background-color: #1a1a1a;
+    box-shadow: 0 0 10px rgba(0,255,136,0.5);
+}
+
+.theme-switcher button[data-theme="retro"] {
+    background-color: #e9c46a;
+    color: #264653;
+    border-color: #e76f51;
+}
+
+.theme-switcher button[data-theme="retro"]:hover {
+    background-color: #f4a261;
+    border-color: #2a9d8f;
 }
 
 .theme-switcher button.active {
-    outline: 2px solid var(--selected-border);
+    outline: 3px solid;
+    outline-offset: 2px;
+}
+
+.theme-switcher button[data-theme="light"].active {
+    outline-color: #f59e0b;
+}
+
+.theme-switcher button[data-theme="dark"].active {
+    outline-color: #f59e0b;
+}
+
+.theme-switcher button[data-theme="metro"].active {
+    outline-color: #1ba1e2;
+}
+
+.theme-switcher button[data-theme="neon"].active {
+    outline-color: #ffff00;
+}
+
+.theme-switcher button[data-theme="retro"].active {
+    outline-color: #e76f51;
+}
+
+body.theme-metro .card.back {
+    background: linear-gradient(45deg, #00a3a3 25%, #004d4d 25%, #004d4d 50%, #00a3a3 50%, #00a3a3 75%, #004d4d 75%, #004d4d);
+    background-size: 8px 8px;
+}
+
+body.theme-neon .card {
+    box-shadow: 0 0 5px var(--card-border);
+    border: 2px solid var(--card-border);
+}
+
+body.theme-neon .card.back {
+    box-shadow: 0 0 15px var(--deck-bg);
+    border: 2px solid var(--deck-bg);
+}
+
+body.theme-neon .card.selected {
+    box-shadow: 0 0 20px var(--selected-border);
+}
+
+body.theme-retro .card {
+    box-shadow: 3px 3px 0 var(--card-border);
+    border: 2px solid var(--card-border);
 }

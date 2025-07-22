@@ -5,6 +5,7 @@ class SkipBoGame {
     constructor() {
         this.deck = [];
         this.buildPiles = [[], [], [], []];
+        this.completedBuildPileCards = []; // Initialize storage for completed build pile cards
         this.players = [
             { stock: [], hand: [], discard: [[], [], [], []], isAI: false },
             { stock: [], hand: [], discard: [[], [], [], []], isAI: true }
@@ -42,8 +43,16 @@ class SkipBoGame {
 
     reshuffleCompletedBuildPiles() {
         let newDeckCards = [];
+
+        // Check for any completed build pile cards we've stored
+        if (this.completedBuildPileCards && this.completedBuildPileCards.length > 0) {
+            newDeckCards.push(...this.completedBuildPileCards);
+            this.completedBuildPileCards = [];
+        }
+
+        // Also check for any build piles that are currently at 12 cards
         this.buildPiles.forEach((pile, index) => {
-            if (pile.length === CONFIG.GAME.MAX_BUILD_PILE_VALUE) {
+            if (pile.length === 12) {
                 newDeckCards.push(...pile);
                 this.buildPiles[index] = [];
             }
@@ -99,6 +108,18 @@ class SkipBoGame {
             else if (source === 'hand') player.hand.splice(sourceIndex, 1);
             else if (source === 'discard') player.discard[sourceIndex].pop();
 
+            // Check if this build pile is now complete (12 cards) and clear it
+            if (this.buildPiles[pileIndex].length === 12) {
+                const completedCards = this.buildPiles[pileIndex];
+                this.buildPiles[pileIndex] = [];
+
+                // Add completed cards to a temporary storage for later shuffling
+                if (!this.completedBuildPileCards) {
+                    this.completedBuildPileCards = [];
+                }
+                this.completedBuildPileCards.push(...completedCards);
+            }
+
             return true;
         };
 
@@ -139,6 +160,7 @@ class SkipBoGame {
         this.deck = this.createDeck();
         this.shuffleDeck(this.deck);
         this.buildPiles = [[], [], [], []];
+        this.completedBuildPileCards = []; // Reset completed build pile cards storage
         this.players = [
             { stock: [], hand: [], discard: [[], [], [], []], isAI: false },
             { stock: [], hand: [], discard: [[], [], [], []], isAI: true }

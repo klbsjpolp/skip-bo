@@ -20,6 +20,8 @@
     <button data-theme="light">Clair</button>
     <button data-theme="dark">Sombre</button>
     <button data-theme="metro">Metro</button>
+    <button data-theme="neon">Néon</button>
+    <button data-theme="retro">Rétro</button>
 </div>
 
 <div id="game-container" class="max-w-7xl mx-auto">
@@ -29,6 +31,10 @@
             <div class="text-center w-32">
                 <h3>Talon (<span id="ai-stock-count"></span>)</h3>
                 <div id="ai-stock" class="card mx-auto">?</div>
+            </div>
+            <div class="text-center">
+                <h3>Sa main</h3>
+                <div id="ai-hand" class="hand-area"></div>
             </div>
             <div class="text-center">
                 <h3>Piles de défausse</h3>
@@ -41,9 +47,9 @@
         <div class="flex items-start">
             <div class="text-center w-32">
                 <h2>Pioche (<span id="deck-count"></span>)</h2>
-                <div id="deck" class="card shadow-lg mx-auto" style="background-color: var(--deck-bg);"></div>
+                <div id="deck" class="card back shadow-lg mx-auto"></div>
             </div>
-            <div class="text-center player-hand-area-width">
+            <div class="text-center">
                 <h2>Piles de construction</h2>
                 <div id="build-piles" class="discard-piles"></div>
             </div>
@@ -61,7 +67,7 @@
             </div>
             <div class="text-center">
                 <h3>Votre main</h3>
-                <div id="player-hand" class="player-hand-area"></div>
+                <div id="player-hand" class="hand-area"></div>
             </div>
             <div class="text-center">
                 <h3>Piles de défausse</h3>
@@ -289,11 +295,14 @@
                     return;
                 }
 
+                // Store the source before clearing selection
+                const wasFromHand = this.game.selectedCard?.source === 'hand';
+
                 this.ui.clearSelection();
                 this.ui.updateUI();
 
                 // Check if hand is empty and refill
-                if (this.game.selectedCard?.source === 'hand' && this.game.players[0].hand.length === 0) {
+                if (wasFromHand && this.game.players[0].hand.length === 0) {
                     this.ui.showMessage(CONFIG.MESSAGES.HAND_EMPTY_REFILL, CONFIG.UI.HAND_REFILL_DELAY);
                     setTimeout(() => {
                         this.game.drawHand(0);
@@ -307,6 +316,7 @@
         initGame() {
             this.game.initGame();
             this.ui.hideRestartButton();
+            this.game.drawHand(this.game.currentPlayerIndex+1 % 2);
             this.startTurn();
         }
 

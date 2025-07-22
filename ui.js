@@ -20,6 +20,7 @@ class SkipBoUI {
             playerArea: document.getElementById('player-area'),
             aiStock: document.getElementById('ai-stock'),
             aiStockCount: document.getElementById('ai-stock-count'),
+            aiHand: document.getElementById('ai-hand'),
             aiDiscardPiles: document.getElementById('ai-discard-piles'),
             messageBox: document.getElementById('message-box'),
             restartButton: document.getElementById('restart-button')
@@ -40,7 +41,8 @@ class SkipBoUI {
             placeholder.className = 'placeholder';
             if (isPlayer) {
                 placeholder.textContent = 'Défausser';
-                placeholder.style = 'writing-mode: vertical-rl; text-orientation: mixed;';
+                placeholder.style.writingMode = 'vertical-rl';
+                placeholder.style.textOrientation = 'mixed';
                 placeholder.dataset.source = 'discard-placeholder';
             }
             stack.appendChild(placeholder);
@@ -65,7 +67,7 @@ class SkipBoUI {
         const player = this.game.players[0];
 
         // Update stock
-        this.elements.playerStockCount.textContent = player.stock.length;
+        this.elements.playerStockCount.textContent = player.stock.length.toString();
         this.elements.playerStock.innerHTML = player.stock.length > 0 ?
             this.createCardHTML(player.stock[player.stock.length - 1]) : '🏆';
         this.elements.playerStock.className = `card mx-auto ${
@@ -97,9 +99,26 @@ class SkipBoUI {
         const ai = this.game.players[1];
 
         // Update AI stock
-        this.elements.aiStockCount.textContent = ai.stock.length;
-        this.elements.aiStock.innerHTML = ai.stock.length > 0 ? '?' : '🏆';
-        this.elements.aiStock.className = 'card mx-auto';
+        this.elements.aiStockCount.textContent = ai.stock.length.toString();
+        if (ai.stock.length > 0) {
+            const topCard = ai.stock[ai.stock.length - 1];
+            this.elements.aiStock.innerHTML = this.createCardHTML(topCard);
+            this.elements.aiStock.className = `card mx-auto ${topCard === 'SB' ? 'skipbo' : ''}`;
+        } else {
+            this.elements.aiStock.innerHTML = '🏆';
+            this.elements.aiStock.className = 'card mx-auto';
+        }
+
+        // Update hand
+        this.elements.aiHand.innerHTML = '';
+        ai.hand.forEach((card, index) => {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'card back';
+            cardEl.dataset.card = card;
+            cardEl.dataset.source = 'hand';
+            cardEl.dataset.index = index;
+            this.elements.aiHand.appendChild(cardEl);
+        });
 
         // Update AI discard piles
         this.elements.aiDiscardPiles.innerHTML = '';
