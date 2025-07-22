@@ -352,7 +352,7 @@
         }
 
         handleGameEnd(winResult) {
-            this.game.gameIsOver = true;
+            this.game.gameState.endGame(winResult.winnerIndex);
             this.ui.showGameEnd(winResult.isAI);
             this.ui.updateCursors();
         }

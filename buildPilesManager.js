@@ -4,6 +4,26 @@ export class BuildPilesManager {
     constructor() {
         this.piles = [];
         this.reset();
+
+        // Make this object behave like an array for UI compatibility
+        return new Proxy(this, {
+            get(target, prop) {
+                // If accessing a numeric index, return the pile at that index
+                if (typeof prop === 'string' && !isNaN(prop)) {
+                    return target.piles[parseInt(prop)];
+                }
+                // If accessing array methods like forEach, map, etc., delegate to piles array
+                if (typeof target.piles[prop] === 'function') {
+                    return target.piles[prop].bind(target.piles);
+                }
+                // For length property, return piles length
+                if (prop === 'length') {
+                    return target.piles.length;
+                }
+                // Otherwise return the property from the target object
+                return target[prop];
+            }
+        });
     }
 
     reset() {
@@ -19,6 +39,11 @@ export class BuildPilesManager {
         const pile = this.piles[pileIndex];
         const cardValue = this.getCardValue(card);
 
+        // Invalid card cannot be played
+        if (cardValue === null) {
+            return false;
+        }
+
         // Empty pile can only accept 1 or Skip-Bo
         if (pile.length === 0) {
             return cardValue === 1 || cardValue === 0; // 1 or Skip-Bo
@@ -26,6 +51,11 @@ export class BuildPilesManager {
 
         const topCard = pile[pile.length - 1];
         const topValue = this.getCardValue(topCard);
+
+        // If top card is invalid, pile is corrupted
+        if (topValue === null) {
+            return false;
+        }
 
         // Skip-Bo cards can be played as any needed value
         if (cardValue === 0) {
@@ -38,7 +68,7 @@ export class BuildPilesManager {
 
     playCard(card, pileIndex) {
         if (!this.canPlayCard(card, pileIndex)) {
-            return false;
+            return { success: false };
         }
 
         this.piles[pileIndex].push(card);
@@ -48,39 +78,78 @@ export class BuildPilesManager {
             return this.completePile(pileIndex);
         }
 
-        return true;
+        return { success: true };
     }
 
     completePile(pileIndex) {
-        if (pileIndex >= 0 && pileIndex < this.piles.length) {
-            const completedPile = this.piles[pileIndex];
-            this.piles[pileIndex] = []; // Reset pile to empty
-            return completedPile;
-        }
-        return null;
+        const completedCards = this.piles[pileIndex].slice();
+        this.piles[pileIndex] = []; // Reset the pile
+
+        return {
+            success: true,
+            completed: true,
+            completedCards: completedCards,
+            pileIndex: pileIndex
+        };
     }
 
     getCardValue(card) {
-        if (!card) return -1;
-
-        // Handle different card formats
-        if (typeof card === 'object') {
-            if (card.isSkipBo || card.value === 0) return 0;
-            return card.value || card.number || -1;
+        // Handle different card representations
+        if (typeof card === 'string') {
+            if (card === 'SB' || card === 'Skip-Bo') {
+                return 0; // Skip-Bo wildcard
+            }
+            const parsed = parseInt(card);
+            if (isNaN(parsed)) {
+                return null; // Invalid card
+            }
+            return parsed;
         }
 
-        // Handle string/primitive formats
-        if (card === 'SB' || card === 'SKIP_BO') return 0;
-        return parseInt(card) || -1;
+        if (typeof card === 'object' && card !== null) {
+            if (card.value === 'SB' || card.value === 'Skip-Bo' || card.isSkipBo) {
+                return 0; // Skip-Bo wildcard
+            }
+            const parsed = parseInt(card.value || card.number || card);
+            if (isNaN(parsed)) {
+                return null; // Invalid card
+            }
+            return parsed;
+        }
+
+        if (typeof card === 'number') {
+            if (card === 0) return 0; // Skip-Bo wildcard
+            if (card >= 1 && card <= 12) return card; // Valid number card
+            return null; // Invalid number
+        }
+
+        // Fallback - try to parse, but don't default to 0
+        const parsed = parseInt(card);
+        if (isNaN(parsed)) {
+            return null; // Invalid card
+        }
+        return parsed;
     }
 
-    getPileTop(pileIndex) {
+    getTopCard(pileIndex) {
+        if (pileIndex < 0 || pileIndex >= this.piles.length || this.piles[pileIndex].length === 0) {
+            return null;
+        }
+        return this.piles[pileIndex][this.piles[pileIndex].length - 1];
+    }
+
+    getExpectedNextValue(pileIndex) {
         if (pileIndex < 0 || pileIndex >= this.piles.length) {
             return null;
         }
 
         const pile = this.piles[pileIndex];
-        return pile.length > 0 ? pile[pile.length - 1] : null;
+        if (pile.length === 0) {
+            return 1; // Empty pile expects 1
+        }
+
+        const topValue = this.getCardValue(this.getTopCard(pileIndex));
+        return topValue >= CONFIG.GAME.MAX_BUILD_PILE_VALUE ? null : topValue + 1;
     }
 
     getPileSize(pileIndex) {
@@ -90,54 +159,40 @@ export class BuildPilesManager {
         return this.piles[pileIndex].length;
     }
 
-    getAllPiles() {
-        return this.piles;
+    isEmpty(pileIndex) {
+        return this.getPileSize(pileIndex) === 0;
     }
 
-    getNextRequiredValue(pileIndex) {
-        if (pileIndex < 0 || pileIndex >= this.piles.length) {
-            return -1;
-        }
-
-        const pile = this.piles[pileIndex];
-        if (pile.length === 0) {
-            return 1; // Empty pile needs a 1
-        }
-
-        const topValue = this.getCardValue(pile[pile.length - 1]);
-        if (topValue >= CONFIG.GAME.MAX_BUILD_PILE_VALUE) {
-            return -1; // Pile is complete
-        }
-
-        return topValue + 1;
+    isFull(pileIndex) {
+        return this.getPileSize(pileIndex) >= CONFIG.GAME.MAX_BUILD_PILE_VALUE;
     }
 
-    getAvailablePiles() {
-        const available = [];
+    getAllPossiblePlays(card) {
+        const possiblePiles = [];
         for (let i = 0; i < this.piles.length; i++) {
-            if (this.piles[i].length < CONFIG.GAME.MAX_BUILD_PILE_VALUE) {
-                available.push(i);
+            if (this.canPlayCard(card, i)) {
+                possiblePiles.push({
+                    pileIndex: i,
+                    expectedValue: this.getExpectedNextValue(i),
+                    currentSize: this.getPileSize(i)
+                });
             }
         }
-        return available;
-    }
-
-    isEmpty() {
-        return this.piles.every(pile => pile.length === 0);
+        return possiblePiles;
     }
 
     // Method to make buildPiles iterable for UI compatibility
-    forEach(callback) {
-        this.piles.forEach(callback);
+    [Symbol.iterator]() {
+        return this.piles[Symbol.iterator]();
     }
 
-    // Allow array-like access
+    // Getter for compatibility with existing code
     get length() {
         return this.piles.length;
     }
 
-    // Array-like indexing
-    [Symbol.iterator]() {
-        return this.piles[Symbol.iterator]();
+    // Method to access piles by index
+    getPile(index) {
+        return this.piles[index] || [];
     }
 }

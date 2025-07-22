@@ -189,7 +189,8 @@ class SkipBoUI {
         if (!this.game.selectedCard) return;
 
         // Update build pile cursors
-        this.elements.buildPiles.querySelectorAll('.card, .placeholder').forEach((pileEl, pileIndex) => {
+        this.elements.buildPiles.querySelectorAll('.card, .placeholder').forEach((pileEl) => {
+            const pileIndex = parseInt(pileEl.dataset.pileIndex);
             const canPlay = this.game.canPlayCard(this.game.selectedCard.value, pileIndex);
             pileEl.style.cursor = canPlay ? 'copy' : 'not-allowed';
         });
