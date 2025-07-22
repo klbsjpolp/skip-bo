@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skip-Bo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-color: #e5e7eb;
+            --zone-bg-color: #f9fafb;
+            --text-color: #374151;
+            --title-color: #374151;
+            --card-bg: white;
+            --card-border: #9ca3af;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            --card-radius: 8px;
+            --skipbo-bg: #fca5a5;
+            --skipbo-text: #991b1b;
+            --deck-bg: #3b82f6;
+            --selected-border: #f59e0b;
+            --active-turn-color: #22c55e;
+            --button-bg: #4f46e5;
+            --button-hover-bg: #4338ca;
+        }
+
+        body.theme-dark {
+            --bg-color: #111827;
+            --zone-bg-color: #1f2937;
+            --text-color: #d1d5db;
+            --title-color: #f9fafb;
+            --card-bg: #374151;
+            --card-border: #6b7280;
+            --skipbo-bg: #991b1b;
+            --skipbo-text: #fecaca;
+            --deck-bg: #1d4ed8;
+            --selected-border: #f59e0b;
+            --active-turn-color: #4ade80;
+            --button-bg: #6366f1;
+            --button-hover-bg: #4f46e5;
+        }
+
+        body.theme-metro {
+            --bg-color: #1d1d1d;
+            --zone-bg-color: #2d2d2d;
+            --text-color: #ffffff;
+            --title-color: #ffffff;
+            --card-bg: #3c3c3c;
+            --card-border: #5e5e5e;
+            --card-shadow: none;
+            --card-radius: 2px;
+            --skipbo-bg: #e51400;
+            --skipbo-text: #ffffff;
+            --deck-bg: #00a3a3;
+            --selected-border: #1ba1e2;
+            --active-turn-color: #60a917;
+            --button-bg: #60a917;
+            --button-hover-bg: #4c8712;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        .card {
+            width: 70px;
+            height: 100px;
+            border: 1px solid var(--card-border);
+            border-radius: var(--card-radius);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            background-color: var(--card-bg);
+            transition: all 0.2s ease-in-out;
+            position: relative;
+            color: var(--text-color);
+        }
+        .card.skipbo {
+            background-color: var(--skipbo-bg);
+            color: var(--skipbo-text);
+        }
+        .card.selected {
+            border-color: var(--selected-border);
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px var(--selected-border);
+        }
+        .card-corner-number {
+            position: absolute;
+            top: 4px;
+            left: 6px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .placeholder {
+            width: 70px;
+            height: 100px;
+            border: 2px dashed var(--card-border);
+            border-radius: var(--card-radius);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            color: var(--card-border);
+            cursor: pointer;
+        }
+        .hand, .discard-piles, .build-piles, .player-hand-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .discard-piles, .build-piles {
+            width: 320px; /* 4 cards + gaps */
+        }
+        .player-hand-area, .player-hand-area-width {
+            width: 250px; /* 3 cards + gaps */
+        }
+        .player-hand-area {
+            height: 210px; /* 2 cards + gaps */
+        }
+        #player-area, #ai-area, #center-area {
+            padding: 20px;
+            border: 2px solid transparent;
+            border-radius: var(--card-radius);
+            margin-bottom: 20px;
+            background-color: var(--zone-bg-color);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s;
+        }
+        #player-area.active-turn, #ai-area.active-turn {
+            border-color: var(--active-turn-color);
+        }
+        h2, h3 {
+            text-align: center;
+            color: var(--title-color);
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .discard-pile-stack {
+            position: relative;
+            width: 72px;
+            height: 130px;
+        }
+        .discard-pile-stack .card, .discard-pile-stack .placeholder {
+            position: absolute;
+            left: 0;
+            top: 0;
+            box-shadow: var(--card-shadow);
+        }
+        .theme-switcher button {
+            background-color: var(--button-bg);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .theme-switcher button:hover {
+            background-color: var(--button-hover-bg);
+        }
+        .theme-switcher button.active {
+            outline: 2px solid var(--selected-border);
+        }
+    </style>
+    <script>
+        // Apply theme on initial load to prevent FOUC
+        (function() {
+            const theme = localStorage.getItem('skipbo_theme') || 'light';
+            document.documentElement.classList.add(`theme-${theme}`);
+        })();
+    </script>
+</head>
+<body class="p-4 md:p-10">
+<div class="theme-switcher flex justify-center gap-4 mb-6">
+    <button data-theme="light">Clair</button>
+    <button data-theme="dark">Sombre</button>
+    <button data-theme="metro">Metro</button>
+</div>
+
+<div id="game-container" class="max-w-7xl mx-auto">
+
+    <div id="ai-area" class="player-area">
+        <h2>Joueur IA</h2>
+        <div class="flex justify-between items-start">
+            <div class="text-center w-32">
+                <h3>Talon (<span id="ai-stock-count"></span>)</h3>
+                <div id="ai-stock" class="card mx-auto">?</div>
+            </div>
+            <div class="text-center">
+                <h3>Piles de défausse</h3>
+                <div id="ai-discard-piles" class="discard-piles"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="center-area" class="center-area">
+        <div class="flex items-start">
+            <div class="text-center w-32">
+                <h2>Pioche (<span id="deck-count"></span>)</h2>
+                <div id="deck" class="card shadow-lg mx-auto" style="background-color: var(--deck-bg);"></div>
+            </div>
+            <div class="text-center player-hand-area-width">
+                <h2>Piles de construction</h2>
+                <div id="build-piles" class="discard-piles"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="message-box" class="text-center font-bold text-xl my-4 h-8"></div>
+
+    <div id="player-area" class="player-area">
+        <h2>Votre tour</h2>
+        <div class="flex justify-between items-start">
+            <div class="text-center w-32">
+                <h3>Talon (<span id="player-stock-count"></span>)</h3>
+                <div id="player-stock" class="card mx-auto"></div>
+            </div>
+            <div class="text-center">
+                <h3>Votre main</h3>
+                <div id="player-hand" class="player-hand-area"></div>
+            </div>
+            <div class="text-center">
+                <h3>Piles de défausse</h3>
+                <div id="player-discard-piles" class="discard-piles"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <button id="restart-button" class="hidden bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Rejouer</button>
+    </div>
+
+</div>
+
+<script>
+    // --- Theme Logic ---
+    const themeSwitcher = document.querySelector('.theme-switcher');
+    const bodyElement = document.body;
+
+    function applyTheme(themeName) {
+        bodyElement.className = bodyElement.className.replace(/theme-\w+/g, '');
+        bodyElement.classList.add(`theme-${themeName}`);
+
+        // Update active button state
+        themeSwitcher.querySelectorAll('button').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.theme === themeName);
+        });
+    }
+
+    function saveTheme(themeName) {
+        localStorage.setItem('skipbo_theme', themeName);
+    }
+
+    themeSwitcher.addEventListener('click', (e) => {
+        const theme = e.target.dataset.theme;
+        if (theme) {
+            applyTheme(theme);
+            saveTheme(theme);
+        }
+    });
+
+    function loadTheme() {
+        const savedTheme = localStorage.getItem('skipbo_theme') || 'light';
+        // The class is already on `html` from the head script, but we set it on `body` for CSS specificity and update button state
+        document.body.className = '';
+        applyTheme(savedTheme);
+    }
+
+
+    // --- Game State ---
+    let deck = [];
+    let buildPiles = [[], [], [], []];
+    let players = [
+        { stock: [], hand: [], discard: [[], [], [], []], isAI: false },
+        { stock: [], hand: [], discard: [[], [], [], []], isAI: true }
+    ];
+    let currentPlayerIndex = 0;
+    let gameIsOver = false;
+    let selectedCard = null; // { value, source, index, element }
+
+    // --- DOM Elements ---
+    const deckElement = document.getElementById('deck');
+    const deckCountElement = document.getElementById('deck-count');
+    const buildPilesElement = document.getElementById('build-piles');
+    const playerStockElement = document.getElementById('player-stock');
+    const playerStockCount = document.getElementById('player-stock-count');
+    const playerHandElement = document.getElementById('player-hand');
+    const playerDiscardPilesElement = document.getElementById('player-discard-piles');
+    const aiArea = document.getElementById('ai-area');
+    const playerArea = document.getElementById('player-area');
+    const aiStockElement = document.getElementById('ai-stock');
+    const aiStockCount = document.getElementById('ai-stock-count');
+    const aiDiscardPilesElement = document.getElementById('ai-discard-piles');
+    const messageBox = document.getElementById('message-box');
+    const restartButton = document.getElementById('restart-button');
+
+    // --- Game Logic ---
+
+    function createDeck() {
+        const newDeck = [];
+        for (let i = 0; i < 12; i++) { for (let j = 1; j <= 12; j++) newDeck.push(j); }
+        for (let i = 0; i < 18; i++) newDeck.push('SB');
+        return newDeck;
+    }
+
+    function shuffleDeck(deckToShuffle) {
+        for (let i = deckToShuffle.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deckToShuffle[i], deckToShuffle[j]] = [deckToShuffle[j], deckToShuffle[i]];
+        }
+    }
+
+    function dealCards() {
+        const stockPileSize = 30;
+        for (let i = 0; i < players.length; i++) {
+            players[i].stock = deck.splice(0, stockPileSize);
+        }
+    }
+
+    function reshuffleCompletedBuildPiles() {
+        let newDeckCards = [];
+        buildPiles.forEach((pile, index) => {
+            if (pile.length === 12) {
+                newDeckCards.push(...pile);
+                buildPiles[index] = [];
+            }
+        });
+
+        if (newDeckCards.length > 0) {
+            messageBox.textContent = `Pioche vide ! Rebrassage de ${newDeckCards.length} cartes...`;
+            shuffleDeck(newDeckCards);
+            deck = newDeckCards;
+            setTimeout(() => {
+                if (!gameIsOver) messageBox.textContent = "";
+                updateUI();
+            }, 1500);
+            return true; // Indicate success
+        }
+        return false; // Indicate failure
+    }
+
+    function drawHand(playerIndex) {
+        const player = players[playerIndex];
+        while (player.hand.length < 5) {
+            if (deck.length === 0) {
+                const successfullyReshuffled = reshuffleCompletedBuildPiles();
+                if (!successfullyReshuffled) {
+                    messageBox.textContent = "Pioche vide ! Aucune carte à piger.";
+                    break; // No cards left anywhere
+                }
+            }
+            player.hand.push(deck.pop());
+        }
+    }
+
+    function initGame() {
+        deck = createDeck();
+        shuffleDeck(deck);
+        buildPiles = [[], [], [], []];
+        players = [
+            { stock: [], hand: [], discard: [[], [], [], []], isAI: false },
+            { stock: [], hand: [], discard: [[], [], [], []], isAI: true }
+        ];
+        gameIsOver = false;
+        currentPlayerIndex = 0;
+        selectedCard = null;
+        restartButton.classList.add('hidden');
+        dealCards();
+        startTurn();
+    }
+
+    function startTurn() {
+        if (checkForWinner()) return;
+        const player = players[currentPlayerIndex];
+
+        drawHand(currentPlayerIndex);
+
+        updateUI();
+
+        if (player.isAI) {
+            playerArea.classList.remove('active-turn');
+            aiArea.classList.add('active-turn');
+            messageBox.textContent = "Tour de l'IA";
+            setTimeout(playAITurn, 1000);
+        } else {
+            aiArea.classList.remove('active-turn');
+            playerArea.classList.add('active-turn');
+            messageBox.textContent = "Votre tour";
+        }
+        updateCursors();
+    }
+
+    function endTurn() {
+        if (gameIsOver) return;
+        clearSelection();
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+        startTurn();
+    }
+
+    function playCard(playerIndex, card, source, sourceIndex, targetPileIndex = null) {
+        const player = players[playerIndex];
+        let played = false;
+
+        const checkAndPlay = (i) => {
+            const topCard = buildPiles[i].length > 0 ? buildPiles[i][buildPiles[i].length - 1] : 0;
+            const numericCardValue = card === 'SB' ? topCard + 1 : card;
+
+            if (numericCardValue === topCard + 1) {
+                buildPiles[i].push(numericCardValue);
+
+                if (source === 'stock') player.stock.pop();
+                else if (source === 'hand') player.hand.splice(sourceIndex, 1);
+                else if (source === 'discard') player.discard[sourceIndex].pop();
+
+                if (source === 'hand' && player.hand.length === 0 && !player.isAI) {
+                    messageBox.textContent = "Main vide ! Pige de nouvelles cartes...";
+                    setTimeout(() => {
+                        drawHand(playerIndex);
+                        messageBox.textContent = "Votre tour";
+                        updateUI();
+                    }, 1000);
+                }
+                played = true;
+                return true;
+            }
+            return false;
+        };
+
+        if (targetPileIndex !== null) {
+            checkAndPlay(targetPileIndex);
+        } else { // AI logic uses this branch
+            for (let i = 0; i < buildPiles.length; i++) {
+                if (checkAndPlay(i)) {
+                    break;
+                }
+            }
+        }
+
+        if (played) {
+            if(checkForWinner()) return true;
+            clearSelection();
+            updateUI();
+            if(player.isAI) setTimeout(playAITurn, 500);
+        }
+        return played;
+    }
+
+    function checkForWinner() {
+        for (let i = 0; i < players.length; i++) {
+            if (players[i].stock.length === 0) {
+                messageBox.textContent = `${players[i].isAI ? 'Le Joueur IA' : 'Vous'} gagnez !`;
+                gameIsOver = true;
+                playerArea.classList.remove('active-turn');
+                aiArea.classList.remove('active-turn');
+                restartButton.classList.remove('hidden');
+                updateCursors();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // --- AI Logic ---
+    function playAITurn() {
+        if (gameIsOver) return;
+        const ai = players[1];
+
+        if (ai.stock.length > 0) {
+            const stockCard = ai.stock[ai.stock.length - 1];
+            if (playCard(1, stockCard, 'stock')) return;
+        }
+
+        for (let i = 0; i < ai.hand.length; i++) {
+            if (playCard(1, ai.hand[i], 'hand', i)) return;
+        }
+
+        for (let i = 0; i < ai.discard.length; i++) {
+            if (ai.discard[i].length > 0) {
+                const discardCard = ai.discard[i][ai.discard[i].length - 1];
+                if (playCard(1, discardCard, 'discard', i)) return;
+            }
+        }
+
+        if (ai.hand.length > 0) {
+            const cardToDiscard = ai.hand.pop();
+            let discarded = false;
+            for (let i = 0; i < ai.discard.length; i++) {
+                if (ai.discard[i].length === 0) {
+                    ai.discard[i].push(cardToDiscard);
+                    discarded = true;
+                    break;
+                }
+            }
+            if (!discarded) ai.discard[0].push(cardToDiscard);
+        }
+        endTurn();
+    }
+
+    // --- UI Update and Event Handlers ---
+
+    function clearSelection() {
+        if (selectedCard && selectedCard.element) {
+            selectedCard.element.classList.remove('selected');
+        }
+        selectedCard = null;
+        updateCursors();
+    }
+
+    function updateCursors() {
+        document.querySelectorAll('.card, .placeholder').forEach(el => el.style.cursor = 'default');
+
+        if (gameIsOver || currentPlayerIndex !== 0) return;
+
+        playerHandElement.querySelectorAll('.card').forEach(c => c.style.cursor = 'grab');
+        if (players[0].stock.length > 0) playerStockElement.style.cursor = 'grab';
+        playerDiscardPilesElement.querySelectorAll('.card').forEach(c => {
+            if (parseInt(c.style.zIndex) === (c.parentElement.children.length - 1)) {
+                c.style.cursor = 'grab';
+            }
+        });
+
+        if (!selectedCard) return;
+
+        buildPilesElement.querySelectorAll('.card, .placeholder').forEach((pileEl, pileIndex) => {
+            const topCard = buildPiles[pileIndex].length > 0 ? buildPiles[pileIndex][buildPiles[pileIndex].length - 1] : 0;
+            const numericCardValue = selectedCard.value === 'SB' ? topCard + 1 : selectedCard.value;
+            pileEl.style.cursor = (numericCardValue === topCard + 1) ? 'copy' : 'not-allowed';
+        });
+
+        if (selectedCard.source === 'hand') {
+            playerDiscardPilesElement.querySelectorAll('.discard-pile-stack').forEach(stack => {
+                stack.style.cursor = 'copy';
+                stack.querySelectorAll('*').forEach(el => el.style.cursor = 'copy');
+            });
+        }
+    }
+
+    function createCardHTML(cardValue) {
+        return `<span class="card-corner-number">${cardValue}</span><span>${cardValue}</span>`;
+    }
+
+    function renderDiscardPile(pile, isPlayer, pileIndex) {
+        const stack = document.createElement('div');
+        stack.className = 'discard-pile-stack';
+        stack.dataset.index = pileIndex;
+
+        if (pile.length === 0) {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'placeholder';
+            if (isPlayer) {
+                placeholder.textContent = 'Défausser';
+                placeholder.style = 'writing-mode: vertical-rl; text-orientation: mixed;';
+                placeholder.dataset.source = 'discard-placeholder';
+            }
+            stack.appendChild(placeholder);
+        } else {
+            pile.forEach((card, i) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = `card ${card === 'SB' ? 'skipbo' : ''}`;
+                cardEl.innerHTML = createCardHTML(card);
+                cardEl.style.top = `${i * 20}px`;
+                cardEl.style.zIndex = i;
+                if (isPlayer && i === pile.length - 1) {
+                    cardEl.dataset.card = card;
+                    cardEl.dataset.source = 'discard';
+                }
+                stack.appendChild(cardEl);
+            });
+        }
+        return stack;
+    }
+
+    function updateUI() {
+        const player = players[0];
+        playerStockCount.textContent = player.stock.length;
+        playerStockElement.innerHTML = player.stock.length > 0 ? createCardHTML(player.stock[player.stock.length - 1]) : '🏆';
+        playerStockElement.className = `card mx-auto ${player.stock.length > 0 && player.stock[player.stock.length - 1] === 'SB' ? 'skipbo' : ''}`;
+        playerStockElement.dataset.source = 'stock';
+
+        playerHandElement.innerHTML = '';
+        player.hand.forEach((card, index) => {
+            const cardEl = document.createElement('div');
+            cardEl.className = `card ${card === 'SB' ? 'skipbo' : ''}`;
+            cardEl.innerHTML = createCardHTML(card);
+            cardEl.dataset.card = card;
+            cardEl.dataset.source = 'hand';
+            cardEl.dataset.index = index;
+            playerHandElement.appendChild(cardEl);
+        });
+
+        playerDiscardPilesElement.innerHTML = '';
+        for (let i = 0; i < 4; i++) {
+            const pileEl = renderDiscardPile(player.discard[i] || [], true, i);
+            playerDiscardPilesElement.appendChild(pileEl);
+        }
+
+        const ai = players[1];
+        aiStockCount.textContent = ai.stock.length;
+        aiStockElement.innerHTML = ai.stock.length > 0 ? createCardHTML(ai.stock[ai.stock.length - 1]) : '🏆';
+        aiStockElement.className = `card mx-auto ${ai.stock.length > 0 && ai.stock[ai.stock.length - 1] === 'SB' ? 'skipbo' : ''}`;
+
+        aiDiscardPilesElement.innerHTML = '';
+        for (let i = 0; i < 4; i++) {
+            const pileEl = renderDiscardPile(ai.discard[i] || [], false, i);
+            aiDiscardPilesElement.appendChild(pileEl);
+        }
+
+        buildPilesElement.innerHTML = '';
+        buildPiles.forEach((pile, index) => {
+            const pileEl = document.createElement('div');
+            if (pile.length > 0) {
+                pileEl.className = 'card';
+                pileEl.innerHTML = createCardHTML(pile[pile.length - 1]);
+            } else {
+                pileEl.className = 'placeholder';
+                pileEl.textContent = '1';
+            }
+            pileEl.dataset.pileIndex = index;
+            buildPilesElement.appendChild(pileEl);
+        });
+
+        deckCountElement.textContent = deck.length;
+        deckElement.innerHTML = ''; // Keep it as a blank card back
+        updateCursors();
+    }
+
+    function handlePlayerAreaClick(e) {
+        if (currentPlayerIndex !== 0 || gameIsOver) return;
+        const target = e.target;
+
+        const discardPileStack = target.closest('.discard-pile-stack');
+        if (selectedCard && selectedCard.source === 'hand' && discardPileStack) {
+            const cardToDiscard = selectedCard.value;
+            const discardPileIndex = parseInt(discardPileStack.dataset.index);
+
+            players[0].hand.splice(selectedCard.index, 1);
+            players[0].discard[discardPileIndex].push(cardToDiscard);
+            endTurn();
+            return;
+        }
+
+        const cardElement = target.closest('[data-source]');
+        if (!cardElement) return;
+
+        const source = cardElement.dataset.source;
+        let index;
+        if (source === 'discard') {
+            index = parseInt(target.closest('.discard-pile-stack').dataset.index);
+        } else {
+            index = parseInt(cardElement.dataset.index);
+        }
+
+        if (source === 'stock') {
+            if (players[0].stock.length === 0) return;
+            const cardValue = players[0].stock[players[0].stock.length - 1];
+            if (selectedCard && selectedCard.source === 'stock') {
+                clearSelection();
+            } else {
+                clearSelection();
+                selectedCard = { value: cardValue, source: 'stock', index: null, element: cardElement };
+                cardElement.classList.add('selected');
+                updateCursors();
+            }
+            return;
+        }
+
+        if (source === 'hand' || source === 'discard') {
+            const cardStr = cardElement.dataset.card;
+            const cardValue = cardStr === 'SB' ? 'SB' : parseInt(cardStr);
+
+            if (selectedCard && selectedCard.element === cardElement) {
+                clearSelection();
+            } else {
+                clearSelection();
+                selectedCard = { value: cardValue, source: source, index: index, element: cardElement };
+                cardElement.classList.add('selected');
+                updateCursors();
+            }
+        }
+    }
+
+    function handleBuildPileClick(e) {
+        if (currentPlayerIndex !== 0 || gameIsOver || !selectedCard) return;
+        const target = e.target.closest('[data-pile-index]');
+        if (!target) return;
+
+        const pileIndex = parseInt(target.dataset.pileIndex);
+
+        if (!playCard(0, selectedCard.value, selectedCard.source, selectedCard.index, pileIndex)) {
+            messageBox.textContent = "Mouvement invalide.";
+            setTimeout(() => {
+                if (!gameIsOver) messageBox.textContent = "Votre tour";
+            }, 1500);
+        }
+    }
+
+    // --- Event Listeners ---
+    document.getElementById('player-area').addEventListener('click', handlePlayerAreaClick);
+    buildPilesElement.addEventListener('click', handleBuildPileClick);
+    restartButton.addEventListener('click', initGame);
+
+    // --- Start Game ---
+    window.onload = () => {
+        loadTheme();
+        initGame();
+    };
+</script>
+</body>
+</html>
