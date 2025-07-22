@@ -8,6 +8,46 @@ const CONFIG = {
         MAX_BUILD_PILE_VALUE: 12,
         SKIPBO_CARDS_COUNT: 18
     },
+    GAME_MODES: {
+        CLASSIC: {
+            name: 'Classic',
+            stockPileSize: 30,
+            maxPlayers: 6,
+            aiDifficulty: 'medium'
+        },
+        QUICK: {
+            name: 'Quick Game',
+            stockPileSize: 15,
+            maxPlayers: 4,
+            aiDifficulty: 'easy'
+        },
+        CHALLENGE: {
+            name: 'Challenge',
+            stockPileSize: 40,
+            maxPlayers: 2,
+            aiDifficulty: 'hard'
+        }
+    },
+    AI_DIFFICULTIES: {
+        EASY: {
+            name: 'Easy',
+            thinkTime: 1500,
+            mistakeChance: 0.15,
+            lookahead: 1
+        },
+        MEDIUM: {
+            name: 'Medium',
+            thinkTime: 1000,
+            mistakeChance: 0.08,
+            lookahead: 2
+        },
+        HARD: {
+            name: 'Hard',
+            thinkTime: 800,
+            mistakeChance: 0.03,
+            lookahead: 3
+        }
+    },
     UI: {
         AI_TURN_DELAY: 1000,
         AI_PLAY_DELAY: 500,

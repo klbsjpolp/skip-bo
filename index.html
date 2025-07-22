@@ -314,7 +314,7 @@
         }
 
         initGame() {
-            this.game.initGame();
+            this.game.initializeGame();
             this.ui.hideRestartButton();
             this.game.drawHand(this.game.currentPlayerIndex+1 % 2);
             this.startTurn();
