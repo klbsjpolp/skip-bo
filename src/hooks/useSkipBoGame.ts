@@ -125,11 +125,17 @@ export const useSkipBoGame = () => {
     }
 
     setGameState(prev => {
-      const newState = { ...prev };
-      const player = newState.players[newState.currentPlayerIndex];
       const { selectedCard } = prev;
 
       if (!selectedCard) return prev;
+
+      const newState = {
+        ...prev,
+        buildPiles: prev.buildPiles.map((pile, idx) =>
+          idx === buildPileIndex ? [...pile, selectedCard.card] : pile
+        )
+      };
+      const player = newState.players[newState.currentPlayerIndex];
 
       // Add card to build pile
       newState.buildPiles[buildPileIndex].push(selectedCard.card);
