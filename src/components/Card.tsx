@@ -14,9 +14,9 @@ interface CardProps {
 export function Card({ card, isRevealed = true, isSelected = false, onClick, className, canBeGrabbed = false }: CardProps) {
   const displayValue = () => {
     if (!isRevealed) return '?';
-    if (!card) return 'Error';
     if (card.isSkipBo) return 'SB';
-    return card.value !== undefined ? card.value.toString() : 'Error';
+    if (card.value === undefined) throw Error('Error')
+    return card.value.toString();
   };
 
   return (

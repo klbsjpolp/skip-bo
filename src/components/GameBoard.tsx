@@ -5,8 +5,8 @@ import { CenterArea } from '@/components/CenterArea';
 interface GameBoardProps {
   gameState: GameState;
   selectCard: (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void;
-  playCard: (buildPileIndex: number) => { success: boolean; message: string };
-  discardCard: (discardPileIndex: number) => { success: boolean; message: string };
+  playCard: (buildPileIndex: number) => Promise<{ success: boolean; message: string }>;
+  discardCard: (discardPileIndex: number) => Promise<{ success: boolean; message: string }>;
   clearSelection: () => void;
   canPlayCard: (card: CardType, buildPileIndex: number, gameState: GameState) => boolean;
 }

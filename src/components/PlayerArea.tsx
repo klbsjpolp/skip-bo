@@ -10,7 +10,7 @@ interface PlayerAreaProps {
   isCurrentPlayer: boolean;
   gameState: GameState;
   selectCard: (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void;
-  discardCard: (discardPileIndex: number) => { success: boolean; message: string };
+  discardCard: (discardPileIndex: number) => Promise<{ success: boolean; message: string }>;
   clearSelection: () => void;
 }
 
@@ -116,12 +116,12 @@ export function PlayerArea({
                 {pile.length > 0 ? (
                   <div
                     className={`${isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand' ? 'cursor-pointer hover:ring-2 hover:ring-blue-400' : 'cursor-default'}`}
-                    onClick={(e) => {
+                    onClick={async (e) => {
                       // Prevent event propagation to avoid triggering nested handlers
                       e.stopPropagation();
                       
                       if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
-                        discardCard(pileIndex);
+                        await discardCard(pileIndex);
                       } else if (isHuman && isCurrentPlayer) {
                         selectCard('discard', pile.length - 1, pileIndex);
                       }
@@ -141,12 +141,12 @@ export function PlayerArea({
                   </div>
                 ) : (
                   <EmptyCard
-                    onClick={(e) => {
+                    onClick={async (e) => {
                       // Prevent event propagation
                       e.stopPropagation();
                       
                       if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
-                        discardCard(pileIndex);
+                        await discardCard(pileIndex);
                       }
                     }}
                     canDropCard={isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand'}

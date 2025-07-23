@@ -4,7 +4,7 @@ import {EmptyCard} from "@/components/EmptyCard.tsx";
 
 interface CenterAreaProps {
   gameState: GameState;
-  playCard: (buildPileIndex: number) => { success: boolean; message: string };
+  playCard: (buildPileIndex: number) => Promise<{ success: boolean; message: string }>;
   canPlayCard: (card: CardType, buildPileIndex: number, gameState: GameState) => boolean;
 }
 
@@ -40,7 +40,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
               <div
                 key={`build-${index}`}
                 className={`relative ${gameState.selectedCard && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState) ? 'cursor-pointer hover:ring-2 hover:ring-blue-400 hover:transform hover:scale-105 transition-transform' : 'cursor-default'}`}
-                onClick={(e) => {
+                onClick={async (e) => {
                   // Prevent event propagation
                   e.stopPropagation();
                   
@@ -49,7 +49,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                   if (gameState.selectedCard && 
                       gameState.currentPlayerIndex === 0 && 
                       canPlayCard(gameState.selectedCard.card, index, gameState)) {
-                    playCard(index);
+                    await playCard(index);
                   }
                 }}
               >
