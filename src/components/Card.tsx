@@ -1,11 +1,12 @@
 import { Card as CardType } from '@/types';
 import { cn } from '@/lib/utils';
+import {MouseEventHandler} from "react";
 
 interface CardProps {
   card: CardType;
   isRevealed?: boolean;
   isSelected?: boolean;
-  onClick?: () => void;
+  onClick?: MouseEventHandler;
   className?: string;
   canBeGrabbed?: boolean;
 }
@@ -13,8 +14,9 @@ interface CardProps {
 export function Card({ card, isRevealed = true, isSelected = false, onClick, className, canBeGrabbed = false }: CardProps) {
   const displayValue = () => {
     if (!isRevealed) return '?';
+    if (!card) return 'Error';
     if (card.isSkipBo) return 'SB';
-    return card.value.toString();
+    return card.value !== undefined ? card.value.toString() : 'Error';
   };
 
   return (
@@ -22,7 +24,7 @@ export function Card({ card, isRevealed = true, isSelected = false, onClick, cla
       className={cn(
         'card',
         !isRevealed && 'back',
-        card.isSkipBo && isRevealed && 'skip-bo',
+        card && card.isSkipBo && isRevealed && 'skip-bo',
         isSelected && 'selected',
         onClick && canBeGrabbed && 'hover:shadow-lg hover:transform hover:scale-105 cursor-pointer',
         onClick && !canBeGrabbed && 'cursor-default',

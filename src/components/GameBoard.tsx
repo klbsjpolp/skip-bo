@@ -34,6 +34,7 @@ export function GameBoard({
         gameState={gameState}
         selectCard={selectCard}
         discardCard={discardCard}
+        clearSelection={clearSelection}
       />
 
       {/* Center Game Area */}
@@ -57,6 +58,7 @@ export function GameBoard({
         gameState={gameState}
         selectCard={selectCard}
         discardCard={discardCard}
+        clearSelection={clearSelection}
       />
     </div>
   );

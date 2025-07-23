@@ -11,6 +11,7 @@ interface PlayerAreaProps {
   gameState: GameState;
   selectCard: (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void;
   discardCard: (discardPileIndex: number) => { success: boolean; message: string };
+  clearSelection: () => void;
 }
 
 export function PlayerArea({ 
@@ -20,7 +21,8 @@ export function PlayerArea({
   isCurrentPlayer, 
   gameState,
   selectCard,
-  discardCard
+  discardCard,
+  clearSelection
 }: PlayerAreaProps) {
   const isHuman = !player.isAI;
 
@@ -42,8 +44,12 @@ export function PlayerArea({
               <Card
                 card={player.stockPile[player.stockPile.length - 1]}
                 isRevealed={true}
-                onClick={() => {
-                  if (isHuman && isCurrentPlayer) {
+                onClick={(e) => {
+                  // Prevent event propagation
+                  e.stopPropagation();
+                  
+                  // Only allow selection if it's the human player's turn and no card is currently selected
+                  if (isHuman && isCurrentPlayer && !gameState.selectedCard) {
                     selectCard('stock', player.stockPile.length - 1);
                   }
                 }}
@@ -51,7 +57,7 @@ export function PlayerArea({
                   gameState.selectedCard?.source === 'stock' &&
                   gameState.currentPlayerIndex === playerIndex
                 }
-                canBeGrabbed={isHuman && isCurrentPlayer}
+                canBeGrabbed={isHuman && isCurrentPlayer && !gameState.selectedCard}
               />
             ) : (
               <EmptyCard />
@@ -69,10 +75,25 @@ export function PlayerArea({
               <Card
                 key={`hand-${index}`}
                 card={card}
-                isRevealed={isHuman}
-                onClick={() => {
+                isRevealed={true}
+                onClick={(e) => {
+                  // Prevent event propagation
+                  e.stopPropagation();
+                  
+                  // Only allow selection if it's the human player's turn
+                  // For hand cards, we allow selecting even if another card is selected
+                  // This allows the player to change their selection
                   if (isHuman && isCurrentPlayer) {
-                    selectCard('hand', index);
+                    // If this card is already selected, deselect it
+                    if (gameState.selectedCard?.source === 'hand' && 
+                        gameState.selectedCard.index === index &&
+                        gameState.currentPlayerIndex === playerIndex) {
+                      // Clear the selection
+                      clearSelection();
+                    } else {
+                      // Select this card
+                      selectCard('hand', index);
+                    }
                   }
                 }}
                 isSelected={
@@ -95,7 +116,10 @@ export function PlayerArea({
                 {pile.length > 0 ? (
                   <div
                     className={`${isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand' ? 'cursor-pointer hover:ring-2 hover:ring-blue-400' : 'cursor-default'}`}
-                    onClick={() => {
+                    onClick={(e) => {
+                      // Prevent event propagation to avoid triggering nested handlers
+                      e.stopPropagation();
+                      
                       if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
                         discardCard(pileIndex);
                       } else if (isHuman && isCurrentPlayer) {
@@ -111,12 +135,16 @@ export function PlayerArea({
                         gameState.selectedCard.discardPileIndex === pileIndex &&
                         gameState.currentPlayerIndex === playerIndex
                       }
-                      canBeGrabbed={isHuman && isCurrentPlayer}
+                      canBeGrabbed={isHuman && isCurrentPlayer && !gameState.selectedCard}
+                      // Remove onClick from Card to avoid nested handlers
                     />
                   </div>
                 ) : (
                   <EmptyCard
-                    onClick={() => {
+                    onClick={(e) => {
+                      // Prevent event propagation
+                      e.stopPropagation();
+                      
                       if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
                         discardCard(pileIndex);
                       }

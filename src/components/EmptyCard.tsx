@@ -1,7 +1,8 @@
 import {cn} from '@/lib/utils';
+import {MouseEventHandler} from "react";
 
 interface EmptyCardProps {
-  onClick?: () => void;
+  onClick?: MouseEventHandler;
   canDropCard?: boolean;
 }
 

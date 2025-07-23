@@ -94,16 +94,19 @@ export const useSkipBoGame = () => {
       if (source === 'hand') {
         // Create a deep copy of the hand array
         player.hand = [...player.hand];
-        card = player.hand[index];
+        // Create a deep copy of the card object
+        card = { ...player.hand[index] };
       } else if (source === 'stock') {
         // Create a deep copy of the stock pile array
         player.stockPile = [...player.stockPile];
-        card = player.stockPile[player.stockPile.length - 1];
+        // Create a deep copy of the card object
+        card = { ...player.stockPile[player.stockPile.length - 1] };
       } else {
         // Create a deep copy of the discard piles array
         player.discardPiles = [...player.discardPiles];
         player.discardPiles[discardPileIndex!] = [...player.discardPiles[discardPileIndex!]];
-        card = player.discardPiles[discardPileIndex!][player.discardPiles[discardPileIndex!].length - 1];
+        // Create a deep copy of the card object
+        card = { ...player.discardPiles[discardPileIndex!][player.discardPiles[discardPileIndex!].length - 1] };
       }
 
       return {
@@ -143,16 +146,27 @@ export const useSkipBoGame = () => {
 
       if (!selectedCard) return prev;
 
-      const newState = {
-        ...prev,
-        buildPiles: prev.buildPiles.map((pile, idx) =>
-          idx === buildPileIndex ? [...pile, selectedCard.card] : pile
-        )
-      };
+      // Create a deep copy of the previous state
+      const newState = { ...prev };
+      
+      // Create a deep copy of the build piles
+      newState.buildPiles = [...prev.buildPiles];
+      
+      // Add the selected card to the appropriate build pile
+      // Create a deep copy of the specific build pile
+      // If the selected card is a Skip-Bo, set its value to the next expected value
+      const nextValue = prev.buildPiles[buildPileIndex].length === 0 ? 1 : prev.buildPiles[buildPileIndex][prev.buildPiles[buildPileIndex].length - 1].value + 1;
+      const cardToPlay = selectedCard.card.isSkipBo
+        ? { isSkipBo: false, value: nextValue }
+        : selectedCard.card;
+      newState.buildPiles[buildPileIndex] = [...prev.buildPiles[buildPileIndex], cardToPlay];
 
-      // Create a deep copy of the player object
-      const player = { ...newState.players[newState.currentPlayerIndex] };
-      newState.players[newState.currentPlayerIndex] = player;
+      // Create a deep copy of the players array
+      newState.players = [...prev.players];
+      
+      // Create a deep copy of the current player
+      const player = { ...prev.players[prev.currentPlayerIndex] };
+      newState.players[prev.currentPlayerIndex] = player;
 
       // Remove card from source
       if (selectedCard.source === 'hand') {
@@ -164,7 +178,7 @@ export const useSkipBoGame = () => {
         if (player.hand.length === 0 && newState.deck.length > 0) {
           // Create a deep copy of the deck array
           newState.deck = [...newState.deck];
-          player.hand.push(newState.deck.pop()!);
+          player.hand.push({ ...newState.deck.pop()! });
         }
       } else if (selectedCard.source === 'stock') {
         // Create a deep copy of the stock pile array
@@ -195,22 +209,36 @@ export const useSkipBoGame = () => {
       return {
         ...newState,
         selectedCard: null,
-        message: MESSAGES.CARD_PLAYED,
+        message: `${player.isAI ? "L'IA a joué une carte" : "Vous avez joué une carte"}`,
       };
     });
 
-    return { success: true, message: MESSAGES.CARD_PLAYED };
+    // Use the same message format as in the state update
+    const player = gameState.players[gameState.currentPlayerIndex];
+    return { success: true, message: `${player.isAI ? "L'IA a joué une carte" : "Vous avez joué une carte"}` };
   }, [gameState, canPlayCard]);
 
   const discardCard = useCallback((discardPileIndex: number): MoveResult => {
     if (!gameState.selectedCard || gameState.selectedCard.source !== 'hand') {
       return { success: false, message: MESSAGES.INVALID_MOVE };
     }
+    
+    // Prevent discarding Skip-Bo cards
+    if (gameState.selectedCard.card.isSkipBo) {
+      return { success: false, message: "Vous ne pouvez pas défausser une carte Skip-Bo" };
+    }
 
     setGameState(prev => {
+      // Create a deep copy of the previous state
       const newState = { ...prev };
-      const player = { ...newState.players[newState.currentPlayerIndex] };
-      newState.players[newState.currentPlayerIndex] = player;
+      
+      // Create a deep copy of the players array
+      newState.players = [...prev.players];
+      
+      // Create a deep copy of the current player
+      const player = { ...prev.players[prev.currentPlayerIndex] };
+      newState.players[prev.currentPlayerIndex] = player;
+      
       const { selectedCard } = prev;
 
       if (!selectedCard) return prev;
@@ -218,10 +246,14 @@ export const useSkipBoGame = () => {
       // Create a deep copy of the hand array
       player.hand = [...player.hand];
 
-      // Add card to discard pile
-      // Create a deep copy of the discard pile
+      // Create a deep copy of the discard piles array
       player.discardPiles = [...player.discardPiles];
-      player.discardPiles[discardPileIndex] = [...player.discardPiles[discardPileIndex], selectedCard.card];
+      
+      // Create a deep copy of the specific discard pile
+      player.discardPiles[discardPileIndex] = [...player.discardPiles[discardPileIndex]];
+      
+      // Add a deep copy of the card to the discard pile
+      player.discardPiles[discardPileIndex].push({ ...selectedCard.card });
 
       // Remove card from hand
       player.hand.splice(selectedCard.index, 1);
@@ -231,14 +263,24 @@ export const useSkipBoGame = () => {
       // End turn after discarding
       newState.currentPlayerIndex = 1 - newState.currentPlayerIndex;
 
+      // Determine which player's turn is ending and which is starting
+      const currentPlayer = prev.players[prev.currentPlayerIndex];
+      const nextPlayer = prev.players[1 - prev.currentPlayerIndex];
+      
       return {
         ...newState,
         selectedCard: null,
-        message: MESSAGES.TURN_ENDED,
+        message: `${currentPlayer.isAI ? "Tour de l'IA terminé" : "Votre tour est terminé"}. ${nextPlayer.isAI ? "L'IA joue maintenant" : "C'est votre tour"}`,
       };
     });
 
-    return { success: true, message: MESSAGES.TURN_ENDED };
+    // Use the same message format as in the state update
+    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+    const nextPlayer = gameState.players[1 - gameState.currentPlayerIndex];
+    return { 
+      success: true, 
+      message: `${currentPlayer.isAI ? "Tour de l'IA terminé" : "Votre tour est terminé"}. ${nextPlayer.isAI ? "L'IA joue maintenant" : "C'est votre tour"}`
+    };
   }, [gameState.selectedCard]);
 
   const clearSelection = useCallback(() => {
@@ -254,16 +296,20 @@ export const useSkipBoGame = () => {
     });
   }, []);
 
-  // Effect to draw cards at the beginning of a player's turn
+  // Effect to draw cards at the beginning of a player's turn and clear selection between rounds
   useEffect(() => {
     if (!gameState.gameIsOver) {
       setGameState(prev => {
+        // Create a deep copy of the previous state
+        const newState = { ...prev };
+        
+        // Clear any selection when changing players/rounds
+        newState.selectedCard = null;
+        
         const player = prev.players[prev.currentPlayerIndex];
 
         // Draw cards at the beginning of the turn if hand is not full
         if (player.hand.length < CONFIG.HAND_SIZE && prev.deck.length > 0) {
-          const newState = { ...prev };
-
           // Create a deep copy of the player object
           const newPlayer = { ...player };
           newState.players = [...newState.players];
@@ -281,11 +327,9 @@ export const useSkipBoGame = () => {
           for (let i = 0; i < cardsToDraw; i++) {
             newPlayer.hand.push(newState.deck.pop()!);
           }
-
-          return newState;
         }
 
-        return prev;
+        return newState;
       });
     }
   }, [gameState.currentPlayerIndex, gameState.gameIsOver]);
@@ -294,19 +338,27 @@ export const useSkipBoGame = () => {
   useEffect(() => {
     const handleAITurn = async () => {
       if (gameState.currentPlayerIndex === 1 && !gameState.gameIsOver) {
-        setGameState(prev => ({ ...prev, message: MESSAGES.AI_THINKING }));
+        setGameState(prev => ({ ...prev, message: "L'IA joue son tour..." }));
 
-        // Create a deep copy of the gameState to avoid race conditions
-        const gameStateCopy = JSON.parse(JSON.stringify(gameState));
+        // We don't need to create a copy of the gameState here
+        // The AI will directly modify the actual game state through the callbacks
+        const success = await makeAIMove(gameState, playCard, discardCard, selectCard);
 
-        const success = await makeAIMove(gameStateCopy, playCard, discardCard, selectCard);
-
+        // Only change player turn if AI couldn't make a move
+        // If AI successfully made a move, the turn change is handled by the discardCard function
         if (!success) {
+          // This should only happen if the AI has no cards in hand and can't play from stock or discard piles
+          // Check if the AI has cards in hand
+          const aiPlayer = gameState.players[1];
+          const message = aiPlayer.hand.length > 0 
+            ? "L'IA a dû passer son tour. C'est votre tour." // This should never happen with our new logic
+            : "L'IA n'a plus de cartes en main et ne peut pas jouer. C'est votre tour.";
+          
           // If AI can't make a move, skip turn
           setGameState(prev => ({
             ...prev,
             currentPlayerIndex: 0,
-            message: "Tour de l'IA terminé"
+            message: message
           }));
         }
       }

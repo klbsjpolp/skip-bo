@@ -5,7 +5,7 @@ import {EmptyCard} from "@/components/EmptyCard.tsx";
 interface CenterAreaProps {
   gameState: GameState;
   playCard: (buildPileIndex: number) => { success: boolean; message: string };
-  canPlayCard: (card: Card, buildPileIndex: number, gameState: GameState) => boolean;
+  canPlayCard: (card: CardType, buildPileIndex: number, gameState: GameState) => boolean;
 }
 
 export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps) {
@@ -39,26 +39,29 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
             {gameState.buildPiles.map((pile, index) => (
               <div
                 key={`build-${index}`}
-                className={`relative ${gameState.selectedCard && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState) ? 'cursor-pointer hover:ring-2 hover:ring-blue-400' : 'cursor-default'}`}
-                onClick={() => {
-                  if (gameState.selectedCard && gameState.currentPlayerIndex === 0) {
+                className={`relative ${gameState.selectedCard && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState) ? 'cursor-pointer hover:ring-2 hover:ring-blue-400 hover:transform hover:scale-105 transition-transform' : 'cursor-default'}`}
+                onClick={(e) => {
+                  // Prevent event propagation
+                  e.stopPropagation();
+                  
+                  // Only allow playing a card if there's a selected card, it's the human player's turn,
+                  // and the card can be played on this build pile
+                  if (gameState.selectedCard && 
+                      gameState.currentPlayerIndex === 0 && 
+                      canPlayCard(gameState.selectedCard.card, index, gameState)) {
                     playCard(index);
                   }
                 }}
               >
                 {pile.length > 0 ? (
-                  <Card
-                    card={pile[pile.length - 1]}
-                    isRevealed={true}
-                    canBeGrabbed={false}
-                  />
+                    <Card
+                      card={pile[pile.length - 1]}
+                      isRevealed={true}
+                      canBeGrabbed={false}
+                    />
                 ) : (
-                  <EmptyCard canDropCard={gameState.selectedCard !== null && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState)} />
+                    <EmptyCard canDropCard={gameState.selectedCard !== null && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState)} />
                 )}
-                {/* Pile indicator */}
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 text-xs bg-gray-600 text-white px-1 rounded">
-                  {pile.length}
-                </div>
               </div>
             ))}
           </div>
