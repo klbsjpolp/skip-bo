@@ -118,6 +118,13 @@ export const useAIPlayer = () => {
         return false;
       }
       
+      // Check if it's still the AI's turn after discarding
+      const afterDiscardGameState = getLatestGameState();
+      if (afterDiscardGameState.currentPlayerIndex !== 1) {
+        console.log(`[AI] Turn ended after discarding in forceDiscard. Current player index: ${afterDiscardGameState.currentPlayerIndex}`);
+        return true;
+      }
+      
       return true;
     } catch (error) {
       console.log(`[AI] Error during discard process:`, error);
@@ -315,11 +322,24 @@ export const useAIPlayer = () => {
             return await forceDiscard(selectCard, discardCard, getLatestGameState);
           }
           
-          // After playing, add another delay before discarding
+          // After playing, add another delay before checking for more moves
           await new Promise(resolve => setTimeout(resolve, 500));
           
-          // Always discard a card after playing
-          return await forceDiscard(selectCard, discardCard, getLatestGameState);
+          // Get the updated game state after playing a card
+          const updatedGameState = getLatestGameState();
+          
+          // Check if there are more playable cards
+          const nextMove = findBestMove(updatedGameState);
+          
+          if (nextMove && nextMove.action === 'play') {
+            // If there are more playable cards, continue playing
+            console.log(`[AI] Found another playable card. Continuing to play.`);
+            return await makeAIMove(updatedGameState, playCard, discardCard, selectCard, clearSelection, getLatestGameState);
+          } else {
+            // Only discard when there are no more playable cards
+            console.log(`[AI] No more playable cards. Discarding.`);
+            return await forceDiscard(selectCard, discardCard, getLatestGameState);
+          }
         } catch (error) {
           console.log(`[AI] Error during play move:`, error);
           
@@ -372,6 +392,13 @@ export const useAIPlayer = () => {
             
             // Try again with forceDiscard
             return await forceDiscard(selectCard, discardCard, getLatestGameState);
+          }
+          
+          // Check if it's still the AI's turn after discarding
+          const updatedGameState = getLatestGameState();
+          if (updatedGameState.currentPlayerIndex !== 1) {
+            console.log(`[AI] Turn ended after discarding. Current player index: ${updatedGameState.currentPlayerIndex}`);
+            return true;
           }
           
           return true;
