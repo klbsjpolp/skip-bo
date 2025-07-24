@@ -148,7 +148,6 @@
 
 /* Custom Skip-Bo card styles */
 .card {
-  width: 70px;
   height: 100px;
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
@@ -210,19 +209,35 @@
   justify-content: center;
 }
 
-.discard-piles, .build-piles {
-  width: 320px; /* 4 cards + gaps */
+.discard-piles, .build-piles, .hand-area {
+  width: 310px; /* 4 cards + gaps */
 }
 
 .hand-area {
-  width: 250px; /* 3 cards + gaps */
-  height: 210px; /* 2 cards + gaps */
+  height: 100px; /* 1 card */
+}
+
+.hand-area.overlap-hand {
+  position: relative;
+}
+
+.hand-area.overlap-hand .card {
+  position: absolute;
+  top: 0;
+}
+
+.hand-area:not(.overlap-hand) {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
 }
 
 .discard-pile-stack {
   position: relative;
-  width: 72px;
-  height: 130px;
+}
+
+.card, .discard-pile-stack {
+  width: 70px;
 }
 
 .discard-pile-stack .card, .discard-pile-stack .placeholder {
@@ -232,6 +247,7 @@
   box-shadow: var(--card-shadow);
 }
 
+/* Add support for offset stacking via inline style */
 .player-area, .center-area {
   padding: 20px;
   border: 2px solid transparent;

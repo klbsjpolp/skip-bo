@@ -1,24 +1,47 @@
-import { Card as CardType } from '@/types';
-import { cn } from '@/lib/utils';
-import {MouseEventHandler} from "react";
+import {Card as CardType} from '@/types';
+import {cn} from '@/lib/utils';
+import {MouseEventHandler, CSSProperties} from "react";
 
 interface CardProps {
-  card: CardType;
-  isRevealed?: boolean;
-  isSelected?: boolean;
-  onClick?: MouseEventHandler;
-  className?: string;
-  canBeGrabbed?: boolean;
+  card: CardType,
+  isRevealed?: boolean,
+  isSelected?: boolean,
+  onClick?: MouseEventHandler,
+  className?: string,
+  canBeGrabbed?: boolean,
+  stackIndex?: number,
+  overlapIndex?: number
 }
 
-export function Card({ card, isRevealed = true, isSelected = false, onClick, className, canBeGrabbed = false }: CardProps) {
+export function Card({
+                       card,
+                       isRevealed = true,
+                       isSelected = false,
+                       onClick,
+                       className,
+                       canBeGrabbed = false,
+                       stackIndex = undefined,
+                       overlapIndex = undefined
+                     }: CardProps) {
   const displayValue = () => {
     if (!isRevealed) return '?';
     if (card.isSkipBo) return 'SB';
     if (card.value === undefined) throw Error('Error')
     return card.value.toString();
   };
-
+  const cardValue = displayValue();
+  let style: CSSProperties | undefined = undefined;
+  if (stackIndex !== undefined) {
+    style = {
+      top: `${stackIndex * 20}px`,
+      zIndex: stackIndex,
+    }
+  } else if (overlapIndex !== undefined) {
+    style = {
+      left: `${overlapIndex * 60}px`,
+      zIndex: overlapIndex,
+    }
+  }
   return (
     <div
       className={cn(
@@ -31,8 +54,10 @@ export function Card({ card, isRevealed = true, isSelected = false, onClick, cla
         className
       )}
       onClick={onClick}
+      style={style}
     >
-      {displayValue()}
+      <span className="card-corner-number">{cardValue}</span>
+      <span>{cardValue}</span>
     </div>
   );
 }

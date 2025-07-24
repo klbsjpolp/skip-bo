@@ -25,6 +25,7 @@ export function PlayerArea({
   clearSelection
 }: PlayerAreaProps) {
   const isHuman = !player.isAI;
+  const handOverlaps = player.hand.length > 4;
 
   return (
     <div className={cn(
@@ -70,7 +71,10 @@ export function PlayerArea({
           <h3 className="text-sm mb-2">
             {isHuman ? 'Votre main' : 'Sa main'}
           </h3>
-          <div className="hand-area">
+          <div className={cn(
+            "hand-area",
+            handOverlaps && "overlap-hand"
+          )}>
             {player.hand.map((card, index) => (
               <Card
                 key={`hand-${index}`}
@@ -102,6 +106,7 @@ export function PlayerArea({
                   gameState.currentPlayerIndex === playerIndex
                 }
                 canBeGrabbed={isHuman && isCurrentPlayer}
+                overlapIndex={handOverlaps ? index : undefined}
               />
             ))}
           </div>
@@ -117,9 +122,7 @@ export function PlayerArea({
                   <div
                     className={`${isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand' ? 'cursor-pointer hover:ring-2 hover:ring-blue-400' : 'cursor-default'}`}
                     onClick={async (e) => {
-                      // Prevent event propagation to avoid triggering nested handlers
                       e.stopPropagation();
-                      
                       if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
                         await discardCard(pileIndex);
                       } else if (isHuman && isCurrentPlayer) {
@@ -127,24 +130,27 @@ export function PlayerArea({
                       }
                     }}
                   >
-                    <Card
-                      card={pile[pile.length - 1]}
-                      isRevealed={true}
-                      isSelected={
-                        gameState.selectedCard?.source === 'discard' &&
-                        gameState.selectedCard.discardPileIndex === pileIndex &&
-                        gameState.currentPlayerIndex === playerIndex
-                      }
-                      canBeGrabbed={isHuman && isCurrentPlayer && !gameState.selectedCard}
-                      // Remove onClick from Card to avoid nested handlers
-                    />
+                    {pile.map((card, cardIdx) => (
+                      <Card
+                        key={`discard-${pileIndex}-card-${cardIdx}`}
+                        card={card}
+                        isRevealed={true}
+                        isSelected={
+                          gameState.selectedCard?.source === 'discard' &&
+                          gameState.selectedCard.discardPileIndex === pileIndex &&
+                          gameState.currentPlayerIndex === playerIndex &&
+                          cardIdx === pile.length - 1
+                        }
+                        canBeGrabbed={isHuman && isCurrentPlayer && !gameState.selectedCard && cardIdx === pile.length - 1}
+                        stackIndex={cardIdx}
+                        // Remove onClick from Card to avoid nested handlers
+                      />
+                    ))}
                   </div>
                 ) : (
                   <EmptyCard
                     onClick={async (e) => {
-                      // Prevent event propagation
                       e.stopPropagation();
-                      
                       if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
                         await discardCard(pileIndex);
                       }

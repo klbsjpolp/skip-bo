@@ -57,7 +57,7 @@ export const gameMachine = createMachine({
     },
 
     botTurn: {
-      entry: 'DRAW',
+      entry: 'draw',
       always: [
         { target: 'finished', guard: 'hasWinner' },
         { target: 'humanTurn', guard: 'isHumanTurn' },

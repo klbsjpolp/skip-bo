@@ -13,7 +13,7 @@ export function ThemeSwitcher() {
   const { setTheme, theme } = useTheme();
 
   return (
-    <div className="flex justify-center gap-4 mb-6">
+    <div className="flex justify-center gap-4 mb-6 text-foreground">
       {themes.map(({ value, label }) => (
         <Button
           key={value}
