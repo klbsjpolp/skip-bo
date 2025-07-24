@@ -22,6 +22,7 @@ export const initialGameState = (): GameState => {
   return {
     deck,
     buildPiles: Array.from({ length: CONFIG.BUILD_PILES_COUNT }, () => []),
+    completedBuildPiles: [], // Initialize empty completed build piles
     players,
     currentPlayerIndex: 0,
     selectedCard: null,

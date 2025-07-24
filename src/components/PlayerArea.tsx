@@ -36,7 +36,7 @@ export function PlayerArea({
 
       <div className="flex justify-between items-start gap-8">
         {/* Stock Pile */}
-        <div className="text-center w-32">
+        <div className="w-32 flex flex-col">
           <h3 className="text-sm mb-2">
             Talon ({player.stockPile.length})
           </h3>
@@ -67,12 +67,12 @@ export function PlayerArea({
         </div>
 
         {/* Hand */}
-        <div className="text-center flex-1">
+        <div className="flex flex-col">
           <h3 className="text-sm mb-2">
             {isHuman ? 'Votre main' : 'Sa main'}
           </h3>
           <div className={cn(
-            "hand-area",
+            "hand-area", "mx-auto",
             handOverlaps && "overlap-hand"
           )}>
             {player.hand.map((card, index) => (
@@ -112,10 +112,13 @@ export function PlayerArea({
           </div>
         </div>
 
+        {/* Grow */}
+        <div className="flex-grow"></div>
+
         {/* Discard Piles */}
-        <div className="text-center">
+        <div className="flex flex-col">
           <h3 className="text-sm mb-2">Piles de défausse</h3>
-          <div className="discard-piles">
+          <div className="discard-piles mx-auto">
             {player.discardPiles.map((pile, pileIndex) => (
               <div key={`discard-${pileIndex}`} className="discard-pile-stack">
                 {pile.length > 0 ? (

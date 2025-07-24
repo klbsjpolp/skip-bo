@@ -13,11 +13,38 @@ export const gameReducer = produce( (draft: GameState, action: GameAction): Game
 
     case 'DRAW': {
       const player = draft.players[draft.currentPlayerIndex];
-      const count = action.count ||
-        Math.min(CONFIG.HAND_SIZE - player.hand.length, draft.deck.length);
-      console.log('DRAW', count, player.hand.length, draft.deck.length);
-      if (count > 0)
-        player.hand.push(...draft.deck.splice(0, count));
+      const requestedCount = action.count ||
+        Math.min(CONFIG.HAND_SIZE - player.hand.length, draft.deck.length + draft.completedBuildPiles.length);
+
+      let remainingToDraw = requestedCount;
+
+      // First, draw from existing deck
+      const fromDeck = Math.min(remainingToDraw, draft.deck.length);
+      if (fromDeck > 0) {
+        player.hand.push(...draft.deck.splice(0, fromDeck));
+        remainingToDraw -= fromDeck;
+      }
+
+      // If we still need more cards and have completed build piles, reshuffle and continue
+      if (remainingToDraw > 0 && draft.completedBuildPiles.length > 0) {
+        // Move completed build piles to deck and shuffle
+        draft.deck.push(...draft.completedBuildPiles);
+        draft.completedBuildPiles = [];
+
+        // Shuffle deck
+        for (let i = draft.deck.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [draft.deck[i], draft.deck[j]] = [draft.deck[j], draft.deck[i]];
+        }
+
+        // Draw remaining cards
+        const fromReshuffled = Math.min(remainingToDraw, draft.deck.length);
+        if (fromReshuffled > 0) {
+          player.hand.push(...draft.deck.splice(0, fromReshuffled));
+        }
+      }
+
+      console.log('DRAW', requestedCount, player.hand.length, draft.deck.length, draft.completedBuildPiles.length);
       return;
     }
 
@@ -69,18 +96,8 @@ export const gameReducer = produce( (draft: GameState, action: GameAction): Game
       const player = draft.players[draft.currentPlayerIndex];
       const buildPileIndex = action.buildPile;
 
-      // Calculate next value for Skip-Bo cards
-      const nextValue = draft.buildPiles[buildPileIndex].length === 0 
-        ? 1 
-        : draft.buildPiles[buildPileIndex][draft.buildPiles[buildPileIndex].length - 1].value + 1;
-      
-      // Create card to play (handle Skip-Bo)
-      const cardToPlay = selectedCard.card.isSkipBo
-        ? { isSkipBo: false, value: nextValue }
-        : { ...selectedCard.card };
-
-      // Add card to build pile
-      draft.buildPiles[buildPileIndex].push(cardToPlay);
+      // Add card to build pile - preserve Skip-Bo identity
+      draft.buildPiles[buildPileIndex].push({ ...selectedCard.card });
 
       // Remove card from source
       if (selectedCard.source === 'hand') {
@@ -92,21 +109,43 @@ export const gameReducer = produce( (draft: GameState, action: GameAction): Game
       }
       
       // Draw cards only if the player's hand is empty (cleared without discarding)
-      if (player.hand.length === 0 && draft.deck.length > 0) {
-        const cardsToDraw = Math.min(CONFIG.HAND_SIZE, draft.deck.length);
-        for (let i = 0; i < cardsToDraw; i++) {
-          const drawnCard = draft.deck.pop()!;
-          if (drawnCard.value !== undefined) {
-            player.hand.push({
-              value: drawnCard.value,
-              isSkipBo: drawnCard.isSkipBo
-            });
+      if (player.hand.length === 0) {
+        const player = draft.players[draft.currentPlayerIndex];
+        const requestedCount = Math.min(CONFIG.HAND_SIZE, draft.deck.length + draft.completedBuildPiles.length);
+
+        let remainingToDraw = requestedCount;
+
+        // First, draw from existing deck
+        const fromDeck = Math.min(remainingToDraw, draft.deck.length);
+        if (fromDeck > 0) {
+          player.hand.push(...draft.deck.splice(0, fromDeck));
+          remainingToDraw -= fromDeck;
+        }
+
+        // If we still need more cards and have completed build piles, reshuffle and continue
+        if (remainingToDraw > 0 && draft.completedBuildPiles.length > 0) {
+          // Move completed build piles to deck and shuffle
+          draft.deck.push(...draft.completedBuildPiles);
+          draft.completedBuildPiles = [];
+
+          // Shuffle deck
+          for (let i = draft.deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [draft.deck[i], draft.deck[j]] = [draft.deck[j], draft.deck[i]];
+          }
+
+          // Draw remaining cards
+          const fromReshuffled = Math.min(remainingToDraw, draft.deck.length);
+          if (fromReshuffled > 0) {
+            player.hand.push(...draft.deck.splice(0, fromReshuffled));
           }
         }
       }
 
       // Check if build pile is complete (12 cards)
       if (draft.buildPiles[buildPileIndex].length === 12) {
+        // Completed build pile: move cards to completed pile storage
+        draft.completedBuildPiles.push(...draft.buildPiles[buildPileIndex]);
         draft.buildPiles[buildPileIndex] = [];
       }
 
@@ -178,18 +217,37 @@ export const gameReducer = produce( (draft: GameState, action: GameAction): Game
     case 'END_TURN':
       draft.currentPlayerIndex = draft.currentPlayerIndex === 0 ? 1 : 0;
       draft.selectedCard = null;
-      
+
       // Draw cards for the next player up to the maximum hand size
       const nextPlayer = draft.players[draft.currentPlayerIndex];
-      if (nextPlayer.hand.length < CONFIG.HAND_SIZE && draft.deck.length > 0) {
-        const cardsToDraw = Math.min(CONFIG.HAND_SIZE - nextPlayer.hand.length, draft.deck.length);
-        for (let i = 0; i < cardsToDraw; i++) {
-          const drawnCard = draft.deck.pop()!;
-          if (drawnCard.value !== undefined) {
-            nextPlayer.hand.push({
-              value: drawnCard.value,
-              isSkipBo: drawnCard.isSkipBo
-            });
+      if (nextPlayer.hand.length < CONFIG.HAND_SIZE) {
+        const requestedCount = Math.min(CONFIG.HAND_SIZE - nextPlayer.hand.length, draft.deck.length + draft.completedBuildPiles.length);
+
+        let remainingToDraw = requestedCount;
+
+        // First, draw from existing deck
+        const fromDeck = Math.min(remainingToDraw, draft.deck.length);
+        if (fromDeck > 0) {
+          nextPlayer.hand.push(...draft.deck.splice(0, fromDeck));
+          remainingToDraw -= fromDeck;
+        }
+
+        // If we still need more cards and have completed build piles, reshuffle and continue
+        if (remainingToDraw > 0 && draft.completedBuildPiles.length > 0) {
+          // Move completed build piles to deck and shuffle
+          draft.deck.push(...draft.completedBuildPiles);
+          draft.completedBuildPiles = [];
+
+          // Shuffle deck
+          for (let i = draft.deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [draft.deck[i], draft.deck[j]] = [draft.deck[j], draft.deck[i]];
+          }
+
+          // Draw remaining cards
+          const fromReshuffled = Math.min(remainingToDraw, draft.deck.length);
+          if (fromReshuffled > 0) {
+            nextPlayer.hand.push(...draft.deck.splice(0, fromReshuffled));
           }
         }
       }

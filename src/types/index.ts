@@ -13,6 +13,7 @@ export interface Player {
 export interface GameState {
   deck: Card[];
   buildPiles: Card[][];
+  completedBuildPiles: Card[]; // Cards from completed build piles waiting to be reshuffled
   players: Player[];
   currentPlayerIndex: number;
   gameIsOver: boolean;

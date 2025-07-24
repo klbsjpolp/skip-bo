@@ -10,7 +10,8 @@ interface CardProps {
   className?: string,
   canBeGrabbed?: boolean,
   stackIndex?: number,
-  overlapIndex?: number
+  overlapIndex?: number,
+  displayValue?: string | number // Override the displayed value
 }
 
 export function Card({
@@ -21,7 +22,8 @@ export function Card({
                        className,
                        canBeGrabbed = false,
                        stackIndex = undefined,
-                       overlapIndex = undefined
+                       overlapIndex = undefined,
+                       displayValue: overriddenDisplayValue
                      }: CardProps) {
   const displayValue = () => {
     if (!isRevealed) return '?';
@@ -29,7 +31,7 @@ export function Card({
     if (card.value === undefined) throw Error('Error')
     return card.value.toString();
   };
-  const cardValue = displayValue();
+  const cardValue = overriddenDisplayValue !== undefined ? overriddenDisplayValue : displayValue();
   let style: CSSProperties | undefined = undefined;
   if (stackIndex !== undefined) {
     style = {
