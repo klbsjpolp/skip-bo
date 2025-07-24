@@ -42,8 +42,9 @@ src/
 │   ├── CenterArea.tsx # Build piles and deck
 │   └── ThemeSwitcher.tsx # Theme selection
 ├── hooks/
-│   ├── useSkipBoGame.ts # Main game logic hook
-│   └── useAIPlayer.ts   # AI player logic
+│   └── useSkipBoGame.ts # Main game logic hook
+├── ai/
+│   └── computeBestMove.ts # AI strategy implementation
 ├── lib/
 │   ├── config.ts     # Game configuration
 │   └── utils.ts      # Utility functions
@@ -126,14 +127,16 @@ The application supports 5 different themes:
 
 ## 🤖 AI Implementation
 
-The AI player uses a strategic decision-making system:
+The AI player is implemented using the `computeBestMove` function in the `ai` directory, which is integrated with the XState state machine. This provides a clean, predictable way to manage AI turns and decision-making.
+
+The AI follows a strategic priority system:
 
 1. **Priority 1**: Play from stock pile (highest priority for winning)
 2. **Priority 2**: Play from hand (clear hand cards)
 3. **Priority 3**: Play from discard piles (utilize discarded cards)
 4. **Priority 4**: Strategic discarding (preserve valuable cards)
 
-The AI includes delays to make moves visible and creates a more natural gameplay experience.
+The implementation includes deliberate delays between moves to make the AI's actions visible and create a more natural gameplay experience.
 
 ## 📦 Dependencies
 

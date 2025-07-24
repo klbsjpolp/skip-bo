@@ -1,9 +1,9 @@
-import { produce } from 'immer';
-import { GameState } from '@/types';
-import { GameAction } from './gameActions';
-import { initialGameState } from './initialGameState';
-import { CONFIG, MESSAGES } from '@/lib/config';
-import { canPlayCard } from '@/lib/validators';
+import {produce} from 'immer';
+import {GameState} from '@/types';
+import {GameAction} from './gameActions';
+import {initialGameState} from './initialGameState';
+import {CONFIG, MESSAGES} from '@/lib/config';
+import {canPlayCard} from '@/lib/validators';
 
 export const gameReducer = produce( (draft: GameState, action: GameAction): GameState | void => {
   switch (action.type) {
@@ -13,10 +13,8 @@ export const gameReducer = produce( (draft: GameState, action: GameAction): Game
 
     case 'DRAW': {
       const player = draft.players[draft.currentPlayerIndex];
-      const requestedCount = action.count ||
+      let remainingToDraw = action.count ||
         Math.min(CONFIG.HAND_SIZE - player.hand.length, draft.deck.length + draft.completedBuildPiles.length);
-
-      let remainingToDraw = requestedCount;
 
       // First, draw from existing deck
       const fromDeck = Math.min(remainingToDraw, draft.deck.length);
@@ -44,7 +42,6 @@ export const gameReducer = produce( (draft: GameState, action: GameAction): Game
         }
       }
 
-      console.log('DRAW', requestedCount, player.hand.length, draft.deck.length, draft.completedBuildPiles.length);
       return;
     }
 
