@@ -37,8 +37,7 @@ export const computeBestMove = async (G: GameState): Promise<GameAction> => {
       // Find the best discard pile using strategic selection
       const bestDiscardPile = findBestDiscardPile(
         G.selectedCard.card, 
-        aiPlayer.discardPiles,
-        G
+        aiPlayer.discardPiles
       );
       return { type: 'DISCARD_CARD', discardPile: bestDiscardPile };
     }
@@ -93,7 +92,7 @@ export const computeBestMove = async (G: GameState): Promise<GameAction> => {
   );
   
   if (bestDiscardPlay) {
-    const { discardPileIndex, buildPileIndex } = bestDiscardPlay;
+    const { discardPileIndex} = bestDiscardPlay;
     const discardPile = aiPlayer.discardPiles[discardPileIndex];
     
     // Select the discard card first

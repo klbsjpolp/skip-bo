@@ -108,9 +108,7 @@ export const gameReducer = produce( (draft: GameState, action: GameAction): Game
       // Draw cards only if the player's hand is empty (cleared without discarding)
       if (player.hand.length === 0) {
         const player = draft.players[draft.currentPlayerIndex];
-        const requestedCount = Math.min(CONFIG.HAND_SIZE, draft.deck.length + draft.completedBuildPiles.length);
-
-        let remainingToDraw = requestedCount;
+        let remainingToDraw = Math.min(CONFIG.HAND_SIZE, draft.deck.length + draft.completedBuildPiles.length);
 
         // First, draw from existing deck
         const fromDeck = Math.min(remainingToDraw, draft.deck.length);
@@ -218,9 +216,7 @@ export const gameReducer = produce( (draft: GameState, action: GameAction): Game
       // Draw cards for the next player up to the maximum hand size
       const nextPlayer = draft.players[draft.currentPlayerIndex];
       if (nextPlayer.hand.length < CONFIG.HAND_SIZE) {
-        const requestedCount = Math.min(CONFIG.HAND_SIZE - nextPlayer.hand.length, draft.deck.length + draft.completedBuildPiles.length);
-
-        let remainingToDraw = requestedCount;
+        let remainingToDraw = Math.min(CONFIG.HAND_SIZE - nextPlayer.hand.length, draft.deck.length + draft.completedBuildPiles.length);
 
         // First, draw from existing deck
         const fromDeck = Math.min(remainingToDraw, draft.deck.length);

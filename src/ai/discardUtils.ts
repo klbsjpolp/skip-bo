@@ -6,13 +6,11 @@ import { canPlayCard } from '@/lib/validators';
  * Finds the best discard pile for a given card using strategic considerations
  * @param card The card to discard
  * @param discardPiles The player's discard piles
- * @param gameState The current game state
  * @returns The index of the best discard pile
  */
 export const findBestDiscardPile = (
   card: Card, 
-  discardPiles: Card[][], 
-  gameState: GameState
+  discardPiles: Card[][]
 ): number => {
   // If strategic discard pile selection is disabled, use a simple approach
   if (!isFeatureEnabled('useStrategicDiscardPileSelection')) {
@@ -29,7 +27,7 @@ export const findBestDiscardPile = (
   const weights = getWeights();
   
   // If we want to use a more sophisticated approach, score each pile
-  const pileScores: number[] = discardPiles.map((pile, index) => {
+  const pileScores: number[] = discardPiles.map((pile) => {
     let score = 0;
     
     // Empty pile score
@@ -108,7 +106,7 @@ export const selectCardToDiscard = (
   });
   
   // Score each card based on strategic value
-  const cardScores: number[] = hand.map((card, index) => {
+  const cardScores: number[] = hand.map((card) => {
     // Skip-Bo cards should never be discarded
     if (card.isSkipBo) {
       return -Infinity;
