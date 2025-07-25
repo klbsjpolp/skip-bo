@@ -169,6 +169,10 @@
     background-color: var(--bg-color);
     color: var(--text-color);
   }
+
+  h3 {
+   font-weight: bold;
+ }
 }
 
 /* Custom Skip-Bo card styles */
@@ -246,6 +250,54 @@
   border-radius: 2px;
   opacity: 0.8;
   z-index: 10;
+}
+
+/* Enhanced drop indicators */
+.drop-indicator {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.drop-indicator.can-drop:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+}
+
+.drop-indicator.can-drop:hover::after {
+  content: '↓';
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  color: var(--selected-border);
+  font-weight: bold;
+  z-index: 20;
+  animation: dropPulse 1s infinite;
+}
+
+.drop-indicator.can-drop:hover::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px dashed var(--selected-border);
+  border-radius: calc(var(--card-radius) + 2px);
+  opacity: 0.8;
+  z-index: 15;
+  animation: borderPulse 1.5s infinite;
+}
+
+@keyframes dropPulse {
+  0%, 100% { opacity: 0.6; transform: translateX(-50%) translateY(0); }
+  50% { opacity: 1; transform: translateX(-50%) translateY(-3px); }
+}
+
+@keyframes borderPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
 }
 
 .card-corner-number {
@@ -336,29 +388,11 @@
   border-radius: var(--card-radius);
   margin-bottom: 20px;
   background-color: var(--zone-bg-color);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   transition: border-color 0.3s;
 }
 
 .player-area.active-turn, .center-area.active-turn {
   border-color: var(--active-turn-color);
-}
-
-h2, h3 {
-  text-align: center;
-  color: var(--title-color);
-}
-
-h2 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 15px;
-}
-
-h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 10px;
 }
 
 /* Theme-specific special effects */
@@ -397,4 +431,9 @@ h3 {
 .retro .card {
   box-shadow: 3px 3px 0 var(--card-border);
   border: 2px solid var(--card-border);
+}
+
+.vertical-text {
+  @apply transform rotate-180;
+  writing-mode: vertical-rl;
 }

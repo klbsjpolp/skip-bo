@@ -129,17 +129,17 @@ export const computeBestMove = async (G: GameState): Promise<GameAction> => {
     G.buildPiles,
     G
   );
-  
+
   if (bestDiscardPlay) {
     const { discardPileIndex } = bestDiscardPlay;
     const discardPile = aiPlayer.discardPiles[discardPileIndex];
-    
+
     // Select the discard card first
-    return { 
-      type: 'SELECT_CARD', 
-      source: 'discard', 
-      index: discardPile.length - 1, 
-      discardPileIndex 
+    return {
+      type: 'SELECT_CARD',
+      source: 'discard',
+      index: discardPile.length - 1,
+      discardPileIndex
     };
   }
 

@@ -52,9 +52,11 @@ export function Card({
     // Calculate rotation angle for fanned hand effect
     const handSize = 5; // Default hand size
     const angle = (overlapIndex - Math.floor(handSize/2)) * 4; // −8°..+8°
-    
+    const offset = [4, -3, -5, -3, 4][overlapIndex]
+
     style = {
       left: `${overlapIndex * 60}px`,
+      top: `${offset}px`,
       zIndex: overlapIndex,
       '--card-rotate': `${angle}deg`
     } as CSSProperties;

@@ -109,7 +109,7 @@ describe('CSS Visual Behavior', () => {
       document.body.appendChild(div);
 
       const computedStyle = window.getComputedStyle(div);
-      expect(computedStyle.boxShadow).toContain('rgba(0, 0, 0, 0.2)');
+      expect(computedStyle.boxShadow).toContain('rgba(0,0,0,0.2)');
 
       document.body.removeChild(div);
     });

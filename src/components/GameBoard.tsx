@@ -29,7 +29,6 @@ export function GameBoard({
       <PlayerArea
         player={aiPlayer}
         playerIndex={1}
-        title="Joueur IA"
         isCurrentPlayer={!isPlayerTurn}
         gameState={gameState}
         selectCard={selectCard}
@@ -53,7 +52,6 @@ export function GameBoard({
       <PlayerArea
         player={humanPlayer}
         playerIndex={0}
-        title={isPlayerTurn ? "Votre tour" : "En attente..."}
         isCurrentPlayer={isPlayerTurn}
         gameState={gameState}
         selectCard={selectCard}
