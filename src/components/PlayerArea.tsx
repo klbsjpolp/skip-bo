@@ -79,7 +79,7 @@ export function PlayerArea({
               <Card
                 key={`hand-${index}`}
                 card={card}
-                isRevealed={true}
+                isRevealed={isHuman}
                 onClick={(e) => {
                   // Prevent event propagation
                   e.stopPropagation();

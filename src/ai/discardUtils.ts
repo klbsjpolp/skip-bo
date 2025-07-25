@@ -3,14 +3,71 @@ import { getWeights, isFeatureEnabled } from './aiConfig';
 import { canPlayCard } from '@/lib/validators';
 
 /**
+ * Analyzes opponent progress and returns strategic insights
+ */
+const analyzeOpponents = (gameState: GameState) => {
+  const opponents = gameState.players.filter((_, index) => index !== gameState.currentPlayerIndex);
+
+  return {
+    closestToWinning: Math.min(...opponents.map(p => p.stockPile.length)),
+    avgStockPileSize: opponents.reduce((sum, p) => sum + p.stockPile.length, 0) / opponents.length,
+    totalOpponentCards: opponents.reduce((sum, p) => sum + p.hand.length + p.stockPile.length, 0)
+  };
+};
+
+/**
+ * Calculates card availability in the game for strategic decisions
+ */
+const analyzeCardAvailability = (gameState: GameState, targetValue: number) => {
+  let visibleCards = 0;
+  let totalPossibleCards = targetValue === 12 ? 12 : 12; // Skip-Bo cards or numbered cards
+
+  // Count cards in build piles
+  gameState.buildPiles.forEach(pile => {
+    pile.forEach(card => {
+      if ((card.isSkipBo && targetValue <= 12) || card.value === targetValue) {
+        visibleCards++;
+      }
+    });
+  });
+
+  // Count cards in all players' discard piles
+  gameState.players.forEach(player => {
+    player.discardPiles.forEach(pile => {
+      pile.forEach(card => {
+        if ((card.isSkipBo && targetValue <= 12) || card.value === targetValue) {
+          visibleCards++;
+        }
+      });
+    });
+  });
+
+  // Count cards in current player's hand
+  const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+  currentPlayer.hand.forEach(card => {
+    if ((card.isSkipBo && targetValue <= 12) || card.value === targetValue) {
+      visibleCards++;
+    }
+  });
+
+  return {
+    visible: visibleCards,
+    remaining: Math.max(0, totalPossibleCards - visibleCards),
+    scarcity: visibleCards / totalPossibleCards
+  };
+};
+
+/**
  * Finds the best discard pile for a given card using strategic considerations
  * @param card The card to discard
  * @param discardPiles The player's discard piles
+ * @param gameState Optional game state for advanced analysis
  * @returns The index of the best discard pile
  */
 export const findBestDiscardPile = (
   card: Card, 
-  discardPiles: Card[][]
+  discardPiles: Card[][],
+  gameState?: GameState
 ): number => {
   // If strategic discard pile selection is disabled, use a simple approach
   if (!isFeatureEnabled('useStrategicDiscardPileSelection')) {
@@ -26,6 +83,10 @@ export const findBestDiscardPile = (
   // Get strategy weights from configuration
   const weights = getWeights();
   
+  // Analyze game state if provided
+  const opponentAnalysis = gameState ? analyzeOpponents(gameState) : null;
+  const cardAnalysis = gameState ? analyzeCardAvailability(gameState, card.value) : null;
+
   // If we want to use a more sophisticated approach, score each pile
   const pileScores: number[] = discardPiles.map((pile) => {
     let score = 0;
@@ -33,24 +94,51 @@ export const findBestDiscardPile = (
     // Empty pile score
     if (pile.length === 0) {
       score += weights.emptyPilePreference;
+
+      // Bonus for keeping piles organized when opponents are close to winning
+      if (opponentAnalysis && opponentAnalysis.closestToWinning <= 5) {
+        score += 3; // Prefer starting new organized piles under pressure
+      }
+
       return score;
     }
     
     const topCard = pile[pile.length - 1];
     
-    // Same value grouping
+    // Same value grouping - enhanced with scarcity consideration
     if (topCard.value === card.value) {
       score += weights.sameValueGrouping;
+
+      // Bonus for grouping scarce cards
+      if (cardAnalysis && cardAnalysis.scarcity > 0.6) {
+        score += 2;
+      }
     }
     
-    // Sequential values
+    // Sequential values - enhanced for building sequences
     if (Math.abs(topCard.value - card.value) === 1) {
       score += weights.sequentialValues;
+
+      // Extra bonus for continuing longer sequences
+      let sequenceLength = 1;
+      for (let i = pile.length - 2; i >= 0; i--) {
+        if (Math.abs(pile[i].value - pile[i + 1].value) === 1) {
+          sequenceLength++;
+        } else {
+          break;
+        }
+      }
+      score += sequenceLength * 0.5;
     }
     
     // Higher value preference (to preserve lower values for play)
     score += (topCard.value / 12) * weights.highValuePreference;
     
+    // Penalty for very tall piles (harder to use later)
+    if (pile.length > 8) {
+      score -= 2;
+    }
+
     return score;
   });
   
@@ -89,9 +177,10 @@ export const selectCardToDiscard = (
     return hand.findIndex(card => !card.isSkipBo);
   }
   
-  // Get strategy weights from configuration
+  // Get strategy weights and analyze game state
   const weights = getWeights();
-  
+  const opponentAnalysis = analyzeOpponents(gameState);
+
   // Create a map of values that might be needed soon on build piles
   const neededValues = new Set<number>();
   gameState.buildPiles.forEach(pile => {
@@ -118,16 +207,42 @@ export const selectCardToDiscard = (
     const duplicateCount = hand.filter(c => !c.isSkipBo && c.value === card.value).length;
     if (duplicateCount > 1) {
       score += weights.duplicateCardPriority;
+
+      // Extra bonus for discarding when we have many duplicates
+      if (duplicateCount >= 3) {
+        score += 2;
+      }
     }
     
-    // Penalize discarding needed values
+    // Enhanced penalty for discarding needed values
     if (neededValues.has(card.value)) {
-      score -= weights.avoidNeededValues;
+      let penalty = weights.avoidNeededValues;
+
+      // Increase penalty if opponents are close to winning
+      if (opponentAnalysis.closestToWinning <= 3) {
+        penalty *= 1.5;
+      }
+
+      // Analyze card scarcity
+      const cardAnalysis = analyzeCardAvailability(gameState, card.value);
+      if (cardAnalysis.remaining <= 2) {
+        penalty *= 2; // Very scarce cards should almost never be discarded
+      }
+
+      score -= penalty;
+    }
+
+    // Bonus for higher value cards (harder to play) - but consider game phase
+    let highValueBonus = (card.value / 12) * weights.highValueCardPriority;
+
+    // Reduce high value preference if we're ahead (encourage more aggressive play)
+    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+    if (currentPlayer.stockPile.length < opponentAnalysis.avgStockPileSize) {
+      highValueBonus *= 0.7;
     }
     
-    // Bonus for higher value cards (harder to play)
-    score += (card.value / 12) * weights.highValueCardPriority;
-    
+    score += highValueBonus;
+
     return score;
   });
   
@@ -263,18 +378,29 @@ export const findBestDiscardPileToPlayFrom = (
   for (let discardPileIndex = 0; discardPileIndex < discardPiles.length; discardPileIndex++) {
     const pile = discardPiles[discardPileIndex];
     if (pile.length === 0) continue;
-    
+
     const topCard = pile[pile.length - 1];
-    
+
     // Check if this card can be played on any build pile
     for (let buildPileIndex = 0; buildPileIndex < buildPiles.length; buildPileIndex++) {
       if (canPlayCard(topCard, buildPileIndex, gameState)) {
         // Calculate a score for this play
         let score = 0;
-        
+
         // Prioritize playing from larger piles to clear them
         score += pile.length * weights.largerPilePriority;
-        
+
+        // Bonus for completing a build pile
+        const buildPile = buildPiles[buildPileIndex];
+        if (buildPile.length === 11 || (buildPile.length > 0 && buildPile[buildPile.length - 1].value === 11)) {
+          score += 10; // High bonus for completing
+        }
+
+        // Bonus for playing low-value cards that are harder to use later
+        if (!topCard.isSkipBo && topCard.value <= 3) {
+          score += 3;
+        }
+
         possiblePlays.push({
           discardPileIndex,
           buildPileIndex,
@@ -283,15 +409,15 @@ export const findBestDiscardPileToPlayFrom = (
       }
     }
   }
-  
+
   // If no plays are possible, return null
   if (possiblePlays.length === 0) {
     return null;
   }
-  
+
   // Sort plays by score (descending)
   possiblePlays.sort((a, b) => b.score - a.score);
-  
+
   // Return the highest-scoring play
   return {
     discardPileIndex: possiblePlays[0].discardPileIndex,

@@ -25,6 +25,8 @@ interface StrategyWeights {
   
   // Weights for findBestDiscardPileToPlayFrom
   largerPilePriority: number;
+
+  useLookAheadStrategy: boolean;
 }
 
 interface AIConfig {
@@ -68,6 +70,8 @@ const mediumWeights: StrategyWeights = {
   
   // findBestDiscardPileToPlayFrom weights
   largerPilePriority: 2,
+
+  useLookAheadStrategy: true,
 };
 
 // Easy difficulty - less strategic
@@ -91,6 +95,7 @@ const hardWeights: StrategyWeights = {
   neededValuePenalty: 15,
   highValueBonus: 1,
   largerPilePriority: 3,
+  useLookAheadStrategy: true,
 };
 
 // Configuration by difficulty level
@@ -140,7 +145,7 @@ const configByDifficulty: Record<AIDifficulty, AIConfig> = {
 };
 
 // Current AI configuration - can be changed at runtime
-let currentDifficulty: AIDifficulty = 'medium';
+let currentDifficulty: AIDifficulty = 'hard';
 
 /**
  * Get the current AI configuration

@@ -6,7 +6,8 @@ import {
   selectCardToDiscard, 
   findBestDiscardPileToPlayFrom 
 } from './discardUtils';
-import { getDelay } from './aiConfig';
+import { getDelay, isFeatureEnabled } from './aiConfig';
+import { lookAheadEvaluation } from './lookAheadStrategy';
 
 // Add a delay utility function
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -37,7 +38,8 @@ export const computeBestMove = async (G: GameState): Promise<GameAction> => {
       // Find the best discard pile using strategic selection
       const bestDiscardPile = findBestDiscardPile(
         G.selectedCard.card, 
-        aiPlayer.discardPiles
+        aiPlayer.discardPiles,
+        G
       );
       return { type: 'DISCARD_CARD', discardPile: bestDiscardPile };
     }
@@ -49,6 +51,33 @@ export const computeBestMove = async (G: GameState): Promise<GameAction> => {
   // Add a delay before making move decisions
   await delay(getDelay('beforeMove'));
 
+  // Use look-ahead strategy if enabled for better decision making
+  if (isFeatureEnabled('useLookAheadStrategy')) {
+    const bestMove = lookAheadEvaluation(G, 2);
+    if (bestMove) {
+      // Convert the evaluated move to game actions
+      if (bestMove.action === 'play') {
+        // Select the card first, then it will be played on next turn
+        if (bestMove.source === 'stock' && bestMove.sourceIndex !== undefined) {
+          return { type: 'SELECT_CARD', source: 'stock', index: bestMove.sourceIndex };
+        } else if (bestMove.source === 'hand' && bestMove.sourceIndex !== undefined) {
+          return { type: 'SELECT_CARD', source: 'hand', index: bestMove.sourceIndex };
+        } else if (bestMove.source === 'discard' && bestMove.discardPileIndex !== undefined && bestMove.sourceIndex !== undefined) {
+          return {
+            type: 'SELECT_CARD',
+            source: 'discard',
+            index: bestMove.sourceIndex,
+            discardPileIndex: bestMove.discardPileIndex
+          };
+        }
+      } else if (bestMove.action === 'discard' && bestMove.sourceIndex !== undefined) {
+        // Select the card to discard
+        return { type: 'SELECT_CARD', source: 'hand', index: bestMove.sourceIndex };
+      }
+    }
+  }
+
+  // Fallback to original logic if look-ahead doesn't provide a move
   // Try to play from stock pile first (highest priority)
   if (aiPlayer.stockPile.length > 0) {
     const stockCard = aiPlayer.stockPile[aiPlayer.stockPile.length - 1];
@@ -60,26 +89,25 @@ export const computeBestMove = async (G: GameState): Promise<GameAction> => {
     }
   }
 
-  // Try to play from hand - first try non-Skip-Bo cards
-  for (let handIndex = 0; handIndex < aiPlayer.hand.length; handIndex++) {
-    const handCard = aiPlayer.hand[handIndex];
-    if (!handCard.isSkipBo) {
-      for (let buildPile = 0; buildPile < G.buildPiles.length; buildPile++) {
-        if (canPlayCard(handCard, buildPile, G)) {
-          return { type: 'SELECT_CARD', source: 'hand', index: handIndex };
-        }
+  // Try to play from hand - prioritize numbered cards over Skip-Bo cards
+  const handPlayOrder = aiPlayer.hand
+    .map((card, index) => ({ card, index }))
+    .sort((a, b) => {
+      // Prioritize non-Skip-Bo cards
+      if (a.card.isSkipBo && !b.card.isSkipBo) return 1;
+      if (!a.card.isSkipBo && b.card.isSkipBo) return -1;
+      // For non-Skip-Bo cards, prioritize lower values (easier to play)
+      if (!a.card.isSkipBo && !b.card.isSkipBo) {
+        return a.card.value - b.card.value;
       }
-    }
-  }
+      return 0;
+    });
 
-  // Then try Skip-Bo cards from hand (only if they can be played)
-  for (let handIndex = 0; handIndex < aiPlayer.hand.length; handIndex++) {
+  for (const { index: handIndex } of handPlayOrder) {
     const handCard = aiPlayer.hand[handIndex];
-    if (handCard.isSkipBo) {
-      for (let buildPile = 0; buildPile < G.buildPiles.length; buildPile++) {
-        if (canPlayCard(handCard, buildPile, G)) {
-          return { type: 'SELECT_CARD', source: 'hand', index: handIndex };
-        }
+    for (let buildPile = 0; buildPile < G.buildPiles.length; buildPile++) {
+      if (canPlayCard(handCard, buildPile, G)) {
+        return { type: 'SELECT_CARD', source: 'hand', index: handIndex };
       }
     }
   }
@@ -92,7 +120,7 @@ export const computeBestMove = async (G: GameState): Promise<GameAction> => {
   );
   
   if (bestDiscardPlay) {
-    const { discardPileIndex} = bestDiscardPlay;
+    const { discardPileIndex } = bestDiscardPlay;
     const discardPile = aiPlayer.discardPiles[discardPileIndex];
     
     // Select the discard card first
