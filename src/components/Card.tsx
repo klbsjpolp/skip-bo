@@ -56,8 +56,8 @@ export function Card({
     style = {
       left: `${overlapIndex * 60}px`,
       zIndex: overlapIndex,
-      transform: `rotate(${angle}deg)`
-    }
+      '--card-rotate': `${angle}deg`
+    } as CSSProperties;
   }
   return (card ?
     <div
@@ -67,8 +67,8 @@ export function Card({
         card && card.isSkipBo && isRevealed && 'skip-bo',
         colourClass,
         isSelected && 'selected',
-        onClick && canBeGrabbed && 'hover:shadow-lg hover:transform hover:scale-105 cursor-pointer',
-        onClick && !canBeGrabbed && 'cursor-default',
+        canBeGrabbed && 'hoverable-card cursor-pointer',
+        !canBeGrabbed && 'cursor-default',
         className
       )}
       onClick={onClick}

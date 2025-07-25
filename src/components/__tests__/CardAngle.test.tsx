@@ -28,12 +28,12 @@ describe('Card Angle', () => {
     const card3 = container3.querySelector('.card') as HTMLElement;
     const card4 = container4.querySelector('.card') as HTMLElement;
 
-    // Check if the cards have the correct transform styles
-    expect(card0.style.transform).toMatchInlineSnapshot(`"rotate(-8deg)"`);
-    expect(card1.style.transform).toMatchInlineSnapshot(`"rotate(-4deg)"`);
-    expect(card2.style.transform).toMatchInlineSnapshot(`"rotate(0deg)"`);
-    expect(card3.style.transform).toMatchInlineSnapshot(`"rotate(4deg)"`);
-    expect(card4.style.transform).toMatchInlineSnapshot(`"rotate(8deg)"`);
+    // Check if the cards have the correct CSS custom property for rotation
+    expect(card0.style.getPropertyValue('--card-rotate')).toMatchInlineSnapshot(`"-8deg"`);
+    expect(card1.style.getPropertyValue('--card-rotate')).toMatchInlineSnapshot(`"-4deg"`);
+    expect(card2.style.getPropertyValue('--card-rotate')).toMatchInlineSnapshot(`"0deg"`);
+    expect(card3.style.getPropertyValue('--card-rotate')).toMatchInlineSnapshot(`"4deg"`);
+    expect(card4.style.getPropertyValue('--card-rotate')).toMatchInlineSnapshot(`"8deg"`);
 
     // Check if the cards have the correct left positions
     expect(card0.style.left).toBe('0px');

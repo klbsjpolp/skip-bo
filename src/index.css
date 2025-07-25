@@ -189,6 +189,19 @@
   color: var(--text-color);
   box-shadow: var(--card-shadow);
   transform-origin: bottom center;
+  /* Custom properties for transforms */
+  --card-rotate: 0deg;
+  --card-translate-y: 0px;
+  --card-scale: 1;
+  transform: translateY(var(--card-translate-y)) scale(var(--card-scale)) rotate(var(--card-rotate));
+}
+
+/* Consistent hover effects for all selectable cards */
+.hoverable-card:hover {
+  --card-translate-y: -2px;
+  --card-scale: 1.05;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease-in-out;
 }
 
 /* Card range utility classes */
@@ -214,10 +227,25 @@
   color: white;
 }
 
+/* Selected cards should pop up more and override hover */
 .card.selected {
   border-color: var(--selected-border);
-  transform: translateY(-5px);
+  --card-translate-y: -5px;
   box-shadow: 0 4px 15px var(--selected-border);
+}
+
+/* Drop target indicator should only show on hover */
+.drop-target-hover:hover::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--selected-border);
+  border-radius: 2px;
+  opacity: 0.8;
+  z-index: 10;
 }
 
 .card-corner-number {
@@ -286,6 +314,21 @@
   box-shadow: var(--card-shadow);
 }
 
+/* Ensure selected cards in discard piles show the selection shadow */
+.discard-pile-stack .card.selected {
+  box-shadow: 0 4px 15px var(--selected-border);
+}
+
+/* Ensure hoverable cards in discard piles show the hover shadow */
+.discard-pile-stack .hoverable-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Selected cards should always show selection shadow, even when hovered */
+.discard-pile-stack .card.selected.hoverable-card:hover {
+  box-shadow: 0 4px 15px var(--selected-border);
+}
+
 /* Add support for offset stacking via inline style */
 .player-area, .center-area {
   padding: 20px;
@@ -335,6 +378,19 @@ h3 {
 }
 
 .neon .card.selected {
+  box-shadow: 0 0 20px var(--selected-border);
+}
+
+.neon .discard-pile-stack .card.selected {
+  box-shadow: 0 0 20px var(--selected-border);
+}
+
+.neon .discard-pile-stack .hoverable-card:hover {
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+}
+
+/* Selected cards in neon theme should always show selection shadow, even when hovered */
+.neon .discard-pile-stack .card.selected.hoverable-card:hover {
   box-shadow: 0 0 20px var(--selected-border);
 }
 

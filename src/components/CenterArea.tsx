@@ -38,7 +38,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
           {gameState.buildPiles.map((pile, index) => (
             <div
               key={`build-${index}`}
-              className={`relative ${gameState.selectedCard && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState) ? 'cursor-pointer hover:ring-2 hover:ring-blue-400 hover:transform hover:scale-105 transition-transform' : 'cursor-default'}`}
+              className={`relative ${gameState.selectedCard && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState) ? 'cursor-pointer hover:drop-target-hover' : 'cursor-default'}`}
               onClick={async (e) => {
                 // Prevent event propagation
                 e.stopPropagation();

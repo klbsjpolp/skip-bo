@@ -49,16 +49,24 @@ export function PlayerArea({
                   // Prevent event propagation
                   e.stopPropagation();
                   
-                  // Only allow selection if it's the human player's turn and no card is currently selected
-                  if (isHuman && isCurrentPlayer && !gameState.selectedCard) {
-                    selectCard('stock', player.stockPile.length - 1);
+                  // Only allow selection if it's the human player's turn
+                  if (isHuman && isCurrentPlayer) {
+                    // If this card is already selected, deselect it
+                    if (gameState.selectedCard?.source === 'stock' &&
+                        gameState.currentPlayerIndex === playerIndex) {
+                      // Clear the selection
+                      clearSelection();
+                    } else {
+                      // Select this card
+                      selectCard('stock', player.stockPile.length - 1);
+                    }
                   }
                 }}
                 isSelected={
                   gameState.selectedCard?.source === 'stock' &&
                   gameState.currentPlayerIndex === playerIndex
                 }
-                canBeGrabbed={isHuman && isCurrentPlayer && !gameState.selectedCard}
+                canBeGrabbed={isHuman && isCurrentPlayer}
               />
             ) : (
               <EmptyCard />
@@ -123,13 +131,22 @@ export function PlayerArea({
               <div key={`discard-${pileIndex}`} className="discard-pile-stack">
                 {pile.length > 0 ? (
                   <div
-                    className={`${isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand' ? 'cursor-pointer hover:ring-2 hover:ring-blue-400' : 'cursor-default'}`}
+                    className={`${isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand' ? 'cursor-pointer hover:drop-target-hover' : 'cursor-default'}`}
                     onClick={async (e) => {
                       e.stopPropagation();
                       if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
                         await discardCard(pileIndex);
                       } else if (isHuman && isCurrentPlayer) {
-                        selectCard('discard', pile.length - 1, pileIndex);
+                        // If this discard pile is already selected, deselect it
+                        if (gameState.selectedCard?.source === 'discard' &&
+                            gameState.selectedCard.discardPileIndex === pileIndex &&
+                            gameState.currentPlayerIndex === playerIndex) {
+                          // Clear the selection
+                          clearSelection();
+                        } else {
+                          // Select this discard pile
+                          selectCard('discard', pile.length - 1, pileIndex);
+                        }
                       }
                     }}
                   >
@@ -144,7 +161,7 @@ export function PlayerArea({
                           gameState.currentPlayerIndex === playerIndex &&
                           cardIdx === pile.length - 1
                         }
-                        canBeGrabbed={isHuman && isCurrentPlayer && !gameState.selectedCard && cardIdx === pile.length - 1}
+                        canBeGrabbed={isHuman && isCurrentPlayer && cardIdx === pile.length - 1}
                         stackIndex={cardIdx}
                         // Remove onClick from Card to avoid nested handlers
                       />

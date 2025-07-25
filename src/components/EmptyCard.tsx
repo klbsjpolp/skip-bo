@@ -11,8 +11,8 @@ export function EmptyCard({onClick, canDropCard = false}: EmptyCardProps) {
     <div
       className={cn(
         'card', 'opacity-50',
-        onClick && canDropCard && 'hover:shadow-lg hover:transform hover:scale-105 cursor-pointer',
-        onClick && !canDropCard && 'cursor-default'
+        canDropCard && 'hoverable-card cursor-pointer',
+        !canDropCard && 'cursor-default'
       )}
       onClick={onClick}
     >
