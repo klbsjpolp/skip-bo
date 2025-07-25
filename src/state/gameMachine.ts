@@ -85,7 +85,6 @@ export const gameMachine = createMachine({
     },
 
     finished: { 
-      type: 'final',
       on: {
         INIT: {
           target: 'setup',

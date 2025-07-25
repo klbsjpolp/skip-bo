@@ -93,20 +93,31 @@ export const computeBestMove = async (G: GameState): Promise<GameAction> => {
   const handPlayOrder = aiPlayer.hand
     .map((card, index) => ({ card, index }))
     .sort((a, b) => {
+      // Handle null cards - put them at the end
+      if (!a.card && b.card) return 1;
+      if (a.card && !b.card) return -1;
+      if (!a.card && !b.card) return 0;
+
+      // Both cards are non-null at this point
+      const cardA = a.card!;
+      const cardB = b.card!;
+
       // Prioritize non-Skip-Bo cards
-      if (a.card.isSkipBo && !b.card.isSkipBo) return 1;
-      if (!a.card.isSkipBo && b.card.isSkipBo) return -1;
+      if (cardA.isSkipBo && !cardB.isSkipBo) return 1;
+      if (!cardA.isSkipBo && cardB.isSkipBo) return -1;
+
       // For non-Skip-Bo cards, prioritize lower values (easier to play)
-      if (!a.card.isSkipBo && !b.card.isSkipBo) {
-        return a.card.value - b.card.value;
+      if (!cardA.isSkipBo && !cardB.isSkipBo) {
+        return cardA.value - cardB.value;
       }
+
       return 0;
     });
 
   for (const { index: handIndex } of handPlayOrder) {
     const handCard = aiPlayer.hand[handIndex];
     for (let buildPile = 0; buildPile < G.buildPiles.length; buildPile++) {
-      if (canPlayCard(handCard, buildPile, G)) {
+      if (handCard && canPlayCard(handCard, buildPile, G)) {
         return { type: 'SELECT_CARD', source: 'hand', index: handIndex };
       }
     }
@@ -133,7 +144,7 @@ export const computeBestMove = async (G: GameState): Promise<GameAction> => {
   }
 
   // If hand is not empty and can't play anything, select the best card to discard
-  const nonSkipBoCards = aiPlayer.hand.filter((card) => !card.isSkipBo);
+  const nonSkipBoCards = aiPlayer.hand.filter((card) => card && !card.isSkipBo);
   if (nonSkipBoCards.length > 0) {
     // Use strategic card selection to find the best card to discard
     const cardIndex = selectCardToDiscard(aiPlayer.hand, G);

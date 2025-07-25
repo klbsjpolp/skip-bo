@@ -3,6 +3,7 @@ import { useMachine } from '@xstate/react';
 import { gameMachine } from '@/state/gameMachine';
 import { GameState, MoveResult } from '@/types';
 import { canPlayCard } from '@/lib/validators';
+import {AIDifficulty} from "@/ai/aiConfig.ts";
 
 export function useSkipBoGame() {
   const [snapshot, send] = useMachine(gameMachine);
@@ -84,5 +85,6 @@ export function useSkipBoGame() {
     clearSelection,
     canPlayCard: canPlayCardWrapper,
     getLatestGameState,
+    setDifficulty: (difficulty: AIDifficulty) => dispatch({ type: 'SET_DIFFICULTY', difficulty }),
   };
 }

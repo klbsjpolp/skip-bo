@@ -44,7 +44,7 @@ const analyzeCardAvailability = (gameState: GameState, targetValue: number) => {
 
   // Count cards in current player's hand
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-  currentPlayer.hand.forEach(card => {
+  currentPlayer.hand.filter(c => !!c).forEach(card => {
     if ((card.isSkipBo && targetValue <= 12) || card.value === targetValue) {
       visibleCards++;
     }
@@ -163,18 +163,18 @@ export const findBestDiscardPile = (
  * @returns The index of the best card to discard
  */
 export const selectCardToDiscard = (
-  hand: Card[], 
+  hand: (Card | null)[],
   gameState: GameState
 ): number => {
   // Skip-Bo cards should never be discarded
-  const discardableCards = hand.filter(card => !card.isSkipBo);
+  const discardableCards = hand.filter(card => card && !card.isSkipBo);
   if (discardableCards.length === 0) {
     return -1; // No cards can be discarded
   }
   
   // If strategic card selection is disabled, just pick the first non-Skip-Bo card
   if (!isFeatureEnabled('useStrategicCardSelection')) {
-    return hand.findIndex(card => !card.isSkipBo);
+    return hand.findIndex(card => card && !card.isSkipBo);
   }
   
   // Get strategy weights and analyze game state
@@ -196,6 +196,10 @@ export const selectCardToDiscard = (
   
   // Score each card based on strategic value
   const cardScores: number[] = hand.map((card) => {
+    // No card
+    if (!card) {
+      return -Infinity;
+    }
     // Skip-Bo cards should never be discarded
     if (card.isSkipBo) {
       return -Infinity;
@@ -204,7 +208,7 @@ export const selectCardToDiscard = (
     let score = 0;
     
     // Count duplicates of this value in hand
-    const duplicateCount = hand.filter(c => !c.isSkipBo && c.value === card.value).length;
+    const duplicateCount = hand.filter(c => c && !c.isSkipBo && c.value === card.value).length;
     if (duplicateCount > 1) {
       score += weights.duplicateCardPriority;
 
@@ -258,7 +262,7 @@ export const selectCardToDiscard = (
   }
   
   // If no suitable card found (all Skip-Bo), return -1
-  if (bestCardIndex === -1 || hand[bestCardIndex].isSkipBo) {
+  if (bestCardIndex === -1 || !hand[bestCardIndex] || hand[bestCardIndex]?.isSkipBo) {
     return -1;
   }
   

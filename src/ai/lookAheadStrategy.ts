@@ -52,6 +52,9 @@ export const lookAheadEvaluation = (
 
   // Evaluate hand moves
   aiPlayer.hand.forEach((handCard, handIndex) => {
+    // Skip null cards
+    if (!handCard) return;
+
     // Try playing on build piles
     for (let buildPile = 0; buildPile < gameState.buildPiles.length; buildPile++) {
       if (canPlayCard(handCard, buildPile, gameState)) {
@@ -237,13 +240,13 @@ export const simulateMove = (
 
     if (move.source === 'stock' && move.sourceIndex !== undefined) {
       const card = player.stockPile.splice(move.sourceIndex, 1)[0];
-      buildPile.push(card);
+      if (card) buildPile.push(card);
     } else if (move.source === 'hand' && move.sourceIndex !== undefined) {
       const card = player.hand.splice(move.sourceIndex, 1)[0];
-      buildPile.push(card);
+      if (card) buildPile.push(card);
     } else if (move.source === 'discard' && move.discardPileIndex !== undefined && move.sourceIndex !== undefined) {
       const card = player.discardPiles[move.discardPileIndex].splice(move.sourceIndex, 1)[0];
-      buildPile.push(card);
+      if (card) buildPile.push(card);
     }
 
     // Check if build pile is complete (reached 12)
@@ -253,7 +256,7 @@ export const simulateMove = (
   } else if (move.action === 'discard' && move.discardPileIndex !== undefined && move.sourceIndex !== undefined) {
     // Simulate discarding a card
     const card = player.hand.splice(move.sourceIndex, 1)[0];
-    player.discardPiles[move.discardPileIndex].push(card);
+    if (card) player.discardPiles[move.discardPileIndex].push(card);
   }
 
   return newState;

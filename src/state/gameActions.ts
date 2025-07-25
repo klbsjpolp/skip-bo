@@ -6,4 +6,5 @@ export type GameAction =
   | { type: 'PLAY_CARD'; buildPile: number }
   | { type: 'DISCARD_CARD'; discardPile: number }
   | { type: 'END_TURN' }
-  | { type: 'RESET' };
+  | { type: 'RESET' }
+  | { type: 'SET_DIFFICULTY'; difficulty: 'easy' | 'medium' | 'hard' };

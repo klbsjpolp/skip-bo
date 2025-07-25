@@ -16,7 +16,15 @@ export const initialGameState = (): GameState => {
 
   // Deal initial hands
   players.forEach(player => {
-    player.hand = deck.splice(0, CONFIG.HAND_SIZE);
+    // Initialize hand with fixed length of CONFIG.HAND_SIZE, filled with null
+    player.hand = Array(CONFIG.HAND_SIZE).fill(null);
+    
+    // Fill hand with cards from deck
+    for (let i = 0; i < CONFIG.HAND_SIZE; i++) {
+      if (deck.length > 0) {
+        player.hand[i] = deck.shift()!;
+      }
+    }
   });
 
   return {
@@ -28,5 +36,6 @@ export const initialGameState = (): GameState => {
     selectedCard: null,
     message: 'Nouvelle partie commencée !',
     gameIsOver: false,
+    aiDifficulty: 'medium', // Default AI difficulty
   };
 };

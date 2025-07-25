@@ -42,6 +42,11 @@
     --active-turn-color: #22c55e;
     --button-bg: #4f46e5;
     --button-hover-bg: #4338ca;
+  
+    /* Card color ranges */
+    --card-g1: hsl(152 69% 58%);   /* green  */  /* 1‑4 */
+    --card-g2: hsl(0 80% 60%);     /* red    */  /* 5‑8 */
+    --card-g3: hsl(283 55% 57%);   /* purple */  /* 9‑12 */
   }
 
   .dark {
@@ -80,6 +85,11 @@
     --active-turn-color: #4ade80;
     --button-bg: #6366f1;
     --button-hover-bg: #4f46e5;
+    
+    /* Card color ranges - same as light theme */
+    --card-g1: hsl(152 69% 58%);   /* green  */  /* 1‑4 */
+    --card-g2: hsl(0 80% 60%);     /* red    */  /* 5‑8 */
+    --card-g3: hsl(283 55% 57%);   /* purple */  /* 9‑12 */
   }
 
   .metro {
@@ -99,6 +109,11 @@
     --active-turn-color: #60a917;
     --button-bg: #60a917;
     --button-hover-bg: #4c8712;
+    
+    /* Card color ranges - Metro theme */
+    --card-g1: #00befc;  /* blue */
+    --card-g2: #ff3b30;  /* red */
+    --card-g3: #ffd426;  /* yellow */
   }
 
   .neon {
@@ -118,6 +133,11 @@
     --active-turn-color: #00ff88;
     --button-bg: #ff0099;
     --button-hover-bg: #cc0077;
+    
+    /* Card color ranges - Neon theme */
+    --card-g1: #00ff88;  /* neon green */
+    --card-g2: #ff0099;  /* neon pink */
+    --card-g3: #0066ff;  /* neon blue */
   }
 
   .retro {
@@ -137,6 +157,11 @@
     --active-turn-color: #264653;
     --button-bg: #2a9d8f;
     --button-hover-bg: #21867a;
+    
+    /* Card color ranges - Retro theme */
+    --card-g1: #2a9d8f;  /* teal */
+    --card-g2: #e76f51;  /* orange-red */
+    --card-g3: #264653;  /* dark blue */
   }
 
   body {
@@ -163,6 +188,20 @@
   position: relative;
   color: var(--text-color);
   box-shadow: var(--card-shadow);
+  transform-origin: bottom center;
+}
+
+/* Card range utility classes */
+.card-range-1 {
+  @apply text-[var(--card-g1)];
+}
+
+.card-range-2 {
+  @apply text-[var(--card-g2)];
+}
+
+.card-range-3 {
+  @apply text-[var(--card-g3)];
 }
 
 .card.skip-bo {

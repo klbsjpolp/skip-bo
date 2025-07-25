@@ -6,7 +6,7 @@ export interface Card {
 export interface Player {
   isAI: boolean;
   stockPile: Card[];
-  hand: Card[];
+  hand: (Card | null)[];  // length always 5
   discardPiles: Card[][];
 }
 
@@ -19,6 +19,7 @@ export interface GameState {
   gameIsOver: boolean;
   selectedCard: SelectedCard | null;
   message: string;
+  aiDifficulty: AIDifficulty;
 }
 
 export interface SelectedCard {
@@ -36,6 +37,8 @@ export interface MoveResult {
 }
 
 export type Theme = 'light' | 'dark' | 'metro' | 'neon' | 'retro';
+
+export type AIDifficulty = 'easy' | 'medium' | 'hard';
 
 export interface GameConfig {
   DECK_SIZE: number;
