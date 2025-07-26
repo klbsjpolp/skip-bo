@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 100" width="150" height="100">
+  <defs>
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardGradient3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ea580c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect x="0" y="0" width="150" height="100" fill="#f8fafc" />
+  
+  <!-- Game Title -->
+  <text x="75" y="15" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#1e293b">Skip-Bo</text>
+  
+  <!-- Draw Pile -->
+  <rect x="15" y="30" width="25" height="35" rx="3" ry="3" fill="white" stroke="#374151" stroke-width="1"/>
+  <rect x="17" y="32" width="21" height="31" rx="2" ry="2" fill="url(#cardGradient)" opacity="0.8"/>
+  <text x="27.5" y="52" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">?</text>
+  <text x="27.5" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="6" fill="#374151">Draw Pile</text>
+  
+  <!-- Build Piles -->
+  <!-- Pile 1 -->
+  <rect x="50" y="30" width="25" height="35" rx="3" ry="3" fill="white" stroke="#374151" stroke-width="1"/>
+  <text x="62.5" y="52" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#374151">1</text>
+  
+  <!-- Pile 2 -->
+  <rect x="85" y="30" width="25" height="35" rx="3" ry="3" fill="white" stroke="#374151" stroke-width="1"/>
+  <text x="97.5" y="52" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#374151">5</text>
+  <text x="90" y="40" font-family="Arial, sans-serif" font-size="6" font-weight="bold" fill="#374151">5</text>
+  
+  <!-- Pile 3 -->
+  <rect x="120" y="30" width="25" height="35" rx="3" ry="3" fill="white" stroke="#374151" stroke-width="1"/>
+  <rect x="120" y="30" width="25" height="35" rx="3" ry="3" fill="url(#cardGradient)" opacity="0.8"/>
+  <text x="132.5" y="52" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">SB</text>
+  <text x="125" y="40" font-family="Arial, sans-serif" font-size="6" font-weight="bold" fill="white">SB</text>
+  
+  <text x="85" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="6" fill="#374151">Build Piles</text>
+  
+  <!-- Player Hand -->
+  <!-- Card 1 -->
+  <rect x="30" y="75" width="20" height="30" rx="2" ry="2" transform="rotate(-5 30 75)" fill="white" stroke="#374151" stroke-width="1"/>
+  <text x="40" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#374151" transform="rotate(-5 40 95)">3</text>
+  
+  <!-- Card 2 -->
+  <rect x="50" y="75" width="20" height="30" rx="2" ry="2" transform="rotate(-2 50 75)" fill="white" stroke="#374151" stroke-width="1"/>
+  <rect x="50" y="75" width="20" height="30" rx="2" ry="2" transform="rotate(-2 50 75)" fill="url(#cardGradient2)" opacity="0.8"/>
+  <text x="60" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white" transform="rotate(-2 60 95)">7</text>
+  
+  <!-- Card 3 -->
+  <rect x="70" y="75" width="20" height="30" rx="2" ry="2" fill="white" stroke="#374151" stroke-width="1"/>
+  <rect x="70" y="75" width="20" height="30" rx="2" ry="2" fill="url(#cardGradient)" opacity="0.8"/>
+  <text x="80" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">SB</text>
+  
+  <!-- Card 4 -->
+  <rect x="90" y="75" width="20" height="30" rx="2" ry="2" transform="rotate(2 90 75)" fill="white" stroke="#374151" stroke-width="1"/>
+  <rect x="90" y="75" width="20" height="30" rx="2" ry="2" transform="rotate(2 90 75)" fill="url(#cardGradient3)" opacity="0.8"/>
+  <text x="100" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white" transform="rotate(2 100 95)">10</text>
+  
+  <!-- Card 5 -->
+  <rect x="110" y="75" width="20" height="30" rx="2" ry="2" transform="rotate(5 110 75)" fill="white" stroke="#374151" stroke-width="1"/>
+  <text x="120" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#374151" transform="rotate(5 120 95)">2</text>
+</svg>
