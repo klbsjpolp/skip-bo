@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { useSkipBoGame } from '@/hooks/useSkipBoGame';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
-import { DifficultySwitcher } from '@/components/DifficultySwitcher';
 import { GameBoard } from '@/components/GameBoard';
 import { Button } from '@/components/ui/button';
+import NewGame from "@/components/NewGame.tsx";
 
 function App() {
   const { gameState, initializeGame, selectCard, playCard, discardCard, clearSelection, canPlayCard } = useSkipBoGame();
@@ -15,9 +15,9 @@ function App() {
   return (
     <div className="min-h-screen p-4 md:p-10">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col gap-4 mb-6">
+        <div className="flex justify-between mb-2">
+          <NewGame />
           <ThemeSwitcher />
-          <DifficultySwitcher />
         </div>
         <GameBoard 
           gameState={gameState} 
@@ -27,7 +27,6 @@ function App() {
           clearSelection={clearSelection}
           canPlayCard={canPlayCard}
         />
-
         {gameState.gameIsOver && (
           <div className="text-center mt-5">
             <Button onClick={initializeGame} size="lg">

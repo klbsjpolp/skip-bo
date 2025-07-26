@@ -1,5 +1,5 @@
 import { useTheme } from 'next-themes';
-import { Button } from '@/components/ui/button';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 
 const themes = [
   { value: 'light', label: 'Clair' },
@@ -12,18 +12,19 @@ const themes = [
 export function ThemeSwitcher() {
   const { setTheme, theme } = useTheme();
 
-  return (
-    <div className="flex justify-center gap-4 mb-6 text-foreground">
-      {themes.map(({ value, label }) => (
-        <Button
-          key={value}
-          variant={theme === value ? "default" : "outline"}
-          size="sm"
-          onClick={() => setTheme(value)}
-        >
-          {label}
-        </Button>
-      ))}
-    </div>
+  return (<div className="relative">
+    <Select value={theme} onValueChange={setTheme}>
+      <SelectTrigger className="w-24">
+        <SelectValue placeholder="Thème" />
+      </SelectTrigger>
+      <SelectContent>
+        {themes.map(({ value, label }) => (
+          <SelectItem key={value} value={value} onClick={() => setTheme(value)}>
+            {label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
   );
 }

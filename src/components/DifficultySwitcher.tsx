@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button';
 import { useSkipBoGame } from '@/hooks/useSkipBoGame';
 import { selectDifficulty } from '@/state/selectors';
 import { AIDifficulty } from '@/types';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
 
 const difficulties = [
   { value: 'easy', label: 'Facile' },
@@ -14,18 +14,17 @@ export function DifficultySwitcher() {
   const currentDifficulty = selectDifficulty(gameState);
 
   return (
-    <div className="flex justify-center gap-4 mb-6 text-foreground">
-      <span className="flex items-center mr-2">Difficulté IA:</span>
-      {difficulties.map(({ value, label }) => (
-        <Button
-          key={value}
-          variant={currentDifficulty === value ? "default" : "outline"}
-          size="sm"
-          onClick={() => setDifficulty(value as AIDifficulty)}
-        >
-          {label}
-        </Button>
-      ))}
-    </div>
+    <Select value={currentDifficulty} onValueChange={setDifficulty}>
+      <SelectTrigger className="w-24">
+        <SelectValue placeholder="Difficulté" />
+      </SelectTrigger>
+      <SelectContent>
+        {difficulties.map(({ value, label }) => (
+          <SelectItem key={value} value={value} onClick={() => setDifficulty(value as AIDifficulty)}>
+            {label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
