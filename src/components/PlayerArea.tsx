@@ -67,14 +67,11 @@ export function PlayerArea({
           <EmptyCard />
         )}
         {/* Stock Pile Indicator */}
-        <div className="w-1 bg-secondary flex ml-1 rounded-t-sm card-height">
+        <div className="w-1 bg-primary-foreground flex ml-1 rounded-t-sm card-height">
           <div
-            className="w-full self-end rounded-t-sm"
+            className="w-full self-end rounded-t-sm bg-primary"
             style={{
               height: `${Math.max(5, (player.stockPile.length / CONFIG.STOCK_SIZE) * 100)}%`,
-              backgroundImage: 'linear-gradient(to top, --color-primary 50%, transparent 50%)',
-              backgroundRepeat: 'repeat-y',
-              backgroundSize: `100% ${Math.floor(100 / CONFIG.STOCK_SIZE)}%`,
             }}
           ></div>
         </div>
