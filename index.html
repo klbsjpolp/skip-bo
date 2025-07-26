@@ -1,79 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Skip-Bo</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-</head>
-<body class="p-4 md:p-10">
-<div class="theme-switcher flex justify-center gap-4 mb-6">
-    <button data-theme="light">Clair</button>
-    <button data-theme="dark">Sombre</button>
-    <button data-theme="metro">Metro</button>
-    <button data-theme="neon">Néon</button>
-    <button data-theme="retro">Rétro</button>
-</div>
-
-<div id="game-container" class="max-w-7xl mx-auto">
-    <div id="ai-area" class="player-area">
-        <h2>Joueur IA</h2>
-        <div class="flex justify-between items-start">
-            <div class="text-center w-32">
-                <h3>Talon (<span id="ai-stock-count"></span>)</h3>
-                <div id="ai-stock" class="card mx-auto">?</div>
-            </div>
-            <div class="text-center">
-                <h3>Sa main</h3>
-                <div id="ai-hand" class="hand-area"></div>
-            </div>
-            <div class="text-center">
-                <h3>Piles de défausse</h3>
-                <div id="ai-discard-piles" class="discard-piles"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="center-area" class="center-area">
-        <div class="flex items-start">
-            <div class="text-center w-32">
-                <h2>Pioche (<span id="deck-count"></span>)</h2>
-                <div id="deck" class="card back shadow-lg mx-auto"></div>
-            </div>
-            <div class="text-center">
-                <h2>Piles de construction</h2>
-                <div id="build-piles" class="discard-piles"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="message-box" class="text-center font-bold text-xl my-4 h-8"></div>
-
-    <div id="player-area" class="player-area">
-        <h2>Votre tour</h2>
-        <div class="flex justify-between items-start">
-            <div class="text-center w-32">
-                <h3>Talon (<span id="player-stock-count"></span>)</h3>
-                <div id="player-stock" class="card mx-auto"></div>
-            </div>
-            <div class="text-center">
-                <h3>Votre main</h3>
-                <div id="player-hand" class="hand-area"></div>
-            </div>
-            <div class="text-center">
-                <h3>Piles de défausse</h3>
-                <div id="player-discard-piles" class="discard-piles"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="text-center mt-5">
-        <button id="restart-button" class="hidden bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Rejouer</button>
-    </div>
-</div>
-
-<script type="module" src="main.js"></script>
-</body>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
+

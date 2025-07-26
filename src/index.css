@@ -1,0 +1,453 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Tailwind CSS variables */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --radius: 0.5rem;
+
+    /* Skip-Bo game theme variables - Light theme (default) */
+    --bg-color: #e5e7eb;
+    --zone-bg-color: #f9fafb;
+    --text-color: #374151;
+    --title-color: #374151;
+    --card-bg: white;
+    --card-border: #9ca3af;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    --card-radius: 8px;
+    --skipbo-bg: #fca5a5;
+    --skipbo-text: #991b1b;
+    --deck-bg: #3b82f6;
+    --selected-border: #f59e0b;
+    --active-turn-color: #22c55e;
+    --button-bg: #4f46e5;
+    --button-hover-bg: #4338ca;
+  
+    /* Card color ranges */
+    --card-g1: hsl(152 69% 58%);   /* green  */  /* 1‑4 */
+    --card-g2: hsl(0 80% 60%);     /* red    */  /* 5‑8 */
+    --card-g3: hsl(283 55% 57%);   /* purple */  /* 9‑12 */  --chart-1: 12 76% 61%;  --chart-2: 173 58% 39%;  --chart-3: 197 37% 24%;  --chart-4: 43 74% 66%;  --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    /* Tailwind CSS variables for dark theme */
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+
+    /* Skip-Bo game theme variables - Dark theme */
+    --bg-color: #111827;
+    --zone-bg-color: #1f2937;
+    --text-color: #d1d5db;
+    --title-color: #f9fafb;
+    --card-bg: #374151;
+    --card-border: #6b7280;
+    --skipbo-bg: #991b1b;
+    --skipbo-text: #fecaca;
+    --deck-bg: #1d4ed8;
+    --selected-border: #f59e0b;
+    --active-turn-color: #4ade80;
+    --button-bg: #6366f1;
+    --button-hover-bg: #4f46e5;
+    
+    /* Card color ranges - same as light theme */
+    --card-g1: hsl(152 69% 58%);   /* green  */  /* 1‑4 */
+    --card-g2: hsl(0 80% 60%);     /* red    */  /* 5‑8 */
+    --card-g3: hsl(283 55% 57%);   /* purple */  /* 9‑12 */  --chart-1: 220 70% 50%;  --chart-2: 160 60% 45%;  --chart-3: 30 80% 55%;  --chart-4: 280 65% 60%;  --chart-5: 340 75% 55%;
+  }
+
+  .metro {
+    /* Skip-Bo game theme variables - Metro theme */
+    --bg-color: #1d1d1d;
+    --zone-bg-color: #2d2d2d;
+    --text-color: #ffffff;
+    --title-color: #ffffff;
+    --card-bg: #3c3c3c;
+    --card-border: #5e5e5e;
+    --card-shadow: none;
+    --card-radius: 2px;
+    --skipbo-bg: #e51400;
+    --skipbo-text: #ffffff;
+    --deck-bg: #00a3a3;
+    --selected-border: #1ba1e2;
+    --active-turn-color: #60a917;
+    --button-bg: #60a917;
+    --button-hover-bg: #4c8712;
+    
+    /* Card color ranges - Metro theme */
+    --card-g1: #00befc;  /* blue */
+    --card-g2: #ff3b30;  /* red */
+    --card-g3: #ffd426;  /* yellow */
+  }
+
+  .neon {
+    /* Skip-Bo game theme variables - Neon theme */
+    --bg-color: #0a0a0a;
+    --zone-bg-color: #1a1a1a;
+    --text-color: #00ff88;
+    --title-color: #ff0099;
+    --card-bg: #1a1a1a;
+    --card-border: #00ff88;
+    --card-shadow: 0 0 10px rgba(0,255,136,0.3);
+    --card-radius: 12px;
+    --skipbo-bg: #ff0099;
+    --skipbo-text: #ffffff;
+    --deck-bg: #0066ff;
+    --selected-border: #ffff00;
+    --active-turn-color: #00ff88;
+    --button-bg: #ff0099;
+    --button-hover-bg: #cc0077;
+    
+    /* Card color ranges - Neon theme */
+    --card-g1: #00ff88;  /* neon green */
+    --card-g2: #ff0099;  /* neon pink */
+    --card-g3: #0066ff;  /* neon blue */
+  }
+
+  .retro {
+    /* Skip-Bo game theme variables - Retro theme */
+    --bg-color: #f4f1de;
+    --zone-bg-color: #e9c46a;
+    --text-color: #264653;
+    --title-color: #2a9d8f;
+    --card-bg: #f4a261;
+    --card-border: #e76f51;
+    --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    --card-radius: 15px;
+    --skipbo-bg: #e76f51;
+    --skipbo-text: #f4f1de;
+    --deck-bg: #2a9d8f;
+    --selected-border: #e9c46a;
+    --active-turn-color: #264653;
+    --button-bg: #2a9d8f;
+    --button-hover-bg: #21867a;
+    
+    /* Card color ranges - Retro theme */
+    --card-g1: #2a9d8f;  /* teal */
+    --card-g2: #e76f51;  /* orange-red */
+    --card-g3: #264653;  /* dark blue */
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
+
+  h3 {
+   font-weight: bold;
+ }
+}
+
+.card, .card-height {
+  height: 100px;
+}
+
+/* Custom Skip-Bo card styles */
+.card {
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+  background-color: var(--card-bg);
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  color: var(--text-color);
+  box-shadow: var(--card-shadow);
+  transform-origin: bottom center;
+  /* Custom properties for transforms */
+  --card-rotate: 0deg;
+  --card-translate-y: 0px;
+  --card-scale: 1;
+  transform: translateY(var(--card-translate-y)) scale(var(--card-scale)) rotate(var(--card-rotate));
+}
+
+/* Consistent hover effects for all selectable cards */
+.hoverable-card:hover {
+  --card-translate-y: -2px;
+  --card-scale: 1.05;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease-in-out;
+}
+
+/* Card range utility classes */
+.card-range-1 {
+  @apply text-[var(--card-g1)];
+}
+
+.card-range-2 {
+  @apply text-[var(--card-g2)];
+}
+
+.card-range-3 {
+  @apply text-[var(--card-g3)];
+}
+
+.card.skip-bo {
+  background-color: var(--skipbo-bg);
+  color: var(--skipbo-text);
+}
+
+.card.back {
+  background-color: var(--deck-bg);
+  color: white;
+}
+
+/* Selected cards should pop up more and override hover */
+.card.selected {
+  border-color: var(--selected-border);
+  --card-translate-y: -5px;
+  box-shadow: 0 4px 15px var(--selected-border);
+}
+
+/* Drop target indicator should only show on hover */
+.drop-target-hover:hover::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--selected-border);
+  border-radius: 2px;
+  opacity: 0.8;
+  z-index: 10;
+}
+
+/* Enhanced drop indicators */
+.drop-indicator {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.drop-indicator.can-drop:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+}
+
+.drop-indicator.can-drop:hover::after {
+  content: '↓';
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  color: var(--selected-border);
+  font-weight: bold;
+  z-index: 20;
+  animation: dropPulse 1s infinite;
+}
+
+.drop-indicator.can-drop:hover::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px dashed var(--selected-border);
+  border-radius: calc(var(--card-radius) + 2px);
+  opacity: 0.8;
+  z-index: 15;
+  animation: borderPulse 1.5s infinite;
+}
+
+@keyframes dropPulse {
+  0%, 100% { opacity: 0.6; transform: translateX(-50%) translateY(0); }
+  50% { opacity: 1; transform: translateX(-50%) translateY(-3px); }
+}
+
+@keyframes borderPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.card-corner-number {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.placeholder {
+  width: 70px;
+  height: 100px;
+  border: 2px dashed var(--card-border);
+  border-radius: var(--card-radius);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  color: var(--card-border);
+  cursor: pointer;
+}
+
+.hand, .discard-piles, .build-piles, .hand-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.discard-piles, .build-piles, .hand-area {
+  width: 310px; /* 4 cards + gaps */
+}
+
+.hand-area {
+  height: 100px; /* 1 card */
+}
+
+.hand-area.overlap-hand {
+  position: relative;
+}
+
+.hand-area.overlap-hand .card {
+  position: absolute;
+  top: 0;
+}
+
+.hand-area:not(.overlap-hand) {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.discard-pile-stack {
+  position: relative;
+}
+
+.card, .discard-pile-stack {
+  width: 70px;
+}
+
+.discard-pile-stack .card, .discard-pile-stack .placeholder {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-shadow: var(--card-shadow);
+}
+
+/* Ensure selected cards in discard piles show the selection shadow */
+.discard-pile-stack .card.selected {
+  box-shadow: 0 4px 15px var(--selected-border);
+}
+
+/* Ensure hoverable cards in discard piles show the hover shadow */
+.discard-pile-stack .hoverable-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Selected cards should always show selection shadow, even when hovered */
+.discard-pile-stack .card.selected.hoverable-card:hover {
+  box-shadow: 0 4px 15px var(--selected-border);
+}
+
+/* Add support for offset stacking via inline style */
+.player-area, .center-area {
+  padding: 20px;
+  border: 2px solid transparent;
+  border-radius: var(--card-radius);
+  margin-bottom: 20px;
+  background-color: var(--zone-bg-color);
+  transition: border-color 0.3s;
+}
+
+.player-area.active-turn, .center-area.active-turn {
+  border-color: var(--active-turn-color);
+}
+
+/* Theme-specific special effects */
+.metro .card.back {
+  background: linear-gradient(45deg, #00a3a3 25%, #004d4d 25%, #004d4d 50%, #00a3a3 50%, #00a3a3 75%, #004d4d 75%, #004d4d);
+  background-size: 8px 8px;
+}
+
+.neon .card {
+  box-shadow: 0 0 5px var(--card-border);
+  border: 2px solid var(--card-border);
+}
+
+.neon .card.back {
+  box-shadow: 0 0 15px var(--deck-bg);
+  border: 2px solid var(--deck-bg);
+}
+
+.neon .card.selected {
+  box-shadow: 0 0 20px var(--selected-border);
+}
+
+.neon .discard-pile-stack .card.selected {
+  box-shadow: 0 0 20px var(--selected-border);
+}
+
+.neon .discard-pile-stack .hoverable-card:hover {
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+}
+
+/* Selected cards in neon theme should always show selection shadow, even when hovered */
+.neon .discard-pile-stack .card.selected.hoverable-card:hover {
+  box-shadow: 0 0 20px var(--selected-border);
+}
+
+.retro .card {
+  box-shadow: 3px 3px 0 var(--card-border);
+  border: 2px solid var(--card-border);
+}
+
+.vertical-text {
+  @apply transform rotate-180;
+  writing-mode: vertical-rl;
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

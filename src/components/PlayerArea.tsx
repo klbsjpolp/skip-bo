@@ -1,0 +1,197 @@
+import { Player, GameState } from '@/types';
+import { Card } from '@/components/Card';
+import { cn } from '@/lib/utils';
+import {EmptyCard} from "@/components/EmptyCard.tsx";
+import { CONFIG } from '@/lib/config';
+
+interface PlayerAreaProps {
+  player: Player;
+  playerIndex: number;
+  isCurrentPlayer: boolean;
+  gameState: GameState;
+  selectCard: (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void;
+  discardCard: (discardPileIndex: number) => Promise<{ success: boolean; message: string }>;
+  clearSelection: () => void;
+}
+
+export function PlayerArea({ 
+  player, 
+  playerIndex,
+  isCurrentPlayer, 
+  gameState,
+  selectCard,
+  discardCard,
+  clearSelection
+}: PlayerAreaProps) {
+  const isHuman = !player.isAI;
+  const handOverlaps = player.hand.length > 4;
+
+  return (
+    <div className={cn(
+      "player-area", "flex items-center gap-4 h-full",
+      isCurrentPlayer && "ring ring-primary",
+    )}>
+      {/* Stock Pile Section */}
+      <h3 className="min-w-fit vertical-text">
+        Talon ({player.stockPile.length})
+      </h3>
+      <div className="w-20 flex items-stretch">
+        {player.stockPile.length > 0 ? (
+          <Card
+            card={player.stockPile[player.stockPile.length - 1]}
+            isRevealed={true}
+            onClick={(e) => {
+              // Prevent event propagation
+              e.stopPropagation();
+
+              // Only allow selection if it's the human player's turn
+              if (isHuman && isCurrentPlayer) {
+                // If this card is already selected, deselect it
+                if (gameState.selectedCard?.source === 'stock' &&
+                    gameState.currentPlayerIndex === playerIndex) {
+                  // Clear the selection
+                  clearSelection();
+                } else {
+                  // Select this card
+                  selectCard('stock', player.stockPile.length - 1);
+                }
+              }
+            }}
+            isSelected={
+              gameState.selectedCard?.source === 'stock' &&
+              gameState.currentPlayerIndex === playerIndex
+            }
+            canBeGrabbed={isHuman && isCurrentPlayer}
+          />
+        ) : (
+          <EmptyCard />
+        )}
+        {/* Stock Pile Indicator */}
+        <div className="w-1 bg-secondary flex ml-1 rounded-t-sm card-height">
+          <div
+            className="w-full self-end rounded-t-sm"
+            style={{
+              height: `${Math.max(5, (player.stockPile.length / CONFIG.STOCK_SIZE) * 100)}%`,
+              backgroundImage: 'linear-gradient(to top, --color-primary 50%, transparent 50%)',
+              backgroundRepeat: 'repeat-y',
+              backgroundSize: `100% ${Math.floor(100 / CONFIG.STOCK_SIZE)}%`,
+            }}
+          ></div>
+        </div>
+      </div>
+
+      {/* Hand Section */}
+      <h3 className="min-w-fit vertical-text">
+        Main
+      </h3>
+      <div className={cn(
+        "hand-area",
+        handOverlaps && "overlap-hand"
+      )}>
+        {player.hand.map((card, index) => (
+          <Card
+            key={`hand-${index}`}
+            card={card}
+            isRevealed={isHuman}
+            onClick={(e) => {
+              // Prevent event propagation
+              e.stopPropagation();
+
+              // Only allow selection if it's the human player's turn
+              // For hand cards, we allow selecting even if another card is selected
+              // This allows the player to change their selection
+              if (isHuman && isCurrentPlayer) {
+                // If this card is already selected, deselect it
+                if (gameState.selectedCard?.source === 'hand' &&
+                    gameState.selectedCard.index === index &&
+                    gameState.currentPlayerIndex === playerIndex) {
+                  // Clear the selection
+                  clearSelection();
+                } else {
+                  // Select this card
+                  selectCard('hand', index);
+                }
+              }
+            }}
+            isSelected={
+              gameState.selectedCard?.source === 'hand' &&
+              gameState.selectedCard.index === index &&
+              gameState.currentPlayerIndex === playerIndex
+            }
+            canBeGrabbed={isHuman && isCurrentPlayer}
+            overlapIndex={handOverlaps ? index : undefined}
+          />
+        ))}
+      </div>
+
+      {/* Grow - blank space */}
+      <div className="flex-grow"></div>
+
+      {/* Discard Piles Section */}
+      <h3 className="min-w-fit vertical-text">Défausses</h3>
+      <div className="discard-piles self-start">
+        {player.discardPiles.map((pile, pileIndex) => (
+          <div key={`discard-${pileIndex}`} className="discard-pile-stack">
+            {pile.length > 0 ? (
+              <div
+                className={cn(
+                  "drop-indicator",
+                  isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand' && "can-drop cursor-pointer",
+                  !isHuman || !isCurrentPlayer || gameState.selectedCard?.source !== 'hand' ? 'cursor-default' : ''
+                )}
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
+                    await discardCard(pileIndex);
+                  } else if (isHuman && isCurrentPlayer) {
+                    // If this discard pile is already selected, deselect it
+                    if (gameState.selectedCard?.source === 'discard' &&
+                        gameState.selectedCard.discardPileIndex === pileIndex &&
+                        gameState.currentPlayerIndex === playerIndex) {
+                      // Clear the selection
+                      clearSelection();
+                    } else {
+                      // Select this discard pile
+                      selectCard('discard', pile.length - 1, pileIndex);
+                    }
+                  }
+                }}
+              >
+                {pile.map((card, cardIdx) => (
+                  <Card
+                    key={`discard-${pileIndex}-card-${cardIdx}`}
+                    card={card}
+                    isRevealed={true}
+                    isSelected={
+                      gameState.selectedCard?.source === 'discard' &&
+                      gameState.selectedCard.discardPileIndex === pileIndex &&
+                      gameState.currentPlayerIndex === playerIndex &&
+                      cardIdx === pile.length - 1
+                    }
+                    canBeGrabbed={isHuman && isCurrentPlayer && cardIdx === pile.length - 1}
+                    stackIndex={cardIdx}
+                    // Remove onClick from Card to avoid nested handlers
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyCard
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
+                    await discardCard(pileIndex);
+                  }
+                }}
+                canDropCard={isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand'}
+                className={cn(
+                  "drop-indicator",
+                  isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand' && "can-drop"
+                )}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
