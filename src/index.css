@@ -175,9 +175,12 @@
  }
 }
 
+.card, .card-height {
+  height: 100px;
+}
+
 /* Custom Skip-Bo card styles */
 .card {
-  height: 100px;
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
   display: flex;
