@@ -1,16 +1,18 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import react from "@vitejs/plugin-react-swc";
 import path from 'path'
-import { fileURLToPath } from 'url'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+export default defineConfig(() => ({
+  // IMPORTANT: Set base path for GitHub Pages
+  // Replace 'skip-bo' with your actual repository name
+  base: process.env.NODE_ENV === 'production' ? '/skip-bo/' : '/',
 
-export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
-})
+}))
