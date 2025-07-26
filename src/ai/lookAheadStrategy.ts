@@ -125,7 +125,6 @@ function evaluatePlayMove(
   gameState: GameState,
   source: 'stock' | 'hand' | 'discard'
 ): number {
-  const weights = getWeights();
   let score = 0;
 
   // Base score for playing a card (always positive)
