@@ -29,7 +29,7 @@ export function PlayerArea({
   return (
     <div className={cn(
       "player-area", "flex items-center gap-4 h-full",
-      isCurrentPlayer && "ring ring-primary",
+      isCurrentPlayer && "ring-3 ring-primary",
     )}>
       {/* Stock Pile Section */}
       <h3 className="min-w-fit vertical-text">
@@ -122,7 +122,7 @@ export function PlayerArea({
       </div>
 
       {/* Grow - blank space */}
-      <div className="flex-grow"></div>
+      <div className="grow"></div>
 
       {/* Discard Piles Section */}
       <h3 className="min-w-fit vertical-text">Défausses</h3>

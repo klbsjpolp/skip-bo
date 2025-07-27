@@ -76,7 +76,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
       </div>
 
       {/* Grow - blank space */}
-      <div className="flex-grow"></div>
+      <div className="grow"></div>
     </div>
   );
 }

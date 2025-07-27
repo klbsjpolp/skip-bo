@@ -103,7 +103,7 @@ describe('CSS Visual Behavior', () => {
   });
 
   describe('Shadow Effects Priority', () => {
-    test('regular cards have default shadow', () => {
+    test('regular cards have default shadow-sm', () => {
       const div = document.createElement('div');
       div.className = 'card';
       document.body.appendChild(div);
@@ -114,7 +114,7 @@ describe('CSS Visual Behavior', () => {
       document.body.removeChild(div);
     });
 
-    test('hoverable cards have enhanced shadow on hover', () => {
+    test('hoverable cards have enhanced shadow-sm on hover', () => {
       const div = document.createElement('div');
       div.className = 'card hoverable-card';
       div.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)'; // Simulate hover
@@ -126,7 +126,7 @@ describe('CSS Visual Behavior', () => {
       document.body.removeChild(div);
     });
 
-    test('selected cards have selection shadow', () => {
+    test('selected cards have selection shadow-sm', () => {
       const div = document.createElement('div');
       div.className = 'card selected';
       div.style.boxShadow = '0 4px 15px rgb(245, 158, 11)'; // Simulate selection
@@ -155,7 +155,7 @@ describe('CSS Visual Behavior', () => {
       document.body.removeChild(container);
     });
 
-    test('discard pile selected cards maintain selection shadow even with hover class', () => {
+    test('discard pile selected cards maintain selection shadow-sm even with hover class', () => {
       const container = document.createElement('div');
       container.className = 'discard-pile-stack';
 
@@ -172,7 +172,7 @@ describe('CSS Visual Behavior', () => {
       document.body.removeChild(container);
     });
 
-    test('discard pile hoverable cards have hover shadow when not selected', () => {
+    test('discard pile hoverable cards have hover shadow-sm when not selected', () => {
       const container = document.createElement('div');
       container.className = 'discard-pile-stack';
 

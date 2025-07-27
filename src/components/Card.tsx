@@ -28,7 +28,7 @@ export function Card({
   const displayValue = () => {
     if (!isRevealed) return '?';
     if (!card) return ''; // Handle null or undefined card
-    if (card.isSkipBo) return 'SB';
+    if (card.isSkipBo) return 'Skip-Bo';
     if (card.value === undefined) throw Error('Error')
     return card.value.toString();
   };
@@ -37,10 +37,11 @@ export function Card({
   
   // Determine color class based on card value
   const colourClass = 
-    !card || !isRevealed || card.isSkipBo ? '' :
-    card.value! <= 4  ? 'card-range-1' :
-    card.value! <= 8  ? 'card-range-2' :
-                        'card-range-3';
+      !card || !isRevealed  ? '' :
+      (card.isSkipBo && !overriddenDisplayValue) ? 'skipbo-text' :
+      (card.value! <= 4  || (Number(overriddenDisplayValue) <= 4 )) ? 'card-range-1' :
+      (card.value! <= 8  || (Number(overriddenDisplayValue) <= 8 )) ? 'card-range-2' :
+      (card.value! <= 12 || (Number(overriddenDisplayValue) <= 12)) ? 'card-range-3' : '';
   
   let style: CSSProperties | undefined = undefined;
   if (stackIndex !== undefined) {
@@ -64,7 +65,7 @@ export function Card({
   return (card ?
     <div
       className={cn(
-        'card',
+        'card', 'text-shadow-foreground', 'text-shadow-sm',
         !isRevealed && 'back',
         card && card.isSkipBo && isRevealed && 'skip-bo',
         colourClass,
