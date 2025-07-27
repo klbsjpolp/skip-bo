@@ -36,7 +36,16 @@ export interface MoveResult {
   winner?: number;
 }
 
-export type Theme = 'light' | 'dark' | 'metro' | 'neon' | 'retro';
+export const themes = [
+  { value: 'light', label: 'Clair' },
+  { value: 'pastel', label: 'Pastel' },
+  { value: 'dark', label: 'Sombre' },
+  { value: 'metro', label: 'Metro' },
+  { value: 'neon', label: 'Néon' },
+  { value: 'retro', label: 'Rétro' },
+];
+
+export type Theme = typeof themes[number]['value'];
 
 export type AIDifficulty = 'easy' | 'medium' | 'hard';
 

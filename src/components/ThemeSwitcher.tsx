@@ -1,13 +1,6 @@
 import { useTheme } from 'next-themes';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-
-const themes = [
-  { value: 'light', label: 'Clair' },
-  { value: 'dark', label: 'Sombre' },
-  { value: 'metro', label: 'Metro' },
-  { value: 'neon', label: 'Néon' },
-  { value: 'retro', label: 'Rétro' },
-];
+import {themes} from "@/types";
 
 export function ThemeSwitcher() {
   const { setTheme, theme } = useTheme();

@@ -1,4 +1,5 @@
 import { describe, expect, test, beforeEach, afterEach } from 'vitest';
+import {themes} from "@/types";
 
 /**
  * CSS Visual Behavior Tests
@@ -229,11 +230,9 @@ describe('CSS Visual Behavior', () => {
 
   describe('Cross-Theme Consistency', () => {
     test('selection behavior works consistently across themes', () => {
-      const themes = ['light', 'dark', 'metro', 'neon', 'retro'];
-
       themes.forEach(theme => {
         const div = document.createElement('div');
-        div.className = `card selected ${theme}`;
+        div.className = `card selected ${theme.value}`;
         document.body.appendChild(div);
 
         // All themes should have the selected class
@@ -245,11 +244,9 @@ describe('CSS Visual Behavior', () => {
     });
 
     test('hover behavior works consistently across themes', () => {
-      const themes = ['light', 'dark', 'metro', 'neon', 'retro'];
-
       themes.forEach(theme => {
         const div = document.createElement('div');
-        div.className = `card hoverable-card ${theme}`;
+        div.className = `card hoverable-card ${theme.value}`;
         document.body.appendChild(div);
 
         // All themes should have the hoverable-card class
