@@ -26,7 +26,7 @@ export function Card({
                        displayValue: overriddenDisplayValue
                      }: CardProps) {
   const displayValue = () => {
-    if (!isRevealed) return '?';
+    if (!isRevealed) return '';
     if (!card) return ''; // Handle null or undefined card
     if (card.isSkipBo) return 'Skip-Bo';
     if (card.value === undefined) throw Error('Error')

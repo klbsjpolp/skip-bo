@@ -7,7 +7,7 @@ export function ThemeSwitcher() {
 
   return (<div className="relative">
     <Select value={theme} onValueChange={setTheme}>
-      <SelectTrigger className="w-24">
+      <SelectTrigger className="w-32">
         <SelectValue placeholder="Thème" />
       </SelectTrigger>
       <SelectContent>
