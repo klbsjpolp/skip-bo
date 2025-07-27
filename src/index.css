@@ -174,13 +174,53 @@
     --card-g3: hsl(283 55% 57%);
   }
 
+  .pastel {
+    --primary: hsl(170 70% 70%);
+    --primary-foreground: hsl(0 0% 20%);
+    --secondary: hsl(350 80% 85%);
+    --secondary-foreground: hsl(0 0% 20%);
+
+    /* Skip-Bo game theme variables - Pastel theme */
+    --bg-color: #f0f4f8;
+    --zone-bg-color: #ffffff;
+    --text-color: #5a6270;
+    --title-color: #4a5568;
+    --card-bg: #ffffff;
+    --card-border: #d8e2ef;
+    --card-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    --card-radius: 10px;
+    --deck-bg: #a0d2eb;
+    --selected-border: #ffcb77;
+    --active-turn-color: #a5dda5;
+    --button-bg: #a0d2eb;
+    --button-hover-bg: #8bbbd6;
+
+    /* Card color ranges - Pastel theme */
+    --skipbo-text: #ffcb77;  /* Soft yellow */
+    --card-g1: #a5dda5;      /* Mint green */
+    --card-g2: #f7a9a8;      /* Soft coral */
+    --card-g3: #d0a5db;      /* Lavender */
+
+    .card {
+      border-width: 1px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+      &.back {
+        background: linear-gradient(135deg, #a0d2eb 0%, #bee5eb 100%);
+      }
+
+      &.selected {
+        box-shadow: 0 0 0 2px var(--selected-border), 0 4px 8px rgba(255, 203, 119, 0.3);
+      }
+    }
+  }
+
   .metro {
     --primary: hsl(160 100% 32%);
     --primary-foreground: hsl(0 0% 100%);
     --secondary: hsl(0 100% 45%);
     --secondary-foreground: hsl(0 0% 100%);
 
-    /* Skip-Bo game theme variables - Metro theme */
     --bg-color: #1d1d1d;
     --zone-bg-color: #2d2d2d;
     --text-color: #ffffff;
@@ -194,12 +234,34 @@
     --active-turn-color: #60a917;
     --button-bg: #60a917;
     --button-hover-bg: #4c8712;
-    
-    /* Card color ranges - Metro theme */
-    --skipbo-text: hsl(0 0% 85%);  /* Silver/light gray that complements the bold primary colors */
+
+    --skipbo-text: hsl(0 0% 85%);
     --card-g1: #00befc;
     --card-g2: #ff3b30;
     --card-g3: #ffd426;
+
+    .card.back {
+      background: repeating-conic-gradient(from 0deg,
+      #00a3a3 0deg 90deg,
+      #ff3b30 90deg 180deg,
+      #00befc 180deg 270deg,
+      #1ba1e2 270deg 360deg
+      );
+      background-size: 50px 50px;
+      position: relative;
+    }
+
+    .card.back::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(45deg,
+      transparent calc(50% - 20px),
+      #ffd426 calc(50% - 20px),
+      #ffd426 calc(50% + 20px),
+      transparent calc(50% + 20px)
+      );
+    }
   }
 
   .neon {
@@ -208,7 +270,6 @@
     --secondary: hsl(324 100% 50%);
     --secondary-foreground: hsl(0 0% 100%);
 
-    /* Skip-Bo game theme variables - Neon theme */
     --bg-color: #0a0a0a;
     --zone-bg-color: #1a1a1a;
     --text-color: #00ff88;
@@ -222,12 +283,40 @@
     --active-turn-color: #00ff88;
     --button-bg: #ff0099;
     --button-hover-bg: #cc0077;
-    
-    /* Card color ranges - Neon theme */
-    --skipbo-text: hsl(60 100% 60%);  /* Bright yellow that complements the neon palette */
+
+    --skipbo-text: hsl(60 100% 60%);
     --card-g1: #00ff88;
     --card-g2: #ff0099;
     --card-g3: #0066ff;
+
+    .card {
+      box-shadow: 0 0 5px var(--card-border);
+      border: 2px solid var(--card-border);
+
+      &.back {
+        box-shadow: 0 0 15px var(--deck-bg);
+        border: 2px solid var(--deck-bg);
+        background: linear-gradient(135deg, #ff0099 0%, #00ff88 25%, #0066ff 50%, #ff0099 75%, #00ff88 100%);
+      }
+
+      &.selected {
+        box-shadow: 0 0 20px var(--selected-border);
+      }
+    }
+
+    .discard-pile-stack {
+      .card.selected {
+        box-shadow: 0 0 20px var(--selected-border);
+      }
+
+      .hoverable-card:hover {
+        box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+      }
+
+      .card.selected.hoverable-card:hover {
+        box-shadow: 0 0 20px var(--selected-border);
+      }
+    }
   }
 
   .retro {
@@ -533,48 +622,6 @@
   .player-area.active-turn,
   .center-area.active-turn {
     border-color: var(--active-turn-color);
-  }
-
-  /* Theme-specific special effects */
-  .metro .card.back {
-    background: linear-gradient(
-      45deg,
-      #00a3a3 25%,
-      #004d4d 25%,
-      #004d4d 50%,
-      #00a3a3 50%,
-      #00a3a3 75%,
-      #004d4d 75%,
-      #004d4d
-    );
-    background-size: 8px 8px;
-  }
-
-  .neon .card {
-    box-shadow: 0 0 5px var(--card-border);
-    border: 2px solid var(--card-border);
-  }
-
-  .neon .card.back {
-    box-shadow: 0 0 15px var(--deck-bg);
-    border: 2px solid var(--deck-bg);
-  }
-
-  .neon .card.selected {
-    box-shadow: 0 0 20px var(--selected-border);
-  }
-
-  .neon .discard-pile-stack .card.selected {
-    box-shadow: 0 0 20px var(--selected-border);
-  }
-
-  .neon .discard-pile-stack .hoverable-card:hover {
-    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
-  }
-
-  /* Selected cards in neon theme should always show selection shadow, even when hovered */
-  .neon .discard-pile-stack .card.selected.hoverable-card:hover {
-    box-shadow: 0 0 20px var(--selected-border);
   }
 
   .retro .card {
