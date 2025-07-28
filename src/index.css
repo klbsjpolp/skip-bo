@@ -60,10 +60,10 @@
 @utility container {
   margin-inline: auto;
   padding-inline: 2rem;
-  @media (width >= --theme(--breakpoint-sm)) {
+  @media (min-width: 640px) {
     max-width: none;
   }
-  @media (width >= 1400px) {
+  @media (min-width: 1400px) {
     max-width: 1400px;
   }
 }
@@ -84,9 +84,7 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentcolor);
   }
-}
 
-@layer base {
   :root {
     /* Tailwind CSS variables */
     --background: hsl(0 0% 100%);
@@ -124,7 +122,7 @@
     --active-turn-color: #22c55e;
     --button-bg: #4f46e5;
     --button-hover-bg: #4338ca;
-  
+
     /* Card color ranges */
     --skipbo-text: #FFD97D;
     --card-g1: hsl(152 69% 58%);   /* 1‑4 */
@@ -132,7 +130,7 @@
     --card-g3: hsl(283 55% 57%);   /* 9‑12 */
   }
 
-  .dark {
+  .theme-dark {
     /* Tailwind CSS variables for dark theme */
     --background: hsl(0 0% 3.9%);
     --foreground: hsl(0 0% 98%);
@@ -166,7 +164,7 @@
     --active-turn-color: #4ade80;
     --button-bg: #6366f1;
     --button-hover-bg: #4f46e5;
-    
+
     /* Card color ranges - same as light theme */
     --skipbo-text: #FFD97D;
     --card-g1: hsl(152 69% 58%);
@@ -174,13 +172,12 @@
     --card-g3: hsl(283 55% 57%);
   }
 
-  .pastel {
+  .theme-pastel {
     --primary: hsl(170 70% 70%);
     --primary-foreground: hsl(0 0% 20%);
     --secondary: hsl(350 80% 85%);
     --secondary-foreground: hsl(0 0% 20%);
 
-    /* Skip-Bo game theme variables - Pastel theme */
     --bg-color: #f0f4f8;
     --zone-bg-color: #ffffff;
     --text-color: #5a6270;
@@ -195,27 +192,13 @@
     --button-bg: #a0d2eb;
     --button-hover-bg: #8bbbd6;
 
-    /* Card color ranges - Pastel theme */
-    --skipbo-text: #ffcb77;  /* Soft yellow */
-    --card-g1: #a5dda5;      /* Mint green */
-    --card-g2: #f7a9a8;      /* Soft coral */
-    --card-g3: #d0a5db;      /* Lavender */
-
-    .card {
-      border-width: 1px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-
-      &.back {
-        background: linear-gradient(135deg, #a0d2eb 0%, #bee5eb 100%);
-      }
-
-      &.selected {
-        box-shadow: 0 0 0 2px var(--selected-border), 0 4px 8px rgba(255, 203, 119, 0.3);
-      }
-    }
+    --skipbo-text: #ffcb77;
+    --card-g1: #a5dda5;
+    --card-g2: #f7a9a8;
+    --card-g3: #d0a5db;
   }
 
-  .metro {
+  .theme-metro {
     --primary: hsl(160 100% 32%);
     --primary-foreground: hsl(0 0% 100%);
     --secondary: hsl(0 100% 45%);
@@ -239,32 +222,35 @@
     --card-g1: #00befc;
     --card-g2: #ff3b30;
     --card-g3: #ffd426;
-
-    .card.back {
-      background: repeating-conic-gradient(from 0deg,
-      #00a3a3 0deg 90deg,
-      #ff3b30 90deg 180deg,
-      #00befc 180deg 270deg,
-      #1ba1e2 270deg 360deg
-      );
-      background-size: 50px 50px;
-      position: relative;
-    }
-
-    .card.back::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(45deg,
-      transparent calc(50% - 20px),
-      #ffd426 calc(50% - 20px),
-      #ffd426 calc(50% + 20px),
-      transparent calc(50% + 20px)
-      );
-    }
   }
 
-  .neon {
+  .theme-rainbow {
+    --primary: hsl(0 100% 70%);
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: hsl(120 100% 70%);
+    --secondary-foreground: hsl(0 0% 100%);
+
+    --bg-color: #f0f8ff;
+    --zone-bg-color: #ffffff;
+    --text-color: #333333;
+    --title-color: #ff6b6b;
+    --card-bg: #ffffff;
+    --card-border: #9381ff;
+    --card-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --card-radius: 12px;
+    --deck-bg: #6a5acd;
+    --selected-border: #ffd700;
+    --active-turn-color: #4caf50;
+    --button-bg: #ff6b6b;
+    --button-hover-bg: #ff5252;
+
+    --skipbo-text: hsl(45 100% 70%);
+    --card-g1: #4caf50;
+    --card-g2: #ff6b6b;
+    --card-g3: #9381ff;
+  }
+
+  .theme-neon {
     --primary: hsl(157 100% 50%);
     --primary-foreground: hsl(0 0% 0%);
     --secondary: hsl(324 100% 50%);
@@ -288,44 +274,14 @@
     --card-g1: #00ff88;
     --card-g2: #ff0099;
     --card-g3: #0066ff;
-
-    .card {
-      box-shadow: 0 0 5px var(--card-border);
-      border: 2px solid var(--card-border);
-
-      &.back {
-        box-shadow: 0 0 15px var(--deck-bg);
-        border: 2px solid var(--deck-bg);
-        background: linear-gradient(135deg, #ff0099 0%, #00ff88 25%, #0066ff 50%, #ff0099 75%, #00ff88 100%);
-      }
-
-      &.selected {
-        box-shadow: 0 0 20px var(--selected-border);
-      }
-    }
-
-    .discard-pile-stack {
-      .card.selected {
-        box-shadow: 0 0 20px var(--selected-border);
-      }
-
-      .hoverable-card:hover {
-        box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
-      }
-
-      .card.selected.hoverable-card:hover {
-        box-shadow: 0 0 20px var(--selected-border);
-      }
-    }
   }
 
-  .retro {
+  .theme-retro {
     --primary: hsl(174 59% 39%);
     --primary-foreground: hsl(0 0% 100%);
     --secondary: hsl(11 83% 62%);
     --secondary-foreground: hsl(0 0% 100%);
 
-    /* Skip-Bo game theme variables - Retro theme */
     --bg-color: #f4f1de;
     --zone-bg-color: #e9c46a;
     --text-color: #264653;
@@ -339,8 +295,7 @@
     --active-turn-color: #264653;
     --button-bg: #2a9d8f;
     --button-hover-bg: #21867a;
-    
-    /* Card color ranges - Retro theme */
+
     --skipbo-text: hsl(40 80% 80%);  /* Warm cream color that fits the vintage palette */
     --card-g1: #2a9d8f;
     --card-g2: #e76f51;
@@ -355,39 +310,167 @@
 
   h3 {
    font-weight: bold;
- }
-}
-
-@layer utilities {
-  .card,
-  .card-height {
-    height: 100px;
   }
 
-  /* Custom Skip-Bo card styles */
-  .card {
-    @apply text-center leading-none;
-    border: 1px solid var(--card-border);
-    border-radius: var(--card-radius);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-    user-select: none;
-    background-color: var(--card-bg);
-    transition: all 0.2s ease-in-out;
+  * {
+    @apply border-border;
+  }
+
+  /* Default card back styles - MOVE THIS BEFORE THEME STYLES */
+  .card.back {
+    background-color: var(--deck-bg);
+    color: white;
     position: relative;
-    color: var(--text-color);
+  }
+
+  /* Light theme card back */
+  :root .card.back {
+    background: linear-gradient(135deg, var(--deck-bg) 0%, #2563eb 100%);
+    border: 2px solid var(--deck-bg);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+  }
+
+  /* Dark theme card back */
+  .theme-dark .card.back {
+    background: linear-gradient(135deg, var(--deck-bg) 0%, #1e40af 100%);
+    border: 2px solid var(--deck-bg);
+    box-shadow: 0 0 10px rgba(29, 78, 216, 0.3);
+  }
+
+  /* Discard pile stack positioning */
+  .discard-pile-stack {
+    position: relative;
+    width: 70px;
+  }
+
+  .discard-pile-stack .card,
+  .discard-pile-stack .placeholder {
+    position: absolute;
+    left: 0;
+    top: 0;
     box-shadow: var(--card-shadow);
-    transform-origin: bottom center;
-    /* Custom properties for transforms */
-    --card-rotate: 0deg;
-    --card-translate-y: 0px;
-    --card-scale: 1;
-    transform: translateY(var(--card-translate-y)) scale(var(--card-scale))
-      rotate(var(--card-rotate));
+  }
+
+  /* Base hover effect for discard pile cards */
+  .discard-pile-stack .hoverable-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    --card-translate-y: -2px;
+    --card-scale: 1.05;
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Selected cards in discard piles */
+  .discard-pile-stack .card.selected {
+    box-shadow: 0 4px 15px var(--selected-border);
+  }
+
+  /* Selected cards should maintain selection shadow when hovered */
+  .discard-pile-stack .card.selected.hoverable-card:hover {
+    box-shadow: 0 4px 15px var(--selected-border);
+    --card-translate-y: -2px;
+    --card-scale: 1.05;
+  }
+
+  /* Theme-specific overrides */
+  .theme-rainbow .discard-pile-stack .hoverable-card:hover {
+    box-shadow: 0 0 15px rgba(147, 129, 255, 0.4);
+  }
+
+  .theme-rainbow .discard-pile-stack .card.selected.hoverable-card:hover {
+    box-shadow: 0 0 20px var(--selected-border);
+  }
+
+  .theme-neon .discard-pile-stack .hoverable-card:hover {
+    box-shadow: 0 0 15px var(--card-border);
+  }
+
+  .theme-neon .card {
+    box-shadow: 0 0 5px var(--card-border);
+    border: 2px solid var(--card-border);
+
+    &.back {
+      box-shadow: 0 0 15px var(--deck-bg);
+      border: 2px solid var(--deck-bg);
+      background: linear-gradient(135deg, #ff0099 0%, #00ff88 25%, #0066ff 50%, #ff0099 75%, #00ff88 100%);
+    }
+
+    &.selected {
+      box-shadow: 0 0 20px var(--selected-border);
+    }
+  }
+
+  .theme-rainbow {
+    .card {
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+      border: 2px solid var(--card-border);
+
+      &.back {
+        position: relative;
+        background: linear-gradient(
+                to bottom,
+                #ff6b6b 0%, /* Red */ #ffb347 16.6%, /* Orange */ #ffff66 33.2%, /* Yellow */ #4caf50 49.8%, /* Green */ #5d9cec 66.4%, /* Blue */ #9381ff 83%, /* Indigo */ #d183e8 100% /* Violet */
+        );
+        border: 2px solid #ffffff;
+        box-shadow: 0 0 15px rgba(147, 129, 255, 0.5);
+      }
+
+      &.selected {
+        box-shadow: 0 0 20px var(--selected-border);
+      }
+    }
+
+    .discard-pile-stack {
+      .card.selected {
+        box-shadow: 0 0 20px var(--selected-border);
+      }
+
+      .hoverable-card:hover {
+        box-shadow: 0 0 15px rgba(147, 129, 255, 0.4);
+      }
+
+      .card.selected.hoverable-card:hover {
+        box-shadow: 0 0 20px var(--selected-border);
+      }
+    }
+  }
+
+  .theme-retro .card {
+    box-shadow: 3px 3px 0 var(--card-border);
+    border: 2px solid var(--card-border);
+
+    &.back {
+      background: linear-gradient(135deg, #2a9d8f 0%, #e9c46a 50%, #f4a261 100%);
+      border: 3px solid var(--card-border);
+      box-shadow: 3px 3px 0 var(--card-border), 0 0 10px rgba(42, 157, 143, 0.3);
+    }
+  }
+
+  .theme-metro {
+    .card.back {
+      background-image: repeating-conic-gradient(from 0deg,
+      #00a3a3 0deg 90deg,
+      #ff3b30 90deg 180deg,
+      #00befc 180deg 270deg,
+      #1ba1e2 270deg 360deg
+      );
+      background-size: 70px 100px;
+      background-repeat: no-repeat;
+      background-color: #ffd426;
+      position: relative;
+    }
+  }
+
+  .theme-pastel .card {
+    border-width: 1px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+    &.back {
+      background: linear-gradient(135deg, #a0d2eb 0%, #bee5eb 100%);
+    }
+
+    &.selected {
+      box-shadow: 0 0 0 2px var(--selected-border), 0 4px 8px rgba(255, 203, 119, 0.3);
+    }
   }
 
   /* Consistent hover effects for all selectable cards */
@@ -396,35 +479,6 @@
     --card-scale: 1.05;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     transition: all 0.2s ease-in-out;
-  }
-
-  /* Card range utility classes */
-  .card-range-1 {
-    @apply text-(--card-g1);
-  }
-
-  .card-range-2 {
-    @apply text-(--card-g2);
-  }
-
-  .card-range-3 {
-    @apply text-(--card-g3);
-  }
-
-  .skipbo-text {
-    @apply text-(--skipbo-text);
-  }
-
-  .card.back {
-    background-color: var(--deck-bg);
-    color: white;
-  }
-
-  /* Selected cards should pop up more and override hover */
-  .card.selected {
-    border-color: var(--selected-border);
-    --card-translate-y: -5px;
-    box-shadow: 0 4px 15px var(--selected-border);
   }
 
   /* Drop target indicator should only show on hover */
@@ -501,73 +555,67 @@
     }
   }
 
-  .card-corner-number {
-    position: absolute;
-    top: 4px;
-    left: 6px;
-    font-size: 12px;
-    font-weight: bold;
-  }
-
   .card.back * {
     @apply text-4xl;
   }
+
   .card.back .card-corner-number {
     @apply invisible;
   }
 
-  .placeholder {
-    width: 70px;
-    height: 100px;
-    border: 2px dashed var(--card-border);
-    border-radius: var(--card-radius);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 18px;
-    color: var(--card-border);
-    cursor: pointer;
-  }
-
   .hand,
   .discard-piles,
-  .build-piles,
-  .hand-area {
+  .build-piles {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     justify-content: center;
   }
 
-  .discard-piles,
-  .build-piles,
   .hand-area {
     width: 310px; /* 4 cards + gaps */
-  }
-
-  /* Responsive layout for small screens - discard piles wrap under stock and hand */
-  @media (max-width: 640px) {
-    .player-area {
-      flex-wrap: wrap;
-    }
-
-    .player-area .discard-piles {
-      width: 100%;
-      margin-top: 20px;
-    }
-  }
-
-  .hand-area {
     height: 100px; /* 1 card */
   }
 
+  /* Non-overlapping hands use flexbox */
+  .hand-area:not(.overlap-hand) {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  /* Overlapping hands use absolute positioning */
   .hand-area.overlap-hand {
     position: relative;
+    /* Remove flexbox properties that conflict with absolute positioning */
   }
 
   .hand-area.overlap-hand .card {
-    position: absolute;
+    position: absolute !important;
     top: 0;
+    /* Left positioning is handled by inline styles from Card component */
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Enhanced selection styles for overlapped hands */
+  .hand-area.overlap-hand .card.selected {
+    z-index: 101;
+    --card-translate-y: -8px;
+    border-color: var(--selected-border) !important;
+    box-shadow: 0 4px 15px var(--selected-border) !important;
+  }
+
+  .hand-area.overlap-hand .card.selected.hoverable-card:hover {
+    z-index: 999;
+    --card-translate-y: -10px;
+    box-shadow: 0 6px 20px var(--selected-border) !important;
+  }
+
+  /* Enhanced hover effects for overlapped hands */
+  .hand-area.overlap-hand .card.hoverable-card:hover {
+    z-index: 999;
+    --card-translate-y: -8px;
+    --card-scale: 1.08;
   }
 
   .hand-area:not(.overlap-hand) {
@@ -576,39 +624,6 @@
     justify-content: center;
   }
 
-  .discard-pile-stack {
-    position: relative;
-  }
-
-  .card,
-  .discard-pile-stack {
-    width: 70px;
-  }
-
-  .discard-pile-stack .card,
-  .discard-pile-stack .placeholder {
-    position: absolute;
-    left: 0;
-    top: 0;
-    box-shadow: var(--card-shadow);
-  }
-
-  /* Ensure selected cards in discard piles show the selection shadow */
-  .discard-pile-stack .card.selected {
-    box-shadow: 0 4px 15px var(--selected-border);
-  }
-
-  /* Ensure hoverable cards in discard piles show the hover shadow */
-  .discard-pile-stack .hoverable-card:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  }
-
-  /* Selected cards should always show selection shadow, even when hovered */
-  .discard-pile-stack .card.selected.hoverable-card:hover {
-    box-shadow: 0 4px 15px var(--selected-border);
-  }
-
-  /* Add support for offset stacking via inline style */
   .player-area,
   .center-area {
     padding: 20px;
@@ -624,21 +639,104 @@
     border-color: var(--active-turn-color);
   }
 
-  .retro .card {
-    box-shadow: 3px 3px 0 var(--card-border);
-    border: 2px solid var(--card-border);
+  .card,
+  .discard-pile-stack {
+    width: 70px;
   }
 
-  .vertical-text {
-    @apply transform rotate-180;
-    writing-mode: vertical-rl;
+  /* Consistent selection styles for all cards */
+  .card.selected {
+    border-color: var(--selected-border);
+    --card-translate-y: -5px;
+    box-shadow: 0 4px 15px var(--selected-border);
+    z-index: 100;
+  }
+
+  @media (max-width: 640px) {
+    .player-area {
+      flex-wrap: wrap;
+    }
+
+    .player-area .discard-piles {
+      width: 100%;
+      margin-top: 20px;
+    }
   }
 }
 
+@utility card {
+  @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer relative;
+  height: 100px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  font-size: 24px;
+  user-select: none;
+  background-color: var(--card-bg);
+  transition: all 0.2s ease-in-out;
+  color: var(--text-color);
+  box-shadow: var(--card-shadow);
+  transform-origin: bottom center;
+  --card-rotate: 0deg;
+  --card-translate-y: 0px;
+  --card-scale: 1;
+  transform: translateY(var(--card-translate-y)) scale(var(--card-scale)) rotate(var(--card-rotate));
+}
 
+@utility card-height {
+  height: 100px;
+}
 
-@layer base {
-  * {
-    @apply border-border;
-  }
+@utility card-range-1 {
+  color: var(--card-g1);
+}
+
+@utility card-range-2 {
+  color: var(--card-g2);
+}
+
+@utility card-range-3 {
+  color: var(--card-g3);
+}
+
+@utility skipbo-text {
+  color: var(--skipbo-text);
+}
+
+@utility card-back {
+  background-color: var(--deck-bg);
+}
+
+@utility placeholder {
+  width: 70px;
+  height: 100px;
+  border: 2px dashed var(--card-border);
+  border-radius: var(--card-radius);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  color: var(--card-border);
+  cursor: pointer;
+}
+
+@utility card-corner-number {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+@utility vertical-text {
+  @apply transform rotate-180;
+  writing-mode: vertical-rl;
+}
+
+@utility drop-indicator {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+@utility drop-target-hover {
+  position: relative;
 }
