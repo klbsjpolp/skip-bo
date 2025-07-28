@@ -5,6 +5,8 @@ import './index.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from 'next-themes'
 import {themes} from "@/types";
+import {CardAnimationProvider} from "@/contexts/CardAnimationContext.tsx";
+import {CardAnimationLayer} from "@/components/CardAnimationLayer.tsx";
 
 const queryClient = new QueryClient()
 
@@ -17,7 +19,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         enableSystem
         themes={themes.map(t => t.value)}
       >
-        <App />
+        <CardAnimationProvider>
+          <App />
+          <CardAnimationLayer />
+        </CardAnimationProvider>
       </ThemeProvider>
     </QueryClientProvider>
   </React.StrictMode>,

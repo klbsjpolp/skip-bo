@@ -19,8 +19,8 @@ function App() {
           <NewGame />
           <ThemeSwitcher />
         </div>
-        <GameBoard 
-          gameState={gameState} 
+        <GameBoard
+          gameState={gameState}
           selectCard={selectCard}
           playCard={playCard}
           discardCard={discardCard}

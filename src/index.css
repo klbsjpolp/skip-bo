@@ -495,6 +495,39 @@
     z-index: 10;
   }
 
+  /* Card Animation Styles */
+  .card-animation-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  .animated-card {
+    position: fixed;
+    pointer-events: none;
+    will-change: transform, left, top;
+  }
+
+  /* Animation type specific styles */
+  .animation-play {
+    /* Cards moving to build piles */
+    filter: brightness(1.1);
+  }
+
+  .animation-discard {
+    /* Cards moving to discard piles */
+    filter: saturate(0.8);
+  }
+
+  .animation-draw {
+    /* Cards moving from deck to hand */
+    filter: brightness(1.05);
+  }
+
   /* Enhanced drop indicators */
   .drop-indicator {
     position: relative;
@@ -665,7 +698,7 @@
 }
 
 @utility card {
-  @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer relative;
+  @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer;
   height: 100px;
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);

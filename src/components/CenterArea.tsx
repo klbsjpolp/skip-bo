@@ -17,7 +17,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
       <h3 className="min-w-fit vertical-text">
         Pioche ({gameState.deck.length})
       </h3>
-      <div className="w-20">
+        <div className="w-20 deck">
         {gameState.deck.length > 0 ? (
           <Card
             card={{ value: 0, isSkipBo: false }}
@@ -36,6 +36,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
         {gameState.buildPiles.map((pile, index) => (
           <div
             key={`build-${index}`}
+            data-build-pile={index}
             className={cn(
               "relative drop-indicator",
               gameState.selectedCard && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState)
