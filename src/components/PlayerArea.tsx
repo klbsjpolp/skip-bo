@@ -105,8 +105,9 @@ export function PlayerArea({
       )}>
         {player.hand.map((card, index) => (
           <div className='card-holder' key={`hand-${index}`} data-card-index={index}>
-            {/* Hide the card if it's being animated */}
-            {isCardBeingAnimated(playerIndex, 'hand', index) ? (
+            {/* Hide cards that are being animated OUT of the hand (discard/play animations) */}
+            {/* Show cards that are in the hand normally or being animated INTO the hand (draw animations) */}
+            {isCardBeingAnimated(playerIndex, 'hand', index) || isCardBeingAnimated(playerIndex, 'deck', index) ? (
               <div className="card opacity-0 pointer-events-none" />
             ) : (
               <Card

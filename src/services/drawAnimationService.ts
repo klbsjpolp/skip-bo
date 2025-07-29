@@ -4,22 +4,11 @@ import {
   getDeckPosition,
   calculateAnimationDuration 
 } from '@/utils/cardPositions';
+import { CardAnimationData } from "@/contexts/CardAnimationContext.tsx";
 
 // Global reference to the animation context
 let globalAnimationContext: {
-  startAnimation: (animationData: {
-    card: Card;
-    startPosition: { x: number; y: number };
-    endPosition: { x: number; y: number };
-    animationType: 'play' | 'discard' | 'draw';
-    duration: number;
-    sourceInfo: {
-      playerIndex: number;
-      source: 'hand' | 'stock' | 'discard' | 'deck';
-      index: number;
-      discardPileIndex?: number;
-    };
-  }) => string;
+  startAnimation: (animationData: Omit<CardAnimationData, 'id'>) => string;
   removeAnimation: (id: string) => void;
 } | null = null;
 
@@ -41,11 +30,12 @@ const waitForAnimationContext = async (maxWaitTime: number = 2000): Promise<bool
 };
 
 // Function to trigger draw animations from deck to hand
-export const triggerDrawAnimation = async (
+const triggerDrawAnimation = async (
   gameState: GameState,
   playerIndex: number,
   card: Card,
-  handIndex: number
+  handIndex: number,
+  initialDelay: number = 0
 ): Promise<{ duration: number; animationId: string }> => {
   if (!globalAnimationContext) {
     console.warn('Animation context not available for draw action');
@@ -86,11 +76,12 @@ export const triggerDrawAnimation = async (
       startPosition,
       endPosition,
       animationType: 'draw',
+      initialDelay,
       duration,
       sourceInfo: {
         playerIndex,
         source: 'deck',
-        index: 0, // Deck always has index 0 since we're drawing from the top
+        index: handIndex, // For draw animations, store the destination hand index
         discardPileIndex: undefined,
       },
     });
@@ -138,43 +129,60 @@ export const triggerMultipleDrawAnimations = async (
   // This prevents cumulative delays - each card appears at a predictable time
   const animationPromises: Promise<void>[] = [];
   let maxDuration = 0;
-  
+
   for (let i = 0; i < cards.length; i++) {
     const startDelay = i * staggerDelay;
-    
+
     const animationPromise = new Promise<void>((resolve) => {
-      setTimeout(async () => {
-        const { duration, animationId } = await triggerDrawAnimation(
-          gameState,
-          playerIndex,
-          cards[i],
-          handIndices[i]
-        );
-        
+      console.log(`🎬 Card ${i+1}/${cards.length} animation STARTING - Card: ${cards[i].value}, Hand Index: ${handIndices[i]}, Delay: ${startDelay}ms`);
+
+      triggerDrawAnimation(
+        gameState,
+        playerIndex,
+        cards[i],
+        handIndices[i],
+        startDelay
+      ).then(({ duration, animationId }) => {
         if (duration > 0 && animationId) {
+          console.log(`⏱️ Card ${i + 1}/${cards.length} animation IN PROGRESS - Duration: ${duration}ms, Total time expected: ${startDelay + duration}ms`);
+
           // Remove animation exactly when it completes to show the card
           setTimeout(() => {
+            console.log(`✅ Card ${i + 1}/${cards.length} animation FINISHED - Card: ${cards[i].value} now APPEARING at ${Date.now()}`);
+            console.log(`🔄 Removing animation ${animationId} for Card: ${cards[i].value}`);
             globalAnimationContext!.removeAnimation(animationId);
             resolve();
           }, duration);
-          
+
           // Track the maximum total time for any card
           const totalTimeForThisCard = startDelay + duration;
           if (totalTimeForThisCard > maxDuration) {
             maxDuration = totalTimeForThisCard;
           }
         } else {
+          console.log(`❌ Card ${i + 1}/${cards.length} animation FAILED - Card: ${cards[i].value}`);
           resolve();
         }
-      }, startDelay);
+      });
     });
     
     animationPromises.push(animationPromise);
   }
   
-  // Wait for all animations to complete
-  await Promise.all(animationPromises);
+  console.log(`🔄 Starting all ${animationPromises.length} animations independently...`);
+  console.log(`📊 Returning duration: 0ms to avoid additional waiting in useSkipBoGame`);
   
-  // Return the maximum duration (when the last card finishes)
-  return maxDuration;
+  // Don't wait for all animations to complete
+  // Each card will appear independently when its animation completes
+  // This allows for a more natural staggered appearance
+  
+  // We still keep track of the animations to ensure they complete properly
+  // but we don't make the game logic wait for them
+  Promise.all(animationPromises).then(() => {
+    console.log(`🏁 All ${animationPromises.length} animations completed in the background`);
+  });
+  
+  // Return 0 duration so useSkipBoGame doesn't wait additionally
+  // This allows the game to proceed immediately while animations continue in the background
+  return 0;
 };

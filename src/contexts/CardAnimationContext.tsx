@@ -7,6 +7,7 @@ export interface CardAnimationData {
   startPosition: { x: number; y: number };
   endPosition: { x: number; y: number };
   animationType: 'play' | 'discard' | 'draw';
+  initialDelay: number;
   duration: number;
   // Source information to identify which card should be hidden
   sourceInfo: {

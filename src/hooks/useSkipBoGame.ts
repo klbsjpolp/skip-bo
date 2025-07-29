@@ -107,6 +107,7 @@ export function useSkipBoGame() {
             startPosition,
             endPosition,
             animationType: 'play',
+            initialDelay: 0,
             duration,
             sourceInfo: {
               playerIndex: currentState.currentPlayerIndex,
@@ -142,7 +143,7 @@ export function useSkipBoGame() {
           // Simulate the draw to get the cards that will be drawn
           let remainingToDraw = cardsToDraw;
           const deckCopy = [...currentState.deck];
-          let completedBuildPilesCopy = [...currentState.completedBuildPiles];
+          const completedBuildPilesCopy = [...currentState.completedBuildPiles];
           
           // First, get cards from existing deck
           for (let i = 0; i < handCopy.length && remainingToDraw > 0; i++) {
@@ -156,7 +157,6 @@ export function useSkipBoGame() {
           // If we need more cards and have completed build piles, reshuffle
           if (remainingToDraw > 0 && completedBuildPilesCopy.length > 0) {
             deckCopy.push(...completedBuildPilesCopy);
-            completedBuildPilesCopy = [];
             
             // Shuffle deck
             for (let i = deckCopy.length - 1; i > 0; i--) {
@@ -176,6 +176,9 @@ export function useSkipBoGame() {
           
           // Trigger draw animations
           if (cardsToAnimate.length > 0) {
+            console.log(`🔄 useSkipBoGame: Starting draw animations for ${cardsToAnimate.length} cards`);
+            const startTime = Date.now();
+            
             const drawAnimationDuration = await triggerMultipleDrawAnimations(
               currentState,
               currentState.currentPlayerIndex,
@@ -184,9 +187,13 @@ export function useSkipBoGame() {
               150 // 150ms stagger between cards
             );
             
+            console.log(`⏱️ useSkipBoGame: Received drawAnimationDuration: ${drawAnimationDuration}ms after ${Date.now() - startTime}ms`);
+            
             // Wait for draw animations to complete
             if (drawAnimationDuration > 0) {
+              console.log(`⏳ useSkipBoGame: Waiting additional ${drawAnimationDuration}ms before proceeding with game logic`);
               await new Promise(resolve => setTimeout(resolve, drawAnimationDuration));
+              console.log(`✅ useSkipBoGame: Wait complete, proceeding with game logic at ${Date.now()}`);
             }
           }
         }
@@ -197,7 +204,7 @@ export function useSkipBoGame() {
 
     dispatch({ type: 'PLAY_CARD', buildPile });
     return { success: true, message: 'Carte jouée' };
-  }, [startAnimation]);
+  }, [dispatch, startAnimation]);
 
   const discardCard = useCallback((discardPile: number): Promise<MoveResult> => {
     return new Promise((resolve) => {
@@ -248,6 +255,7 @@ export function useSkipBoGame() {
                 startPosition,
                 endPosition,
                 animationType: 'discard',
+                initialDelay: 0,
                 duration,
                 sourceInfo: {
                   playerIndex: currentState.currentPlayerIndex,
@@ -273,7 +281,7 @@ export function useSkipBoGame() {
 
   const clearSelection = useCallback(() => {
     dispatch({ type: 'CLEAR_SELECTION' });
-  }, []);
+  }, [dispatch]);
 
   const canPlayCardWrapper = useCallback((card: Card, buildPileIndex: number, gameState: GameState) => {
     return canPlayCard(card, buildPileIndex, gameState);

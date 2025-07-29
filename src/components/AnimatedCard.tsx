@@ -12,24 +12,42 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
   animation, 
   onAnimationComplete 
 }) => {
+  const [isStarted, setStarted] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(false);
 
   useEffect(() => {
-    // Start animation on next frame to ensure initial position is set
-    const startTimer = requestAnimationFrame(() => {
-      setIsAnimating(true);
-    });
+    const startedTimeout = setTimeout(() => {
+      setStarted(true);
+    }, animation.initialDelay);
 
-    // Complete animation after duration
-    const completeTimer = setTimeout(() => {
-      onAnimationComplete(animation.id);
-    }, animation.duration);
+    return () => clearTimeout(startedTimeout);
+  }, [animation.initialDelay]);
 
-    return () => {
-      cancelAnimationFrame(startTimer);
-      clearTimeout(completeTimer);
-    };
-  }, [animation.id, animation.duration, onAnimationComplete]);
+  useEffect(() => {
+    if (isStarted) {
+      // Start animation on next frame to ensure initial position is set
+      const startTimer = requestAnimationFrame(() => {
+        setIsAnimating(true);
+
+        // The animated card (moving across screen) should always be visible
+        // This is the card actually animating from point A to point B
+        setIsRevealed(!(animation.animationType === 'draw' && animation.sourceInfo.playerIndex === 1));
+      });
+
+      console.log(`🎭 Card ${animation.card.value} animation INIT - Type: ${animation.animationType}, animated card is VISIBLE`);
+
+      // Complete animation after duration
+      const completeTimer = setTimeout(() => {
+        onAnimationComplete(animation.id);
+      }, animation.duration);
+
+      return () => {
+        cancelAnimationFrame(startTimer);
+        clearTimeout(completeTimer);
+      };
+    }
+  }, [isStarted, animation.id, animation.duration, animation.animationType, animation.card.value, onAnimationComplete]);
 
   const style: React.CSSProperties = {
     position: 'fixed',
@@ -45,13 +63,14 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
     <div
       className={cn(
         'animated-card',
-        `animation-${animation.animationType}`
+        `animation-${animation.animationType}`,
+        isRevealed ? 'card-revealed' : 'card-hidden'
       )}
       style={style}
     >
       <Card
         card={animation.card}
-        isRevealed={true}
+        isRevealed={isRevealed}
         canBeGrabbed={false}
         className="shadow-lg"
       />

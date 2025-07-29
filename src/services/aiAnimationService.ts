@@ -7,22 +7,11 @@ import {
   getBuildPilePosition,
   calculateAnimationDuration 
 } from '@/utils/cardPositions';
+import {CardAnimationData} from "@/contexts/CardAnimationContext.tsx";
 
 // Global reference to the animation context
 let globalAnimationContext: {
-  startAnimation: (animationData: {
-    card: Card;
-    startPosition: { x: number; y: number };
-    endPosition: { x: number; y: number };
-    animationType: 'play' | 'discard' | 'draw';
-    duration: number;
-    sourceInfo: {
-      playerIndex: number;
-      source: 'hand' | 'stock' | 'discard';
-      index: number;
-      discardPileIndex?: number;
-    };
-  }) => void;
+  startAnimation: (animationData: Omit<CardAnimationData, 'id'>) => void;
 } | null = null;
 
 // Function to set the global animation context (called from React component)
@@ -117,6 +106,7 @@ export const triggerAIAnimation = async (
         startPosition,
         endPosition,
         animationType,
+        initialDelay: 0,
         duration,
         sourceInfo: {
           playerIndex: gameState.currentPlayerIndex,
