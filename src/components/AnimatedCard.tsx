@@ -43,7 +43,7 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
     transition: isAnimating ? `all ${animation.duration}ms cubic-bezier(0.4, 0.0, 0.2, 1)` : 'none',
     transform: 'translate(-50%, -50%)', // Center the card on the position
   };
-  console.log('AnimatedCard', 'animationType', animation.animationType, 'isAnimating', isAnimating , 'card', animation.card.isSkipBo ? 'SB' : animation.card.value, 'isRevealed', isRevealed)
+  //console.log('AnimatedCard', 'animationType', animation.animationType, 'isAnimating', isAnimating , 'card', animation.card.isSkipBo ? 'SB' : animation.card.value, 'isRevealed', isRevealed)
   return (<div
       className={cn(
         'animated-card',

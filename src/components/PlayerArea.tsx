@@ -102,6 +102,7 @@ export function PlayerArea({
                 onClick={stockPileOnClick}
                 isSelected={
                   gameState.selectedCard?.source === 'stock' &&
+                  gameState.selectedCard.index === player.stockPile.length - 1 &&
                   gameState.currentPlayerIndex === playerIndex
                 }
                 canBeGrabbed={isHuman && isCurrentPlayer}

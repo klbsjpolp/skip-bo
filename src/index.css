@@ -361,14 +361,17 @@
 
   /* Selected cards in discard piles */
   .discard-pile-stack .card.selected {
-    box-shadow: 0 4px 15px var(--selected-border);
+    box-shadow: 0 0 20px var(--selected-border) !important;
+    border-color: var(--selected-border) !important;
+    z-index: 100 !important;
   }
 
   /* Selected cards should maintain selection shadow when hovered */
   .discard-pile-stack .card.selected.hoverable-card:hover {
-    box-shadow: 0 4px 15px var(--selected-border);
+    box-shadow: 0 0 20px var(--selected-border) !important;
     --card-translate-y: -2px;
     --card-scale: 1.05;
+    z-index: 100 !important;
   }
 
   /* Theme-specific overrides */
@@ -395,7 +398,9 @@
     }
 
     &.selected {
-      box-shadow: 0 0 20px var(--selected-border);
+      box-shadow: 0 0 20px var(--selected-border) !important;
+      border-color: var(--selected-border) !important;
+      z-index: 100 !important;
     }
   }
 
@@ -415,7 +420,9 @@
       }
 
       &.selected {
-        box-shadow: 0 0 20px var(--selected-border);
+        box-shadow: 0 0 20px var(--selected-border) !important;
+        border-color: var(--selected-border) !important;
+        z-index: 100 !important;
       }
     }
 
@@ -443,6 +450,12 @@
       border: 3px solid var(--card-border);
       box-shadow: 3px 3px 0 var(--card-border), 0 0 10px rgba(42, 157, 143, 0.3);
     }
+    
+    &.selected {
+      box-shadow: 0 0 20px var(--selected-border) !important;
+      border-color: var(--selected-border) !important;
+      z-index: 100 !important;
+    }
   }
 
   .theme-metro {
@@ -458,6 +471,12 @@
       background-color: #ffd426;
       position: relative;
     }
+    
+    .card.selected {
+      box-shadow: 0 0 20px var(--selected-border) !important;
+      border-color: var(--selected-border) !important;
+      z-index: 100 !important;
+    }
   }
 
   .theme-pastel .card {
@@ -469,7 +488,9 @@
     }
 
     &.selected {
-      box-shadow: 0 0 0 2px var(--selected-border), 0 4px 8px rgba(255, 203, 119, 0.3);
+      box-shadow: 0 0 20px var(--selected-border) !important;
+      border-color: var(--selected-border) !important;
+      z-index: 100 !important;
     }
   }
 
@@ -679,10 +700,24 @@
 
   /* Consistent selection styles for all cards */
   .card.selected {
-    border-color: var(--selected-border);
+    border-color: var(--selected-border) !important;
     --card-translate-y: -5px;
-    box-shadow: 0 4px 15px var(--selected-border);
-    z-index: 100;
+    box-shadow: 0 0 20px var(--selected-border) !important;
+    z-index: 100 !important;
+  }
+  
+  /* Ensure stock pile cards show selection highlight */
+  .player-area .relative .card.selected {
+    border-color: var(--selected-border) !important;
+    box-shadow: 0 0 20px var(--selected-border) !important;
+    z-index: 100 !important;
+  }
+  
+  /* Ensure discard pile cards show selection highlight */
+  .discard-pile-stack .drop-indicator .card.selected {
+    border-color: var(--selected-border) !important;
+    box-shadow: 0 0 20px var(--selected-border) !important;
+    z-index: 100 !important;
   }
 
   @media (max-width: 640px) {

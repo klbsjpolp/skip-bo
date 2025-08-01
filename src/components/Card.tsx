@@ -24,8 +24,7 @@ const CardComponent: React.FC<CardProps> = ({
                                               canBeGrabbed = false,
                                               stackIndex = undefined,
                                               overlapIndex = undefined,
-                                              displayValue: overriddenDisplayValue,
-                                              hint
+                                              displayValue: overriddenDisplayValue
                                             }) => {
   const displayValue = () => {
     if (!isRevealed) return '';
@@ -64,7 +63,7 @@ const CardComponent: React.FC<CardProps> = ({
       '--card-rotate': `${angle}deg`
     } as CSSProperties;
   }
-  console.log('Card', 'hint', hint, 'cardValue', cardValue, 'card', card?.isSkipBo ? 'SB' : card?.value, 'isRevealed', isRevealed, 'isSelected', isSelected, 'colourClass', colourClass, 'overlapIndex', overlapIndex, 'stackIndex', stackIndex)
+  //console.log('Card', 'hint', hint, 'cardValue', cardValue, 'card', card?.isSkipBo ? 'SB' : card?.value, 'isRevealed', isRevealed, 'isSelected', isSelected, 'colourClass', colourClass, 'overlapIndex', overlapIndex, 'stackIndex', stackIndex)
   return (card ?
       <div
         className={cn(

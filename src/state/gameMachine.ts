@@ -180,7 +180,7 @@ export const gameMachine = createMachine({
       if (!context?.G || !Array.isArray(context.G.players)) return false;
       const aiPlayer = context.G.players[context.G.currentPlayerIndex];
       if (!aiPlayer?.isAI || !Array.isArray(aiPlayer.hand)) return false;
-    
+
       const emptySlots = aiPlayer.hand.filter((c) => c === null).length;
 
       // AI needs to draw if it has empty slots and there are cards available to draw
