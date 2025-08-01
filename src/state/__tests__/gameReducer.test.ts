@@ -486,17 +486,16 @@ describe('gameReducer', () => {
 
     describe('END_TURN with deck exhaustion', () => {
       it('should reshuffle completed build piles when drawing for next player', () => {
-        const stateForEndTurn = {
+        const stateForEndTurn: GameState = {
           ...initialState,
-          deck: [{ value: 1, isSkipBo: false }], // Only 1 card in deck
+          deck: [], // Empty deck
           completedBuildPiles: [
-            { value: 2, isSkipBo: false },
-            { value: 3, isSkipBo: true },
-            { value: 4, isSkipBo: false },
-            { value: 5, isSkipBo: false }, // Add more cards so deck isn't empty after drawing
-            { value: 6, isSkipBo: false },
-            { value: 7, isSkipBo: false }
-          ],
+            {value: 1, isSkipBo: false},
+            {value: 2, isSkipBo: false},
+            {value: 3, isSkipBo: false},
+            {value: 4, isSkipBo: false},
+            {value: 5, isSkipBo: false},
+          ], // 5 cards that need to be reshuffled
           currentPlayerIndex: 0,
           players: [
             {
@@ -505,7 +504,7 @@ describe('gameReducer', () => {
             },
             {
               ...initialState.players[1],
-              hand: [{ value: 10, isSkipBo: false }, null, null, null, null] // AI needs 4 more cards
+              hand: [{ value: 10, isSkipBo: false }, null, null, null, null] // AI has 1 card, will need to draw later
             }
           ]
         };
@@ -514,12 +513,12 @@ describe('gameReducer', () => {
 
         // Should switch to AI player
         expect(result.currentPlayerIndex).toBe(1);
-        // AI should have full hand (1 existing + 4 drawn = 5 total)
-        expect(result.players[1].hand.filter(c => !!c)).toHaveLength(5);
-        // Completed build piles should be empty
-        expect(result.completedBuildPiles).toHaveLength(0);
-        // Deck should have remaining cards (2 cards left after drawing 5 total)
-        expect(result.deck.length).toBeGreaterThan(0);
+        // AI should still have only 1 card (END_TURN no longer auto-draws)
+        expect(result.players[1].hand.filter(c => !!c)).toHaveLength(1);
+        // Completed build piles should remain unchanged (drawing happens in state machine now)
+        expect(result.completedBuildPiles).toHaveLength(5);
+        // Deck should remain empty (reshuffling happens during DRAW action)
+        expect(result.deck.length).toBe(0);
       });
     });
 

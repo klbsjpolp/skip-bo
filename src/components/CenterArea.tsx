@@ -20,6 +20,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
         <div className="w-20 deck">
         {gameState.deck.length > 0 ? (
           <Card
+            hint="Deck"
             card={{ value: 0, isSkipBo: false }}
             isRevealed={false}
             className="shadow-lg"
@@ -58,6 +59,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
           >
             {pile.length > 0 ? (
                 <Card
+                  hint={`Construction pile ${index + 1}`}
                   card={pile[pile.length - 1]}
                   isRevealed={true}
                   canBeGrabbed={false}

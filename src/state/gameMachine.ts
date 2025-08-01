@@ -26,10 +26,10 @@ export const gameMachine = createMachine({
   initial: 'setup',
   states: {
     setup: {
-      always: {
-        target: 'humanTurn',
-        actions: assign({ G: () => initialGameState() }),
-      },
+      always: [
+        { target: 'botTurn', guard: 'isAITurn' },
+        { target: 'humanTurn' }
+      ],
     },
 
     humanTurn: {
@@ -74,7 +74,6 @@ export const gameMachine = createMachine({
             END_TURN: {
               actions: 'apply',
               target: '#skipbo.botTurn',
-              guard: 'isHumanAction',
             },
             RESET: {
               actions: 'apply',
@@ -175,6 +174,18 @@ export const gameMachine = createMachine({
     isAITurn: ({ context }) => context.G.players[context.G.currentPlayerIndex].isAI && !context.G.gameIsOver,
     isHumanTurn: ({ context }) => !context.G.players[context.G.currentPlayerIndex].isAI || context.G.gameIsOver,
     hasWinner: ({ context }) => context.G.gameIsOver,
+    // New guard specifically for END_TURN that checks the current player before switching
+    isHumanEndTurn: ({ context }) => !context.G.players[context.G.currentPlayerIndex].isAI,
+    aiNeedsDraw: ({ context }) => {
+      if (!context?.G || !Array.isArray(context.G.players)) return false;
+      const aiPlayer = context.G.players[context.G.currentPlayerIndex];
+      if (!aiPlayer?.isAI || !Array.isArray(aiPlayer.hand)) return false;
+    
+      const emptySlots = aiPlayer.hand.filter((c) => c === null).length;
+
+      // AI needs to draw if it has empty slots and there are cards available to draw
+      return emptySlots > 0 && (context.G.deck.length > 0 || context.G.completedBuildPiles.length > 0);
+    },
   },
   actors: {
     botService: fromPromise(async ({ input }: { input: { G: GameState } }) => {
@@ -210,7 +221,7 @@ export const gameMachine = createMachine({
             // Simulate the draw to get the cards that will be drawn
             let remainingToDraw = cardsToDraw;
             const deckCopy = [...gameStateAfterPlay.deck];
-            let completedBuildPilesCopy = [...gameStateAfterPlay.completedBuildPiles];
+            const completedBuildPilesCopy = [...gameStateAfterPlay.completedBuildPiles];
             
             // First, get cards from existing deck
             for (let i = 0; i < handCopy.length && remainingToDraw > 0; i++) {
@@ -224,8 +235,7 @@ export const gameMachine = createMachine({
             // If we need more cards and have completed build piles, reshuffle
             if (remainingToDraw > 0 && completedBuildPilesCopy.length > 0) {
               deckCopy.push(...completedBuildPilesCopy);
-              completedBuildPilesCopy = [];
-              
+
               // Shuffle deck
               for (let i = deckCopy.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -276,10 +286,8 @@ export const gameMachine = createMachine({
     drawService: fromPromise(async ({ input }: { input: { G: GameState } }) => {
       const gameState = input.G;
       const player = gameState.players[gameState.currentPlayerIndex];
-      
       // Count empty slots in hand (null values)
       const emptySlots = player.hand.filter(card => card === null).length;
-      
       // Calculate how many cards will be drawn
       const cardsToDraw = Math.min(emptySlots, gameState.deck.length + gameState.completedBuildPiles.length);
       
@@ -287,12 +295,12 @@ export const gameMachine = createMachine({
         // Prepare cards and hand indices for animation
         const cardsToAnimate: Card[] = [];
         const handIndices: number[] = [];
-        
+
         // Simulate the draw to get the cards that will be drawn
         let remainingToDraw = cardsToDraw;
         const deckCopy = [...gameState.deck];
-        let completedBuildPilesCopy = [...gameState.completedBuildPiles];
-        
+        const completedBuildPilesCopy = [...gameState.completedBuildPiles];
+
         // First, get cards from existing deck
         for (let i = 0; i < player.hand.length && remainingToDraw > 0; i++) {
           if (player.hand[i] === null && deckCopy.length > 0) {
@@ -301,19 +309,18 @@ export const gameMachine = createMachine({
             remainingToDraw--;
           }
         }
-        
+
         // If we need more cards and have completed build piles, reshuffle
         if (remainingToDraw > 0 && completedBuildPilesCopy.length > 0) {
           // Add completed build piles to deck and shuffle
           deckCopy.push(...completedBuildPilesCopy);
-          completedBuildPilesCopy = [];
-          
+
           // Shuffle deck
           for (let i = deckCopy.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [deckCopy[i], deckCopy[j]] = [deckCopy[j], deckCopy[i]];
           }
-          
+
           // Get remaining cards
           for (let i = 0; i < player.hand.length && remainingToDraw > 0; i++) {
             if (player.hand[i] === null && deckCopy.length > 0) {
@@ -323,7 +330,7 @@ export const gameMachine = createMachine({
             }
           }
         }
-        
+
         // Trigger animations if we have cards to animate
         if (cardsToAnimate.length > 0) {
           const animationDuration = await triggerMultipleDrawAnimations(
@@ -333,7 +340,7 @@ export const gameMachine = createMachine({
             handIndices,
             150 // 150ms stagger between cards
           );
-          
+
           // Wait for animations to complete
           if (animationDuration > 0) {
             await new Promise(resolve => setTimeout(resolve, animationDuration));
@@ -341,7 +348,8 @@ export const gameMachine = createMachine({
         }
       }
       
-      return { type: 'DRAW' } as GameAction;
+      return { type: 'DRAW', count: cardsToDraw } as GameAction;
     }),
   },
 });
+

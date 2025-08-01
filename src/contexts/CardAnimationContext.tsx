@@ -43,13 +43,10 @@ export const CardAnimationProvider: React.FC<CardAnimationProviderProps> = ({ ch
 
     setActiveAnimations(prev => [...prev, newAnimation]);
 
-    // Auto-remove animation after duration, but NOT for draw animations
-    // Draw animations will be manually removed to ensure sequential appearance
-    if (animationData.animationType !== 'draw') {
-      setTimeout(() => {
-        setActiveAnimations(prev => prev.filter(anim => anim.id !== id));
-      }, animationData.duration);
-    }
+    // Auto-remove animation after duration
+    setTimeout(() => {
+      setActiveAnimations(prev => prev.filter(anim => anim.id !== id));
+    }, animationData.duration);
 
     return id; // Return the animation ID so it can be manually removed
   }, []);

@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import {EmptyCard} from "@/components/EmptyCard.tsx";
 import { CONFIG } from '@/lib/config';
 import { useCardAnimation } from '@/contexts/CardAnimationContext';
+import {MouseEventHandler, useCallback} from "react";
 
 interface PlayerAreaProps {
   player: Player;
@@ -28,6 +29,47 @@ export function PlayerArea({
   const handOverlaps = player.hand.length > 4;
   const { isCardBeingAnimated } = useCardAnimation();
 
+  const stockPileOnClick: MouseEventHandler = useCallback((e) => {
+    // Prevent event propagation
+    e.stopPropagation();
+
+    // Only allow selection if it's the human player's turn
+    if (isHuman && isCurrentPlayer) {
+      // If this card is already selected, deselect it
+      if (gameState.selectedCard?.source === 'stock' &&
+        gameState.currentPlayerIndex === playerIndex) {
+        // Clear the selection
+        clearSelection();
+      } else {
+        // Select this card
+        selectCard('stock', player.stockPile.length - 1);
+      }
+    }
+  }, [clearSelection, gameState.currentPlayerIndex, gameState.selectedCard?.source, isCurrentPlayer, isHuman, player.stockPile.length, playerIndex, selectCard])
+
+  const handCardOnClick: MouseEventHandler = useCallback((e) => {
+    // Prevent event propagation
+    e.stopPropagation();
+    console.log('handCardOnClick', 'isHuman', isHuman,'isCurrentPlayer',isCurrentPlayer, e.currentTarget.parentElement?.getAttribute('data-card-index'))
+
+    // Only allow selection if it's the human player's turn
+    // For hand cards, we allow selecting even if another card is selected
+    // This allows the player to change their selection
+    if (isHuman && isCurrentPlayer) {
+      const index = parseInt(e.currentTarget.parentElement?.getAttribute('data-card-index') || '');
+      // If this card is already selected, deselect it
+      if (gameState.selectedCard?.source === 'hand' &&
+        gameState.selectedCard.index === index &&
+        gameState.currentPlayerIndex === playerIndex) {
+        // Clear the selection
+        clearSelection();
+      } else {
+        // Select this card
+        selectCard('hand', index);
+      }
+    }
+  }, [clearSelection, gameState.currentPlayerIndex, gameState.selectedCard?.index, gameState.selectedCard?.source, isCurrentPlayer, isHuman, playerIndex, selectCard]);
+
   return (
     <div className={cn(
       "player-area", "flex items-center gap-4 h-full",
@@ -43,6 +85,7 @@ export function PlayerArea({
             {/* Always show the second card underneath if available */}
             {player.stockPile.length > 1 && (
               <Card
+                hint={player.stockPile.length === 2 ? 'Second card in stock' : 'Second card in stock (hidden)'}
                 card={player.stockPile[player.stockPile.length - 2]}
                 isRevealed={true}
                 canBeGrabbed={false}
@@ -53,25 +96,10 @@ export function PlayerArea({
             {/* Show the top card unless it's being animated */}
             {!isCardBeingAnimated(playerIndex, 'stock', player.stockPile.length - 1) && (
               <Card
+                hint={player.stockPile.length === 1 ? 'Top card in stock' : 'Top card in stock (hidden)'}
                 card={player.stockPile[player.stockPile.length - 1]}
                 isRevealed={true}
-                onClick={(e) => {
-                  // Prevent event propagation
-                  e.stopPropagation();
-
-                  // Only allow selection if it's the human player's turn
-                  if (isHuman && isCurrentPlayer) {
-                    // If this card is already selected, deselect it
-                    if (gameState.selectedCard?.source === 'stock' &&
-                        gameState.currentPlayerIndex === playerIndex) {
-                      // Clear the selection
-                      clearSelection();
-                    } else {
-                      // Select this card
-                      selectCard('stock', player.stockPile.length - 1);
-                    }
-                  }
-                }}
+                onClick={stockPileOnClick}
                 isSelected={
                   gameState.selectedCard?.source === 'stock' &&
                   gameState.currentPlayerIndex === playerIndex
@@ -106,33 +134,16 @@ export function PlayerArea({
         {player.hand.map((card, index) => (
           <div className='card-holder' key={`hand-${index}`} data-card-index={index}>
             {/* Hide cards that are being animated OUT of the hand (discard/play animations) */}
-            {/* Show cards that are in the hand normally or being animated INTO the hand (draw animations) */}
+            {/* Hide cards that are being animated INTO the hand (draw animations) until animation completes */}
+            {/* Only show cards that are in the hand normally and not being animated */}
             {isCardBeingAnimated(playerIndex, 'hand', index) || isCardBeingAnimated(playerIndex, 'deck', index) ? (
               <div className="card opacity-0 pointer-events-none" />
             ) : (
               <Card
+                hint={`Hand card ${index + 1}`}
                 card={card}
                 isRevealed={isHuman}
-                onClick={(e) => {
-                  // Prevent event propagation
-                  e.stopPropagation();
-
-                  // Only allow selection if it's the human player's turn
-                  // For hand cards, we allow selecting even if another card is selected
-                  // This allows the player to change their selection
-                  if (isHuman && isCurrentPlayer) {
-                    // If this card is already selected, deselect it
-                    if (gameState.selectedCard?.source === 'hand' &&
-                        gameState.selectedCard.index === index &&
-                        gameState.currentPlayerIndex === playerIndex) {
-                      // Clear the selection
-                      clearSelection();
-                    } else {
-                      // Select this card
-                      selectCard('hand', index);
-                    }
-                  }
-                }}
+                onClick={handCardOnClick}
                 isSelected={
                   gameState.selectedCard?.source === 'hand' &&
                   gameState.selectedCard.index === index &&
@@ -188,6 +199,7 @@ export function PlayerArea({
                     <div key={`discard-${pileIndex}-card-${cardIdx}`} className="card opacity-0 pointer-events-none" style={{ top: `${cardIdx * 20}px`, zIndex: cardIdx }} />
                   ) : (
                     <Card
+                      hint={`discard pile ${pileIndex + 1}, card ${cardIdx + 1}`}
                       key={`discard-${pileIndex}-card-${cardIdx}`}
                       card={card}
                       isRevealed={true}

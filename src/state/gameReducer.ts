@@ -5,10 +5,10 @@ import {initialGameState} from './initialGameState';
 import {MESSAGES} from '@/lib/config';
 import {canPlayCard} from '@/lib/validators';
 
-export const gameReducer = produce( (draft: GameState, action: GameAction): GameState | void => {
+export const gameReducer = produce((draft: GameState, action: GameAction) => {
   switch (action.type) {
     case 'INIT': {
-      return initialGameState();                          // recrée totalement
+      return initialGameState();
     }
 
     case 'DRAW': {
@@ -63,8 +63,7 @@ export const gameReducer = produce( (draft: GameState, action: GameAction): Game
           }
         }
       }
-
-      return;
+      break;
     }
 
     case 'SELECT_CARD': {
@@ -90,13 +89,13 @@ export const gameReducer = produce( (draft: GameState, action: GameAction): Game
         };
         draft.message = 'Sélectionnez une destination';
       }
-      return;
+      break;
     }
 
     case 'CLEAR_SELECTION':
       draft.selectedCard = null;
       draft.message = 'Sélectionnez une carte';
-      return;
+      break;
 
     case 'PLAY_CARD': {
       const { selectedCard } = draft;
@@ -186,7 +185,7 @@ export const gameReducer = produce( (draft: GameState, action: GameAction): Game
 
       // Clear selection
       draft.selectedCard = null;
-      return;
+      break;
     }
 
     case 'DISCARD_CARD': {
@@ -228,9 +227,6 @@ export const gameReducer = produce( (draft: GameState, action: GameAction): Game
       // End turn after discarding
       draft.currentPlayerIndex = 1 - draft.currentPlayerIndex;
 
-      // No card drawing here - cards should only be drawn at the beginning of a turn (END_TURN case)
-      // or when a player clears their hand without discarding (PLAY_CARD case)
-
       // Set message
       const currentPlayer = draft.players[1 - draft.currentPlayerIndex]; // Previous player
       const nextPlayer = draft.players[draft.currentPlayerIndex]; // New current player
@@ -238,63 +234,23 @@ export const gameReducer = produce( (draft: GameState, action: GameAction): Game
 
       // Clear selection
       draft.selectedCard = null;
-      return;
+      break;
     }
 
     case 'END_TURN':
       draft.currentPlayerIndex = draft.currentPlayerIndex === 0 ? 1 : 0;
       draft.selectedCard = null;
 
-      // Draw cards for the next player to fill empty slots
-      const nextPlayer = draft.players[draft.currentPlayerIndex];
-      
-      // Count empty slots in hand (null values)
-      const emptySlots = nextPlayer.hand.filter(card => card === null).length;
-      
-      if (emptySlots > 0) {
-        let remainingToDraw = Math.min(emptySlots, draft.deck.length + draft.completedBuildPiles.length);
-
-        // First, draw from existing deck
-        const fromDeck = Math.min(remainingToDraw, draft.deck.length);
-        if (fromDeck > 0) {
-          // Fill empty slots first
-          for (let i = 0; i < nextPlayer.hand.length && remainingToDraw > 0; i++) {
-            if (nextPlayer.hand[i] === null && draft.deck.length > 0) {
-              nextPlayer.hand[i] = draft.deck.shift()!;
-              remainingToDraw--;
-            }
-          }
-        }
-
-        // If we still need more cards and have completed build piles, reshuffle and continue
-        if (remainingToDraw > 0 && draft.completedBuildPiles.length > 0) {
-          // Move completed build piles to deck and shuffle
-          draft.deck.push(...draft.completedBuildPiles);
-          draft.completedBuildPiles = [];
-
-          // Shuffle deck
-          for (let i = draft.deck.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [draft.deck[i], draft.deck[j]] = [draft.deck[j], draft.deck[i]];
-          }
-
-          // Draw remaining cards to fill empty slots
-          for (let i = 0; i < nextPlayer.hand.length && remainingToDraw > 0 && draft.deck.length > 0; i++) {
-            if (nextPlayer.hand[i] === null) {
-              nextPlayer.hand[i] = draft.deck.shift()!;
-              remainingToDraw--;
-            }
-          }
-        }
-      }
-      
-      return;
+      // Don't draw cards here - let the state machine handle drawing
+      // This ensures both human and AI players get the same drawing experience
+      // with proper animations
+      break;
 
     case 'RESET':
       return initialGameState();
       
     case 'SET_DIFFICULTY':
       draft.aiDifficulty = action.difficulty;
-      return;
+      break;
   }
 });
