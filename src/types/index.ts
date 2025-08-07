@@ -37,13 +37,13 @@ export interface MoveResult {
 }
 
 export const themes = [
-  { value: 'theme-light' as const, label: 'Clair' },
-  { value: 'theme-pastel' as const, label: 'Pastel' },
-  { value: 'theme-rainbow' as const, label: 'Arc-en-ciel' },
-  { value: 'theme-dark' as const, label: 'Sombre' },
-  { value: 'theme-metro' as const, label: 'Metro' },
-  { value: 'theme-neon' as const, label: 'Néon' },
-  { value: 'theme-retro' as const, label: 'Rétro' },
+  { value: 'theme-light' as const, label: 'Clair', icon: 'Sun' },
+  { value: 'theme-pastel' as const, label: 'Pastel', icon: 'Flower2' },
+  { value: 'theme-rainbow' as const, label: 'Arc-en-ciel', icon: 'Rainbow' },
+  { value: 'theme-dark' as const, label: 'Sombre', icon: 'Moon' },
+  { value: 'theme-metro' as const, label: 'Metro', icon: 'Building2' },
+  { value: 'theme-neon' as const, label: 'Néon', icon: 'Zap' },
+  { value: 'theme-retro' as const, label: 'Rétro', icon: 'Radio' },
 ];
 
 export type Theme = typeof themes[number]['value'];
