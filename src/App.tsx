@@ -9,7 +9,12 @@ function App() {
   const { gameState, initializeGame, selectCard, playCard, discardCard, clearSelection, canPlayCard } = useSkipBoGame();
 
   useEffect(() => {
-    initializeGame();
+    // Delay initialization to ensure animation context is set up first
+    const timer = setTimeout(() => {
+      initializeGame();
+    }, 1000);
+    
+    return () => clearTimeout(timer);
   }, [initializeGame]);
 
   return (

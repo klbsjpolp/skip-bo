@@ -178,7 +178,7 @@ export function useSkipBoGame() {
           if (cardsToAnimate.length > 0) {
             console.log(`🔄 useSkipBoGame: Starting draw animations for ${cardsToAnimate.length} cards`);
             const startTime = Date.now();
-            
+
             const drawAnimationDuration = await triggerMultipleDrawAnimations(
               currentState,
               currentState.currentPlayerIndex,
@@ -188,7 +188,7 @@ export function useSkipBoGame() {
             );
             
             console.log(`⏱️ useSkipBoGame: Received drawAnimationDuration: ${drawAnimationDuration}ms after ${Date.now() - startTime}ms`);
-            
+
             // Wait for draw animations to complete
             if (drawAnimationDuration > 0) {
               console.log(`⏳ useSkipBoGame: Waiting additional ${drawAnimationDuration}ms before proceeding with game logic`);

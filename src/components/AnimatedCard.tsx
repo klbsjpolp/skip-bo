@@ -33,7 +33,6 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
     }
   }, [animation.id, animation.duration, animation.animationType, animation.card.value, onAnimationComplete, animation.sourceInfo.playerIndex, animation.initialDelay]);
 
-  const isRevealed = !(animation.animationType === 'draw' && animation.sourceInfo.playerIndex === 1);
   const style: React.CSSProperties = {
     position: 'fixed',
     left: isAnimating ? animation.endPosition.x : animation.startPosition.x,
@@ -43,8 +42,20 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
     transition: isAnimating ? `all ${animation.duration}ms cubic-bezier(0.4, 0.0, 0.2, 1)` : 'none',
     transform: 'translate(-50%, -50%)', // Center the card on the position
   };
-  //console.log('AnimatedCard', 'animationType', animation.animationType, 'isAnimating', isAnimating , 'card', animation.card.isSkipBo ? 'SB' : animation.card.value, 'isRevealed', isRevealed)
-  return (<div
+
+  // Determine if the card should be revealed during animation
+  // AI cards (playerIndex 1) should remain face-down during draw animations
+  const shouldRevealCard = () => {
+    // For draw animations, only reveal if it's the human player (playerIndex 0)
+    if (animation.animationType === 'draw') {
+      return animation.sourceInfo.playerIndex === 0; // Human player
+    }
+    // For play and discard animations, always reveal the card
+    return true;
+  };
+
+  return (
+    <div
       className={cn(
         'animated-card',
         `animation-${animation.animationType}`
@@ -54,7 +65,7 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
       <Card
         hint="AnimatedCard"
         card={animation.card}
-        isRevealed={isRevealed}
+        isRevealed={shouldRevealCard()}
         canBeGrabbed={false}
         className="shadow-lg"
       />

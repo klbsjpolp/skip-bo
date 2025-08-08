@@ -66,6 +66,17 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       break;
     }
 
+    case 'DRAW_SINGLE_CARD': {
+      const player = draft.players[draft.currentPlayerIndex];
+      
+      // Place the specific card in the specific hand slot
+      if (action.handIndex >= 0 && action.handIndex < player.hand.length) {
+        player.hand[action.handIndex] = action.card;
+      }
+      
+      return;
+    }
+
     case 'SELECT_CARD': {
       const player = draft.players[draft.currentPlayerIndex];
       let card;
