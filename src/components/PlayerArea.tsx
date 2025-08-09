@@ -1,8 +1,7 @@
-import { Player, GameState } from '@/types';
+import {Player, GameState} from '@/types';
 import { Card } from '@/components/Card';
 import { cn } from '@/lib/utils';
 import {EmptyCard} from "@/components/EmptyCard.tsx";
-import { CONFIG } from '@/lib/config';
 import { useCardAnimation } from '@/contexts/CardAnimationContext';
 import {MouseEventHandler, useCallback} from "react";
 
@@ -16,10 +15,10 @@ interface PlayerAreaProps {
   clearSelection: () => void;
 }
 
-export function PlayerArea({ 
-  player, 
+export function PlayerArea({
+  player,
   playerIndex,
-  isCurrentPlayer, 
+  isCurrentPlayer,
   gameState,
   selectCard,
   discardCard,
@@ -118,7 +117,7 @@ export function PlayerArea({
           <div
             className="w-full self-end rounded-t-sm bg-primary"
             style={{
-              height: `${Math.max(5, (player.stockPile.length / CONFIG.STOCK_SIZE) * 100)}%`,
+              height: `${Math.max(5, (player.stockPile.length / gameState.config.STOCK_SIZE) * 100)}%`,
             }}
           ></div>
         </div>

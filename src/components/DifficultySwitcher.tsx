@@ -1,7 +1,15 @@
 import { useSkipBoGame } from '@/hooks/useSkipBoGame';
 import { selectDifficulty } from '@/state/selectors';
 import { AIDifficulty } from '@/types';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select.tsx";
 
 const difficulties = [
   { value: 'easy', label: 'Facile' },
@@ -13,7 +21,8 @@ export function DifficultySwitcher() {
   const { gameState, setDifficulty } = useSkipBoGame();
   const currentDifficulty = selectDifficulty(gameState);
 
-  return (
+  return (<SelectGroup className="flex items-baseline gap-2">
+    <SelectLabel className="text-sm">Difficulté: </SelectLabel>
     <Select value={currentDifficulty} onValueChange={setDifficulty}>
       <SelectTrigger className="w-24">
         <SelectValue placeholder="Difficulté" />
@@ -26,5 +35,6 @@ export function DifficultySwitcher() {
         ))}
       </SelectContent>
     </Select>
+    </SelectGroup>
   );
 }

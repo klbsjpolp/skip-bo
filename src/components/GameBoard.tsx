@@ -1,4 +1,4 @@
-import { GameState, Card as CardType } from '@/types';
+import {GameState, Card as CardType} from '@/types';
 import { PlayerArea } from '@/components/PlayerArea';
 import { CenterArea } from '@/components/CenterArea';
 

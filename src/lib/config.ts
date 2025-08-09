@@ -1,14 +1,3 @@
-import { GameConfig } from '@/types';
-
-export const CONFIG: GameConfig = {
-  DECK_SIZE: 162,
-  SKIP_BO_CARDS: 18,
-  HAND_SIZE: 5,
-  STOCK_SIZE: 15,
-  BUILD_PILES_COUNT: 4,
-  DISCARD_PILES_COUNT: 4,
-};
-
 export const CARD_VALUES = {
   MIN: 1,
   MAX: 12,

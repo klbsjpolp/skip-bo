@@ -21,7 +21,7 @@ function App() {
     <div className="min-h-screen p-4 md:p-10">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between mb-2">
-          <NewGame />
+          <NewGame onNewGame={initializeGame} />
           <ThemeSwitcher />
         </div>
         <GameBoard

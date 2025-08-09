@@ -20,6 +20,7 @@ export interface GameState {
   selectedCard: SelectedCard | null;
   message: string;
   aiDifficulty: AIDifficulty;
+  config: GameConfig;
 }
 
 export interface SelectedCard {

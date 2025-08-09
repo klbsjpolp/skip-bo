@@ -39,22 +39,8 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
-  /*@keyframes accordion-down {
-    from {
-      height: 0;
-    }
-    to {
-      height: var(--radix-accordion-content-height);
-    }
-  }
-  @keyframes accordion-up {
-    from {
-      height: var(--radix-accordion-content-height);
-    }
-    to {
-      height: 0;
-    }
-  }*/
+  --card-width: 70px;
+  --card-height: 100px;
 }
 
 @utility container {
@@ -85,256 +71,11 @@
     border-color: var(--color-gray-200, currentcolor);
   }
 
-  :root {
-    /* Tailwind CSS variables */
-    --background: hsl(0 0% 100%);
-    --foreground: hsl(0 0% 3.9%);
-    --card: hsl(0 0% 100%);
-    --card-foreground: hsl(0 0% 3.9%);
-    --popover: hsl(0 0% 100%);
-    --popover-foreground: hsl(0 0% 3.9%);
-    --primary: hsl(0 0% 9%);
-    --primary-foreground: hsl(0 0% 98%);
-    --secondary: hsl(0 0% 96.1%);
-    --secondary-foreground: hsl(0 0% 9%);
-    --muted: hsl(0 0% 96.1%);
-    --muted-foreground: hsl(0 0% 45.1%);
-    --accent: hsl(0 0% 96.1%);
-    --accent-foreground: hsl(0 0% 9%);
-    --destructive: hsl(0 84.2% 60.2%);
-    --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(0 0% 89.8%);
-    --input: hsl(0 0% 89.8%);
-    --ring: hsl(0 0% 3.9%);
-    --radius: 0.5rem;
-
-    /* Skip-Bo game theme variables - Light theme (default) */
-    --bg-color: #e5e7eb;
-    --zone-bg-color: #f9fafb;
-    --text-color: #374151;
-    --title-color: #374151;
-    --card-bg: white;
-    --card-border: #9ca3af;
-    --card-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    --card-radius: 8px;
-    --deck-bg: #3b82f6;
-    --selected-border: #f59e0b;
-    --active-turn-color: #22c55e;
-    --button-bg: #4f46e5;
-    --button-hover-bg: #4338ca;
-
-    /* Card color ranges */
-    --skipbo-text: #FFD97D;
-    --card-g1: hsl(152 69% 58%);   /* 1‑4 */
-    --card-g2: hsl(0 80% 60%);     /* 5‑8 */
-    --card-g3: hsl(283 55% 57%);   /* 9‑12 */
-  }
-
-  .theme-dark {
-    /* Tailwind CSS variables for dark theme */
-    --background: hsl(0 0% 3.9%);
-    --foreground: hsl(0 0% 98%);
-    --card: hsl(0 0% 3.9%);
-    --card-foreground: hsl(0 0% 98%);
-    --popover: hsl(0 0% 3.9%);
-    --popover-foreground: hsl(0 0% 98%);
-    --primary: hsl(0 0% 98%);
-    --primary-foreground: hsl(0 0% 9%);
-    --secondary: hsl(0 0% 14.9%);
-    --secondary-foreground: hsl(0 0% 98%);
-    --muted: hsl(0 0% 14.9%);
-    --muted-foreground: hsl(0 0% 63.9%);
-    --accent: hsl(0 0% 14.9%);
-    --accent-foreground: hsl(0 0% 98%);
-    --destructive: hsl(0 62.8% 30.6%);
-    --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(0 0% 14.9%);
-    --input: hsl(0 0% 14.9%);
-    --ring: hsl(0 0% 83.1%);
-
-    /* Skip-Bo game theme variables - Dark theme */
-    --bg-color: #111827;
-    --zone-bg-color: #1f2937;
-    --text-color: #d1d5db;
-    --title-color: #f9fafb;
-    --card-bg: #374151;
-    --card-border: #6b7280;
-    --deck-bg: #1d4ed8;
-    --selected-border: #f59e0b;
-    --active-turn-color: #4ade80;
-    --button-bg: #6366f1;
-    --button-hover-bg: #4f46e5;
-
-    /* Card color ranges - same as light theme */
-    --skipbo-text: #FFD97D;
-    --card-g1: hsl(152 69% 58%);
-    --card-g2: hsl(0 80% 60%);
-    --card-g3: hsl(283 55% 57%);
-  }
-
-  .theme-pastel {
-    --primary: hsl(170 70% 70%);
-    --primary-foreground: hsl(0 0% 20%);
-    --secondary: hsl(350 80% 85%);
-    --secondary-foreground: hsl(0 0% 20%);
-
-    --bg-color: #f0f4f8;
-    --zone-bg-color: #ffffff;
-    --text-color: #5a6270;
-    --title-color: #4a5568;
-    --card-bg: #ffffff;
-    --card-border: #d8e2ef;
-    --card-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    --card-radius: 10px;
-    --deck-bg: #a0d2eb;
-    --selected-border: #ffcb77;
-    --active-turn-color: #a5dda5;
-    --button-bg: #a0d2eb;
-    --button-hover-bg: #8bbbd6;
-
-    --skipbo-text: #ffcb77;
-    --card-g1: #a5dda5;
-    --card-g2: #f7a9a8;
-    --card-g3: #d0a5db;
-  }
-
-  .theme-metro {
-    --primary: hsl(160 100% 32%);
-    --primary-foreground: hsl(0 0% 100%);
-    --secondary: hsl(0 100% 45%);
-    --secondary-foreground: hsl(0 0% 100%);
-
-    --bg-color: #1d1d1d;
-    --zone-bg-color: #2d2d2d;
-    --text-color: #ffffff;
-    --title-color: #ffffff;
-    --card-bg: #3c3c3c;
-    --card-border: #5e5e5e;
-    --card-shadow: none;
-    --card-radius: 2px;
-    --deck-bg: #00a3a3;
-    --selected-border: #1ba1e2;
-    --active-turn-color: #60a917;
-    --button-bg: #60a917;
-    --button-hover-bg: #4c8712;
-
-    --skipbo-text: hsl(0 0% 85%);
-    --card-g1: #00befc;
-    --card-g2: #ff3b30;
-    --card-g3: #ffd426;
-  }
-
-  .theme-rainbow {
-    --primary: hsl(0 100% 70%);
-    --primary-foreground: hsl(0 0% 100%);
-    --secondary: hsl(120 100% 70%);
-    --secondary-foreground: hsl(0 0% 100%);
-
-    --bg-color: #f0f8ff;
-    --zone-bg-color: #ffffff;
-    --text-color: #333333;
-    --title-color: #ff6b6b;
-    --card-bg: #ffffff;
-    --card-border: #9381ff;
-    --card-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    --card-radius: 12px;
-    --deck-bg: #6a5acd;
-    --selected-border: #ffd700;
-    --active-turn-color: #4caf50;
-    --button-bg: #ff6b6b;
-    --button-hover-bg: #ff5252;
-
-    --skipbo-text: hsl(45 100% 70%);
-    --card-g1: #4caf50;
-    --card-g2: #ff6b6b;
-    --card-g3: #9381ff;
-  }
-
-  .theme-neon {
-    --primary: hsl(157 100% 50%);
-    --primary-foreground: hsl(0 0% 0%);
-    --secondary: hsl(324 100% 50%);
-    --secondary-foreground: hsl(0 0% 100%);
-
-    --bg-color: #0a0a0a;
-    --zone-bg-color: #1a1a1a;
-    --text-color: #00ff88;
-    --title-color: #ff0099;
-    --card-bg: #1a1a1a;
-    --card-border: #00ff88;
-    --card-shadow: 0 0 10px rgba(0,255,136,0.3);
-    --card-radius: 12px;
-    --deck-bg: #0066ff;
-    --selected-border: #ffff00;
-    --active-turn-color: #00ff88;
-    --button-bg: #ff0099;
-    --button-hover-bg: #cc0077;
-
-    --skipbo-text: hsl(60 100% 60%);
-    --card-g1: #00ff88;
-    --card-g2: #ff0099;
-    --card-g3: #0066ff;
-  }
-
-  .theme-retro {
-    --primary: hsl(174 59% 39%);
-    --primary-foreground: hsl(0 0% 100%);
-    --secondary: hsl(11 83% 62%);
-    --secondary-foreground: hsl(0 0% 100%);
-
-    --bg-color: #f4f1de;
-    --zone-bg-color: #e9c46a;
-    --text-color: #264653;
-    --title-color: #2a9d8f;
-    --card-bg: #f4a261;
-    --card-border: #e76f51;
-    --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    --card-radius: 15px;
-    --deck-bg: #2a9d8f;
-    --selected-border: #e9c46a;
-    --active-turn-color: #264653;
-    --button-bg: #2a9d8f;
-    --button-hover-bg: #21867a;
-
-    --skipbo-text: hsl(40 80% 80%);  /* Warm cream color that fits the vintage palette */
-    --card-g1: #2a9d8f;
-    --card-g2: #e76f51;
-    --card-g3: #264653;
-  }
-
-  body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-  }
-
-  h3 {
-   font-weight: bold;
-  }
-
-  * {
-    @apply border-border;
-  }
-
   /* Default card back styles - MOVE THIS BEFORE THEME STYLES */
   .card.back {
     background-color: var(--deck-bg);
     color: white;
     position: relative;
-  }
-
-  /* Light theme card back */
-  :root .card.back {
-    background: linear-gradient(135deg, var(--deck-bg) 0%, #2563eb 100%);
-    border: 2px solid var(--deck-bg);
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
-  }
-
-  /* Dark theme card back */
-  .theme-dark .card.back {
-    background: linear-gradient(135deg, var(--deck-bg) 0%, #1e40af 100%);
-    border: 2px solid var(--deck-bg);
-    box-shadow: 0 0 10px rgba(29, 78, 216, 0.3);
   }
 
   /* Discard pile stack positioning */
@@ -351,148 +92,28 @@
     box-shadow: var(--card-shadow);
   }
 
-  /* Base hover effect for discard pile cards */
+  /* Base hover effect for discard pile cards
   .discard-pile-stack .hoverable-card:hover {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     --card-translate-y: -2px;
     --card-scale: 1.05;
     transition: all 0.2s ease-in-out;
-  }
+  }*/
 
-  /* Selected cards in discard piles */
+  /* Selected cards in discard piles
   .discard-pile-stack .card.selected {
-    box-shadow: 0 0 20px var(--selected-border) !important;
-    border-color: var(--selected-border) !important;
-    z-index: 100 !important;
-  }
+    box-shadow: 0 0 20px var(--selected-border);
+    border-color: var(--selected-border);
+    z-index: 100;
+  }*/
 
-  /* Selected cards should maintain selection shadow when hovered */
+  /* Selected cards should maintain selection shadow when hovered
   .discard-pile-stack .card.selected.hoverable-card:hover {
-    box-shadow: 0 0 20px var(--selected-border) !important;
+    box-shadow: 0 0 20px var(--selected-border);
     --card-translate-y: -2px;
     --card-scale: 1.05;
     z-index: 100 !important;
-  }
-
-  /* Theme-specific overrides */
-  .theme-rainbow .discard-pile-stack .hoverable-card:hover {
-    box-shadow: 0 0 15px rgba(147, 129, 255, 0.4);
-  }
-
-  .theme-rainbow .discard-pile-stack .card.selected.hoverable-card:hover {
-    box-shadow: 0 0 20px var(--selected-border);
-  }
-
-  .theme-neon .discard-pile-stack .hoverable-card:hover {
-    box-shadow: 0 0 15px var(--card-border);
-  }
-
-  .theme-neon .card {
-    box-shadow: 0 0 5px var(--card-border);
-    border: 2px solid var(--card-border);
-
-    &.back {
-      box-shadow: 0 0 15px var(--deck-bg);
-      border: 2px solid var(--deck-bg);
-      background: linear-gradient(135deg, #ff0099 0%, #00ff88 25%, #0066ff 50%, #ff0099 75%, #00ff88 100%);
-    }
-
-    &.selected {
-      box-shadow: 0 0 20px var(--selected-border) !important;
-      border-color: var(--selected-border) !important;
-      z-index: 100 !important;
-    }
-  }
-
-  .theme-rainbow {
-    .card {
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
-      border: 2px solid var(--card-border);
-
-      &.back {
-        position: relative;
-        background: linear-gradient(
-                to bottom,
-                #ff6b6b 0%, /* Red */ #ffb347 16.6%, /* Orange */ #ffff66 33.2%, /* Yellow */ #4caf50 49.8%, /* Green */ #5d9cec 66.4%, /* Blue */ #9381ff 83%, /* Indigo */ #d183e8 100% /* Violet */
-        );
-        border: 2px solid #ffffff;
-        box-shadow: 0 0 15px rgba(147, 129, 255, 0.5);
-      }
-
-      &.selected {
-        box-shadow: 0 0 20px var(--selected-border) !important;
-        border-color: var(--selected-border) !important;
-        z-index: 100 !important;
-      }
-    }
-
-    .discard-pile-stack {
-      .card.selected {
-        box-shadow: 0 0 20px var(--selected-border);
-      }
-
-      .hoverable-card:hover {
-        box-shadow: 0 0 15px rgba(147, 129, 255, 0.4);
-      }
-
-      .card.selected.hoverable-card:hover {
-        box-shadow: 0 0 20px var(--selected-border);
-      }
-    }
-  }
-
-  .theme-retro .card {
-    box-shadow: 3px 3px 0 var(--card-border);
-    border: 2px solid var(--card-border);
-
-    &.back {
-      background: linear-gradient(135deg, #2a9d8f 0%, #e9c46a 50%, #f4a261 100%);
-      border: 3px solid var(--card-border);
-      box-shadow: 3px 3px 0 var(--card-border), 0 0 10px rgba(42, 157, 143, 0.3);
-    }
-    
-    &.selected {
-      box-shadow: 0 0 20px var(--selected-border) !important;
-      border-color: var(--selected-border) !important;
-      z-index: 100 !important;
-    }
-  }
-
-  .theme-metro {
-    .card.back {
-      background-image: repeating-conic-gradient(from 0deg,
-      #00a3a3 0deg 90deg,
-      #ff3b30 90deg 180deg,
-      #00befc 180deg 270deg,
-      #1ba1e2 270deg 360deg
-      );
-      background-size: 70px 100px;
-      background-repeat: no-repeat;
-      background-color: #ffd426;
-      position: relative;
-    }
-    
-    .card.selected {
-      box-shadow: 0 0 20px var(--selected-border) !important;
-      border-color: var(--selected-border) !important;
-      z-index: 100 !important;
-    }
-  }
-
-  .theme-pastel .card {
-    border-width: 1px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-
-    &.back {
-      background: linear-gradient(135deg, #a0d2eb 0%, #bee5eb 100%);
-    }
-
-    &.selected {
-      box-shadow: 0 0 20px var(--selected-border) !important;
-      border-color: var(--selected-border) !important;
-      z-index: 100 !important;
-    }
-  }
+  }*/
 
   /* Consistent hover effects for all selectable cards */
   .hoverable-card:hover {
@@ -609,6 +230,17 @@
     }
   }
 
+  @keyframes neonShift {
+    0%   { background-position: 0 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+  }
+
+  @keyframes neonDrift {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
   .card.back * {
     @apply text-4xl;
   }
@@ -627,55 +259,47 @@
   }
 
   .hand-area {
-    width: 310px; /* 4 cards + gaps */
-    height: 100px; /* 1 card */
-  }
+    width: calc(var(--card-width) * 4 + 10px * (4 - 1)); /* 4 cards + gaps */
+    height: var(--card-height); /* 1 card */
 
-  /* Non-overlapping hands use flexbox */
-  .hand-area:not(.overlap-hand) {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-  }
+    &:not(.overlap-hand) {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
 
-  /* Overlapping hands use absolute positioning */
-  .hand-area.overlap-hand {
-    position: relative;
-    /* Remove flexbox properties that conflict with absolute positioning */
-  }
+    &.overlap-hand {
+      position: relative;
+      /* Remove flexbox properties that conflict with absolute positioning */
+      .card {
+        position: absolute;
+        top: 0;
+        /* Left positioning is handled by inline styles from Card component */
+        transition: all 0.2s ease-in-out;
 
-  .hand-area.overlap-hand .card {
-    position: absolute !important;
-    top: 0;
-    /* Left positioning is handled by inline styles from Card component */
-    transition: all 0.2s ease-in-out;
-  }
+        &.selected {
+          z-index: 101;
+          --card-translate-y: -8px;
 
-  /* Enhanced selection styles for overlapped hands */
-  .hand-area.overlap-hand .card.selected {
-    z-index: 101;
-    --card-translate-y: -8px;
-    border-color: var(--selected-border) !important;
-    box-shadow: 0 4px 15px var(--selected-border) !important;
-  }
+          &.hoverable-card:hover {
+            z-index: 999;
+            --card-translate-y: -10px;
+          }
+        }
 
-  .hand-area.overlap-hand .card.selected.hoverable-card:hover {
-    z-index: 999;
-    --card-translate-y: -10px;
-    box-shadow: 0 6px 20px var(--selected-border) !important;
-  }
+        &.hoverable-card:hover {
+          z-index: 999;
+          --card-translate-y: -8px;
+          --card-scale: 1.08;
+        }
+      }
+    }
 
-  /* Enhanced hover effects for overlapped hands */
-  .hand-area.overlap-hand .card.hoverable-card:hover {
-    z-index: 999;
-    --card-translate-y: -8px;
-    --card-scale: 1.08;
-  }
-
-  .hand-area:not(.overlap-hand) {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
+    &:not(.overlap-hand) {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
   }
 
   .player-area,
@@ -693,31 +317,22 @@
     border-color: var(--active-turn-color);
   }
 
-  .card,
   .discard-pile-stack {
-    width: 70px;
+    width: var(--card-width);
   }
 
-  /* Consistent selection styles for all cards */
-  .card.selected {
-    border-color: var(--selected-border) !important;
-    --card-translate-y: -5px;
-    box-shadow: 0 0 20px var(--selected-border) !important;
-    z-index: 100 !important;
-  }
-  
   /* Ensure stock pile cards show selection highlight */
   .player-area .relative .card.selected {
-    border-color: var(--selected-border) !important;
-    box-shadow: 0 0 20px var(--selected-border) !important;
-    z-index: 100 !important;
+    border-color: var(--selected-border);
+    box-shadow: 0 0 20px var(--selected-border);
+    z-index: 100;
   }
-  
+
   /* Ensure discard pile cards show selection highlight */
   .discard-pile-stack .drop-indicator .card.selected {
-    border-color: var(--selected-border) !important;
-    box-shadow: 0 0 20px var(--selected-border) !important;
-    z-index: 100 !important;
+    border-color: var(--selected-border);
+    box-shadow: 0 0 20px var(--selected-border);
+    z-index: 100;
   }
 
   @media (max-width: 640px) {
@@ -730,11 +345,517 @@
       margin-top: 20px;
     }
   }
+
+  :root {
+    /* Tailwind CSS variables */
+    --background: hsl(0 0% 100%);
+    --foreground: hsl(0 0% 3.9%);
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(0 0% 3.9%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(0 0% 3.9%);
+    --primary: hsl(0 0% 9%);
+    --primary-foreground: hsl(0 0% 98%);
+    --secondary: hsl(0 0% 96.1%);
+    --secondary-foreground: hsl(0 0% 9%);
+    --muted: hsl(0 0% 96.1%);
+    --muted-foreground: hsl(0 0% 45.1%);
+    --accent: hsl(0 0% 96.1%);
+    --accent-foreground: hsl(0 0% 9%);
+    --destructive: hsl(0 84.2% 60.2%);
+    --destructive-foreground: hsl(0 0% 98%);
+    --border: hsl(0 0% 89.8%);
+    --input: hsl(0 0% 89.8%);
+    --ring: hsl(0 0% 3.9%);
+    --radius: 0.5rem;
+
+    /* Skip-Bo game theme variables - Light theme (default) */
+    --bg-color: #e5e7eb;
+    --zone-bg-color: #f9fafb;
+    --text-color: #374151;
+    --title-color: #374151;
+    --card-bg: white;
+    --card-border: #9ca3af;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    --card-radius: 8px;
+    --deck-bg: #3b82f6;
+    --selected-border: #f59e0b;
+    --active-turn-color: #22c55e;
+    --button-bg: #4f46e5;
+    --button-hover-bg: #4338ca;
+
+    /* Card color ranges */
+    --skipbo-text: #FFD97D;
+    --skipbo-bg: #4f46e5;
+    --card-g1: hsl(152 69% 58%);   /* 1‑4 */
+    --card-g2: hsl(0 80% 60%);     /* 5‑8 */
+    --card-g3: hsl(283 55% 57%);   /* 9‑12 */
+
+    .card.back {
+      background: linear-gradient(135deg, var(--deck-bg) 0%, #2563eb 100%);
+      border: 2px solid var(--deck-bg);
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+  }
+
+  .theme-dark {
+    /* Tailwind CSS variables for dark theme */
+    --background: hsl(0 0% 3.9%);
+    --foreground: hsl(0 0% 98%);
+    --card: hsl(0 0% 3.9%);
+    --card-foreground: hsl(0 0% 98%);
+    --popover: hsl(0 0% 3.9%);
+    --popover-foreground: hsl(0 0% 98%);
+    --primary: hsl(0 0% 98%);
+    --primary-foreground: hsl(0 0% 9%);
+    --secondary: hsl(0 0% 14.9%);
+    --secondary-foreground: hsl(0 0% 98%);
+    --muted: hsl(0 0% 14.9%);
+    --muted-foreground: hsl(0 0% 63.9%);
+    --accent: hsl(0 0% 14.9%);
+    --accent-foreground: hsl(0 0% 98%);
+    --destructive: hsl(0 62.8% 30.6%);
+    --destructive-foreground: hsl(0 0% 98%);
+    --border: hsl(0 0% 14.9%);
+    --input: hsl(0 0% 14.9%);
+    --ring: hsl(0 0% 83.1%);
+
+    /* Skip-Bo game theme variables - Dark theme */
+    --bg-color: #111827;
+    --zone-bg-color: #1f2937;
+    --text-color: #d1d5db;
+    --title-color: #f9fafb;
+    --card-bg: #374151;
+    --card-border: #6b7280;
+    --deck-bg: #1d4ed8;
+    --selected-border: #f59e0b;
+    --active-turn-color: #4ade80;
+    --button-bg: #6366f1;
+    --button-hover-bg: #4f46e5;
+
+    /* Card color ranges - same as light theme */
+    --skipbo-text: #FFD97D;
+    --skipbo-bg: hsl(0 0% 3.9%);
+    --card-g1: hsl(152 69% 58%);
+    --card-g2: hsl(0 80% 60%);
+    --card-g3: hsl(283 55% 57%);
+
+    .card.back {
+      background: linear-gradient(135deg, var(--deck-bg) 0%, #1e40af 100%);
+      border: 2px solid var(--deck-bg);
+      box-shadow: 0 0 10px rgba(29, 78, 216, 0.3);
+    }
+  }
+
+  .theme-pastel {
+    --primary: hsl(170 70% 70%);
+    --primary-foreground: hsl(0 0% 20%);
+    --secondary: hsl(350 80% 85%);
+    --secondary-foreground: hsl(0 0% 20%);
+
+    --bg-color: #f0f4f8;
+    --zone-bg-color: #ffffff;
+    --text-color: #5a6270;
+    --title-color: #4a5568;
+    --card-bg: #ffffff;
+    --card-border: #d8e2ef;
+    --card-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    --card-radius: 10px;
+    --deck-bg: #a0d2eb;
+    --selected-border: #ffcb77;
+    --active-turn-color: #a5dda5;
+    --button-bg: #a0d2eb;
+    --button-hover-bg: #8bbbd6;
+
+    --skipbo-text: #ffedd8;
+    --skipbo-bg: hsl(350 80% 85%);
+    --card-g1: #a5dda5;
+    --card-g2: #f7a9a8;
+    --card-g3: #d0a5db;
+
+    .card {
+      border-width: 1px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+      &.back {
+        background: linear-gradient(135deg, #a0d2eb 0%, #bee5eb 100%);
+      }
+    }
+  }
+
+  .theme-metro {
+    --primary: hsl(160 100% 32%);
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: hsl(0 100% 45%);
+    --secondary-foreground: hsl(0 0% 100%);
+
+    --bg-color: #1d1d1d;
+    --zone-bg-color: #2d2d2d;
+    --text-color: #ffffff;
+    --title-color: #ffffff;
+    --card-bg: #3c3c3c;
+    --card-border: #5e5e5e;
+    --card-shadow: none;
+    --card-radius: 2px;
+    --deck-bg: #00a3a3;
+    --selected-border: #1ba1e2;
+    --active-turn-color: #60a917;
+    --button-bg: #60a917;
+    --button-hover-bg: #4c8712;
+
+    --skipbo-text: hsl(0 0% 85%);
+    --skipbo-bg: #1d1d1d;
+    --card-g1: #00befc;
+    --card-g2: #ff3b30;
+    --card-g3: #ffd426;
+
+    .card {
+      &.back {
+        background-image: repeating-conic-gradient(from 0deg,
+        #00a3a3 0deg 90deg,
+        #ff3b30 90deg 180deg,
+        #00befc 180deg 270deg,
+        #1ba1e2 270deg 360deg
+        );
+        background-size: 70px 100px;
+        background-repeat: no-repeat;
+        background-color: #ffd426;
+      }
+
+      &.skipbo-text {
+        &::before {
+          content: "";
+          position: absolute;
+          left: 0;
+          bottom: 0;
+          height: 20px;
+          width: 100%;
+          background-image: linear-gradient(to left,
+          #00a3a3 0%,
+          #00a3a3 25%,
+          #ff3b30 25%,
+          #ff3b30 50%,
+          #00befc 50%,
+          #00befc 75%,
+          #1ba1e2 75%,
+          #1ba1e2 100%
+          );
+        }
+      }
+    }
+  }
+
+  .theme-rainbow {
+    --primary: hsl(0 100% 70%);
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: #9381ff;
+    --secondary-foreground: hsl(0 0% 100%);
+
+    --bg-color: #f0f8ff;
+    --zone-bg-color: #ffffff;
+    --text-color: #333333;
+    --title-color: #ff6b6b;
+    --card-bg: #ffffff;
+    --card-border: #9381ff;
+    --card-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --card-radius: 12px;
+    --deck-bg: #6a5acd;
+    --selected-border: #ffd700;
+    --active-turn-color: #4caf50;
+    --button-bg: #ff6b6b;
+    --button-hover-bg: #ff5252;
+
+    --skipbo-text: hsl(45 100% 70%);
+    --card-g1: #4caf50;
+    --card-g2: #ff6b6b;
+    --card-g3: #9381ff;
+
+    .discard-pile-stack {
+      .hoverable-card:hover {
+        box-shadow: 0 0 15px rgba(147, 129, 255, 0.4);
+      }
+      .card.selected.hoverable-card:hover {
+        box-shadow: 0 0 20px var(--selected-border);
+      }
+    }
+
+    .card {
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+      border: 2px solid var(--card-border);
+
+      &.back {
+        background: linear-gradient(
+                to bottom,
+                #ff6b6b 0%, /* Red */ #ffb347 16.6%, /* Orange */ #ffff66 33.2%, /* Yellow */ #4caf50 49.8%, /* Green */ #5d9cec 66.4%, /* Blue */ #9381ff 83%, /* Indigo */ #d183e8 100% /* Violet */
+        );
+        border: 2px solid #ffffff;
+        box-shadow: 0 0 15px rgba(147, 129, 255, 0.5);
+      }
+
+      &.skipbo-text {
+        /*background:
+                linear-gradient(#ffffff80, #ffffff80),
+                linear-gradient(to left,
+                #ff6b6b 0%, #ffb347 16.6%, #ffff66 33.2%, #4caf50 49.8%, #5d9cec 66.4%, #9381ff 83%, #d183e8 100%
+        );
+        background-blend-mode: normal;*/
+        overflow: hidden;
+        background: none; /* on déporte le décor dans ::before */
+        /* Réglages rapides */
+        --center-y: 140%;     /* centre vertical du cercle (plus grand => arc plus bombé) */
+        --inner: 50%;         /* rayon intérieur de l’arc visible */
+        --band: 3%;         /* épaisseur d’une bande (ajustez entre 2% et 3%) */
+
+        &::before {
+          content: "";
+          position: absolute;
+          inset: -40% -20% -60% -20%; /* déborde pour bien couvrir */
+          z-index: 0;
+          pointer-events: none;
+
+          /* Anneaux concentriques: chaque couleur est une couronne radiale */
+          background:
+                  linear-gradient(#ffffff40, #ffffff40),
+                  radial-gradient(circle at 50% var(--center-y),
+                  transparent 0 var(--inner),
+
+                  #8f00ff var(--inner) calc(var(--inner) + var(--band)),
+                  #4b0082 calc(var(--inner) + var(--band)) calc(var(--inner) + var(--band) * 2),
+                  #0077ff calc(var(--inner) + var(--band) * 2) calc(var(--inner) + var(--band) * 3),
+                  #00ff00 calc(var(--inner) + var(--band) * 3) calc(var(--inner) + var(--band) * 4),
+                  #ffff00 calc(var(--inner) + var(--band) * 4) calc(var(--inner) + var(--band) * 5),
+                  #ff7f00 calc(var(--inner) + var(--band) * 5) calc(var(--inner) + var(--band) * 6),
+                  #ff0000 calc(var(--inner) + var(--band) * 6) calc(var(--inner) + var(--band) * 7),
+
+                  transparent calc(var(--inner) + var(--band) * 7) 100%
+                  );
+          background-blend-mode: normal;
+        }
+
+        & > * {
+          position: relative;
+          z-index: 1;
+        }
+      }
+    }
+
+    .discard-pile-stack {
+      .card.selected {
+        box-shadow: 0 0 20px var(--selected-border);
+      }
+
+      .hoverable-card:hover {
+        box-shadow: 0 0 15px rgba(147, 129, 255, 0.4);
+      }
+
+      .card.selected.hoverable-card:hover {
+        box-shadow: 0 0 20px var(--selected-border);
+      }
+    }
+  }
+
+  .theme-neon {
+    --primary: hsl(157 100% 50%);
+    --primary-foreground: hsl(0 0% 0%);
+    --secondary: hsl(324 100% 50%);
+    --secondary-foreground: hsl(0 0% 100%);
+
+    --bg-color: #0a0a0a;
+    --zone-bg-color: #1a1a1a;
+    --text-color: #00ff88;
+    --title-color: #ff0099;
+    --card-bg: #1a1a1a;
+    --card-border: #00ff88;
+    --card-shadow: 0 0 10px rgba(0,255,136,0.3);
+    --card-radius: 12px;
+    --deck-bg: #0066ff;
+    --selected-border: #ffff00;
+    --active-turn-color: #00ff88;
+    --button-bg: #ff0099;
+    --button-hover-bg: #cc0077;
+
+    --skipbo-text: hsl(60 100% 60%);
+    --skipbo-bg: var(--secondary);
+    --card-g1: #00ff88;
+    --card-g2: #ff0099;
+    --card-g3: #0066ff;
+
+    .card {
+      &.back {
+        box-shadow: 0 0 15px var(--deck-bg);
+        border: 2px solid var(--deck-bg);
+        background: linear-gradient(135deg, #ff0099 0%, #00ff88 25%, #0066ff 50%, #ff0099 75%, #00ff88 100%);
+        overflow: hidden; /* keep glow inside rounded corners */
+
+        /* Animated neon glow overlay */
+        &::before {
+          content: "";
+          position: absolute;
+          inset: -8%;
+          border-radius: calc(var(--card-radius) + 10px);
+          background: linear-gradient(
+                  120deg,
+                  #ff0099 0%,
+                  #00ff88 40%,
+                  #0066ff 70%,
+                  #ff0099 100%
+          );
+          background-size: 250% 250%;
+          filter: blur(10px) saturate(1.1);
+          opacity: 0.30;          /* subtle; tune to 0.25–0.45 */
+          z-index: 0;
+          animation: neonDrift 9s linear infinite alternate;
+        }
+
+        /* Optional: very subtle scanlines for texture */
+        &::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: var(--card-radius);
+          pointer-events: none;
+          z-index: 0;
+          background: repeating-linear-gradient(
+                  to bottom,
+                  rgba(255,255,255,0.03) 0px,
+                  rgba(255,255,255,0.03) 1px,
+                  transparent 2px,
+                  transparent 4px
+          );
+          mix-blend-mode: overlay;
+          opacity: 0.4; /* softer than front */
+        }
+
+        /* Ensure any inner content (logos, etc.) stays above overlays */
+        > * {
+          position: relative;
+          z-index: 1;
+        }
+      }
+
+      &.skipbo-text {
+        color: var(--skipbo-text);
+        /* Keep skipbo-text utility bg as base; add neon overlay via ::before */
+        background: none;
+
+        /* Big neon text glow */
+        text-shadow:
+                0 0 4px currentColor,
+                0 0 8px currentColor,
+                0 0 16px currentColor;
+
+        /* Outer and inner neon glow */
+        box-shadow:
+                0 0 12px var(--secondary),             /* magenta outer */
+                inset 0 0 14px rgba(0, 255, 136, .25); /* green inner */
+
+        /* Decorative animated neon gradient layer */
+        &::before {
+          content: "";
+          position: absolute;
+          inset: -6%;
+          border-radius: calc(var(--card-radius) + 8px);
+          background: linear-gradient(
+                  120deg,
+                  #ff0099 0%,
+                  #00ff88 40%,
+                  #0066ff 70%,
+                  #ff0099 100%
+          );
+          filter: blur(8px) saturate(1.2);
+          opacity: 0.55;
+          z-index: 0;
+          animation: neonShift 6s linear infinite;
+          background-size: 200% 200%;
+        }
+
+        /* Subtle scanlines for a retro-futuristic vibe */
+        &::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          background:
+                  repeating-linear-gradient(
+                          to bottom,
+                          rgba(255,255,255,0.05) 0px,
+                          rgba(255,255,255,0.05) 1px,
+                          transparent 2px,
+                          transparent 4px
+                  );
+          mix-blend-mode: overlay;
+          border-radius: var(--card-radius);
+          pointer-events: none;
+        }
+
+        /* Ensure content sits above the decorative layers */
+        > * {
+          position: relative;
+          z-index: 1;
+        }
+      }
+    }
+  }
+
+  .theme-retro {
+    --primary: hsl(174 59% 39%);
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: hsl(11 83% 62%);
+    --secondary-foreground: hsl(0 0% 100%);
+
+    --bg-color: #f4f1de;
+    --zone-bg-color: #e9c46a;
+    --text-color: #264653;
+    --title-color: #2a9d8f;
+    --card-bg: #f4a261;
+    --card-border: #e76f51;
+    --card-shadow: 3px 3px 0 var(--card-border);
+    --card-radius: 15px;
+    --deck-bg: #2a9d8f;
+    --selected-border: var(--primary);
+    --active-turn-color: #264653;
+    --button-bg: #2a9d8f;
+    --button-hover-bg: #21867a;
+
+    --skipbo-text: hsl(40 80% 80%);  /* Warm cream color that fits the vintage palette */
+    --skipbo-bg: #2a9d8f;
+    --card-g1: #2a9d8f;
+    --card-g2: #e76f51;
+    --card-g3: #264653;
+
+    .card {
+      border: 2px dashed var(--card-border);
+
+      &.back {
+        background: linear-gradient(135deg, #2a9d8f 0%, #e9c46a 50%, #f4a261 100%);
+        border: 3px solid var(--card-border);
+        box-shadow: 3px 3px 0 var(--card-border), 0 0 10px rgba(42, 157, 143, 0.3);
+      }
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
+
+  h3 {
+   font-weight: bold;
+  }
+
+  * {
+    @apply border-border;
+  }
+}
+
+@utility card-height {
+  height: var(--card-height);
 }
 
 @utility card {
-  @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer;
-  height: 100px;
+  @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer card-height;
+  width: var(--card-width);
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
   font-size: 24px;
@@ -748,10 +869,13 @@
   --card-translate-y: 0px;
   --card-scale: 1;
   transform: translateY(var(--card-translate-y)) scale(var(--card-scale)) rotate(var(--card-rotate));
-}
 
-@utility card-height {
-  height: 100px;
+  &.selected {
+    border-color: var(--selected-border);
+    --card-translate-y: -5px;
+    box-shadow: 0 0 20px var(--selected-border);
+    z-index: 100;
+  }
 }
 
 @utility card-range-1 {
@@ -767,7 +891,7 @@
 }
 
 @utility skipbo-text {
-  color: var(--skipbo-text);
+  @apply text-(--skipbo-text) bg-(--skipbo-bg);
 }
 
 @utility card-back {
