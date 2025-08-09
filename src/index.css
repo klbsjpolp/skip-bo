@@ -74,7 +74,7 @@
   /* Discard pile stack positioning */
   .discard-pile-stack {
     position: relative;
-    width: 70px;
+    width: var(--card-width);
   }
 
   .discard-pile-stack .card,
@@ -207,7 +207,7 @@
   }
 
   @keyframes neonDrift {
-    0%   { background-position: 0% 50%; }
+    0%   { background-position: 0 50%; }
     100% { background-position: 200% 50%; }
   }
 
@@ -223,9 +223,14 @@
   .discard-piles,
   .build-piles {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 10px;
     justify-content: center;
+  }
+
+
+  .discard-piles {
+    flex-wrap: nowrap;
   }
 
   .hand-area {
@@ -292,10 +297,6 @@
   }
 
   @media (max-width: 640px) {
-    .player-area {
-      flex-wrap: wrap;
-    }
-
     .player-area .discard-piles {
       width: 100%;
       margin-top: 20px;
@@ -867,8 +868,8 @@
 }
 
 @utility placeholder {
-  width: 70px;
-  height: 100px;
+  width: var(--card-width);
+  height: var(--card-height);
   border: 2px dashed var(--card-border);
   border-radius: var(--card-radius);
   display: flex;

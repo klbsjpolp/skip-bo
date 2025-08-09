@@ -16,7 +16,7 @@ function NewGame({ onNewGame }: NewGameProps) {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-baseline gap-2">
       <StockPileSizeSwitcher />
       <DifficultySwitcher />
       <Button variant="secondary" onClick={handleNewGame}>Nouvelle partie</Button>

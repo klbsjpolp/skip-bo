@@ -22,13 +22,13 @@ export function StockPileSizeSwitcher() {
   };
 
   return <SelectGroup className="flex items-baseline gap-2">
-    <SelectLabel>Taille pile: </SelectLabel>
+    <SelectLabel>Pile: </SelectLabel>
     <Select
       value={String(stockSize)}
       onValueChange={handleValueChange}
     >
-      <SelectTrigger className="w-24">
-        <SelectValue placeholder="Difficulté" />
+      <SelectTrigger className="w-15">
+        <SelectValue placeholder={DEFAULT_STOCK_SIZE} />
       </SelectTrigger>
       <SelectContent>
         {options.map((n) => (
