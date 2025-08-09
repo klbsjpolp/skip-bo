@@ -71,13 +71,6 @@
     border-color: var(--color-gray-200, currentcolor);
   }
 
-  /* Default card back styles - MOVE THIS BEFORE THEME STYLES */
-  .card.back {
-    background-color: var(--deck-bg);
-    color: white;
-    position: relative;
-  }
-
   /* Discard pile stack positioning */
   .discard-pile-stack {
     position: relative;
@@ -91,29 +84,6 @@
     top: 0;
     box-shadow: var(--card-shadow);
   }
-
-  /* Base hover effect for discard pile cards
-  .discard-pile-stack .hoverable-card:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    --card-translate-y: -2px;
-    --card-scale: 1.05;
-    transition: all 0.2s ease-in-out;
-  }*/
-
-  /* Selected cards in discard piles
-  .discard-pile-stack .card.selected {
-    box-shadow: 0 0 20px var(--selected-border);
-    border-color: var(--selected-border);
-    z-index: 100;
-  }*/
-
-  /* Selected cards should maintain selection shadow when hovered
-  .discard-pile-stack .card.selected.hoverable-card:hover {
-    box-shadow: 0 0 20px var(--selected-border);
-    --card-translate-y: -2px;
-    --card-scale: 1.05;
-    z-index: 100 !important;
-  }*/
 
   /* Consistent hover effects for all selectable cards */
   .hoverable-card:hover {
@@ -278,7 +248,7 @@
         transition: all 0.2s ease-in-out;
 
         &.selected {
-          z-index: 101;
+          z-index: 101 !important;
           --card-translate-y: -8px;
 
           &.hoverable-card:hover {
@@ -321,20 +291,6 @@
     width: var(--card-width);
   }
 
-  /* Ensure stock pile cards show selection highlight */
-  .player-area .relative .card.selected {
-    border-color: var(--selected-border);
-    box-shadow: 0 0 20px var(--selected-border);
-    z-index: 100;
-  }
-
-  /* Ensure discard pile cards show selection highlight */
-  .discard-pile-stack .drop-indicator .card.selected {
-    border-color: var(--selected-border);
-    box-shadow: 0 0 20px var(--selected-border);
-    z-index: 100;
-  }
-
   @media (max-width: 640px) {
     .player-area {
       flex-wrap: wrap;
@@ -375,11 +331,12 @@
     --text-color: #374151;
     --title-color: #374151;
     --card-bg: white;
+    --card-back: #3b82f6;
     --card-border: #9ca3af;
     --card-shadow: 0 1px 3px rgba(0,0,0,0.2);
     --card-radius: 8px;
-    --deck-bg: #3b82f6;
     --selected-border: #f59e0b;
+    --selected-shadow: 0 0 20px var(--selected-border);
     --active-turn-color: #22c55e;
     --button-bg: #4f46e5;
     --button-hover-bg: #4338ca;
@@ -390,12 +347,6 @@
     --card-g1: hsl(152 69% 58%);   /* 1‑4 */
     --card-g2: hsl(0 80% 60%);     /* 5‑8 */
     --card-g3: hsl(283 55% 57%);   /* 9‑12 */
-
-    .card.back {
-      background: linear-gradient(135deg, var(--deck-bg) 0%, #2563eb 100%);
-      border: 2px solid var(--deck-bg);
-      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
-    }
   }
 
   .theme-dark {
@@ -427,8 +378,8 @@
     --title-color: #f9fafb;
     --card-bg: #374151;
     --card-border: #6b7280;
-    --deck-bg: #1d4ed8;
-    --selected-border: #f59e0b;
+    --card-back: #1d4ed8;
+    --selected-border: #ead3b5;
     --active-turn-color: #4ade80;
     --button-bg: #6366f1;
     --button-hover-bg: #4f46e5;
@@ -441,9 +392,12 @@
     --card-g3: hsl(283 55% 57%);
 
     .card.back {
-      background: linear-gradient(135deg, var(--deck-bg) 0%, #1e40af 100%);
-      border: 2px solid var(--deck-bg);
-      box-shadow: 0 0 10px rgba(29, 78, 216, 0.3);
+      background: linear-gradient(45deg,
+        var(--card-back) 0%,
+        var(--card-back) 50%,
+        var(--active-turn-color) 50%,
+        var(--active-turn-color) 100%
+      );
     }
   }
 
@@ -461,7 +415,7 @@
     --card-border: #d8e2ef;
     --card-shadow: 0 2px 8px rgba(0,0,0,0.05);
     --card-radius: 10px;
-    --deck-bg: #a0d2eb;
+    --card-back: #a0d2eb;
     --selected-border: #ffcb77;
     --active-turn-color: #a5dda5;
     --button-bg: #a0d2eb;
@@ -494,10 +448,10 @@
     --text-color: #ffffff;
     --title-color: #ffffff;
     --card-bg: #3c3c3c;
+    --card-back: #ffd426;
     --card-border: #5e5e5e;
     --card-shadow: none;
     --card-radius: 2px;
-    --deck-bg: #00a3a3;
     --selected-border: #1ba1e2;
     --active-turn-color: #60a917;
     --button-bg: #60a917;
@@ -511,19 +465,35 @@
 
     .card {
       &.back {
-        background-image: repeating-conic-gradient(from 0deg,
-        #00a3a3 0deg 90deg,
-        #ff3b30 90deg 180deg,
-        #00befc 180deg 270deg,
-        #1ba1e2 270deg 360deg
-        );
-        background-size: 70px 100px;
-        background-repeat: no-repeat;
-        background-color: #ffd426;
+        &::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background-image: repeating-conic-gradient(from 0deg,
+          #00a3a3 0deg 90deg,
+          #ff3b30 90deg 180deg,
+          #00befc 180deg 270deg,
+          #1ba1e2 270deg 360deg
+          );
+          background-size: var(--card-width) var(--card-width);
+          background-repeat: no-repeat;
+        }
       }
 
       &.skipbo-text {
+        .card-corner-number {
+          @apply text-(--skipbo-bg);
+        }
         &::before {
+          content: "";
+          position: absolute;
+          left: 0;
+          top: 0;
+          height: 20px;
+          width: 100%;
+          background-color: #ffd426;
+        }
+        &::after {
           content: "";
           position: absolute;
           left: 0;
@@ -559,7 +529,7 @@
     --card-border: #9381ff;
     --card-shadow: 0 2px 8px rgba(0,0,0,0.1);
     --card-radius: 12px;
-    --deck-bg: #6a5acd;
+    --card-back: #6a5acd;
     --selected-border: #ffd700;
     --active-turn-color: #4caf50;
     --button-bg: #ff6b6b;
@@ -589,7 +559,6 @@
                 #ff6b6b 0%, /* Red */ #ffb347 16.6%, /* Orange */ #ffff66 33.2%, /* Yellow */ #4caf50 49.8%, /* Green */ #5d9cec 66.4%, /* Blue */ #9381ff 83%, /* Indigo */ #d183e8 100% /* Violet */
         );
         border: 2px solid #ffffff;
-        box-shadow: 0 0 15px rgba(147, 129, 255, 0.5);
       }
 
       &.skipbo-text {
@@ -668,7 +637,7 @@
     --card-border: #00ff88;
     --card-shadow: 0 0 10px rgba(0,255,136,0.3);
     --card-radius: 12px;
-    --deck-bg: #0066ff;
+    --card-back: #0066ff;
     --selected-border: #ffff00;
     --active-turn-color: #00ff88;
     --button-bg: #ff0099;
@@ -682,8 +651,6 @@
 
     .card {
       &.back {
-        box-shadow: 0 0 15px var(--deck-bg);
-        border: 2px solid var(--deck-bg);
         background: linear-gradient(135deg, #ff0099 0%, #00ff88 25%, #0066ff 50%, #ff0099 75%, #00ff88 100%);
         overflow: hidden; /* keep glow inside rounded corners */
 
@@ -811,8 +778,9 @@
     --card-border: #e76f51;
     --card-shadow: 3px 3px 0 var(--card-border);
     --card-radius: 15px;
-    --deck-bg: #2a9d8f;
-    --selected-border: var(--primary);
+    --card-back: #2a9d8f;
+    --selected-border: var(--card-border);
+    --selected-shadow: 3px 3px 0 var(--primary);
     --active-turn-color: #264653;
     --button-bg: #2a9d8f;
     --button-hover-bg: #21867a;
@@ -824,12 +792,8 @@
     --card-g3: #264653;
 
     .card {
-      border: 2px dashed var(--card-border);
-
       &.back {
         background: linear-gradient(135deg, #2a9d8f 0%, #e9c46a 50%, #f4a261 100%);
-        border: 3px solid var(--card-border);
-        box-shadow: 3px 3px 0 var(--card-border), 0 0 10px rgba(42, 157, 143, 0.3);
       }
     }
   }
@@ -870,10 +834,14 @@
   --card-scale: 1;
   transform: translateY(var(--card-translate-y)) scale(var(--card-scale)) rotate(var(--card-rotate));
 
+  &.back {
+    background-color: var(--card-back);
+  }
+
   &.selected {
     border-color: var(--selected-border);
     --card-translate-y: -5px;
-    box-shadow: 0 0 20px var(--selected-border);
+    box-shadow: var(--selected-shadow);
     z-index: 100;
   }
 }
@@ -895,7 +863,7 @@
 }
 
 @utility card-back {
-  background-color: var(--deck-bg);
+  background-color: var(--card-back);
 }
 
 @utility placeholder {

@@ -190,6 +190,7 @@ export function PlayerArea({
                   }
                 }}
               >
+                <EmptyCard />
                 {pile.map((card, cardIdx) => {
                   // Hide the top card if it's being animated
                   const isTopCard = cardIdx === pile.length - 1;
