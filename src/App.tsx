@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useSkipBoGame } from '@/hooks/useSkipBoGame';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { GameBoard } from '@/components/GameBoard';
@@ -8,14 +7,6 @@ import NewGame from "@/components/NewGame.tsx";
 function App() {
   const { gameState, initializeGame, selectCard, playCard, discardCard, clearSelection, canPlayCard } = useSkipBoGame();
 
-  useEffect(() => {
-    // Delay initialization to ensure animation context is set up first
-    const timer = setTimeout(() => {
-      initializeGame();
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, [initializeGame]);
 
   return (
     <div className="min-h-screen p-4 md:p-10">
