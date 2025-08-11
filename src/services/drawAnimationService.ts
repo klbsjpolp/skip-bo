@@ -1,4 +1,4 @@
-import {Card, GameState} from '@/types';
+import {Card} from '@/types';
 import {calculateAnimationDuration, getDeckPosition, getHandCardPosition} from '@/utils/cardPositions';
 import {CardAnimationData} from "@/contexts/CardAnimationContext.tsx";
 
@@ -15,19 +15,8 @@ export const setGlobalDrawAnimationContext = (context: typeof globalAnimationCon
 };
 
 // Helper function to wait for the global animation context to be available
-const waitForAnimationContext = async (maxWaitTime: number = 2000): Promise<boolean> => {
-  const startTime = Date.now();
-  
-  while (!globalAnimationContext && (Date.now() - startTime) < maxWaitTime) {
-    await new Promise(resolve => setTimeout(resolve, 50)); // Wait 50ms before checking again
-  }
-  
-  return globalAnimationContext !== null;
-};
-
 // Function to trigger draw animations from deck to hand
 const triggerDrawAnimation = async (
-  gameState: GameState,
   playerIndex: number,
   card: Card,
   handIndex: number,
@@ -61,9 +50,7 @@ const triggerDrawAnimation = async (
       return { duration: 0, animationId: '' };
     }
 
-    const player = gameState.players[playerIndex];
-    const isOverlapping = player.hand.length > 4;
-    const endPosition = getHandCardPosition(handContainer, handIndex, isOverlapping);
+    const endPosition = getHandCardPosition(handContainer, handIndex);
 
     const duration = calculateAnimationDuration(startPosition, endPosition);
     
@@ -82,7 +69,7 @@ const triggerDrawAnimation = async (
       },
     });
 
-    return { duration, animationId };
+    return { duration: duration + initialDelay, animationId };
   } catch (error) {
     console.warn('Draw animation failed:', error);
   }
@@ -92,11 +79,10 @@ const triggerDrawAnimation = async (
 
 // Function to trigger multiple draw animations with staggered start times (no cumulative delays)
 export const triggerMultipleDrawAnimations = async (
-  gameState: GameState,
   playerIndex: number,
   cards: Card[],
   handIndices: number[],
-  staggerDelay: number = 100
+  staggerDelay: number = 500
 ): Promise<number> => {
   console.log(`🎯 triggerMultipleDrawAnimations called for player ${playerIndex} with ${cards.length} cards`);
   
@@ -105,80 +91,25 @@ export const triggerMultipleDrawAnimations = async (
     return 0;
   }
 
-  // If no cards, return immediately
   if (cards.length === 0) {
     return 0;
   }
 
-  if (!globalAnimationContext)
-    await waitForAnimationContext();
-
-  // Check if animation context is available (non-blocking)
-  if (!globalAnimationContext) {
-    console.log('⏳ Animation context not available - using fallback duration calculation');
-    // Return estimated duration without waiting for context
-    const estimatedAnimationDuration = 300;
-    const maxExpectedDuration = ((cards.length - 1) * staggerDelay) + estimatedAnimationDuration;
-    console.log(`🚀 Returning estimated duration: ${maxExpectedDuration}ms`);
-    return maxExpectedDuration;
-  }
-
-  console.log('✅ Global animation context is available, proceeding with animations');
-
-  // Calculate expected duration and trigger animations
-  let maxDuration = 0;
-  const animationPromises: Promise<void>[] = [];
-
-  for (let i = 0; i < cards.length; i++) {
-    const startDelay = i * staggerDelay;
-
-    console.log(`🎬 Card ${i+1}/${cards.length} animation STARTING - Card: ${cards[i].value}, Hand Index: ${handIndices[i]}, Delay: ${startDelay}ms`);
-
-    // Create a promise for this animation that doesn't block the return
-    const animationPromise = triggerDrawAnimation(
-      gameState,
-      playerIndex,
-      cards[i],
-      handIndices[i],
-      startDelay
-    ).then(({ duration, animationId }) => {
-      if (duration > 0 && animationId) {
-        console.log(`⏱️ Card ${i + 1}/${cards.length} animation IN PROGRESS - Duration: ${duration}ms, Total time expected: ${startDelay + duration}ms`);
-
-        // Set up completion handler
-        setTimeout(() => {
-          console.log(`✅ Card ${i + 1}/${cards.length} animation FINISHED - Card: ${cards[i].value} now APPEARING`);
-          console.log(`🔄 Removing animation ${animationId} for Card: ${cards[i].value}`);
-          globalAnimationContext!.removeAnimation(animationId);
-        }, duration);
-
-        // Update max duration with actual calculated duration
-        const totalDuration = startDelay + duration;
-        maxDuration = Math.max(maxDuration, totalDuration);
-      } else {
-        console.log(`❌ Card ${i + 1}/${cards.length} animation FAILED - Card: ${cards[i].value}`);
-      }
-    }).catch((error) => {
-      console.warn(`Animation setup failed for card ${cards[i].value}:`, error);
-    });
-
-    animationPromises.push(animationPromise);
-
-    // Also calculate estimated duration as fallback
-    const estimatedAnimationDuration = 300;
-    const expectedTotalDuration = startDelay + estimatedAnimationDuration;
-    maxDuration = Math.max(maxDuration, expectedTotalDuration);
-  }
-
-  console.log(`🚀 All ${cards.length} animations STARTED - Estimated total duration: ${maxDuration}ms`);
-
-  // Don't await - let animations run in background
-  // Track completion for logging only
-  Promise.all(animationPromises).then(() => {
-    console.log(`🏁 All ${cards.length} animations completed in the background`);
-  }).catch((error) => {
-    console.warn('Some animations failed:', error);
+  const animationPromises = cards.map((card, index) => {
+    const initialDelay = index * staggerDelay;
+    return triggerDrawAnimation(playerIndex, card, handIndices[index], initialDelay);
   });
 
-  return maxDuration;
+  try {
+    const results = await Promise.all(animationPromises);
+
+    const totalDuration = results.map(result => result.duration).reduce((a, b) => a > b ? a : b, 0);
+
+    console.log(`✅ triggerMultipleDrawAnimations: All ${cards.length} animations triggered. Total estimated duration: ${totalDuration}ms`);
+    return totalDuration;
+
+  } catch (error) {
+    console.error('Error triggering one or more draw animations:', error);
+    return 0;
+  }
 };

@@ -1,6 +1,6 @@
 import React from 'react';
-import { useCardAnimation } from '@/contexts/CardAnimationContext';
 import { AnimatedCard } from '@/components/AnimatedCard';
+import {useCardAnimation} from "@/contexts/useCardAnimation.ts";
 
 /**
  * CardAnimationLayer renders all active card animations as an overlay
@@ -8,7 +8,7 @@ import { AnimatedCard } from '@/components/AnimatedCard';
  * animated cards can move freely across the entire screen
  */
 export const CardAnimationLayer: React.FC = () => {
-  const { activeAnimations, removeAnimation } = useCardAnimation();
+  const { activeAnimations } = useCardAnimation();
 
   if (activeAnimations.length === 0) {
     return null;
@@ -20,7 +20,6 @@ export const CardAnimationLayer: React.FC = () => {
         <AnimatedCard
           key={animation.id}
           animation={animation}
-          onAnimationComplete={removeAnimation}
         />
       ))}
     </div>

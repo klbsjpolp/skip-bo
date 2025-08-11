@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { Card } from '@/types';
+import {ReactNode, useCallback, useState} from 'react';
+import {Card} from '@/types';
+import {CardAnimationContext} from "./useCardAnimation";
 
 export interface CardAnimationData {
   id: string;
@@ -25,14 +26,16 @@ export interface AnimationContextType {
   isCardBeingAnimated: (playerIndex: number, source: 'hand' | 'stock' | 'discard' | 'deck', index: number, discardPileIndex?: number) => boolean;
 }
 
-const CardAnimationContext = createContext<AnimationContextType | undefined>(undefined);
-
 interface CardAnimationProviderProps {
   children: ReactNode;
 }
 
 export const CardAnimationProvider: React.FC<CardAnimationProviderProps> = ({ children }) => {
   const [activeAnimations, setActiveAnimations] = useState<CardAnimationData[]>([]);
+
+  const removeAnimation = useCallback((id: string) => {
+    setActiveAnimations(prev => prev.filter(anim => anim.id !== id));
+  }, []);
 
   const startAnimation = useCallback((animationData: Omit<CardAnimationData, 'id'>) => {
     const id = `animation-${Date.now()}-${Math.random()}`;
@@ -45,15 +48,11 @@ export const CardAnimationProvider: React.FC<CardAnimationProviderProps> = ({ ch
 
     // Auto-remove animation after duration
     setTimeout(() => {
-      setActiveAnimations(prev => prev.filter(anim => anim.id !== id));
-    }, animationData.duration);
+      removeAnimation(id);
+    }, animationData.duration + animationData.initialDelay);
 
     return id; // Return the animation ID so it can be manually removed
-  }, []);
-
-  const removeAnimation = useCallback((id: string) => {
-    setActiveAnimations(prev => prev.filter(anim => anim.id !== id));
-  }, []);
+  }, [removeAnimation]);
 
   const isCardBeingAnimated = useCallback((
     playerIndex: number, 
@@ -64,9 +63,9 @@ export const CardAnimationProvider: React.FC<CardAnimationProviderProps> = ({ ch
     return activeAnimations.some(animation => {
       const sourceInfo = animation.sourceInfo;
       return sourceInfo.playerIndex === playerIndex &&
-             sourceInfo.source === source &&
-             sourceInfo.index === index &&
-             sourceInfo.discardPileIndex === discardPileIndex;
+        sourceInfo.source === source &&
+        sourceInfo.index === index &&
+        sourceInfo.discardPileIndex === discardPileIndex;
     });
   }, [activeAnimations]);
 
@@ -84,10 +83,3 @@ export const CardAnimationProvider: React.FC<CardAnimationProviderProps> = ({ ch
   );
 };
 
-export const useCardAnimation = (): AnimationContextType => {
-  const context = useContext(CardAnimationContext);
-  if (context === undefined) {
-    throw new Error('useCardAnimation must be used within a CardAnimationProvider');
-  }
-  return context;
-};

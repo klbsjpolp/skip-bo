@@ -4,8 +4,7 @@ import { gameMachine } from '@/state/gameMachine';
 import { GameState, MoveResult, Card } from '@/types';
 import { canPlayCard } from '@/lib/validators';
 import {AIDifficulty} from "@/ai/aiConfig.ts";
-import { useCardAnimation } from '@/contexts/CardAnimationContext';
-import { 
+import {
   getHandCardPosition, 
   getStockCardPosition, 
   getDiscardCardPosition, 
@@ -14,6 +13,7 @@ import {
 } from '@/utils/cardPositions';
 import { setGlobalAnimationContext } from '@/services/aiAnimationService';
 import { setGlobalDrawAnimationContext, triggerMultipleDrawAnimations } from '@/services/drawAnimationService';
+import {useCardAnimation} from "@/contexts/useCardAnimation.ts";
 
 // Helper function to check if a PLAY_CARD action will result in an empty hand
 const willPlayCardEmptyHand = (gameState: GameState): boolean => {
@@ -82,8 +82,7 @@ export function useSkipBoGame() {
         if (currentState.selectedCard.source === 'hand') {
           const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
           if (handContainer) {
-            const isOverlapping = currentState.players[currentState.currentPlayerIndex].hand.length > 4;
-            startPosition = getHandCardPosition(handContainer, currentState.selectedCard.index, isOverlapping);
+            startPosition = getHandCardPosition(handContainer, currentState.selectedCard.index);
           }
         } else if (currentState.selectedCard.source === 'stock') {
           const stockContainer = playerAreaElement.querySelector('.stock-pile') as HTMLElement;
@@ -180,11 +179,9 @@ export function useSkipBoGame() {
             const startTime = Date.now();
 
             const drawAnimationDuration = await triggerMultipleDrawAnimations(
-              currentState,
               currentState.currentPlayerIndex,
               cardsToAnimate,
               handIndices,
-              150 // 150ms stagger between cards
             );
             
             console.log(`⏱️ useSkipBoGame: Received drawAnimationDuration: ${drawAnimationDuration}ms after ${Date.now() - startTime}ms`);
@@ -240,8 +237,7 @@ export function useSkipBoGame() {
           // Calculate start position (hand card)
           const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
           if (handContainer) {
-            const isOverlapping = currentState.players[currentState.currentPlayerIndex].hand.length > 4;
-            const startPosition = getHandCardPosition(handContainer, currentState.selectedCard.index, isOverlapping);
+            const startPosition = getHandCardPosition(handContainer, currentState.selectedCard.index);
             
             // Calculate end position (discard pile)
             const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;

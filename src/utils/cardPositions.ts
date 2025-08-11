@@ -25,28 +25,18 @@ export const getElementCenter = (element: HTMLElement): CardPosition => {
 export const getHandCardPosition = (
   handContainer: HTMLElement,
   cardIndex: number,
-  isOverlapping: boolean = false
 ): CardPosition => {
-  if (isOverlapping) {
-    // For overlapping hands, cards are positioned with left offset
-    const baseRect = handContainer.getBoundingClientRect();
-    return {
-      x: baseRect.left + (cardIndex * 60) + 40, // 60px offset + half card width
-      y: baseRect.top + baseRect.height / 2,
-    };
-  } else {
-    // For non-overlapping hands, find the specific card element
-    const cardElement = handContainer.querySelector(`[data-card-index="${cardIndex}"]`) as HTMLElement;
-    if (cardElement) {
-      return getElementCenter(cardElement);
-    }
-    // Fallback: estimate position
-    const baseRect = handContainer.getBoundingClientRect();
-    return {
-      x: baseRect.left + (cardIndex * 90) + 40,
-      y: baseRect.top + baseRect.height / 2,
-    };
+  // For non-overlapping hands, find the specific card element
+  const cardElement = handContainer.querySelector(`[data-card-index="${cardIndex}"]`) as HTMLElement;
+  if (cardElement) {
+    return getElementCenter(cardElement);
   }
+  // Fallback: estimate position
+  const baseRect = handContainer.getBoundingClientRect();
+  return {
+    x: baseRect.left + (cardIndex * 90) + 40,
+    y: baseRect.top + baseRect.height / 2,
+  };
 };
 
 /**

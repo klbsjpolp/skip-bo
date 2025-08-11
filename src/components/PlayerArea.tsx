@@ -2,8 +2,8 @@ import {Player, GameState} from '@/types';
 import { Card } from '@/components/Card';
 import { cn } from '@/lib/utils';
 import {EmptyCard} from "@/components/EmptyCard.tsx";
-import { useCardAnimation } from '@/contexts/CardAnimationContext';
 import {MouseEventHandler, useCallback} from "react";
+import {useCardAnimation} from "@/contexts/useCardAnimation.ts";
 
 interface PlayerAreaProps {
   player: Player;
@@ -133,7 +133,7 @@ export function PlayerArea({
           handOverlaps && "overlap-hand"
         )}>
           {player.hand.map((card, index) => (
-            <div className='card-holder' key={`hand-${index}`} data-card-index={index}>
+            <div className='inline-block card-holder w-[calc(var(--card-width)-10px)] h-(--card-height)' key={`hand-${index}`} data-card-index={index}>
               {/* Hide cards that are being animated OUT of the hand (discard/play animations) */}
               {/* Hide cards that are being animated INTO the hand (draw animations) until animation completes */}
               {/* Only show cards that are in the hand normally and not being animated */}

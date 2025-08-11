@@ -61,11 +61,10 @@ export const triggerAIAnimation = async (
       if (gameState.selectedCard.source === 'hand') {
         const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
         if (handContainer) {
-          const isOverlapping = currentPlayer.hand.length > 4;
-          startPosition = getHandCardPosition(handContainer, gameState.selectedCard.index, isOverlapping);
+          startPosition = getHandCardPosition(handContainer, gameState.selectedCard.index);
         }
       } else if (gameState.selectedCard.source === 'stock') {
-        const stockContainer = playerAreaElement.querySelector('.w-20') as HTMLElement;
+        const stockContainer = playerAreaElement.querySelector('.stock-pile') as HTMLElement;
         if (stockContainer) {
           startPosition = getStockCardPosition(stockContainer);
         }
@@ -87,8 +86,7 @@ export const triggerAIAnimation = async (
       // Calculate start position (hand card)
       const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
       if (handContainer) {
-        const isOverlapping = currentPlayer.hand.length > 4;
-        startPosition = getHandCardPosition(handContainer, gameState.selectedCard.index, isOverlapping);
+        startPosition = getHandCardPosition(handContainer, gameState.selectedCard.index);
       }
 
       // Calculate end position (discard pile)

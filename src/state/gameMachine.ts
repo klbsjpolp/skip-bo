@@ -255,11 +255,9 @@ export const gameMachine = createMachine({
             // Trigger draw animations
             if (cardsToAnimate.length > 0) {
               const drawAnimationDuration = await triggerMultipleDrawAnimations(
-                gameStateAfterPlay,
                 gameStateAfterPlay.currentPlayerIndex,
                 cardsToAnimate,
                 handIndices,
-                150 // 150ms stagger between cards
               );
               
               // Wait for draw animations to complete
@@ -334,11 +332,9 @@ export const gameMachine = createMachine({
         // Trigger animations if we have cards to animate
         if (cardsToAnimate.length > 0) {
           const animationDuration = await triggerMultipleDrawAnimations(
-            gameState,
             gameState.currentPlayerIndex,
             cardsToAnimate,
             handIndices,
-            150 // 150ms stagger between cards
           );
 
           // Wait for animations to complete
