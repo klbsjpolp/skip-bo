@@ -75,23 +75,27 @@ export function PlayerArea({
       isCurrentPlayer && "ring-3 ring-primary",
     )}>
       {/* Stock Pile Section */}
-      <div className="w-24 flex items-center relative gap-2">
+      <div className="flex items-center relative gap-2">
         <h3 className="vertical-text">Talon ({player.stockPile.length})</h3>
         {player.stockPile.length > 0 ? (
-          <div className="relative w-full">
+          <div className="relative w-full stock-pile">
             {/* Always show the second card underneath if available */}
-            {player.stockPile.length > 1 && (
+            {player.stockPile.length > 1 ? (
               <Card
                 hint={player.stockPile.length === 2 ? 'Second card in stock' : 'Second card in stock (hidden)'}
                 card={player.stockPile[player.stockPile.length - 2]}
                 isRevealed={true}
                 canBeGrabbed={false}
-                className="absolute top-1 left-1 opacity-60"
+                className="absolute top-0.5 left-0.5 opacity-60 border-2"
               />
+            ) : (
+              <EmptyCard className="absolute" />
             )}
             
             {/* Show the top card unless it's being animated */}
-            {!isCardBeingAnimated(playerIndex, 'stock', player.stockPile.length - 1) && (
+            {isCardBeingAnimated(playerIndex, 'stock', player.stockPile.length - 1)
+              ? (<div className="card opacity-0 pointer-events-none" />)
+                : (
               <Card
                 hint={player.stockPile.length === 1 ? 'Top card in stock' : 'Top card in stock (hidden)'}
                 card={player.stockPile[player.stockPile.length - 1]}
@@ -115,7 +119,7 @@ export function PlayerArea({
           <div
             className="w-full self-end rounded-t-sm bg-primary"
             style={{
-              height: `${Math.max(5, (player.stockPile.length / gameState.config.STOCK_SIZE) * 100)}%`,
+              height: `${(player.stockPile.length / gameState.config.STOCK_SIZE) * 100}%`,
             }}
           ></div>
         </div>

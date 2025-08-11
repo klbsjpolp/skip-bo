@@ -86,7 +86,7 @@ export function useSkipBoGame() {
             startPosition = getHandCardPosition(handContainer, currentState.selectedCard.index, isOverlapping);
           }
         } else if (currentState.selectedCard.source === 'stock') {
-          const stockContainer = playerAreaElement.querySelector('.w-20') as HTMLElement;
+          const stockContainer = playerAreaElement.querySelector('.stock-pile') as HTMLElement;
           if (stockContainer) {
             startPosition = getStockCardPosition(stockContainer);
           }
