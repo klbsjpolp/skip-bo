@@ -1,11 +1,12 @@
-import { createMachine, assign, fromPromise } from 'xstate';
-import { gameReducer } from './gameReducer';
-import { GameAction } from './gameActions';
-import { initialGameState } from './initialGameState';
-import { computeBestMove } from '@/ai/computeBestMove';
-import { GameState, Card } from '@/types';
-import { triggerAIAnimation } from '@/services/aiAnimationService';
-import { triggerMultipleDrawAnimations } from '@/services/drawAnimationService';
+import {assign, createMachine, fromPromise} from 'xstate';
+import {gameReducer} from './gameReducer';
+import {GameAction} from './gameActions';
+import {initialGameState} from './initialGameState';
+import {computeBestMove} from '@/ai/computeBestMove';
+import {Card, GameState} from '@/types';
+import {triggerAIAnimation} from '@/services/aiAnimationService';
+import {triggerMultipleDrawAnimations} from '@/services/drawAnimationService';
+import {animationGate} from '@/services/animationGate';
 
 // Helper function to check if a PLAY_CARD action will result in an empty hand
 const willPlayCardEmptyHand = (gameState: GameState): boolean => {
@@ -22,7 +23,10 @@ const willPlayCardEmptyHand = (gameState: GameState): boolean => {
 
 export const gameMachine = createMachine({
   id: 'skipbo',
-  context: { G: initialGameState() },
+  context: {
+    G: initialGameState(),
+    animationDuration: 0,
+  },
   initial: 'setup',
   states: {
     setup: {
@@ -64,11 +68,13 @@ export const gameMachine = createMachine({
               guard: 'isHumanAction',
             },
             PLAY_CARD: {
-              actions: 'apply',
+              actions: 'applyAndStoreAnimation',
+              target: 'humanActionAnimating',
               guard: 'isHumanAction',
             },
             DISCARD_CARD: {
-              actions: 'apply',
+              actions: 'applyAndStoreAnimation',
+              target: 'humanActionAnimating',
               guard: 'isHumanAction',
             },
             END_TURN: {
@@ -78,6 +84,15 @@ export const gameMachine = createMachine({
             RESET: {
               actions: 'apply',
               target: '#skipbo.setup'
+            },
+          },
+        },
+        humanActionAnimating: {
+          invoke: {
+            src: 'animationGate',
+            input: ({ context }) => ({ duration: context.animationDuration }),
+            onDone: {
+              target: 'ready',
             },
           },
         },
@@ -109,7 +124,16 @@ export const gameMachine = createMachine({
             src: 'botService',
             input: ({ context }) => ({ G: context.G }),
             onDone: {
-              actions: ['applyBot', 'logAIAction'],
+              actions: 'applyBotAndStoreAnimation',
+              target: 'animating',
+            },
+          },
+        },
+        animating: {
+          invoke: {
+            src: 'animationGate',
+            input: ({ context }) => ({ duration: context.animationDuration }),
+            onDone: {
               target: 'checkState',
             },
           },
@@ -150,10 +174,41 @@ export const gameMachine = createMachine({
     applyBot: assign({ 
       G: ({ context, event }) => {
         if (event && typeof event === 'object' && 'output' in event) {
-          const action = (event as unknown as { output: GameAction }).output;
+          const { output: { action } } = (event as unknown as { output: { action: GameAction, animationDuration: number } });
           return gameReducer(context.G, action);
         }
         return context.G;
+      }
+    }),
+    applyBotAndStoreAnimation: assign({
+      G: ({ context, event }) => {
+        if (event && typeof event === 'object' && 'output' in event) {
+          const { action } = (event as unknown as { output: { action: GameAction, animationDuration: number } }).output;
+          return gameReducer(context.G, action);
+        }
+        return context.G;
+      },
+      animationDuration: ({ event }) => {
+        if (event && typeof event === 'object' && 'output' in event) {
+          const { animationDuration } = (event as unknown as { output: { action: GameAction, animationDuration: number } }).output;
+          return animationDuration;
+        }
+        return 0;
+      }
+    }),
+    applyAndStoreAnimation: assign({
+      G: ({ context, event }) => {
+        if (event && typeof event === 'object' && 'type' in event) {
+          return gameReducer(context.G, event as GameAction);
+        }
+        return context.G;
+      },
+      animationDuration: ({ event }) => {
+        if (event && typeof event === 'object' && 'output' in event) {
+          const { animationDuration } = (event as unknown as { output: { action: GameAction, animationDuration: number } }).output;
+          return animationDuration;
+        }
+        return 0;
       }
     }),
     logAIAction: () => {
@@ -188,17 +243,17 @@ export const gameMachine = createMachine({
     },
   },
   actors: {
+    animationGate,
     botService: fromPromise(async ({ input }: { input: { G: GameState } }) => {
       const action = await computeBestMove(input.G);
-      
+      let totalAnimationDuration = 0;
+
       // Check if PLAY_CARD will empty the hand and trigger draw animations
       if (action.type === 'PLAY_CARD' && willPlayCardEmptyHand(input.G)) {
         // First trigger the play card animation
         if (input.G.selectedCard) {
           const playAnimationDuration = await triggerAIAnimation(input.G, action);
-          if (playAnimationDuration > 0) {
-            await new Promise(resolve => setTimeout(resolve, playAnimationDuration));
-          }
+          totalAnimationDuration += playAnimationDuration;
         }
         
         // Then trigger draw animations for the hand refill
@@ -259,27 +314,18 @@ export const gameMachine = createMachine({
                 cardsToAnimate,
                 handIndices,
               );
-              
-              // Wait for draw animations to complete
-              if (drawAnimationDuration > 0) {
-                await new Promise(resolve => setTimeout(resolve, drawAnimationDuration));
-              }
+              totalAnimationDuration += drawAnimationDuration;
             }
           }
         }
       } else {
         // Trigger animation for other AI actions that need it
         if ((action.type === 'PLAY_CARD' || action.type === 'DISCARD_CARD') && input.G.selectedCard) {
-          const animationDuration = await triggerAIAnimation(input.G, action);
-          
-          // Wait for animation to complete before returning the action
-          if (animationDuration > 0) {
-            await new Promise(resolve => setTimeout(resolve, animationDuration));
-          }
+          totalAnimationDuration = await triggerAIAnimation(input.G, action);
         }
       }
       
-      return action;
+      return { action, animationDuration: totalAnimationDuration };
     }),
     drawService: fromPromise(async ({ input }: { input: { G: GameState } }) => {
       const gameState = input.G;
@@ -288,7 +334,8 @@ export const gameMachine = createMachine({
       const emptySlots = player.hand.filter(card => card === null).length;
       // Calculate how many cards will be drawn
       const cardsToDraw = Math.min(emptySlots, gameState.deck.length + gameState.completedBuildPiles.length);
-      
+      let animationDuration = 0;
+
       if (cardsToDraw > 0) {
         // Prepare cards and hand indices for animation
         const cardsToAnimate: Card[] = [];
@@ -331,20 +378,16 @@ export const gameMachine = createMachine({
 
         // Trigger animations if we have cards to animate
         if (cardsToAnimate.length > 0) {
-          const animationDuration = await triggerMultipleDrawAnimations(
+          // Fire and forget: start animations but don't block the draw state update
+          animationDuration = await triggerMultipleDrawAnimations(
             gameState.currentPlayerIndex,
             cardsToAnimate,
             handIndices,
           );
-
-          // Wait for animations to complete
-          if (animationDuration > 0) {
-            await new Promise(resolve => setTimeout(resolve, animationDuration));
-          }
         }
       }
       
-      return { type: 'DRAW', count: cardsToDraw } as GameAction;
+      return { type: 'DRAW', count: cardsToDraw, animationDuration } as GameAction & { animationDuration: number };
     }),
   },
 });

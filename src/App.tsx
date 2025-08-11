@@ -3,10 +3,18 @@ import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { GameBoard } from '@/components/GameBoard';
 import { Button } from '@/components/ui/button';
 import NewGame from "@/components/NewGame.tsx";
+import { useCardAnimation } from '@/contexts/useCardAnimation';
+import { animationServiceBridge } from '@/lib/animationServiceBridge';
+import { useEffect } from 'react';
 
 function App() {
   const { gameState, initializeGame, selectCard, playCard, discardCard, clearSelection, canPlayCard } = useSkipBoGame();
+  const { waitForAnimations } = useCardAnimation();
 
+  // Connect the animation context with the service bridge
+  useEffect(() => {
+    animationServiceBridge.waitForAnimations = waitForAnimations;
+  }, [waitForAnimations]);
 
   return (
     <div className="min-h-screen p-4 md:p-10">
