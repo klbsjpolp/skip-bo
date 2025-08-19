@@ -39,8 +39,15 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
-  --card-width: 70px;
-  --card-height: 100px;
+  --card-width: 46px;
+  --card-height: 66px;
+}
+
+@media(width >= 1024px) {
+  :root {
+    --card-height: 100px;
+    --card-widrh: 70px;
+  }
 }
 
 @utility container {
@@ -224,7 +231,7 @@
   .build-piles {
     display: flex;
     flex-wrap: nowrap;
-    gap: 10px;
+    gap: calc(var(--card-width) / 7);
     justify-content: center;
   }
 
@@ -234,7 +241,7 @@
   }
 
   .hand-area {
-    width: calc(var(--card-width) * 4 + 10px * (4 - 1)); /* 4 cards + gaps */
+    width: calc(var(--card-width) * (4 + 3 * 1/7)); /* 4 cards + gaps */
     height: var(--card-height); /* 1 card */
 
     &:not(.overlap-hand) {
@@ -819,11 +826,11 @@
 }
 
 @utility card {
-  @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer card-height;
+  @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer card-height
+  lg:text-2xl text-xl;
   width: var(--card-width);
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
-  font-size: 24px;
   user-select: none;
   background-color: var(--card-bg);
   transition: all 0.2s ease-in-out;

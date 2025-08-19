@@ -57,7 +57,7 @@ const CardComponent: React.FC<CardProps> = ({
     const offset = [4, -3, -5, -3, 4][overlapIndex]
 
     style = {
-      left: `${overlapIndex * 60}px`,
+      left: `calc(${overlapIndex} * (var(--card-width) - 10px))`,
       top: `${offset}px`,
       zIndex: overlapIndex,
       '--card-rotate': `${angle}deg`
