@@ -1,4 +1,5 @@
 import {ReactNode, useCallback, useEffect, useRef, useState} from 'react';
+import { flushSync } from 'react-dom';
 import {Card} from '@/types';
 import {CardAnimationContext} from "./useCardAnimation";
 
@@ -43,7 +44,9 @@ export const CardAnimationProvider: React.FC<CardAnimationProviderProps> = ({ ch
   }, [activeAnimations]);
 
   const removeAnimation = useCallback((id: string) => {
-    setActiveAnimations(prev => prev.filter(anim => anim.id !== id));
+    flushSync(() => {
+      setActiveAnimations(prev => prev.filter(anim => anim.id !== id));
+    });
   }, []);
 
   const startAnimation = useCallback((animationData: Omit<CardAnimationData, 'id'>) => {
@@ -53,7 +56,9 @@ export const CardAnimationProvider: React.FC<CardAnimationProviderProps> = ({ ch
       ...animationData,
     };
 
-    setActiveAnimations(prev => [...prev, newAnimation]);
+    flushSync(() => {
+      setActiveAnimations(prev => [...prev, newAnimation]);
+    });
 
     // Auto-remove animation after duration
     setTimeout(() => {

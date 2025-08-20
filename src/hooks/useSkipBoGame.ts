@@ -34,13 +34,13 @@ export function useSkipBoGame() {
   const dispatch = send;                     // alias pour préserver la suite du code
   const stateRef = useRef<GameState>(state);
   stateRef.current = state;
-  const { startAnimation, removeAnimation } = useCardAnimation();
+  const { startAnimation, removeAnimation, waitForAnimations } = useCardAnimation();
 
   // Set up global animation context for AI animations and draw animations
   React.useEffect(() => {
-    setGlobalAnimationContext({ startAnimation });
+    setGlobalAnimationContext({ startAnimation, waitForAnimations });
     setGlobalDrawAnimationContext({ startAnimation, removeAnimation });
-  }, [startAnimation, removeAnimation]);
+  }, [startAnimation, removeAnimation, waitForAnimations]);
 
   /* wrappers compatibles avec l'UI existante */
   const initializeGame = useCallback(() => {

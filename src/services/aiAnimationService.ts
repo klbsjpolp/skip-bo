@@ -12,6 +12,7 @@ import {CardAnimationData} from "@/contexts/CardAnimationContext.tsx";
 // Global reference to the animation context
 let globalAnimationContext: {
   startAnimation: (animationData: Omit<CardAnimationData, 'id'>) => void;
+  waitForAnimations: () => Promise<void>;
 } | null = null;
 
 // Function to set the global animation context (called from React component)

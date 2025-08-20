@@ -360,6 +360,7 @@ export const gameMachine = createMachine({
         // Trigger animation for other AI actions that need it
         if ((action.type === 'PLAY_CARD' || action.type === 'DISCARD_CARD') && input.G.selectedCard) {
           totalAnimationDuration = await triggerAIAnimation(input.G, action);
+          await animationServiceBridge.waitForAnimations();
         }
       }
       
