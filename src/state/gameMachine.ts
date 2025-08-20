@@ -7,6 +7,7 @@ import {Card, GameState} from '@/types';
 import {triggerAIAnimation} from '@/services/aiAnimationService';
 import {triggerMultipleDrawAnimations} from '@/services/drawAnimationService';
 import {animationGate} from '@/services/animationGate';
+import {animationServiceBridge} from "@/lib/animationServiceBridge.ts";
 
 // Helper function to check if a PLAY_CARD action will result in an empty hand
 const willPlayCardEmptyHand = (gameState: GameState): boolean => {
@@ -44,7 +45,16 @@ export const gameMachine = createMachine({
             src: 'drawService',
             input: ({ context }) => ({ G: context.G }),
             onDone: {
-              actions: 'applyDraw',
+              actions: 'applyDrawAndStoreAnimation',
+              target: 'drawAnimating',
+            },
+          },
+        },
+        drawAnimating: {
+          invoke: {
+            src: 'animationGate',
+            input: ({ context }) => ({ duration: context.animationDuration }),
+            onDone: {
               target: 'ready',
             },
           },
@@ -107,7 +117,16 @@ export const gameMachine = createMachine({
             src: 'drawService',
             input: ({ context }) => ({ G: context.G }),
             onDone: {
-              actions: 'applyDraw',
+              actions: 'applyDrawAndStoreAnimation',
+              target: 'drawAnimating',
+            },
+          },
+        },
+        drawAnimating: {
+          invoke: {
+            src: 'animationGate',
+            input: ({ context }) => ({ duration: context.animationDuration }),
+            onDone: {
               target: 'ready',
             },
           },
@@ -223,6 +242,22 @@ export const gameMachine = createMachine({
         return context.G;
       }
     }),
+    applyDrawAndStoreAnimation: assign({
+      G: ({ context, event }) => {
+        if (event && typeof event === 'object' && 'output' in event) {
+          const action = (event as unknown as { output: GameAction }).output;
+          return gameReducer(context.G, action);
+        }
+        return context.G;
+      },
+      animationDuration: ({ event }) => {
+        if (event && typeof event === 'object' && 'output' in event) {
+          const { animationDuration } = (event as unknown as { output: { animationDuration: number } }).output;
+          return animationDuration;
+        }
+        return 0;
+      }
+    }),
   },
   guards: {
     isHumanAction: ({ context }) => !context.G.players[context.G.currentPlayerIndex].isAI,
@@ -315,6 +350,9 @@ export const gameMachine = createMachine({
                 handIndices,
               );
               totalAnimationDuration += drawAnimationDuration;
+
+              // *** Wait for draw animations to complete before proceeding ***
+              await animationServiceBridge.waitForAnimations();
             }
           }
         }
@@ -391,4 +429,3 @@ export const gameMachine = createMachine({
     }),
   },
 });
-
