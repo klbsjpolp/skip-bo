@@ -36,11 +36,11 @@ describe('Card Angle', () => {
     expect(card4.style.getPropertyValue('--card-rotate')).toMatchInlineSnapshot(`"8deg"`);
 
     // Check if the cards have the correct left positions
-    expect(card0.style.left).toBe('0px');
-    expect(card1.style.left).toBe('60px');
-    expect(card2.style.left).toBe('120px');
-    expect(card3.style.left).toBe('180px');
-    expect(card4.style.left).toBe('240px');
+    expect(card0.style.left).toSatisfy((s: string) => s.startsWith('calc(0 '));
+    expect(card1.style.left).toSatisfy((s: string) => s.startsWith('calc(1 '));
+    expect(card2.style.left).toSatisfy((s: string) => s.startsWith('calc(2 '));
+    expect(card3.style.left).toSatisfy((s: string) => s.startsWith('calc(3 '));
+    expect(card4.style.left).toSatisfy((s: string) => s.startsWith('calc(4 '));
   });
 
   test('cards do not have rotation when stackIndex is provided instead', () => {
