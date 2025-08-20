@@ -43,10 +43,10 @@
   --card-height: 66px;
 }
 
-@media(width >= 1024px) {
+@media(width >= 64rem) {
   :root {
+    --card-width: 70px;
     --card-height: 100px;
-    --card-widrh: 70px;
   }
 }
 
@@ -286,17 +286,14 @@
 
   .player-area,
   .center-area {
-    padding: 20px;
+    @apply lg:p-5 p-3 rounded-lg lg:mb-5 mb-3 bg-(--zone-bg-color);
     border: 2px solid transparent;
-    border-radius: var(--card-radius);
-    margin-bottom: 20px;
-    background-color: var(--zone-bg-color);
     transition: border-color 0.3s;
   }
 
   .player-area.active-turn,
   .center-area.active-turn {
-    border-color: var(--active-turn-color);
+    @apply border-(--active-turn-color);
   }
 
   .discard-pile-stack {
@@ -570,12 +567,6 @@
       }
 
       &.skipbo-text {
-        /*background:
-                linear-gradient(#ffffff80, #ffffff80),
-                linear-gradient(to left,
-                #ff6b6b 0%, #ffb347 16.6%, #ffff66 33.2%, #4caf50 49.8%, #5d9cec 66.4%, #9381ff 83%, #d183e8 100%
-        );
-        background-blend-mode: normal;*/
         overflow: hidden;
         background: none; /* on déporte le décor dans ::before */
         /* Réglages rapides */
@@ -812,8 +803,12 @@
     color: var(--text-color);
   }
 
+  h1 {
+    @apply text-center font-bold text-lg lg:text-xl;
+  }
+
   h3 {
-   font-weight: bold;
+    @apply font-bold text-sm lg:text-lg;
   }
 
   * {
@@ -852,6 +847,10 @@
     box-shadow: var(--selected-shadow);
     z-index: 100;
   }
+
+  &.skipbo-text {
+    @apply text-base lg:text-2xl;
+  }
 }
 
 @utility card-range-1 {
@@ -888,11 +887,7 @@
 }
 
 @utility card-corner-number {
-  position: absolute;
-  top: 4px;
-  left: 6px;
-  font-size: 12px;
-  font-weight: bold;
+  @apply absolute top-1 left-1.5 text-xs font-bold invisible lg:visible;
 }
 
 @utility vertical-text {

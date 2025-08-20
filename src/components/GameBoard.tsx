@@ -44,9 +44,9 @@ export function GameBoard({
       />
 
       {/* Game Message */}
-      <div className="text-center font-bold text-xl my-4 h-8">
+      <h1 className="my-4 lg:my-6">
         {gameState.message}
-      </div>
+      </h1>
 
       {/* Human Player Area */}
       <PlayerArea

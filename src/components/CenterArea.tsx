@@ -12,7 +12,7 @@ interface CenterAreaProps {
 export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps) {
 
   return (
-    <div className="center-area flex items-center gap-4 h-full">
+    <div className="center-area flex items-center gap-2 lg:gap-4 h-full">
       {/* Deck Section */}
       <h3 className="min-w-fit vertical-text">
         Pioche ({gameState.deck.length})

@@ -19,7 +19,7 @@ export function ThemeSwitcher() {
       </SelectTrigger>
       <SelectContent>
         {themes.map(({ value, label, icon }) => (
-          <SelectItem key={value} value={value} onClick={() => setTheme(value)}>
+          <SelectItem key={value} value={value}>
             <div className="flex items-center">
               {getIcon(icon)}
               {label}
