@@ -582,7 +582,7 @@
         radial-gradient(ellipse at 88% 60%, white 0%, transparent 4%),
         radial-gradient(ellipse at 90% 65%, white 0%, transparent 6%);
       background-size: 2000px 500px;
-      animation: clouds-drift 120s linear infinite;
+      animation: clouds-drift 90s linear infinite;
     }
 
     .discard-pile-stack {
