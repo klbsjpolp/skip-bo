@@ -308,29 +308,35 @@
   }
 
   :root {
-    /* Tailwind CSS variables */
     --background: hsl(0 0% 100%);
     --foreground: hsl(0 0% 3.9%);
+
     --card: hsl(0 0% 100%);
     --card-foreground: hsl(0 0% 3.9%);
-    --popover: hsl(0 0% 100%);
-    --popover-foreground: hsl(0 0% 3.9%);
-    --primary: hsl(0 0% 9%);
-    --primary-foreground: hsl(0 0% 98%);
-    --secondary: hsl(0 0% 96.1%);
-    --secondary-foreground: hsl(0 0% 9%);
+
     --muted: hsl(0 0% 96.1%);
     --muted-foreground: hsl(0 0% 45.1%);
     --accent: hsl(0 0% 96.1%);
     --accent-foreground: hsl(0 0% 9%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(0 0% 3.9%);
     --destructive: hsl(0 84.2% 60.2%);
     --destructive-foreground: hsl(0 0% 98%);
     --border: hsl(0 0% 89.8%);
     --input: hsl(0 0% 89.8%);
     --ring: hsl(0 0% 3.9%);
-    --radius: 0.5rem;
+    --selected-border: #f59e0b;
+    --selected-shadow: 0 0 20px var(--selected-border);
 
-    /* Skip-Bo game theme variables - Light theme (default) */
+    --radius: 0.5rem;
+  }
+
+  .theme-light {
+    --primary: hsl(0 0% 9%);
+    --primary-foreground: hsl(0 0% 98%);
+    --secondary: hsl(0 0% 96.1%);
+    --secondary-foreground: hsl(0 0% 9%);
+
     --bg-color: #e5e7eb;
     --zone-bg-color: #f9fafb;
     --text-color: #374151;
@@ -340,18 +346,25 @@
     --card-border: #9ca3af;
     --card-shadow: 0 1px 3px rgba(0,0,0,0.2);
     --card-radius: 8px;
-    --selected-border: #f59e0b;
-    --selected-shadow: 0 0 20px var(--selected-border);
     --active-turn-color: #22c55e;
     --button-bg: #4f46e5;
     --button-hover-bg: #4338ca;
 
     /* Card color ranges */
-    --skipbo-text: #FFD97D;
-    --skipbo-bg: #4f46e5;
+    --skipbo-text: #fff5e0;
+    --skipbo-bg: #141139;
     --card-g1: hsl(152 69% 58%);   /* 1‑4 */
     --card-g2: hsl(0 80% 60%);     /* 5‑8 */
     --card-g3: hsl(283 55% 57%);   /* 9‑12 */
+
+    .card.back {
+      background: linear-gradient(45deg,
+        var(--active-turn-color) 0%,
+        var(--active-turn-color) 50%,
+        var(--card-back) 50%,
+        var(--card-back) 100%
+      );
+    }
   }
 
   .theme-dark {
@@ -390,8 +403,8 @@
     --button-hover-bg: #4f46e5;
 
     /* Card color ranges - same as light theme */
-    --skipbo-text: #FFD97D;
-    --skipbo-bg: hsl(0 0% 3.9%);
+    --skipbo-text: #141139;
+    --skipbo-bg: #fff5e0;
     --card-g1: hsl(152 69% 58%);
     --card-g2: hsl(0 80% 60%);
     --card-g3: hsl(283 55% 57%);
@@ -475,10 +488,10 @@
           position: absolute;
           inset: 0;
           background-image: repeating-conic-gradient(from 0deg,
-          #00a3a3 0deg 90deg,
-          #ff3b30 90deg 180deg,
-          #00befc 180deg 270deg,
-          #1ba1e2 270deg 360deg
+            #00a3a3 0deg 90deg,
+            #ff3b30 90deg 180deg,
+            #00befc 180deg 270deg,
+            #1ba1e2 270deg 360deg
           );
           background-size: var(--card-width) var(--card-width);
           background-repeat: no-repeat;
@@ -540,7 +553,7 @@
     --button-bg: #ff6b6b;
     --button-hover-bg: #ff5252;
 
-    --skipbo-text: hsl(45 100% 70%);
+    --skipbo-text: hsl(0, 0%, 100%);
     --card-g1: #4caf50;
     --card-g2: #ff6b6b;
     --card-g3: #9381ff;
@@ -567,6 +580,7 @@
       }
 
       &.skipbo-text {
+        @apply text-shadow-black;
         overflow: hidden;
         background: none; /* on déporte le décor dans ::before */
         /* Réglages rapides */
@@ -772,7 +786,6 @@
     --bg-color: #f4f1de;
     --zone-bg-color: #e9c46a;
     --text-color: #264653;
-    --title-color: #2a9d8f;
     --card-bg: #f4a261;
     --card-border: #e76f51;
     --card-shadow: 3px 3px 0 var(--card-border);
@@ -804,11 +817,11 @@
   }
 
   h1 {
-    @apply text-center font-bold text-lg lg:text-xl;
+    @apply text-center font-bold text-lg lg:text-xl text-(--title-color);
   }
 
   h3 {
-    @apply font-bold text-sm lg:text-lg;
+    @apply font-bold text-sm lg:text-lg text-(--title-color);
   }
 
   * {

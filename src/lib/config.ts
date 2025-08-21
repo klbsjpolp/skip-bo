@@ -13,7 +13,7 @@ export const MESSAGES = {
   INVALID_MOVE_CANNOT_DISCARD_SKIP_BO: "Mouvement invalide: Vous ne pouvez pas défausser une carte Skip-Bo",
   CARD_PLAYED: "Carte jouée",
   TURN_ENDED: "Tour terminé",
-  GAME_WON: "Partie gagnée !",
+  GAME_WON: "La partie est gagnée par {player} !",
   AI_THINKING: "L'IA réfléchit...",
   SELECT_CARD: "Sélectionnez une carte",
   SELECT_DESTINATION: "Sélectionnez une destination",

@@ -49,7 +49,6 @@ export function PlayerArea({
   const handCardOnClick: MouseEventHandler = useCallback((e) => {
     // Prevent event propagation
     e.stopPropagation();
-    console.log('handCardOnClick', 'isHuman', isHuman,'isCurrentPlayer',isCurrentPlayer, e.currentTarget.parentElement?.getAttribute('data-card-index'))
 
     // Only allow selection if it's the human player's turn
     // For hand cards, we allow selecting even if another card is selected

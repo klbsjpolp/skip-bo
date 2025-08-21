@@ -63,7 +63,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                   card={pile[pile.length - 1]}
                   isRevealed={true}
                   canBeGrabbed={false}
-                  displayValue={pile.length} // Show the sequential position (1-12) instead of card value
+                  displayValue={pile.length.toString()} // Show the sequential position (1-12) instead of card value
                 />
             ) : (
                 <EmptyCard

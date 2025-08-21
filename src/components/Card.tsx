@@ -11,7 +11,7 @@ interface CardProps {
   canBeGrabbed?: boolean,
   stackIndex?: number,
   overlapIndex?: number,
-  displayValue?: string | number,
+  displayValue?: string,
   hint?: string
 }
 

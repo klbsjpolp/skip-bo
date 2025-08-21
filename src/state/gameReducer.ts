@@ -189,7 +189,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       // Check win condition
       if (player.stockPile.length === 0) {
         draft.gameIsOver = true;
-        draft.message = `${player.isAI ? 'IA' : 'Joueur'} ${MESSAGES.GAME_WON}`;
+        draft.message = MESSAGES.GAME_WON.replace('{player}', player.isAI ? "l'IA" : 'le joueur');
       } else {
         draft.message = `${player.isAI ? "L'IA a joué une carte" : "Vous avez joué une carte"}`;
       }
