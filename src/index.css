@@ -41,12 +41,14 @@
 
   --card-width: 46px;
   --card-height: 66px;
+  --stack-diff: 16px;
 }
 
 @media(width >= 64rem) {
   :root {
     --card-width: 70px;
     --card-height: 100px;
+    --stack-diff: 20px;
   }
 }
 
@@ -218,10 +220,6 @@
 
   .card.back * {
     @apply text-4xl;
-  }
-
-  .card.back .card-corner-number {
-    @apply invisible;
   }
 
   .hand,
@@ -507,7 +505,7 @@
           position: absolute;
           left: 0;
           top: 0;
-          height: 20px;
+          height: 20%;
           width: 100%;
           background-color: #ffd426;
         }
@@ -516,7 +514,7 @@
           position: absolute;
           left: 0;
           bottom: 0;
-          height: 20px;
+          height: 20%;
           width: 100%;
           background-image: linear-gradient(to left,
           #00a3a3 0%,
@@ -798,30 +796,32 @@
 
     .card {
       &.back {
+        --transparent-size: calc(var(--card-height) / 50);
+        --stripe-size: calc(var(--card-height) / 10);
         background-image: repeating-linear-gradient(
                 45deg,
-                var(--card-g1),
-                var(--card-g1) 10px,
-                transparent 10px,
-                transparent 12px,
-                var(--card-g2) 12px,
-                var(--card-g2) 22px,
-                transparent 22px,
-                transparent 24px,
-                var(--card-g3) 24px,
-                var(--card-g3) 34px,
-                transparent 34px,
-                transparent 36px,
-                var(--card-bg) 36px,
-                var(--card-bg) 46px,
-                transparent 46px,
-                transparent 48px
+                var(--card-g1)  0,
+                var(--card-g1)  calc(var(--stripe-size) * 1),
+                transparent     calc(var(--stripe-size) * 1),
+                transparent     calc(var(--stripe-size) * 1 + var(--transparent-size) * 1),
+                var(--card-g2)  calc(var(--stripe-size) * 1 + var(--transparent-size) * 1),
+                var(--card-g2)  calc(var(--stripe-size) * 2 + var(--transparent-size) * 1),
+                transparent     calc(var(--stripe-size) * 2 + var(--transparent-size) * 1),
+                transparent     calc(var(--stripe-size) * 2 + var(--transparent-size) * 2),
+                var(--card-g3)  calc(var(--stripe-size) * 2 + var(--transparent-size) * 2),
+                var(--card-g3)  calc(var(--stripe-size) * 3 + var(--transparent-size) * 2),
+                transparent     calc(var(--stripe-size) * 3 + var(--transparent-size) * 2),
+                transparent     calc(var(--stripe-size) * 3 + var(--transparent-size) * 3),
+                var(--card-bg)  calc(var(--stripe-size) * 3 + var(--transparent-size) * 3),
+                var(--card-bg)  calc(var(--stripe-size) * 4 + var(--transparent-size) * 3),
+                transparent     calc(var(--stripe-size) * 4 + var(--transparent-size) * 3),
+                transparent     calc(var(--stripe-size) * 4 + var(--transparent-size) * 4)
         );
       }
       &.skipbo-text {
         @apply overflow-hidden
           before:absolute before:top-0   before:left-0 before:w-full before:h-1/6
-          after:absolute  after:bottom-0 after:left-0  after:w-full  after:h-1/12;
+          after:absolute  after:bottom-0 after:left-0  after:w-full  after:h-1/6;
         &::before {
           background-image: conic-gradient(from 45deg,
             transparent 0deg 180deg,
@@ -870,7 +870,7 @@
 
 @utility card {
   @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer card-height
-  lg:text-2xl text-xl;
+  lg:not-[.skipbo-text]:text-2xl not-[.skipbo-text]:text-xl;
   width: var(--card-width);
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
@@ -895,10 +895,6 @@
     box-shadow: var(--selected-shadow);
     z-index: 100;
   }
-
-  &.skipbo-text {
-    @apply text-base lg:text-2xl;
-  }
 }
 
 @utility card-range-1 {
@@ -914,7 +910,7 @@
 }
 
 @utility skipbo-text {
-  @apply text-(--skipbo-text) bg-(--skipbo-bg);
+  @apply text-(--skipbo-text) bg-(--skipbo-bg) text-base lg:text-2xl;
 }
 
 @utility card-back {
@@ -935,7 +931,11 @@
 }
 
 @utility card-corner-number {
-  @apply absolute top-1 left-1.5 text-xs font-bold invisible lg:visible;
+  @apply absolute top-0.5 lg:top-1 left-1 lg:left-1.5 text-xs font-bold invisible lg:visible;
+}
+
+.discard-pile-stack .card:not(:last-child) .card-corner-number {
+  @apply visible;
 }
 
 @utility vertical-text {

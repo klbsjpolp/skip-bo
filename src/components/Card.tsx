@@ -47,7 +47,7 @@ const CardComponent: React.FC<CardProps> = ({
   let style: CSSProperties | undefined = undefined;
   if (stackIndex !== undefined) {
     style = {
-      top: `${stackIndex * 20}px`,
+      top: `calc(var(--stack-diff) * ${stackIndex})`,
       zIndex: stackIndex,
     }
   } else if (overlapIndex !== undefined) {
