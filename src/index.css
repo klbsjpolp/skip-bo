@@ -218,6 +218,15 @@
     100% { background-position: 200% 50%; }
   }
 
+  @keyframes clouds-drift {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: -2000px 0;
+    }
+  }
+
   .card.back * {
     @apply text-4xl;
   }
@@ -537,8 +546,8 @@
     --secondary: #9381ff;
     --secondary-foreground: hsl(0 0% 100%);
 
-    --bg-color: #f0f8ff;
-    --zone-bg-color: #ffffff;
+    --bg-color: #87ceeb; /* Sky Blue */
+    --zone-bg-color: #ffffff88;
     --text-color: #333333;
     --title-color: #ff6b6b;
     --card-bg: #ffffff;
@@ -555,6 +564,26 @@
     --card-g1: #4caf50;
     --card-g2: #ff6b6b;
     --card-g3: #9381ff;
+
+    body {
+      background-image:
+        /* Cloud Set 1 */
+        radial-gradient(ellipse at 15% 25%, white 0%, transparent 8%),
+        radial-gradient(ellipse at 25% 50%, white 0%, transparent 10%),
+        radial-gradient(ellipse at 45% 20%, white 0%, transparent 7%),
+        radial-gradient(ellipse at 50% 40%, white 0%, transparent 9%),
+        radial-gradient(ellipse at 35% 80%, white 0%, transparent 11%),
+        radial-gradient(ellipse at 40% 70%, white 0%, transparent 10%),
+        /* Cloud Set 2 (Mirrored for seamless loop) */
+        radial-gradient(ellipse at 60% 70%, white 0%, transparent 10%),
+        radial-gradient(ellipse at 65% 80%, white 0%, transparent 11%),
+        radial-gradient(ellipse at 75% 20%, white 0%, transparent 7%),
+        radial-gradient(ellipse at 80% 40%, white 0%, transparent 9%),
+        radial-gradient(ellipse at 88% 60%, white 0%, transparent 4%),
+        radial-gradient(ellipse at 90% 65%, white 0%, transparent 6%);
+      background-size: 2000px 500px;
+      animation: clouds-drift 120s linear infinite;
+    }
 
     .discard-pile-stack {
       .hoverable-card:hover {
