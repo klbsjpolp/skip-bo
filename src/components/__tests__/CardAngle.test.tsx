@@ -44,16 +44,17 @@ describe('Card Angle', () => {
   });
 
   test('cards do not have rotation when stackIndex is provided instead', () => {
+    const index = 2;
     // Render a card with stackIndex
     const { container } = render(
-      <Card card={{ value: 1, isSkipBo: false }} stackIndex={2} />
+      <Card card={{ value: 1, isSkipBo: false }} stackIndex={index} />
     );
 
     // Get the card element
     const card = container.querySelector('.card') as HTMLElement;
 
     // Check that the card has the correct top position but no transform
-    expect(card.style.top).toBe('40px');
+    expect(card.style.top).toBe(`calc(var(--stack-diff) * ${index})`);
     expect(card.style.transform).toBe('');
   });
 });
