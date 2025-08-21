@@ -126,9 +126,7 @@
   }
 
   .animated-card {
-    position: fixed;
-    pointer-events: none;
-    will-change: transform, left, top;
+    @apply shadow-2xl fixed pointer-events-none will-change-transform;
   }
 
   /* Animation type specific styles */
@@ -329,6 +327,7 @@
     --selected-shadow: 0 0 20px var(--selected-border);
 
     --radius: 0.5rem;
+    --stripes-bg: none;
   }
 
   .theme-light {
@@ -351,14 +350,14 @@
     --button-hover-bg: #4338ca;
 
     /* Card color ranges */
-    --skipbo-text: #fff5e0;
-    --skipbo-bg: #141139;
+    --skipbo-text: white;
+    --skipbo-bg: var(--active-turn-color);
     --card-g1: hsl(152 69% 58%);   /* 1‑4 */
     --card-g2: hsl(0 80% 60%);     /* 5‑8 */
     --card-g3: hsl(283 55% 57%);   /* 9‑12 */
 
     .card.back {
-      background: linear-gradient(45deg,
+      background-image: linear-gradient(45deg,
         var(--active-turn-color) 0%,
         var(--active-turn-color) 50%,
         var(--card-back) 50%,
@@ -398,19 +397,20 @@
     --card-border: #6b7280;
     --card-back: #1d4ed8;
     --selected-border: #ead3b5;
+    --card-radius: 8px;
     --active-turn-color: #4ade80;
     --button-bg: #6366f1;
     --button-hover-bg: #4f46e5;
 
     /* Card color ranges - same as light theme */
-    --skipbo-text: #141139;
-    --skipbo-bg: #fff5e0;
+    --skipbo-text: black;
+    --skipbo-bg: var(--card-back);
     --card-g1: hsl(152 69% 58%);
     --card-g2: hsl(0 80% 60%);
     --card-g3: hsl(283 55% 57%);
 
     .card.back {
-      background: linear-gradient(45deg,
+      background-image: linear-gradient(45deg,
         var(--card-back) 0%,
         var(--card-back) 50%,
         var(--active-turn-color) 50%,
@@ -545,7 +545,7 @@
     --title-color: #ff6b6b;
     --card-bg: #ffffff;
     --card-border: #9381ff;
-    --card-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --card-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
     --card-radius: 12px;
     --card-back: #6a5acd;
     --selected-border: #ffd700;
@@ -568,38 +568,31 @@
     }
 
     .card {
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
-      border: 2px solid var(--card-border);
-
       &.back {
-        background: linear-gradient(
-                to bottom,
-                #ff6b6b 0%, /* Red */ #ffb347 16.6%, /* Orange */ #ffff66 33.2%, /* Yellow */ #4caf50 49.8%, /* Green */ #5d9cec 66.4%, /* Blue */ #9381ff 83%, /* Indigo */ #d183e8 100% /* Violet */
+        background-image: linear-gradient(
+          to bottom,
+          #ff6b6b 0%, /* Red */ #ffb347 16.6%, /* Orange */ #ffff66 33.2%, /* Yellow */ #4caf50 49.8%, /* Green */ #5d9cec 66.4%, /* Blue */ #9381ff 83%, /* Indigo */ #d183e8 100% /* Violet */
         );
-        border: 2px solid #ffffff;
       }
 
       &.skipbo-text {
-        @apply text-shadow-black;
-        overflow: hidden;
-        background: none; /* on déporte le décor dans ::before */
+        @apply text-shadow-black overflow-hidden;
         /* Réglages rapides */
-        --center-y: 140%;     /* centre vertical du cercle (plus grand => arc plus bombé) */
-        --inner: 50%;         /* rayon intérieur de l’arc visible */
+        --center-y: 60%;     /* centre vertical du cercle (plus grand => arc plus bombé) */
+        --inner: 30%;         /* rayon intérieur de l’arc visible */
         --band: 3%;         /* épaisseur d’une bande (ajustez entre 2% et 3%) */
 
         &::before {
           content: "";
           position: absolute;
-          inset: -40% -20% -60% -20%; /* déborde pour bien couvrir */
-          z-index: 0;
+          inset: -10% -20% -60% -20%; /* déborde pour bien couvrir */
           pointer-events: none;
 
           /* Anneaux concentriques: chaque couleur est une couronne radiale */
-          background:
+          background-image:
                   linear-gradient(#ffffff40, #ffffff40),
                   radial-gradient(circle at 50% var(--center-y),
-                  transparent 0 var(--inner),
+                  var(--card-bg) 0 var(--inner),
 
                   #8f00ff var(--inner) calc(var(--inner) + var(--band)),
                   #4b0082 calc(var(--inner) + var(--band)) calc(var(--inner) + var(--band) * 2),
@@ -609,7 +602,7 @@
                   #ff7f00 calc(var(--inner) + var(--band) * 5) calc(var(--inner) + var(--band) * 6),
                   #ff0000 calc(var(--inner) + var(--band) * 6) calc(var(--inner) + var(--band) * 7),
 
-                  transparent calc(var(--inner) + var(--band) * 7) 100%
+                  var(--card-bg) calc(var(--inner) + var(--band) * 7) 100%
                   );
           background-blend-mode: normal;
         }
@@ -790,22 +783,64 @@
     --card-border: #e76f51;
     --card-shadow: 3px 3px 0 var(--card-border);
     --card-radius: 15px;
-    --card-back: #2a9d8f;
+    --card-back: var(--zone-bg-color);
     --selected-border: var(--card-border);
     --selected-shadow: 3px 3px 0 var(--primary);
     --active-turn-color: #264653;
     --button-bg: #2a9d8f;
     --button-hover-bg: #21867a;
 
-    --skipbo-text: hsl(40 80% 80%);  /* Warm cream color that fits the vintage palette */
-    --skipbo-bg: #2a9d8f;
+    --skipbo-text: hsl(40 80% 80%);
+    --skipbo-bg: var(--card-bg);
     --card-g1: #2a9d8f;
     --card-g2: #e76f51;
     --card-g3: #264653;
 
     .card {
       &.back {
-        background: linear-gradient(135deg, #2a9d8f 0%, #e9c46a 50%, #f4a261 100%);
+        background-image: repeating-linear-gradient(
+                45deg,
+                var(--card-g1),
+                var(--card-g1) 10px,
+                transparent 10px,
+                transparent 12px,
+                var(--card-g2) 12px,
+                var(--card-g2) 22px,
+                transparent 22px,
+                transparent 24px,
+                var(--card-g3) 24px,
+                var(--card-g3) 34px,
+                transparent 34px,
+                transparent 36px,
+                var(--card-bg) 36px,
+                var(--card-bg) 46px,
+                transparent 46px,
+                transparent 48px
+        );
+      }
+      &.skipbo-text {
+        @apply overflow-hidden
+          before:absolute before:top-0   before:left-0 before:w-full before:h-1/6
+          after:absolute  after:bottom-0 after:left-0  after:w-full  after:h-1/12;
+        &::before {
+          background-image: conic-gradient(from 45deg,
+            transparent 0deg 180deg,
+            var(--card-g2) 180deg 360deg
+          );
+        }
+        &::after {
+          background-image: conic-gradient(from 225deg,
+            transparent 0deg 180deg,
+            var(--card-g1) 180deg 360deg
+          );
+        }
+        span:not(.card-corner-number) {
+          @apply relative
+            before:absolute before:z-[-1] before:content-['Skip-Bo']
+            after:absolute  after:z-[-1]  after:content-['Skip-Bo']
+            before:text-(--card-g1)  before:bottom-1 before:right-1.5
+            after:text-(--card-g2)   after:top-1     after:left-1.5;
+        }
       }
     }
   }

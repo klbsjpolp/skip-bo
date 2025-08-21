@@ -65,7 +65,6 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
         card={animation.card}
         isRevealed={shouldRevealCard()}
         canBeGrabbed={false}
-        className="shadow-lg"
       />
     </div>
   );

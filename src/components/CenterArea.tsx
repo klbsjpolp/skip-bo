@@ -23,7 +23,6 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
             hint="Deck"
             card={{ value: 0, isSkipBo: false }}
             isRevealed={false}
-            className="shadow-lg"
             canBeGrabbed={false}
           />
         ) : (
