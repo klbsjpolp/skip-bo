@@ -186,12 +186,10 @@ export function useSkipBoGame() {
             
             console.log(`⏱️ useSkipBoGame: Received drawAnimationDuration: ${drawAnimationDuration}ms after ${Date.now() - startTime}ms`);
 
-            // Wait for draw animations to complete
-            if (drawAnimationDuration > 0) {
-              console.log(`⏳ useSkipBoGame: Waiting additional ${drawAnimationDuration}ms before proceeding with game logic`);
-              await new Promise(resolve => setTimeout(resolve, drawAnimationDuration));
-              console.log(`✅ useSkipBoGame: Wait complete, proceeding with game logic at ${Date.now()}`);
-            }
+            // Do NOT wait for draw animations to complete here.
+            // Start-of-turn draws already apply state immediately and then wait in the state machine.
+            // Mirror that behavior here so cards appear as each animation finishes.
+            // We keep the animations running in the background without blocking the state update.
           }
         }
       } catch (error) {
