@@ -1,6 +1,6 @@
 import {Card as CardType} from '@/types';
 import {cn} from '@/lib/utils';
-import React, {MouseEventHandler, CSSProperties, memo} from "react";
+import React, {MouseEventHandler, CSSProperties, memo, useState, useLayoutEffect} from "react";
 
 interface CardProps {
   card: CardType | null,
@@ -26,6 +26,7 @@ const CardComponent: React.FC<CardProps> = ({
                                               overlapIndex = undefined,
                                               displayValue: overriddenDisplayValue
                                             }) => {
+  const [isMorphing, setIsMorphing] = useState(false);
   const displayValue = () => {
     if (!isRevealed) return '';
     if (!card) return ''; // Handle null or undefined card
@@ -34,12 +35,21 @@ const CardComponent: React.FC<CardProps> = ({
     return card.value.toString();
   };
 
-  const cardValue = overriddenDisplayValue !== undefined ? overriddenDisplayValue : displayValue();
+  useLayoutEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (card && card.isSkipBo) {
+      setIsMorphing(true);
+      timer = setTimeout(() => setIsMorphing(false), 300);
+    }
+    return () => clearTimeout(timer);
+  }, [card, card?.isSkipBo]);
+
+  const cardValue = (overriddenDisplayValue !== undefined && !isMorphing) ? overriddenDisplayValue : displayValue();
 
   // Determine color class based on card value
   const colourClass =
     !card || !isRevealed ? '' :
-      (card.isSkipBo && !overriddenDisplayValue) ? 'skipbo-text' :
+      (cardValue === 'Skip-Bo') ? 'skipbo-text' :
         (Number(cardValue) <= 4) ? 'card-range-1' :
           (Number(cardValue) <= 8) ? 'card-range-2' :
             (Number(cardValue) <= 12) ? 'card-range-3' : '';
