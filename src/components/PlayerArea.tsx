@@ -70,8 +70,8 @@ export function PlayerArea({
 
   return (
     <div className={cn(
-      "player-area", "flex items-center gap-2 lg:gap-4 h-full flex-wrap",
-      isCurrentPlayer && "ring-3 ring-primary",
+      "player-area", 'ring-3 transition', "flex items-center gap-2 lg:gap-4 h-full flex-wrap",
+      isCurrentPlayer ? "ring-primary" : 'ring-transparent',
     )}>
       {/* Stock Pile Section */}
       <div className="flex items-center relative gap-2">

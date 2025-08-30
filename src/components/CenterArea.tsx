@@ -32,13 +32,13 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
 
       {/* Build Piles Section */}
       <h3 className="min-w-fit vertical-text">Piles de<br />construction</h3>
-      <div className="discard-piles">
+      <div className="build-piles">
         {gameState.buildPiles.map((pile, index) => (
           <div
             key={`build-${index}`}
             data-build-pile={index}
             className={cn(
-              "relative drop-indicator",
+              "relative drop-indicator build-pile",
               gameState.selectedCard && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState)
                 ? 'can-drop cursor-pointer'
                 : 'cursor-default'

@@ -127,10 +127,6 @@
     z-index: 1000;
   }
 
-  .animated-card {
-    @apply shadow-2xl fixed pointer-events-none will-change-transform;
-  }
-
   /* Animation type specific styles */
   .animation-play {
     /* Cards moving to build piles */
@@ -426,8 +422,8 @@
     --secondary: hsl(350 80% 85%);
     --secondary-foreground: hsl(0 0% 20%);
 
-    --bg-color: #f0f4f8;
-    --zone-bg-color: #ffffff;
+    --bg-color: #fbef8b;
+    --zone-bg-color: #f4edaf;
     --text-color: #5a6270;
     --title-color: #4a5568;
     --card-bg: #ffffff;
@@ -597,35 +593,36 @@
       }
 
       &.skipbo-text {
-        @apply text-shadow-black overflow-hidden;
+        @apply text-shadow-black;
         /* Réglages rapides */
         --center-y: 60%;     /* centre vertical du cercle (plus grand => arc plus bombé) */
         --inner: 30%;         /* rayon intérieur de l’arc visible */
         --band: 3%;         /* épaisseur d’une bande (ajustez entre 2% et 3%) */
 
-        &::before {
+        .card-inner::before {
           content: "";
           position: absolute;
           inset: -10% -20% -60% -20%; /* déborde pour bien couvrir */
           pointer-events: none;
+          border-radius: inherit;
+          z-index: 0;
 
-          /* Anneaux concentriques: chaque couleur est une couronne radiale */
           background-image:
-                  linear-gradient(#ffffff40, #ffffff40),
-                  radial-gradient(circle at 50% var(--center-y),
-                  var(--card-bg) 0 var(--inner),
+            linear-gradient(#ffffff40, #ffffff40),
+            radial-gradient(circle at 50% var(--center-y),
+              var(--card-bg) 0 var(--inner),
 
-                  #8f00ff var(--inner) calc(var(--inner) + var(--band)),
-                  #4b0082 calc(var(--inner) + var(--band)) calc(var(--inner) + var(--band) * 2),
-                  #0077ff calc(var(--inner) + var(--band) * 2) calc(var(--inner) + var(--band) * 3),
-                  #00ff00 calc(var(--inner) + var(--band) * 3) calc(var(--inner) + var(--band) * 4),
-                  #ffff00 calc(var(--inner) + var(--band) * 4) calc(var(--inner) + var(--band) * 5),
-                  #ff7f00 calc(var(--inner) + var(--band) * 5) calc(var(--inner) + var(--band) * 6),
-                  #ff0000 calc(var(--inner) + var(--band) * 6) calc(var(--inner) + var(--band) * 7),
+              #8f00ff var(--inner) calc(var(--inner) + var(--band)),
+              #4b0082 calc(var(--inner) + var(--band)) calc(var(--inner) + var(--band) * 2),
+              #0077ff calc(var(--inner) + var(--band) * 2) calc(var(--inner) + var(--band) * 3),
+              #00ff00 calc(var(--inner) + var(--band) * 3) calc(var(--inner) + var(--band) * 4),
+              #ffff00 calc(var(--inner) + var(--band) * 4) calc(var(--inner) + var(--band) * 5),
+              #ff7f00 calc(var(--inner) + var(--band) * 5) calc(var(--inner) + var(--band) * 6),
+              #ff0000 calc(var(--inner) + var(--band) * 6) calc(var(--inner) + var(--band) * 7),
 
-                  var(--card-bg) calc(var(--inner) + var(--band) * 7) 100%
-                  );
-          background-blend-mode: normal;
+              var(--card-bg) calc(var(--inner) + var(--band) * 7) 100%
+            );
+          background-blend-mode: overlay;
         }
 
         & > * {
@@ -716,7 +713,6 @@
                   transparent 2px,
                   transparent 4px
           );
-          mix-blend-mode: overlay;
           opacity: 0.4; /* softer than front */
         }
 
@@ -770,14 +766,13 @@
           inset: 0;
           z-index: 0;
           background:
-                  repeating-linear-gradient(
-                          to bottom,
-                          rgba(255,255,255,0.05) 0px,
-                          rgba(255,255,255,0.05) 1px,
-                          transparent 2px,
-                          transparent 4px
-                  );
-          mix-blend-mode: overlay;
+            repeating-linear-gradient(
+              to bottom,
+              rgba(255,255,255,0.05) 0px,
+              rgba(255,255,255,0.05) 1px,
+              transparent 2px,
+              transparent 4px
+            );
           border-radius: var(--card-radius);
           pointer-events: none;
         }
@@ -842,23 +837,25 @@
         );
       }
       &.skipbo-text {
-        @apply overflow-hidden
-          before:absolute before:top-0   before:left-0 before:w-full before:h-1/6
-          after:absolute  after:bottom-0 after:left-0  after:w-full  after:h-1/6;
-        &::before {
-          background-image: conic-gradient(from 45deg,
-            transparent 0deg 180deg,
-            var(--card-g2) 180deg 360deg
-          );
-        }
-        &::after {
-          background-image: conic-gradient(from 225deg,
+        .card-inner {
+          @apply overflow-hidden
+            before:absolute before:top-0   before:left-0 before:w-full before:h-1/6
+            after:absolute  after:bottom-0 after:left-0  after:w-full  after:h-1/6;
+          &::before {
+            background-image: conic-gradient(from 45deg,
+              transparent 0deg 180deg,
+              var(--card-g2) 180deg 360deg
+            );
+          }
+          &::after {
+            background-image: conic-gradient(from 225deg,
             transparent 0deg 180deg,
             var(--card-g1) 180deg 360deg
-          );
+            );
+          }
         }
         span:not(.card-corner-number) {
-          @apply relative
+          @apply relative z-0
             before:absolute before:z-[-1] before:content-['Skip-Bo']
             after:absolute  after:z-[-1]  after:content-['Skip-Bo']
             before:text-(--card-g1)  before:bottom-1 before:right-1.5
@@ -893,7 +890,7 @@
 
 @utility card {
   @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer card-height
-  lg:not-[.skipbo-text]:text-2xl not-[.skipbo-text]:text-xl;
+  lg:not-[.skipbo-text]:text-2xl not-[.skipbo-text]:text-xl overflow-hidden;
   width: var(--card-width);
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
@@ -902,7 +899,6 @@
   color: var(--text-color);
   box-shadow: var(--card-shadow);
   transform-origin: bottom center;
-  overflow: hidden;
   --card-rotate: inherit;
   --card-translate-y: 0px;
   --card-scale: 1;
@@ -915,12 +911,26 @@
     }
   }
 
+  .card-inner {
+    @apply w-full h-full overflow-hidden flex items-center justify-center absolute;
+    border-radius: inherit;
+  }
+
+  .card-inner > * {
+    position: relative;
+    z-index: 1;
+  }
+
   &.selected {
     border-color: var(--selected-border);
     --card-translate-y: -5px;
     box-shadow: var(--selected-shadow);
     z-index: 100;
   }
+}
+
+@utility animated-card {
+  @apply shadow-2xl fixed pointer-events-none will-change-transform;
 }
 
 @utility card-range-1 {

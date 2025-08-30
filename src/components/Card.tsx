@@ -40,7 +40,7 @@ const CardComponent: React.FC<CardProps> = ({
   const [morphing, setMorphing] = useState<'no' | 'yes' | 'after'>('no');
 
   const morphingDelay = 100;
-  const morphingAfterDelay = 500;
+  const morphingAfterDelay = 800;
 
   useLayoutEffect(() => {
     let timer1: NodeJS.Timeout, timer2: NodeJS.Timeout;
@@ -74,9 +74,11 @@ const CardComponent: React.FC<CardProps> = ({
   }
 
   const content = isRevealed ? <>
-    <span className="card-corner-number">{cardValue}</span>
+    <div className='card-inner'></div>
+    <span className='card-corner-number'>{cardValue}</span>
     <span>{cardValue}</span>
-  </> : <div className="back"></div>;
+  </> : <div className='back'></div>;
+
   return (card ?
       <div
         className={cn(
