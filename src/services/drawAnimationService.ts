@@ -1,5 +1,10 @@
 import {Card} from '@/types';
-import {calculateAnimationDuration, getDeckPosition, getHandCardPosition} from '@/utils/cardPositions';
+import {
+  calculateAnimationDuration,
+  getDeckPosition,
+  getHandCardAngle,
+  getHandCardPosition
+} from '@/utils/cardPositions';
 import {CardAnimationData} from "@/contexts/CardAnimationContext.tsx";
 
 // Global reference to the animation context
@@ -58,6 +63,7 @@ const triggerDrawAnimation = async (
       card,
       startPosition,
       endPosition,
+      endAngleDeg: getHandCardAngle(handContainer, handIndex),
       animationType: 'draw',
       initialDelay,
       duration,
@@ -84,7 +90,7 @@ export const triggerMultipleDrawAnimations = async (
   handIndices: number[],
   staggerDelay: number = 500
 ): Promise<number> => {
-  console.log(`🎯 triggerMultipleDrawAnimations called for player ${playerIndex} with ${cards.length} cards`);
+  console.log(`🎯 triggerMultipleDrawAnimations called for player ${playerIndex} with ${cards.length} cards. handIndices: ${JSON.stringify(handIndices)}`);
   
   if (cards.length !== handIndices.length) {
     console.warn('Cards and hand indices arrays must have the same length');

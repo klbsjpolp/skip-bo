@@ -5,11 +5,11 @@ import { GameState, MoveResult, Card } from '@/types';
 import { canPlayCard } from '@/lib/validators';
 import {AIDifficulty} from "@/ai/aiConfig.ts";
 import {
-  getHandCardPosition, 
-  getStockCardPosition, 
-  getDiscardCardPosition, 
+  getHandCardPosition,
+  getStockCardPosition,
+  getDiscardCardPosition,
   getBuildPilePosition,
-  calculateAnimationDuration 
+  calculateAnimationDuration, getHandCardAngle
 } from '@/utils/cardPositions';
 import { setGlobalAnimationContext } from '@/services/aiAnimationService';
 import { setGlobalDrawAnimationContext, triggerMultipleDrawAnimations } from '@/services/drawAnimationService';
@@ -74,6 +74,7 @@ export function useSkipBoGame() {
       const domIndex = currentState.currentPlayerIndex === 0 ? 1 : 0; // Human=1, AI=0 in DOM
       const playerAreaElement = playerAreas[domIndex] as HTMLElement;
       const centerAreaElement = document.querySelector('.center-area') as HTMLElement;
+      let startAngleDeg: number | undefined;
       
       if (playerAreaElement && centerAreaElement) {
         let startPosition;
@@ -83,6 +84,7 @@ export function useSkipBoGame() {
           const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
           if (handContainer) {
             startPosition = getHandCardPosition(handContainer, currentState.selectedCard.index);
+            startAngleDeg = getHandCardAngle(handContainer, currentState.selectedCard.index);
           }
         } else if (currentState.selectedCard.source === 'stock') {
           const stockContainer = playerAreaElement.querySelector('.stock-pile') as HTMLElement;
@@ -105,9 +107,10 @@ export function useSkipBoGame() {
             card: currentState.selectedCard.card,
             startPosition,
             endPosition,
+            startAngleDeg,
             animationType: 'play',
             initialDelay: 0,
-            duration,
+            duration:duration*1.2,
             sourceInfo: {
               playerIndex: currentState.currentPlayerIndex,
               source: currentState.selectedCard.source,
@@ -251,6 +254,7 @@ export function useSkipBoGame() {
                 animationType: 'discard',
                 initialDelay: 0,
                 duration,
+                startAngleDeg: getHandCardAngle(handContainer, currentState.selectedCard.index),
                 sourceInfo: {
                   playerIndex: currentState.currentPlayerIndex,
                   source: currentState.selectedCard.source,

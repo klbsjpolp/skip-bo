@@ -11,6 +11,9 @@ export interface CardAnimationData {
   animationType: 'play' | 'discard' | 'draw';
   initialDelay: number;
   duration: number;
+  // Optional rotation angles (degrees) for smoother, accurate animation
+  startAngleDeg?: number;
+  endAngleDeg?: number;
   // Source information to identify which card should be hidden
   sourceInfo: {
     playerIndex: number;

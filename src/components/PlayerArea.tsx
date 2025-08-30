@@ -132,7 +132,10 @@ export function PlayerArea({
           handOverlaps && "overlap-hand"
         )}>
           {player.hand.map((card, index) => (
-            <div className='inline-block card-holder w-[calc(var(--card-width)*6/7)] h-(--card-height)' key={`hand-${index}`} data-card-index={index}>
+            <div className='card-holder inline-flex flex-nowrap w-[calc(var(--hand-area-width)/5)] h-(--card-height)' key={`hand-${index}`} data-card-index={index} style={{
+              // @ts-expect-error custom var
+              '--card-rotate': `${(index - Math.floor(5 / 2)) * 4}deg` // −8°..+8°
+            }}>
               {/* Hide cards that are being animated OUT of the hand (discard/play animations) */}
               {/* Hide cards that are being animated INTO the hand (draw animations) until animation completes */}
               {/* Only show cards that are in the hand normally and not being animated */}

@@ -26,10 +26,14 @@ export const getHandCardPosition = (
   handContainer: HTMLElement,
   cardIndex: number,
 ): CardPosition => {
-  // For non-overlapping hands, find the specific card element
-  const cardElement = handContainer.querySelector(`[data-card-index="${cardIndex}"]`) as HTMLElement;
+  // Prefer the actual .card element center to capture overlap offsets
+  const holderElement = handContainer.querySelector(`[data-card-index="${cardIndex}"]`) as HTMLElement | null;
+  const cardElement = holderElement?.querySelector('.card') as HTMLElement | null;
   if (cardElement) {
     return getElementCenter(cardElement);
+  }
+  if (holderElement) {
+    return getElementCenter(holderElement);
   }
   // Fallback: estimate position
   const baseRect = handContainer.getBoundingClientRect();
@@ -62,7 +66,11 @@ export const getDiscardCardPosition = (
   if (pileElement) {
     const topCard = pileElement.querySelector('.card:last-child') as HTMLElement;
     if (topCard) {
-      return getElementCenter(topCard);
+      const nbOfCards = pileElement.querySelectorAll('.card').length;
+      if (nbOfCards === 1) return getElementCenter(topCard);
+      const pileCenter = getElementCenter(pileElement);
+      const topCardCenter = getElementCenter(topCard);
+      return {x: topCardCenter.x, y: topCardCenter.y + (topCardCenter.y - pileCenter.y) / nbOfCards};
     }
     return getElementCenter(pileElement);
   }
@@ -124,4 +132,54 @@ export const calculateAnimationDuration = (
   );
   const duration = Math.max(300, Math.min(800, distance / baseSpeed));
   return Math.round(duration);
+};
+
+/**
+ * Get rotation angle (in degrees) of a card in the player's hand
+ */
+export const getHandCardAngle = (
+  handContainer: HTMLElement,
+  cardIndex: number,
+): number => {
+  const holderElement = handContainer.querySelector(`[data-card-index="${cardIndex}"]`) as HTMLElement | null;
+  if (!holderElement) return 0;
+  const style = window.getComputedStyle(holderElement);
+  const rotateVar = style.getPropertyValue('--card-rotate');
+  if (!rotateVar) return 0;
+  const numeric = parseFloat(rotateVar.replace('deg', '').trim());
+  return isNaN(numeric) ? 0 : numeric;
+};
+
+/**
+ * Get the position where the next card should land on a discard pile (accounts for stacked offset)
+ */
+export const getNextDiscardCardPosition = (
+  discardContainer: HTMLElement,
+  pileIndex: number
+): CardPosition => {
+  const pileElement = discardContainer.querySelector(`[data-pile-index="${pileIndex}"]`) as HTMLElement | null;
+  if (!pileElement) {
+    // Fallback: container center
+    return getElementCenter(discardContainer);
+  }
+
+  // Determine how many real cards are in the pile (exclude placeholder which has opacity-50)
+  const allCards = Array.from(pileElement.querySelectorAll('.card')) as HTMLElement[];
+  const realCards = allCards.filter(el => !el.classList.contains('opacity-50'));
+
+  if (realCards.length === 0) {
+    // Empty pile: land on the base position (placeholder center)
+    // If a placeholder card exists, use its center; otherwise, use the pile center
+    const placeholder = allCards[0];
+    return placeholder ? getElementCenter(placeholder) : getElementCenter(pileElement);
+  }
+
+  const topCard = realCards[realCards.length - 1];
+  const topCenter = getElementCenter(topCard);
+  const styles = window.getComputedStyle(pileElement);
+  const diffStr = styles.getPropertyValue('--stack-diff');
+  const stackDiff = parseFloat(diffStr.replace('px', '').trim());
+  const diff = isNaN(stackDiff) ? 20 : stackDiff;
+
+  return { x: topCenter.x, y: topCenter.y + diff };
 };

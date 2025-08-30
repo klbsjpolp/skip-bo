@@ -147,12 +147,6 @@
     filter: brightness(1.05);
   }
 
-  /* Enhanced drop indicators */
-  .drop-indicator {
-    position: relative;
-    transition: all 0.2s ease-in-out;
-  }
-
   .drop-indicator.can-drop:hover {
     transform: translateY(-2px);
     box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
@@ -227,10 +221,6 @@
     }
   }
 
-  .card.back * {
-    @apply text-4xl;
-  }
-
   .hand,
   .discard-piles,
   .build-piles {
@@ -246,7 +236,8 @@
   }
 
   .hand-area {
-    width: calc(var(--card-width) * (4 + 3 * 1/7)); /* 4 cards + gaps */
+    --hand-area-width: calc(var(--card-width) * (4 + 3 * 1/7)); /* 4 cards + gaps */
+    width: var(--hand-area-width);
     height: var(--card-height); /* 1 card */
 
     &:not(.overlap-hand) {
@@ -293,6 +284,9 @@
   .center-area {
     @apply lg:p-5 p-3 rounded-lg lg:mb-5 mb-3 bg-(--zone-bg-color);
     border: 2px solid transparent;
+  }
+
+  .player-area {
     transition: border-color 0.3s;
   }
 
@@ -363,7 +357,7 @@
     --card-g2: hsl(0 80% 60%);     /* 5‑8 */
     --card-g3: hsl(283 55% 57%);   /* 9‑12 */
 
-    .card.back {
+    .card .back {
       background-image: linear-gradient(45deg,
         var(--active-turn-color) 0%,
         var(--active-turn-color) 50%,
@@ -416,7 +410,7 @@
     --card-g2: hsl(0 80% 60%);
     --card-g3: hsl(283 55% 57%);
 
-    .card.back {
+    .card .back {
       background-image: linear-gradient(45deg,
         var(--card-back) 0%,
         var(--card-back) 50%,
@@ -456,7 +450,7 @@
       border-width: 1px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 
-      &.back {
+      .back {
         background: linear-gradient(135deg, #a0d2eb 0%, #bee5eb 100%);
       }
     }
@@ -489,7 +483,7 @@
     --card-g3: #ffd426;
 
     .card {
-      &.back {
+      .back {
         &::before {
           content: "";
           position: absolute;
@@ -595,7 +589,7 @@
     }
 
     .card {
-      &.back {
+      .back {
         background-image: linear-gradient(
           to bottom,
           #ff6b6b 0%, /* Red */ #ffb347 16.6%, /* Orange */ #ffff66 33.2%, /* Yellow */ #4caf50 49.8%, /* Green */ #5d9cec 66.4%, /* Blue */ #9381ff 83%, /* Indigo */ #d183e8 100% /* Violet */
@@ -683,7 +677,7 @@
     --card-g3: #0066ff;
 
     .card {
-      &.back {
+      .back {
         background: linear-gradient(135deg, #ff0099 0%, #00ff88 25%, #0066ff 50%, #ff0099 75%, #00ff88 100%);
         overflow: hidden; /* keep glow inside rounded corners */
 
@@ -824,7 +818,7 @@
     --card-g3: #264653;
 
     .card {
-      &.back {
+      .back {
         --transparent-size: calc(var(--card-height) / 50);
         --stripe-size: calc(var(--card-height) / 10);
         background-image: repeating-linear-gradient(
@@ -905,17 +899,20 @@
   border-radius: var(--card-radius);
   user-select: none;
   background-color: var(--card-bg);
-  transition: all 0.2s ease-in-out;
   color: var(--text-color);
   box-shadow: var(--card-shadow);
   transform-origin: bottom center;
-  --card-rotate: 0deg;
+  overflow: hidden;
+  --card-rotate: inherit;
   --card-translate-y: 0px;
   --card-scale: 1;
   transform: translateY(var(--card-translate-y)) scale(var(--card-scale)) rotate(var(--card-rotate));
 
-  &.back {
-    background-color: var(--card-back);
+  .back {
+    @apply relative w-full h-full bg-cover bg-(--card-back);
+    * {
+      @apply text-4xl;
+    }
   }
 
   &.selected {

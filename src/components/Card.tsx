@@ -15,6 +15,17 @@ interface CardProps {
   hint?: string
 }
 
+function getTextAndColourForCard(card: CardType | null, overriddenDisplayValue: string | undefined, isRevealed: boolean) {
+  if (!card || !isRevealed) return { colourClass: '', cardValue: '' };
+  const cardValue = (overriddenDisplayValue === undefined) ? (card.isSkipBo ? 'Skip-Bo' : card.value?.toString() ?? '') : overriddenDisplayValue;
+  const colourClass =
+    (cardValue === 'Skip-Bo') ? 'skipbo-text' :
+      (Number(cardValue) <= 4) ? 'card-range-1' :
+        (Number(cardValue) <= 8) ? 'card-range-2' :
+          (Number(cardValue) <= 12) ? 'card-range-3' : '';
+  return { colourClass, cardValue };
+}
+
 const CardComponent: React.FC<CardProps> = ({
                                               card,
                                               isRevealed = true,
@@ -26,33 +37,25 @@ const CardComponent: React.FC<CardProps> = ({
                                               overlapIndex = undefined,
                                               displayValue: overriddenDisplayValue
                                             }) => {
-  const [isMorphing, setIsMorphing] = useState(false);
-  const displayValue = () => {
-    if (!isRevealed) return '';
-    if (!card) return ''; // Handle null or undefined card
-    if (card.isSkipBo) return 'Skip-Bo';
-    if (card.value === undefined) throw Error('Error')
-    return card.value.toString();
-  };
+  const [morphing, setMorphing] = useState<'no' | 'yes' | 'after'>('no');
+
+  const morphingDelay = 100;
+  const morphingAfterDelay = 500;
 
   useLayoutEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer1: NodeJS.Timeout, timer2: NodeJS.Timeout;
     if (card && card.isSkipBo) {
-      setIsMorphing(true);
-      timer = setTimeout(() => setIsMorphing(false), 300);
+      setMorphing('yes');
+      timer1 = setTimeout(() => setMorphing('after'), morphingDelay);
+      timer2 = setTimeout(() => setMorphing('no'), morphingDelay + morphingAfterDelay);
     }
-    return () => clearTimeout(timer);
+    return () =>  {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    }
   }, [card, card?.isSkipBo]);
 
-  const cardValue = (overriddenDisplayValue !== undefined && !isMorphing) ? overriddenDisplayValue : displayValue();
-
-  // Determine color class based on card value
-  const colourClass =
-    !card || !isRevealed ? '' :
-      (cardValue === 'Skip-Bo') ? 'skipbo-text' :
-        (Number(cardValue) <= 4) ? 'card-range-1' :
-          (Number(cardValue) <= 8) ? 'card-range-2' :
-            (Number(cardValue) <= 12) ? 'card-range-3' : '';
+  const { colourClass, cardValue } = getTextAndColourForCard(card, morphing === 'yes' ? undefined : overriddenDisplayValue, isRevealed);
 
   let style: CSSProperties | undefined = undefined;
   if (stackIndex !== undefined) {
@@ -61,26 +64,26 @@ const CardComponent: React.FC<CardProps> = ({
       zIndex: stackIndex,
     }
   } else if (overlapIndex !== undefined) {
-    // Calculate rotation angle for fanned hand effect
-    const handSize = 5; // Default hand size
-    const angle = (overlapIndex - Math.floor(handSize / 2)) * 4; // −8°..+8°
     const offset = [4, -3, -5, -3, 4][overlapIndex]
 
     style = {
       left: `calc(${overlapIndex} * (var(--card-width) - 10px))`,
       top: `${offset}px`,
-      zIndex: overlapIndex,
-      '--card-rotate': `${angle}deg`
+      zIndex: overlapIndex
     } as CSSProperties;
   }
-  //console.log('Card', 'hint', hint, 'cardValue', cardValue, 'card', card?.isSkipBo ? 'SB' : card?.value, 'isRevealed', isRevealed, 'isSelected', isSelected, 'colourClass', colourClass, 'overlapIndex', overlapIndex, 'stackIndex', stackIndex)
+
+  const content = isRevealed ? <>
+    <span className="card-corner-number">{cardValue}</span>
+    <span>{cardValue}</span>
+  </> : <div className="back"></div>;
   return (card ?
       <div
         className={cn(
           'card', 'text-shadow-foreground', 'text-shadow-sm',
-          !isRevealed && 'back',
           card && card.isSkipBo && isRevealed && 'skip-bo',
           colourClass,
+          morphing === 'after' && `transition duration-800`,
           isSelected && 'selected',
           canBeGrabbed && 'hoverable-card cursor-pointer',
           !canBeGrabbed && 'cursor-default',
@@ -89,8 +92,7 @@ const CardComponent: React.FC<CardProps> = ({
         onClick={onClick}
         style={style}
       >
-        <span className="card-corner-number">{cardValue}</span>
-        <span>{cardValue}</span>
+        {content}
       </div>
       : <></>
   );

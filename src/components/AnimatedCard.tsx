@@ -31,6 +31,9 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
     }
   }, [animation.id, animation.duration, animation.animationType, animation.card.value, animation.sourceInfo.playerIndex, animation.initialDelay]);
 
+  const currentAngle = isAnimating ? (animation.endAngleDeg ?? 0) : (animation.startAngleDeg ?? 0);
+  console.log('🎭 Card animation angle:', currentAngle, 'isAnimating', isAnimating, 'endAngleDeg', animation.endAngleDeg, 'startAngleDeg', animation.startAngleDeg);
+
   const style: React.CSSProperties = {
     position: 'fixed',
     left: isAnimating ? animation.endPosition.x : animation.startPosition.x,
@@ -38,7 +41,7 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
     zIndex: 1000 - animation.sourceInfo.index, // Ensure animated cards appear above everything
     pointerEvents: 'none', // Don't interfere with user interactions
     transition: isAnimating ? `all ${animation.duration}ms cubic-bezier(0.4, 0.0, 0.2, 1)` : 'none',
-    transform: 'translate(-50%, -50%)', // Center the card on the position
+    transform: `translate(-50%, -50%) rotate(${currentAngle}deg)`, // Center the card and apply angle
   };
 
   // Determine if the card should be revealed during animation

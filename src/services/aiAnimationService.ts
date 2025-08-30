@@ -1,11 +1,11 @@
 import { GameState, Card } from '@/types';
 import { GameAction } from '@/state/gameActions';
-import { 
-  getHandCardPosition, 
-  getStockCardPosition, 
-  getDiscardCardPosition, 
+import {
+  getHandCardPosition,
+  getStockCardPosition,
+  getDiscardCardPosition,
   getBuildPilePosition,
-  calculateAnimationDuration 
+  calculateAnimationDuration, getHandCardAngle
 } from '@/utils/cardPositions';
 import {CardAnimationData} from "@/contexts/CardAnimationContext.tsx";
 
@@ -52,6 +52,7 @@ export const triggerAIAnimation = async (
     let endPosition: { x: number; y: number } | undefined;
     let animationType: 'play' | 'discard' | 'draw' = 'play';
     let animationCard: Card | undefined;
+    let startAngleDeg: number | undefined;
 
     if (action.type === 'PLAY_CARD' && gameState.selectedCard) {
       // AI is playing a card
@@ -63,6 +64,7 @@ export const triggerAIAnimation = async (
         const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
         if (handContainer) {
           startPosition = getHandCardPosition(handContainer, gameState.selectedCard.index);
+          startAngleDeg = getHandCardAngle(handContainer, gameState.selectedCard.index);
         }
       } else if (gameState.selectedCard.source === 'stock') {
         const stockContainer = playerAreaElement.querySelector('.stock-pile') as HTMLElement;
@@ -78,7 +80,6 @@ export const triggerAIAnimation = async (
 
       // Calculate end position (build pile)
       endPosition = getBuildPilePosition(centerAreaElement, action.buildPile);
-
     } else if (action.type === 'DISCARD_CARD' && gameState.selectedCard) {
       // AI is discarding a card
       animationCard = gameState.selectedCard.card;
@@ -88,6 +89,7 @@ export const triggerAIAnimation = async (
       const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
       if (handContainer) {
         startPosition = getHandCardPosition(handContainer, gameState.selectedCard.index);
+        startAngleDeg = getHandCardAngle(handContainer, gameState.selectedCard.index);
       }
 
       // Calculate end position (discard pile)
@@ -104,6 +106,7 @@ export const triggerAIAnimation = async (
         card: animationCard,
         startPosition,
         endPosition,
+        startAngleDeg,
         animationType,
         initialDelay: 0,
         duration,
