@@ -987,3 +987,12 @@
 @utility drop-target-hover {
   position: relative;
 }
+
+
+@utility card-morph-wrapper {
+  @apply relative card-height w-(--card-width);
+}
+
+@utility card-morph-layer {
+  @apply absolute pointer-events-none transition-opacity duration-800;
+}

@@ -40,7 +40,7 @@ const CardComponent: React.FC<CardProps> = ({
   const [morphing, setMorphing] = useState<'no' | 'yes' | 'after'>('no');
 
   const morphingDelay = 100;
-  const morphingAfterDelay = 800;
+  const morphingAfterDelay = 700;
 
   useLayoutEffect(() => {
     let timer1: NodeJS.Timeout, timer2: NodeJS.Timeout;
@@ -55,6 +55,16 @@ const CardComponent: React.FC<CardProps> = ({
     }
   }, [card, card?.isSkipBo]);
 
+  // Determine whether we should render a morphing overlay
+  const shouldMorph = Boolean(
+    card && isRevealed && card.isSkipBo && overriddenDisplayValue !== undefined && morphing !== 'no'
+  );
+
+  // Prepare values for both layers
+  const fromData = getTextAndColourForCard(card, undefined, isRevealed);
+  const toData = getTextAndColourForCard(card, overriddenDisplayValue, isRevealed);
+
+  // Keep backward compatibility (single content) for non-morphing state
   const { colourClass, cardValue } = getTextAndColourForCard(card, morphing === 'yes' ? undefined : overriddenDisplayValue, isRevealed);
 
   let style: CSSProperties | undefined = undefined;
@@ -73,11 +83,53 @@ const CardComponent: React.FC<CardProps> = ({
     } as CSSProperties;
   }
 
-  const content = isRevealed ? <>
-    <div className='card-inner'></div>
-    <span className='card-corner-number'>{cardValue}</span>
-    <span>{cardValue}</span>
-  </> : <div className='back'></div>;
+  const renderContent = (value: string) => (
+    isRevealed ? <>
+      <div className='card-inner'></div>
+      <span className='card-corner-number'>{value}</span>
+      <span>{value}</span>
+    </> : <div className='back'></div>
+  );
+
+  if (card && shouldMorph) {
+    // During morphing: outer card acts as a transparent wrapper to preserve layout/hover positions.
+    const fromOpacity = morphing === 'yes' ? 1 : 0; // fade out after delay
+    const toOpacity = morphing === 'yes' ? 0 : 1;   // fade in after delay
+
+    return (
+      <div
+        className='card-morph-wrapper'
+        style={style}
+      >
+        {/* FROM (Skip-Bo) layer */}
+        <div
+          className={cn(
+            'card', 'card-morph-layer',
+            className,
+            fromData.colourClass
+          )}
+          style={{ opacity: fromOpacity }}
+        >
+          {renderContent(fromData.cardValue)}
+        </div>
+
+        {/* TO (new value) layer */}
+        <div
+          className={cn(
+            'card', 'card-morph-layer',
+            className,
+            toData.colourClass
+          )}
+          style={{ opacity: toOpacity }}
+        >
+          {renderContent(toData.cardValue)}
+        </div>
+      </div>
+    );
+  }
+
+  // Default: render single card as before
+  const content = renderContent(cardValue);
 
   return (card ?
       <div
