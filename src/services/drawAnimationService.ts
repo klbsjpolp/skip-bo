@@ -64,6 +64,8 @@ const triggerDrawAnimation = async (
       startPosition,
       endPosition,
       endAngleDeg: getHandCardAngle(handContainer, handIndex),
+      sourceRevealed: false, // Cards drawn from deck are face-down
+      targetRevealed: playerIndex === 0, // Reveal to human player only
       animationType: 'draw',
       initialDelay,
       duration,

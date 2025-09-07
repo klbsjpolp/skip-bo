@@ -10,10 +10,6 @@ import {useCardAnimation} from "@/contexts/useCardAnimation.ts";
 export const CardAnimationLayer: React.FC = () => {
   const { activeAnimations } = useCardAnimation();
 
-  if (activeAnimations.length === 0) {
-    return null;
-  }
-
   return (
     <div className="card-animation-layer">
       {activeAnimations.map((animation) => (

@@ -9,6 +9,8 @@ export interface CardAnimationData {
   startPosition: { x: number; y: number };
   endPosition: { x: number; y: number };
   animationType: 'play' | 'discard' | 'draw';
+  sourceRevealed: boolean; // Whether the card starts face-up or face-down
+  targetRevealed: boolean; // Whether the card ends face-up or face-down
   initialDelay: number;
   duration: number;
   // Optional rotation angles (degrees) for smoother, accurate animation

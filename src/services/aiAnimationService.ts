@@ -3,9 +3,8 @@ import { GameAction } from '@/state/gameActions';
 import {
   getHandCardPosition,
   getStockCardPosition,
-  getDiscardCardPosition,
   getBuildPilePosition,
-  calculateAnimationDuration, getHandCardAngle
+  calculateAnimationDuration, getHandCardAngle, getNextDiscardCardPosition
 } from '@/utils/cardPositions';
 import {CardAnimationData} from "@/contexts/CardAnimationContext.tsx";
 
@@ -74,7 +73,7 @@ export const triggerAIAnimation = async (
       } else if (gameState.selectedCard.source === 'discard') {
         const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
         if (discardContainer && gameState.selectedCard.discardPileIndex !== undefined) {
-          startPosition = getDiscardCardPosition(discardContainer, gameState.selectedCard.discardPileIndex);
+          startPosition = getNextDiscardCardPosition(discardContainer, gameState.selectedCard.discardPileIndex);
         }
       }
 
@@ -95,7 +94,7 @@ export const triggerAIAnimation = async (
       // Calculate end position (discard pile)
       const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
       if (discardContainer) {
-        endPosition = getDiscardCardPosition(discardContainer, action.discardPile);
+        endPosition = getNextDiscardCardPosition(discardContainer, action.discardPile);
       }
     }
 
@@ -108,6 +107,8 @@ export const triggerAIAnimation = async (
         endPosition,
         startAngleDeg,
         animationType,
+        sourceRevealed: (animationType === 'play' && gameState.selectedCard?.source !== 'hand') || (animationType === 'discard' && false), // Hand cards are revealed, stock/discard are not
+        targetRevealed: true, // Cards played or discarded by AI are revealed to human
         initialDelay: 0,
         duration,
         sourceInfo: {

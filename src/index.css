@@ -228,6 +228,7 @@
 
 
   .discard-piles {
+    @apply card-height;
     flex-wrap: nowrap;
   }
 

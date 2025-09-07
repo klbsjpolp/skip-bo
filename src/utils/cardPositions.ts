@@ -35,12 +35,8 @@ export const getHandCardPosition = (
   if (holderElement) {
     return getElementCenter(holderElement);
   }
-  // Fallback: estimate position
-  const baseRect = handContainer.getBoundingClientRect();
-  return {
-    x: baseRect.left + (cardIndex * 90) + 40,
-    y: baseRect.top + baseRect.height / 2,
-  };
+
+  return getElementCenter(handContainer);
 };
 
 /**
@@ -51,35 +47,8 @@ export const getStockCardPosition = (stockContainer: HTMLElement): CardPosition 
   if (cardElement) {
     return getElementCenter(cardElement);
   }
-  // Fallback to container center
-  return getElementCenter(stockContainer);
-};
 
-/**
- * Get position of the top card in a discard pile
- */
-export const getDiscardCardPosition = (
-  discardContainer: HTMLElement,
-  pileIndex: number
-): CardPosition => {
-  const pileElement = discardContainer.querySelector(`[data-pile-index="${pileIndex}"]`) as HTMLElement;
-  if (pileElement) {
-    const topCard = pileElement.querySelector('.card:last-child') as HTMLElement;
-    if (topCard) {
-      const nbOfCards = pileElement.querySelectorAll('.card').length;
-      if (nbOfCards === 1) return getElementCenter(topCard);
-      const pileCenter = getElementCenter(pileElement);
-      const topCardCenter = getElementCenter(topCard);
-      return {x: topCardCenter.x, y: topCardCenter.y + (topCardCenter.y - pileCenter.y) / nbOfCards};
-    }
-    return getElementCenter(pileElement);
-  }
-  // Fallback: estimate position based on pile index
-  const baseRect = discardContainer.getBoundingClientRect();
-  return {
-    x: baseRect.left + 40,
-    y: baseRect.top + (pileIndex * 120) + 60,
-  };
+  return getElementCenter(stockContainer);
 };
 
 /**
@@ -95,12 +64,8 @@ export const getBuildPilePosition = (
   if (buildPileElement) {
     return getElementCenter(buildPileElement);
   }
-  // Fallback: estimate position based on build pile index
-  const baseRect = centerContainer.getBoundingClientRect();
-  return {
-    x: baseRect.left + (buildPileIndex * 90) + 40,
-    y: baseRect.top + baseRect.height / 2,
-  };
+
+  return getElementCenter(centerContainer);
 };
 
 /**

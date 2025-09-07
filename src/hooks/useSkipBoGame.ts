@@ -7,9 +7,8 @@ import {AIDifficulty} from "@/ai/aiConfig.ts";
 import {
   getHandCardPosition,
   getStockCardPosition,
-  getDiscardCardPosition,
   getBuildPilePosition,
-  calculateAnimationDuration, getHandCardAngle
+  calculateAnimationDuration, getHandCardAngle, getNextDiscardCardPosition
 } from '@/utils/cardPositions';
 import { setGlobalAnimationContext } from '@/services/aiAnimationService';
 import { setGlobalDrawAnimationContext, triggerMultipleDrawAnimations } from '@/services/drawAnimationService';
@@ -94,7 +93,7 @@ export function useSkipBoGame() {
         } else if (currentState.selectedCard.source === 'discard') {
           const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
           if (discardContainer && currentState.selectedCard.discardPileIndex !== undefined) {
-            startPosition = getDiscardCardPosition(discardContainer, currentState.selectedCard.discardPileIndex);
+            startPosition = getNextDiscardCardPosition(discardContainer, currentState.selectedCard.discardPileIndex);
           }
         }
         
@@ -109,6 +108,8 @@ export function useSkipBoGame() {
             endPosition,
             startAngleDeg,
             animationType: 'play',
+            sourceRevealed: true,
+            targetRevealed: true,
             initialDelay: 0,
             duration:duration*1.2,
             sourceInfo: {
@@ -243,7 +244,7 @@ export function useSkipBoGame() {
             // Calculate end position (discard pile)
             const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
             if (discardContainer) {
-              const endPosition = getDiscardCardPosition(discardContainer, discardPile);
+              const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
               
               const duration = calculateAnimationDuration(startPosition, endPosition);
               animationDuration = duration;
@@ -252,6 +253,8 @@ export function useSkipBoGame() {
                 startPosition,
                 endPosition,
                 animationType: 'discard',
+                sourceRevealed: true,
+                targetRevealed: true,
                 initialDelay: 0,
                 duration,
                 startAngleDeg: getHandCardAngle(handContainer, currentState.selectedCard.index),
