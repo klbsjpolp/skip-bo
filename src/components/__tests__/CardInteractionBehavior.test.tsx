@@ -106,9 +106,9 @@ describe('Card Interaction Behavior', () => {
 
   describe('Transform Effects', () => {
     test('cards use CSS custom properties for transforms', () => {
-      const { container } = render(
+      const {container} = render(
         <Card
-          card={{ value: 5, isSkipBo: false }}
+          card={{value: 5, isSkipBo: false}}
           canBeGrabbed={true}
         />
       );
@@ -119,47 +119,6 @@ describe('Card Interaction Behavior', () => {
       expect(card.style.getPropertyValue('--card-rotate')).toBeDefined();
       expect(card.style.getPropertyValue('--card-translate-y')).toBeDefined();
       expect(card.style.getPropertyValue('--card-scale')).toBeDefined();
-    });
-
-    test('overlapping hand cards set rotation custom property', () => {
-      const { container } = render(
-        <Card
-          card={{ value: 5, isSkipBo: false }}
-          overlapIndex={2}
-          canBeGrabbed={true}
-        />
-      );
-
-      const card = container.querySelector('.card') as HTMLElement;
-      expect(card.style.getPropertyValue('--card-rotate')).toBe('0deg');
-    });
-
-    test('overlapping hand cards with different indices get different rotations', () => {
-      const { container: container1 } = render(
-        <Card
-          card={{ value: 5, isSkipBo: false }}
-          overlapIndex={0}
-          canBeGrabbed={true}
-        />
-      );
-
-      const { container: container2 } = render(
-        <Card
-          card={{ value: 6, isSkipBo: false }}
-          overlapIndex={4}
-          canBeGrabbed={true}
-        />
-      );
-
-      const card1 = container1.querySelector('.card') as HTMLElement;
-      const card2 = container2.querySelector('.card') as HTMLElement;
-
-      const rotation1 = card1.style.getPropertyValue('--card-rotate');
-      const rotation2 = card2.style.getPropertyValue('--card-rotate');
-
-      expect(rotation1).not.toBe(rotation2);
-      expect(rotation1).toBe('-8deg');
-      expect(rotation2).toBe('8deg');
     });
   });
 

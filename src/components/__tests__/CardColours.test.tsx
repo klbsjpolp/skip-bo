@@ -104,7 +104,7 @@ describe('Card Colors', () => {
     const card = container.querySelector('.card') as HTMLElement;
 
     // Check that the card has the back class but not any range classes
-    expect(card.classList.contains('back')).toBeTruthy();
+    expect(card.querySelector('.back')).toBeTruthy();
     expect(card.classList.contains('card-range-1')).toBeFalsy();
     expect(card.classList.contains('card-range-2')).toBeFalsy();
     expect(card.classList.contains('card-range-3')).toBeFalsy();
