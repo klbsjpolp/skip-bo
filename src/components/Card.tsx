@@ -121,6 +121,7 @@ const CardComponent: React.FC<CardProps> = ({
             toData.colourClass
           )}
           style={{ opacity: toOpacity }}
+          data-value={toData.cardValue}
         >
           {renderContent(toData.cardValue)}
         </div>
@@ -145,6 +146,7 @@ const CardComponent: React.FC<CardProps> = ({
         )}
         onClick={onClick}
         style={style}
+        data-value={card.value}
       >
         {content}
       </div>
