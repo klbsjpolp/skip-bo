@@ -97,20 +97,20 @@ export const computeBestMove = async (G: GameState): Promise<GameAction> => {
       if (!a.card && b.card) return 1;
       if (a.card && !b.card) return -1;
       if (!a.card && !b.card) return 0;
-
+      
       // Both cards are non-null at this point
       const cardA = a.card!;
       const cardB = b.card!;
-
+      
       // Prioritize non-Skip-Bo cards
       if (cardA.isSkipBo && !cardB.isSkipBo) return 1;
       if (!cardA.isSkipBo && cardB.isSkipBo) return -1;
-
+      
       // For non-Skip-Bo cards, prioritize lower values (easier to play)
       if (!cardA.isSkipBo && !cardB.isSkipBo) {
         return cardA.value - cardB.value;
       }
-
+      
       return 0;
     });
 
@@ -129,17 +129,17 @@ export const computeBestMove = async (G: GameState): Promise<GameAction> => {
     G.buildPiles,
     G
   );
-
+  
   if (bestDiscardPlay) {
     const { discardPileIndex } = bestDiscardPlay;
     const discardPile = aiPlayer.discardPiles[discardPileIndex];
-
+    
     // Select the discard card first
-    return {
-      type: 'SELECT_CARD',
-      source: 'discard',
-      index: discardPile.length - 1,
-      discardPileIndex
+    return { 
+      type: 'SELECT_CARD', 
+      source: 'discard', 
+      index: discardPile.length - 1, 
+      discardPileIndex 
     };
   }
 

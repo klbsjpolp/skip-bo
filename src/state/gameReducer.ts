@@ -77,6 +77,18 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       return;
     }
 
+    case 'DEBUG_SET_AI_HAND': {
+      const player = draft.players[draft.currentPlayerIndex];
+      const targetSize = draft.config.HAND_SIZE;
+      const newHand = action.hand.slice(0, targetSize);
+      while (newHand.length < targetSize) newHand.push(null);
+      player.hand = newHand;
+      // Clear selection to avoid stale indices
+      draft.selectedCard = null;
+      draft.message = 'Main IA forcée (debug)';
+      return;
+    }
+
     case 'SELECT_CARD': {
       const player = draft.players[draft.currentPlayerIndex];
       let card;

@@ -10,4 +10,5 @@ export type GameAction =
   | { type: 'DISCARD_CARD'; discardPile: number }
   | { type: 'END_TURN' }
   | { type: 'RESET' }
-  | { type: 'SET_DIFFICULTY'; difficulty: 'easy' | 'medium' | 'hard' };
+  | { type: 'SET_DIFFICULTY'; difficulty: 'easy' | 'medium' | 'hard' }
+  | { type: 'DEBUG_SET_AI_HAND'; hand: Card[] };

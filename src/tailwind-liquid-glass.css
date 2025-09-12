@@ -1,0 +1,75 @@
+/* tailwind-liquid-glass.css */
+    @layer theme {
+      /* Theme tokens (light) */
+      :root {
+        --lg-blur: 60px;
+        --lg-radius: 42px;
+        --lg-rim: color-mix(in oklab, white 35%, transparent);
+        --lg-fill-top: color-mix(in oklab, white 22%, transparent);
+        --lg-fill-bottom: color-mix(in oklab, white 6%, transparent);
+        --lg-specular: color-mix(in oklab, white 65%, transparent);
+        --lg-inner-glow: color-mix(in oklab, white 8%, transparent);
+        --lg-drop-shadow: rgb(4 16 40 / 38%);
+      }
+    }
+
+    /* Dark-mode token tweaks (works with system media by default) */
+    @variant dark {
+      :root {
+        --lg-rim: color-mix(in oklab, white 20%, transparent);
+        --lg-fill-top: color-mix(in oklab, white 10%, transparent);
+        --lg-fill-bottom: color-mix(in oklab, white 2%, transparent);
+        --lg-specular: color-mix(in oklab, white 55%, transparent);
+        --lg-inner-glow: color-mix(in oklab, white 6%, transparent);
+        --lg-drop-shadow: rgb(0 0 0 / 55%);
+      }
+    }
+
+    /* css - update `src/tailwind-liquid-glass.css` - replace pseudo-elements usage with a clipped internal layer */
+
+    @utility liquid-glass-square {
+      --lg-radius: 0;
+    }
+    @utility liquid-glass {
+      isolation: isolate;
+      border-radius: var(--lg-radius);
+
+      .content-layer {
+        z-index: 1;
+      }
+
+      /* new clipped decorative layer — only this layer clips pseudo-elements */
+      .bg-layer {
+        border-radius: inherit;
+        overflow: hidden;              /* clip decorations only */
+        pointer-events: none;
+        z-index: 0;
+        will-change: background-position, opacity;
+
+        background: rgba(255, 255, 255, 0.36);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(2px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+    }
+
+    /* keyframes: animate background-position only (cheap compared to transform of large blurred boxes) */
+    @keyframes lg-float {
+      0%   { background-position: 0% 0%, 0% 0%; }
+      100% { background-position: 6% -4%, 4% -3%; } /* larger but still subtle movement */
+    }
+    @keyframes lg-ripple {
+      0%   { background-position: 0% 0%, 0% 0%; }
+      100% { background-position: 6% 2%, 5% 1%; }
+    }
+
+    /* optional: reduce motion for users and further reduce work on low-power devices */
+    @media (prefers-reduced-motion: reduce) {
+      .liquid-glass .bg-layer::before,
+      .liquid-glass .bg-layer::after {
+        animation: none;
+        transition: none;
+        filter: blur(6px);
+        opacity: 0.6;
+      }
+    }

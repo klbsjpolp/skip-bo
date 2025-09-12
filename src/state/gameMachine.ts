@@ -369,6 +369,42 @@ export const gameMachine = createMachine({
     drawService: fromPromise(async ({ input }: { input: { G: GameState } }) => {
       const gameState = input.G;
       const player = gameState.players[gameState.currentPlayerIndex];
+      // Debug: override AI hand via query param aiHand (supports [1,2,3,4,5], 1,2,3,4,5 and 1-2-3-4-5)
+      if (typeof window !== 'undefined' && player.isAI) {
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const raw = params.get('aiHand');
+          if (raw) {
+            let numbers: number[] = [];
+
+            // 1) Try JSON array first (e.g., "[1,2,3,4,5]")
+            try {
+              const maybe = JSON.parse(raw);
+              if (Array.isArray(maybe)) {
+                numbers = maybe
+                  .map((n) => (typeof n === 'string' ? parseInt(n, 10) : Number(n)))
+                  .filter((n) => Number.isFinite(n) && n >= 1);
+              }
+            } catch {
+              // Not JSON, fall through
+            }
+
+            // 2) Fallback: remove brackets/spaces and split by comma or dash
+            if (numbers.length === 0) {
+              const cleaned = raw.replaceAll('[', '').replaceAll(']', '').replace(/\s/g, '');
+              const tokens = cleaned.split(/[,-]/).filter(Boolean);
+              numbers = tokens
+                .map((t) => parseInt(t, 10))
+                .filter((n) => Number.isFinite(n) && n >= 1);
+            }
+
+            if (numbers.length > 0) {
+              const hand: Card[] = numbers.map((v) => ({ value: v, isSkipBo: false }));
+              return { type: 'DEBUG_SET_AI_HAND', hand, animationDuration: 0 } as GameAction & { animationDuration: number };
+            }
+          }
+        } catch { /* ignore invalid aiHand param */ }
+      }
       // Count empty slots in hand (null values)
       const emptySlots = player.hand.filter(card => card === null).length;
       // Calculate how many cards will be drawn
