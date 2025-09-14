@@ -1,0 +1,35 @@
+.theme-pastel {
+    --primary: hsl(170 70% 70%);
+    --primary-foreground: hsl(0 0% 20%);
+    --secondary: hsl(350 80% 85%);
+    --secondary-foreground: hsl(0 0% 20%);
+
+    --bg-color: #fbef8b;
+    --zone-bg-color: #f4edaf;
+    --text-color: #5a6270;
+    --title-color: #4a5568;
+    --card-bg: #ffffff;
+    --card-border: #d8e2ef;
+    --card-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    --card-radius: 10px;
+    --card-back: #a0d2eb;
+    --selected-border: #ffcb77;
+    --active-turn-color: #a5dda5;
+    --button-bg: #a0d2eb;
+    --button-hover-bg: #8bbbd6;
+
+    --skipbo-text: #ffedd8;
+    --skipbo-bg: hsl(350 80% 85%);
+    --card-g1: #a5dda5;
+    --card-g2: #f7a9a8;
+    --card-g3: #d0a5db;
+
+    .card {
+      border-width: 1px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+      .back {
+        background: linear-gradient(135deg, #a0d2eb 0%, #bee5eb 100%);
+      }
+    }
+  }

@@ -1,0 +1,112 @@
+.theme-rainbow {
+    --primary: hsl(0 100% 70%);
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: #9381ff;
+    --secondary-foreground: hsl(0 0% 100%);
+
+    --bg-color: #87ceeb; /* Sky Blue */
+    --zone-bg-color: #ffffff88;
+    --text-color: #333333;
+    --title-color: #ff6b6b;
+    --card-bg: #ffffff;
+    --card-border: #9381ff;
+    --card-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+    --card-radius: 12px;
+    --card-back: #6a5acd;
+    --selected-border: #ffd700;
+    --button-bg: #ff6b6b;
+    --button-hover-bg: #ff5252;
+
+    --skipbo-text: hsl(0, 0%, 100%);
+    --card-g1: #4caf50;
+    --card-g2: #ff6b6b;
+    --card-g3: #9381ff;
+
+    body {
+      background-image:
+        /* Cloud Set 1 */
+        radial-gradient(ellipse at 15% 25%, white 0%, transparent 8%),
+        radial-gradient(ellipse at 25% 50%, white 0%, transparent 10%),
+        radial-gradient(ellipse at 45% 20%, white 0%, transparent 7%),
+        radial-gradient(ellipse at 50% 40%, white 0%, transparent 9%),
+        radial-gradient(ellipse at 35% 80%, white 0%, transparent 11%),
+        radial-gradient(ellipse at 40% 70%, white 0%, transparent 10%),
+        /* Cloud Set 2 (Mirrored for seamless loop) */
+        radial-gradient(ellipse at 60% 70%, white 0%, transparent 10%),
+        radial-gradient(ellipse at 65% 80%, white 0%, transparent 11%),
+        radial-gradient(ellipse at 75% 20%, white 0%, transparent 7%),
+        radial-gradient(ellipse at 80% 40%, white 0%, transparent 9%),
+        radial-gradient(ellipse at 88% 60%, white 0%, transparent 4%),
+        radial-gradient(ellipse at 90% 65%, white 0%, transparent 6%);
+      background-size: 2000px 500px;
+      animation: clouds-drift 90s linear infinite;
+    }
+
+    .discard-pile-stack {
+      .hoverable-card:hover {
+        box-shadow: 0 0 15px rgba(147, 129, 255, 0.4);
+      }
+      .card.selected.hoverable-card:hover {
+        box-shadow: 0 0 20px var(--selected-border);
+      }
+    }
+
+    .card {
+      .back {
+        background-image: linear-gradient(
+          to bottom,
+          #ff6b6b 0%, /* Red */ #ffb347 16.6%, /* Orange */ #ffff66 33.2%, /* Yellow */ #4caf50 49.8%, /* Green */ #5d9cec 66.4%, /* Blue */ #9381ff 83%, /* Indigo */ #d183e8 100% /* Violet */
+        );
+      }
+
+      &.skipbo-text {
+        @apply text-shadow-black;
+        /* Réglages rapides */
+        --center-y: 60%;     /* centre vertical du cercle (plus grand => arc plus bombé) */
+        --inner: 50%;         /* rayon intérieur de l’arc visible */
+        --band: 3%;         /* épaisseur d’une bande (ajustez entre 2% et 3%) */
+
+        .card-inner::before {
+          content: "";
+          position: absolute;
+          inset: -10% -20% -60% -20%; /* déborde pour bien couvrir */
+          pointer-events: none;
+          border-radius: inherit;
+          z-index: 0;
+
+          background-image:
+            linear-gradient(#ffffff40, #ffffff40),
+            radial-gradient(circle at 50% var(--center-y),
+              var(--card-bg) 0 var(--inner),
+
+              #8f00ff var(--inner) calc(var(--inner) + var(--band)),
+              #4b0082 calc(var(--inner) + var(--band)) calc(var(--inner) + var(--band) * 2),
+              #0077ff calc(var(--inner) + var(--band) * 2) calc(var(--inner) + var(--band) * 3),
+              #00ff00 calc(var(--inner) + var(--band) * 3) calc(var(--inner) + var(--band) * 4),
+              #ffff00 calc(var(--inner) + var(--band) * 4) calc(var(--inner) + var(--band) * 5),
+              #ff7f00 calc(var(--inner) + var(--band) * 5) calc(var(--inner) + var(--band) * 6),
+              #ff0000 calc(var(--inner) + var(--band) * 6) calc(var(--inner) + var(--band) * 7),
+
+              var(--card-bg) calc(var(--inner) + var(--band) * 7) 100%
+            );
+          background-size: 100% 100%, 100% 200%;
+          background-repeat: no-repeat;
+          background-position: center, top left;
+          filter: saturate(1.1);
+          opacity: 0.65;
+        }
+
+        span:not(.card-corner-number) {
+          position: relative;
+          z-index: 1; /* au-dessus des gradients */
+        }
+      }
+
+      .corner-top .card-corner-number,
+      .corner-bottom .card-corner-number {
+        text-shadow: 0 0 4px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 1; /* for sure above the rainbow overlay */
+      }
+    }
+  }

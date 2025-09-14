@@ -1,0 +1,76 @@
+.theme-metro {
+  --primary: hsl(160 100% 32%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(0 100% 45%);
+  --secondary-foreground: hsl(0 0% 100%);
+
+  --bg-color: #1d1d1d;
+  --zone-bg-color: #2d2d2d;
+  --text-color: #ffffff;
+  --title-color: #ffffff;
+  --card-bg: #3c3c3c;
+  --card-back: #ffd426;
+  --card-border: #5e5e5e;
+  --card-shadow: none;
+  --card-radius: 2px;
+  --selected-border: #1ba1e2;
+  --button-bg: #60a917;
+  --button-hover-bg: #4c8712;
+
+  --skipbo-text: hsl(0 0% 85%);
+  --skipbo-bg: #1d1d1d;
+  --card-g1: #00befc;
+  --card-g2: #ff3b30;
+  --card-g3: #ffd426;
+
+  .card {
+    .back {
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: repeating-conic-gradient(from 0deg,
+        #00a3a3 0deg 90deg,
+        #ff3b30 90deg 180deg,
+        #00befc 180deg 270deg,
+        #1ba1e2 270deg 360deg
+        );
+        background-size: var(--card-width) var(--card-width);
+        background-repeat: no-repeat;
+      }
+    }
+
+    &.skipbo-text {
+      .card-corner-number {
+        @apply text-(--skipbo-bg);
+      }
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 20%;
+        width: 100%;
+        background-color: #ffd426;
+      }
+      &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 20%;
+        width: 100%;
+        background-image: linear-gradient(to left,
+        #00a3a3 0%,
+        #00a3a3 25%,
+        #ff3b30 25%,
+        #ff3b30 50%,
+        #00befc 50%,
+        #00befc 75%,
+        #1ba1e2 75%,
+        #1ba1e2 100%
+        );
+      }
+    }
+  }
+}

@@ -46,6 +46,7 @@ export const themes = [
   { value: 'theme-neon' as const, label: 'Néon', icon: 'Zap' },
   { value: 'theme-retro' as const, label: 'Rétro', icon: 'Radio' },
   { value: 'theme-glass' as const, label: 'Verre', icon: 'Squircle' },
+  { value: 'theme-wool' as const, label: 'Laine', icon: 'Spool' },
 ];
 
 export type Theme = typeof themes[number]['value'];

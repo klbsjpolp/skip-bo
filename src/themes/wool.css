@@ -1,0 +1,127 @@
+.theme-wool {
+  --primary: hsl(0 0% 40%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(0 0% 30%);
+  --secondary-foreground: hsl(0 0% 100%);
+
+  --bg-color: #728492;
+  --text-color: #333333;
+  --title-color: #2b2b2b;
+  --card-bg: #ddd;
+  --card-border: var(--card-bg);
+  --card-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2), /* A soft, dark inner shadow for depth */
+    inset 0 0 5px rgba(255, 255, 255, 0.5); /* A soft, light inner shadow for highlight */
+  --card-radius: calc(var(--card-height) / 10);
+  --card-back: var(--bg-color);
+  --button-bg: #c9c9c9;
+  --button-hover-bg: #bdbdbd;
+
+  --skipbo-text: #333;
+  --skipbo-bg: var(--card-bg);
+  --card-g1: hsl(152, 33%, 60%);   /* 1‑4 */
+  --card-g2: hsl(0, 33%, 60%);     /* 5‑8 */
+  --card-g3: hsl(282, 33%, 60%);   /* 9‑12 */
+
+  body {
+    background-color: var(--bg-color);
+    background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 0 1px, transparent 1px),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 0 1px, transparent 1px);
+    background-size: 6px 6px, 6px 6px, 3px 3px, 3px 3px;
+    background-blend-mode: multiply;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 1; /* Adjust opacity for desired intensity */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      pointer-events: none; /* Allows mouse events to pass through */
+    }
+  }
+
+  .player-area:first-child {
+    margin-top: 15px;
+  }
+  #main {
+    padding-top: 10px;
+  }
+
+  .center-area, .player-area {
+    box-shadow: 10px 10px 20px color-mix(in srgb, var(--bg-color), black 15%),
+      -10px -10px 20px color-mix(in srgb, var(--bg-color), white 35%);
+  }
+
+  .player-area.active-turn {
+    box-shadow: 10px 10px 20px color-mix(in srgb, var(--bg-color), black 25%),
+    -10px -10px 20px color-mix(in srgb, var(--bg-color), white 70%);
+  }
+
+  .empty-card {
+    box-shadow: inset 5px 5px 10px color-mix(in srgb, var(--bg-color), white 35%),
+    inset -5px -5px 10px color-mix(in srgb, var(--bg-color), white 75%);
+  }
+
+  .discard-pile-stack {
+    .hoverable-card:hover {
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .card.selected.hoverable-card:hover {
+      box-shadow: var(--selected-shadow);
+    }
+  }
+
+  .card.skipbo-text {
+    background-image: linear-gradient(135deg,
+      var(--card-g1) 0%, var(--card-g1) 33%,
+      var(--card-g2) 33%, var(--card-g2) 66%,
+      var(--card-g3) 66%, var(--card-g3) 100%);
+  }
+
+  .card .card-inner {
+    opacity: 0.5; /* Adjust for desired intensity */
+    /* This creates a seamless, random noise pattern */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: cover;
+  }
+
+  .card {
+    .back {
+      /* The base background color for the "yarn" */
+      --back-alternate: rgb(from color-mix(in srgb, var(--card-back), white 35%) r g b / 50%);
+
+      /*
+      The magic happens here: we use multiple repeating linear gradients to create the pattern.
+      Each gradient is a "stitch" that repeats.
+      */
+      background-image:
+        /* The first gradient creates the diagonal lines going one way */
+          repeating-linear-gradient(
+              120deg,
+              transparent,
+              transparent 10px,
+              var(--back-alternate) 10px,
+              var(--back-alternate) 20px
+          ),
+            /* The second gradient creates the diagonal lines going the other way */
+          repeating-linear-gradient(
+              -120deg,
+              transparent,
+              transparent 10px,
+              var(--back-alternate) 10px,
+              var(--back-alternate) 20px
+          );
+
+      /* Background size and position are key to making the pattern tile seamlessly.
+      We double the size to create a clean, repeating unit.
+      */
+      background-size: 20px 40px;
+    }
+  }
+}

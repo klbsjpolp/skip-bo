@@ -1,0 +1,136 @@
+.theme-neon {
+  --primary: hsl(157 100% 50%);
+  --primary-foreground: hsl(0 0% 0%);
+  --secondary: hsl(324 100% 50%);
+  --secondary-foreground: hsl(0 0% 100%);
+
+  --bg-color: #0a0a0a;
+  --zone-bg-color: #1a1a1a;
+  --text-color: #00ff88;
+  --title-color: #ff0099;
+  --card-bg: #1a1a1a;
+  --card-border: #00ff88;
+  --card-shadow: 0 0 10px rgba(0,255,136,0.3);
+  --card-radius: 12px;
+  --card-back: #0066ff;
+  --selected-border: #ffff00;
+  --button-bg: #ff0099;
+  --button-hover-bg: #cc0077;
+
+  --skipbo-text: hsl(60 100% 60%);
+  --skipbo-bg: var(--secondary);
+  --card-g1: #00ff88;
+  --card-g2: #ff0099;
+  --card-g3: #0066ff;
+
+  .card {
+    .back {
+      background: linear-gradient(135deg, #ff0099 0%, #00ff88 25%, #0066ff 50%, #ff0099 75%, #00ff88 100%);
+      overflow: hidden; /* keep glow inside rounded corners */
+
+      /* Animated neon glow overlay */
+      &::before {
+        content: "";
+        position: absolute;
+        inset: -8%;
+        border-radius: calc(var(--card-radius) + 10px);
+        background: linear-gradient(
+            120deg,
+            #ff0099 0%,
+            #00ff88 40%,
+            #0066ff 70%,
+            #ff0099 100%
+        );
+        background-size: 250% 250%;
+        filter: blur(10px) saturate(1.1);
+        opacity: 0.30;          /* subtle; tune to 0.25–0.45 */
+        z-index: 0;
+        animation: neonDrift 9s linear infinite alternate;
+      }
+
+      /* Optional: very subtle scanlines for texture */
+      &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: var(--card-radius);
+        pointer-events: none;
+        z-index: 0;
+        background: repeating-linear-gradient(
+            to bottom,
+            rgba(255,255,255,0.03) 0px,
+            rgba(255,255,255,0.03) 1px,
+            transparent 2px,
+            transparent 4px
+        );
+        opacity: 0.4; /* softer than front */
+      }
+
+      /* Ensure any inner content (logos, etc.) stays above overlays */
+      > * {
+        position: relative;
+        z-index: 1;
+      }
+    }
+
+    &.skipbo-text {
+      color: var(--skipbo-text);
+      /* Keep skipbo-text utility bg as base; add neon overlay via ::before */
+      background: none;
+
+      /* Big neon text glow */
+      text-shadow:
+          0 0 4px currentColor,
+          0 0 8px currentColor,
+          0 0 16px currentColor;
+
+      /* Outer and inner neon glow */
+      box-shadow:
+          0 0 12px var(--secondary),             /* magenta outer */
+          inset 0 0 14px rgba(0, 255, 136, .25); /* green inner */
+
+      /* Decorative animated neon gradient layer */
+      &::before {
+        content: "";
+        position: absolute;
+        inset: -6%;
+        border-radius: calc(var(--card-radius) + 8px);
+        background: linear-gradient(
+            120deg,
+            #ff0099 0%,
+            #00ff88 40%,
+            #0066ff 70%,
+            #ff0099 100%
+        );
+        filter: blur(8px) saturate(1.2);
+        opacity: 0.55;
+        z-index: 0;
+        animation: neonShift 6s linear infinite;
+        background-size: 200% 200%;
+      }
+
+      /* Subtle scanlines for a retro-futuristic vibe */
+      &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        background:
+            repeating-linear-gradient(
+                to bottom,
+                rgba(255,255,255,0.05) 0px,
+                rgba(255,255,255,0.05) 1px,
+                transparent 2px,
+                transparent 4px
+            );
+        border-radius: var(--card-radius);
+        pointer-events: none;
+      }
+
+      /* Ensure content sits above the decorative layers */
+      > * {
+        z-index: 1;
+      }
+    }
+  }
+}

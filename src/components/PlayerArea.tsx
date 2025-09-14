@@ -71,7 +71,7 @@ export function PlayerArea({
   return (
     <div className={cn(
       "player-area ring-3 transition",
-      isCurrentPlayer ? "ring-primary" : 'ring-transparent'
+      isCurrentPlayer && "active-turn"
     )}>
       <div className="bg-layer"/>
       <div className="content-layer flex items-center gap-2 lg:gap-4 h-full flex-wrap">

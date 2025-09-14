@@ -1,0 +1,77 @@
+.theme-retro {
+    --primary: hsl(174 59% 39%);
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: hsl(11 83% 62%);
+    --secondary-foreground: hsl(0 0% 100%);
+
+    --bg-color: #f4f1de;
+    --zone-bg-color: #e9c46a;
+    --text-color: #264653;
+    --card-bg: #f4a261;
+    --card-border: #e76f51;
+    --card-shadow: 3px 3px 0 var(--card-border);
+    --card-radius: 15px;
+    --card-back: var(--zone-bg-color);
+    --selected-border: var(--card-border);
+    --selected-shadow: 3px 3px 0 var(--primary);
+    --button-bg: #2a9d8f;
+    --button-hover-bg: #21867a;
+
+    --skipbo-text: hsl(40 80% 80%);
+    --skipbo-bg: var(--card-bg);
+    --card-g1: #2a9d8f;
+    --card-g2: #e76f51;
+    --card-g3: #264653;
+
+    .card {
+      .back {
+        --transparent-size: calc(var(--card-height) / 50);
+        --stripe-size: calc(var(--card-height) / 10);
+        background-image: repeating-linear-gradient(
+                45deg,
+                var(--card-g1)  0,
+                var(--card-g1)  calc(var(--stripe-size) * 1),
+                transparent     calc(var(--stripe-size) * 1),
+                transparent     calc(var(--stripe-size) * 1 + var(--transparent-size) * 1),
+                var(--card-g2)  calc(var(--stripe-size) * 1 + var(--transparent-size) * 1),
+                var(--card-g2)  calc(var(--stripe-size) * 2 + var(--transparent-size) * 1),
+                transparent     calc(var(--stripe-size) * 2 + var(--transparent-size) * 1),
+                transparent     calc(var(--stripe-size) * 2 + var(--transparent-size) * 2),
+                var(--card-g3)  calc(var(--stripe-size) * 2 + var(--transparent-size) * 2),
+                var(--card-g3)  calc(var(--stripe-size) * 3 + var(--transparent-size) * 2),
+                transparent     calc(var(--stripe-size) * 3 + var(--transparent-size) * 2),
+                transparent     calc(var(--stripe-size) * 3 + var(--transparent-size) * 3),
+                var(--card-bg)  calc(var(--stripe-size) * 3 + var(--transparent-size) * 3),
+                var(--card-bg)  calc(var(--stripe-size) * 4 + var(--transparent-size) * 3),
+                transparent     calc(var(--stripe-size) * 4 + var(--transparent-size) * 3),
+                transparent     calc(var(--stripe-size) * 4 + var(--transparent-size) * 4)
+        );
+      }
+      &.skipbo-text {
+        .card-inner {
+          @apply overflow-hidden
+            before:absolute before:top-0   before:left-0 before:w-full before:h-1/6
+            after:absolute  after:bottom-0 after:left-0  after:w-full  after:h-1/6;
+          &::before {
+            background-image: conic-gradient(from 45deg,
+              transparent 0deg 180deg,
+              var(--card-g2) 180deg 360deg
+            );
+          }
+          &::after {
+            background-image: conic-gradient(from 225deg,
+            transparent 0deg 180deg,
+            var(--card-g1) 180deg 360deg
+            );
+          }
+        }
+        span:not(.card-corner-number) {
+          @apply relative z-0
+            before:absolute before:z-[-1] before:content-['Skip-Bo']
+            after:absolute  after:z-[-1]  after:content-['Skip-Bo']
+            before:text-(--card-g1)  before:bottom-1 before:right-1.5
+            after:text-(--card-g2)   after:top-1     after:left-1.5;
+        }
+      }
+    }
+  }
