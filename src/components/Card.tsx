@@ -135,7 +135,7 @@ const CardComponent: React.FC<CardProps> = ({
   return (card ?
       <div
         className={cn(
-          'card', 'text-shadow-foreground', 'text-shadow-sm',
+          'card',
           card && card.isSkipBo && isRevealed && 'skip-bo',
           colourClass,
           morphing === 'after' && `transition duration-800`,

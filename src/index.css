@@ -39,9 +39,6 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
 
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -54,6 +51,11 @@
   --stack-diff: 16px;
 
   --active-turn-color: var(--primary);
+  --card-bg: white;
+  --skipbo-bg: var(--card-bg);
+  --selected-border: #f59e0b;
+  --drop-indicator-color: var(--selected-border);
+  --selected-shadow: 0 0 20px var(--selected-border);
 }
 
 @media(width >= 64rem) {
@@ -114,20 +116,6 @@
     transition: all 0.2s ease-in-out;
   }
 
-  /* Drop target indicator should only show on hover */
-  .drop-target-hover:hover::before {
-    content: '';
-    position: absolute;
-    top: -3px;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background-color: var(--selected-border);
-    border-radius: 2px;
-    opacity: 0.8;
-    z-index: 10;
-  }
-
   /* Card Animation Styles */
   .card-animation-layer {
     position: fixed;
@@ -153,38 +141,6 @@
   .animation-draw {
     /* Cards moving from deck to hand */
     filter: brightness(1.05);
-  }
-
-  .drop-indicator.can-drop:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
-  }
-
-  .drop-indicator.can-drop:hover::after {
-    content: '↓';
-    position: absolute;
-    top: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 18px;
-    color: var(--selected-border);
-    font-weight: bold;
-    z-index: 20;
-    animation: dropPulse 1s infinite;
-  }
-
-  .drop-indicator.can-drop:hover::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    border: 2px dashed var(--selected-border);
-    border-radius: calc(var(--card-radius) + 2px);
-    opacity: 0.8;
-    z-index: 15;
-    animation: borderPulse 1.5s infinite;
   }
 
   @keyframes dropPulse {
@@ -337,8 +293,6 @@
     --border: hsl(0 0% 89.8%);
     --input: hsl(0 0% 89.8%);
     --ring: hsl(0 0% 3.9%);
-    --selected-border: #f59e0b;
-    --selected-shadow: 0 0 20px var(--selected-border);
 
     --radius: 0.5rem;
     --stripes-bg: none;
@@ -433,20 +387,14 @@
 
 @utility card {
   @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer card-height
-  lg:not-[.skipbo-text]:text-2xl not-[.skipbo-text]:text-xl overflow-hidden;
-  width: var(--card-width);
-  border: 1px solid var(--card-border);
-  border-radius: var(--card-radius);
+  lg:not-[.skipbo-text]:text-2xl not-[.skipbo-text]:text-xl overflow-hidden text-shadow-sm shadow-(--card-shadow)
+  text-(--card-color) bg-(--card-bg) rounded-(--card-radius) w-(--card-width) will-change-transform border-[1px] border-(--card-border);
   user-select: none;
-  background-color: var(--card-bg);
-  color: var(--text-color);
-  box-shadow: var(--card-shadow);
   transform-origin: bottom center;
   clip-path: inset(0 round var(--card-radius));
   --card-rotate: inherit;
   --card-translate-y: 0px;
   --card-scale: 1;
-  will-change: transform;
   transform: translate3d(0,var(--card-translate-y),0) scale(var(--card-scale)) rotate(var(--card-rotate));
 
   .back {
@@ -467,10 +415,8 @@
   }
 
   &.selected {
-    border-color: var(--selected-border);
+    @apply border-(--selected-border) z-50 shadow-(--selected-border);
     --card-translate-y: -5px;
-    box-shadow: var(--selected-shadow);
-    z-index: 100;
   }
 }
 
@@ -527,10 +473,56 @@
 @utility drop-indicator {
   position: relative;
   transition: all 0.2s ease-in-out;
+
+  &.can-drop:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+
+    &::after {
+      content: '↓';
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--drop-indicator-color);
+      font-size: 18px;
+      font-weight: bold;
+      z-index: 20;
+      animation: dropPulse 1s infinite;
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border: 2px dashed var(--drop-indicator-color);
+      border-radius: calc(var(--card-radius) + 2px);
+      opacity: 0.8;
+      z-index: 15;
+      animation: borderPulse 1.5s infinite;
+    }
+  }
 }
 
 @utility drop-target-hover {
-  position: relative;
+  @apply relative ;
+
+  /* Drop target indicator should only show on hover */
+  &:hover::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: var(--selected-border);
+    border-radius: 2px;
+    opacity: 0.8;
+    z-index: 10;
+  }
 }
 
 

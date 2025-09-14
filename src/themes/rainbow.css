@@ -17,7 +17,7 @@
     --button-bg: #ff6b6b;
     --button-hover-bg: #ff5252;
 
-    --skipbo-text: hsl(0, 0%, 100%);
+    --skipbo-text: white;
     --card-g1: #4caf50;
     --card-g2: #ff6b6b;
     --card-g3: #9381ff;
@@ -63,8 +63,8 @@
         @apply text-shadow-black;
         /* Réglages rapides */
         --center-y: 60%;     /* centre vertical du cercle (plus grand => arc plus bombé) */
-        --inner: 50%;         /* rayon intérieur de l’arc visible */
-        --band: 3%;         /* épaisseur d’une bande (ajustez entre 2% et 3%) */
+        --inner: 60%;         /* rayon intérieur de l’arc visible */
+        --band: 2%;         /* épaisseur d’une bande (ajustez entre 2% et 3%) */
 
         .card-inner::before {
           content: "";

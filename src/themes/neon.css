@@ -74,15 +74,12 @@
     }
 
     &.skipbo-text {
-      color: var(--skipbo-text);
-      /* Keep skipbo-text utility bg as base; add neon overlay via ::before */
-      background: none;
-
+      --shadow-color: color-mix(in srgb, currentColor 80%, black);
       /* Big neon text glow */
       text-shadow:
-          0 0 4px currentColor,
-          0 0 8px currentColor,
-          0 0 16px currentColor;
+          0 0 2px var(--shadow-color),
+          0 0 4px var(--shadow-color),
+          0 0 8px var(--shadow-color);
 
       /* Outer and inner neon glow */
       box-shadow:

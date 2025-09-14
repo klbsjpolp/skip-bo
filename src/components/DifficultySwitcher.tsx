@@ -21,7 +21,7 @@ export function DifficultySwitcher() {
   const { gameState, setDifficulty } = useSkipBoGame();
   const currentDifficulty = selectDifficulty(gameState);
 
-  return (<SelectGroup className="flex items-baseline gap-2">
+  return (<SelectGroup className="flex items-baseline gap-2 hidden">
     <SelectLabel className="text-sm">Difficulté: </SelectLabel>
     <Select value={currentDifficulty} onValueChange={setDifficulty}>
       <SelectTrigger className="w-24">

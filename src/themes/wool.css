@@ -82,6 +82,10 @@
       var(--card-g1) 0%, var(--card-g1) 33%,
       var(--card-g2) 33%, var(--card-g2) 66%,
       var(--card-g3) 66%, var(--card-g3) 100%);
+
+    .card-corner-number {
+      z-index: -1;
+    }
   }
 
   .card .card-inner {

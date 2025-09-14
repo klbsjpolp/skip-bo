@@ -16,7 +16,8 @@
 
   /* Accents consistent with dark glass */
   --card-back: #1f3a8a;           /* deep indigo */
-  --selected-border: #cbd5e1;
+  --selected-border: #d8ad5d;
+  --drop-indicator-color: white;
 
   /* Extra glass tuning (used by liquid-glass tokens) */
   --lg-blur: 20px;
