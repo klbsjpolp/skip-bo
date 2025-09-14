@@ -33,55 +33,52 @@
   .skipbo-text {
     @apply liquid-glass;
     --lg-radius: var(--card-radius);
-  }
 
-  .card.skipbo-text .card-inner::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    /* layout */
-    --m-gap: calc(var(--card-width) / 18);
-    --m-w: calc((100% - var(--m-gap)) / 2);
-    --m-h: calc((100% - (var(--m-gap) * 2)) / 3);
+    .card-inner::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      /* layout */
+      --m-gap: calc(var(--card-width) / 18);
+      --m-w: calc((100% - var(--m-gap)) / 2);
+      --m-h: calc((100% - (var(--m-gap) * 2)) / 2);
 
-    /* panel colors */
-    --p1: rgba(118, 186, 255, 0.28);  /* light azure */
-    --p2: rgba(255, 149, 128, 0.28);  /* coral */
-    --p3: rgba(120, 255, 196, 0.28);  /* mint */
-    --p4: rgba(255, 219, 127, 0.28);  /* amber */
-    --p5: rgba(171, 148, 255, 0.28);  /* lavender */
-    --p6: rgba(255, 127, 202, 0.28);  /* pink */
+      /* panel colors */
+      --p1: rgba(118, 186, 255, 0.28); /* light azure */
+      --p2: rgba(255, 149, 128, 0.28); /* coral */
+      --p3: rgba(120, 255, 196, 0.28); /* mint */
+      --p4: rgba(255, 219, 127, 0.28); /* amber */
+      --p5: rgba(171, 148, 255, 0.28); /* lavender */
+      --p6: rgba(255, 127, 202, 0.28); /* pink */
 
-    background-image:
-      linear-gradient(var(--p1), var(--p1)),
-      linear-gradient(var(--p2), var(--p2)),
-      linear-gradient(var(--p3), var(--p3)),
-      linear-gradient(var(--p4), var(--p4)),
-      linear-gradient(var(--p5), var(--p5)),
-      linear-gradient(var(--p6), var(--p6));
-    background-size:
-      var(--m-w) var(--m-h),
-      var(--m-w) var(--m-h),
-      var(--m-w) var(--m-h),
-      var(--m-w) var(--m-h),
-      var(--m-w) var(--m-h),
-      var(--m-w) var(--m-h);
-    background-position:
-      left 0 top 0,
-      right 0 top 0,
-      left 0 top calc(var(--m-h) + var(--m-gap)),
-      right 0 top calc(var(--m-h) + var(--m-gap)),
-      left 0 top calc((var(--m-h) + var(--m-gap)) * 2),
-      right 0 top calc((var(--m-h) + var(--m-gap)) * 2);
-    background-repeat: no-repeat;
+      background-image: linear-gradient(var(--p1), var(--p1)),
+        linear-gradient(var(--p2), var(--p2)),
+        linear-gradient(var(--p3), var(--p3)),
+        linear-gradient(var(--p4), var(--p4)),
+        linear-gradient(var(--p5), var(--p5)),
+        linear-gradient(var(--p6), var(--p6));
+      background-size: var(--m-w) var(--m-h),
+        var(--m-w) var(--m-h),
+        var(--m-w) var(--m-h),
+        var(--m-w) var(--m-h),
+        var(--m-w) var(--m-h),
+        var(--m-w) var(--m-h);
+      background-position: left 0 top 0,
+        right 0 top 0,
+        left 0 top calc(var(--m-h) + var(--m-gap)),
+        right 0 top calc(var(--m-h) + var(--m-gap)),
+        left 0 top calc((var(--m-h) + var(--m-gap)) * 2),
+        right 0 top calc((var(--m-h) + var(--m-gap)) * 2);
+      background-repeat: no-repeat;
 
-    /* glass feel */
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.22);
-    backdrop-filter: blur(3px) saturate(1.2);
-    -webkit-backdrop-filter: blur(3px) saturate(1.2);
-    border-radius: inherit;
-    pointer-events: none;
+      /* glass feel */
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(3px) saturate(1.2);
+      -webkit-backdrop-filter: blur(3px) saturate(1.2);
+      border-radius: inherit;
+      pointer-events: none;
+    }
   }
 
   /* keep text above mosaic */
