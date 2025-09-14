@@ -5,7 +5,7 @@ import { useTheme } from 'next-themes';
 
 // Mock next-themes useTheme
 vi.mock('next-themes', async () => {
-  const actual = await vi.importActual<any>('next-themes');
+  const actual = await vi.importActual('next-themes');
   return {
     ...actual,
     useTheme: vi.fn(),

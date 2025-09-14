@@ -81,7 +81,10 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       const player = draft.players[draft.currentPlayerIndex];
       const targetSize = draft.config.HAND_SIZE;
       const newHand = action.hand.slice(0, targetSize);
-      while (newHand.length < targetSize) newHand.push(null);
+      while (newHand.length < targetSize) {
+        // @ts-expect-error will never happen
+        newHand.push(null);
+      }
       player.hand = newHand;
       // Clear selection to avoid stale indices
       draft.selectedCard = null;

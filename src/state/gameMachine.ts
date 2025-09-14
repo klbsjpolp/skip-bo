@@ -391,7 +391,7 @@ export const gameMachine = createMachine({
 
             // 2) Fallback: remove brackets/spaces and split by comma or dash
             if (numbers.length === 0) {
-              const cleaned = raw.replaceAll('[', '').replaceAll(']', '').replace(/\s/g, '');
+              const cleaned = raw.replace(/\[/g, '').replace(/]/g, '').replace(/\s/g, '');
               const tokens = cleaned.split(/[,-]/).filter(Boolean);
               numbers = tokens
                 .map((t) => parseInt(t, 10))

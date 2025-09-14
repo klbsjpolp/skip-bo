@@ -20,7 +20,7 @@ const analyzeOpponents = (gameState: GameState) => {
  */
 const analyzeCardAvailability = (gameState: GameState, targetValue: number) => {
   let visibleCards = 0;
-  let totalPossibleCards = targetValue === 12 ? 12 : 12; // Skip-Bo cards or numbered cards
+  const totalPossibleCards = targetValue === 12 ? 12 : 12; // Skip-Bo cards or numbered cards
 
   // Count cards in build piles
   gameState.buildPiles.forEach(pile => {

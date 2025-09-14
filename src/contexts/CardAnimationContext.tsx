@@ -1,4 +1,4 @@
-import {ReactNode, useCallback, useEffect, useRef, useState} from 'react';
+import {FC, ReactNode, useCallback, useEffect, useRef, useState} from 'react';
 import { flushSync } from 'react-dom';
 import {Card} from '@/types';
 import {CardAnimationContext} from "./useCardAnimation";
@@ -37,7 +37,7 @@ interface CardAnimationProviderProps {
   children: ReactNode;
 }
 
-export const CardAnimationProvider: React.FC<CardAnimationProviderProps> = ({ children }) => {
+export const CardAnimationProvider: FC<CardAnimationProviderProps> = ({ children }) => {
   const [activeAnimations, setActiveAnimations] = useState<CardAnimationData[]>([]);
   const animationCompletionResolvers = useRef<(() => void)[]>([]);
 

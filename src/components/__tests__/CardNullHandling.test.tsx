@@ -14,7 +14,7 @@ describe('Card Null Handling', () => {
   test('renders without errors when card is null', () => {
     // This should not throw an error
     const { container } = render(
-      <Card card={null as any} isRevealed={true} />
+      <Card card={null} isRevealed={true} />
     );
     
     // Check that the card element exists
@@ -25,7 +25,7 @@ describe('Card Null Handling', () => {
   test('renders without errors when card is undefined', () => {
     // This should not throw an error
     const { container } = render(
-      <Card card={undefined as any} isRevealed={true} />
+      <Card card={null} isRevealed={true} />
     );
     
     // Check that the card element exists
