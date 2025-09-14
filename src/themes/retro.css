@@ -12,7 +12,7 @@
     --card-shadow: 3px 3px 0 var(--card-border);
     --card-radius: 15px;
     --card-back: var(--zone-bg-color);
-    --selected-border: var(--card-border);
+    --selected-border: var(--card-shadow);
     --selected-shadow: 3px 3px 0 var(--primary);
     --button-bg: #2a9d8f;
     --button-hover-bg: #21867a;

@@ -387,9 +387,10 @@
 
 @utility card {
   @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer card-height
-  lg:not-[.skipbo-text]:text-2xl not-[.skipbo-text]:text-xl overflow-hidden text-shadow-sm shadow-(--card-shadow)
+  lg:not-[.skipbo-text]:text-2xl not-[.skipbo-text]:text-xl overflow-hidden text-shadow-sm
   text-(--card-color) bg-(--card-bg) rounded-(--card-radius) w-(--card-width) will-change-transform border-[1px] border-(--card-border);
   user-select: none;
+  box-shadow: var(--card-shadow);
   transform-origin: bottom center;
   clip-path: inset(0 round var(--card-radius));
   --card-rotate: inherit;
@@ -415,7 +416,8 @@
   }
 
   &.selected {
-    @apply border-(--selected-border) z-50 shadow-(--selected-border);
+    @apply border-(--selected-border) z-50;
+    box-shadow: var(--selected-shadow);
     --card-translate-y: -5px;
   }
 }
