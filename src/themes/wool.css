@@ -23,26 +23,15 @@
   --card-g3: hsl(282, 33%, 60%);   /* 9‑12 */
 
   body {
-    background-color: var(--bg-color);
     background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.1) 0 1px, transparent 1px),
     linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.1) 0 1px, transparent 1px);
     background-size: 6px 6px, 6px 6px, 3px 3px, 3px 3px;
-    background-blend-mode: multiply;
-    position: relative;
 
+    @apply before:absolute before:inset-0 before:-z-1 before:w-full before:h-full before:opacity-80 before:pointer-events-none;
     &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      opacity: 1; /* Adjust opacity for desired intensity */
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      pointer-events: none; /* Allows mouse events to pass through */
     }
   }
 
@@ -71,9 +60,6 @@
   .discard-pile-stack {
     .hoverable-card:hover {
       box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-    .card.selected.hoverable-card:hover {
-      box-shadow: var(--selected-shadow);
     }
   }
 

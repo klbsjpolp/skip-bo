@@ -1,3 +1,5 @@
+@import "./utils/liquid-glass.css";
+
 .theme-glass {
   /* Dark, premium liquid glass palette */
   --bg-color: #2d6698;
@@ -18,6 +20,10 @@
   --card-back: #1f3a8a;           /* deep indigo */
   --selected-border: #d8ad5d;
   --drop-indicator-color: white;
+
+  --card-g1: hsl(120, 80%, 55%);   /* 1‑4 */
+  --card-g2: hsl(0, 90%, 65%);     /* 5‑8 */
+  --card-g3: hsl(280, 75%, 60%);   /* 9‑12 */
 
   /* Extra glass tuning (used by liquid-glass tokens) */
   --lg-blur: 20px;
@@ -96,12 +102,11 @@
     @apply liquid-glass liquid-glass-square;
   }
 
-  .empty-card:not(:last-child) {
+  .discard-piles .empty-card:not(:last-child) {
     visibility: hidden;
   }
 
   .card {
-    color: var(--card-text-color);
     background: rgba(255, 255, 255, 0.15); /* A semi-transparent white background */
     backdrop-filter: blur(10px); /* The frosted glass effect */
 

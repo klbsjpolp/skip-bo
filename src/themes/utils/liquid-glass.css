@@ -1,4 +1,4 @@
-/* tailwind-liquid-glass.css */
+/* liquid-glass.css */
     @layer theme {
       /* Theme tokens (light) */
       :root {
@@ -25,25 +25,17 @@
       }
     }
 
-    /* css - update `src/tailwind-liquid-glass.css` - replace pseudo-elements usage with a clipped internal layer */
-
     @utility liquid-glass-square {
       --lg-radius: 0;
     }
     @utility liquid-glass {
-      isolation: isolate;
       border-radius: var(--lg-radius);
-
-      .content-layer {
-        z-index: 1;
-      }
 
       /* new clipped decorative layer — only this layer clips pseudo-elements */
       .bg-layer {
         border-radius: inherit;
         overflow: hidden;              /* clip decorations only */
         pointer-events: none;
-        z-index: 0;
         will-change: background-position, opacity;
 
         background: rgba(255, 255, 255, 0.36);
@@ -55,11 +47,11 @@
 
     /* keyframes: animate background-position only (cheap compared to transform of large blurred boxes) */
     @keyframes lg-float {
-      0%   { background-position: 0% 0%, 0% 0%; }
+      0%   { background-position: 0 0, 0 0; }
       100% { background-position: 6% -4%, 4% -3%; } /* larger but still subtle movement */
     }
     @keyframes lg-ripple {
-      0%   { background-position: 0% 0%, 0% 0%; }
+      0%   { background-position: 0 0, 0 0; }
       100% { background-position: 6% 2%, 5% 1%; }
     }
 

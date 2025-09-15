@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@import "./tailwind-liquid-glass.css";
 @import "./themes/light.css";
 @import "./themes/dark.css";
 @import "./themes/glass.css";
@@ -56,6 +55,10 @@
   --selected-border: #f59e0b;
   --drop-indicator-color: var(--selected-border);
   --selected-shadow: 0 0 20px var(--selected-border);
+
+  --card-g1: #0F0; /* 1‑4 */
+  --card-g2: #F00; /* 5‑8 */
+  --card-g3: #F0F; /* 9‑12 */
 }
 
 @media(width >= 64rem) {
