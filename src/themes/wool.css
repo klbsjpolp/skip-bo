@@ -35,13 +35,6 @@
     }
   }
 
-  .player-area:first-child {
-    margin-top: 15px;
-  }
-  #main {
-    padding-top: 10px;
-  }
-
   .center-area, .player-area {
     box-shadow: 10px 10px 20px color-mix(in srgb, var(--bg-color), black 15%),
       -10px -10px 20px color-mix(in srgb, var(--bg-color), white 35%);

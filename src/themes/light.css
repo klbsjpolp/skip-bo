@@ -16,9 +16,10 @@
     --card-radius: 8px;
     --button-bg: #4f46e5;
     --button-hover-bg: #4338ca;
+    --button-text: white;
 
     /* Card color ranges */
-    --skipbo-text: white;
+    --skipbo-text: #333;
     --skipbo-bg: var(--card-back-2);
     --card-g1: hsl(152 69% 58%);   /* 1‑4 */
     --card-g2: hsl(0 80% 60%);     /* 5‑8 */

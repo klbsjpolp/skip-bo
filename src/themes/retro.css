@@ -16,6 +16,7 @@
     --selected-shadow: 3px 3px 0 var(--primary);
     --button-bg: #2a9d8f;
     --button-hover-bg: #21867a;
+    --button-text: hsl(0, 0%, 95%);
 
     --skipbo-text: hsl(40 80% 80%);
     --skipbo-bg: var(--card-bg);

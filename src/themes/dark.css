@@ -33,7 +33,7 @@
     --button-hover-bg: #4f46e5;
 
     /* Card color ranges - same as light theme */
-    --skipbo-text: black;
+    --skipbo-text: #ccc;
     --skipbo-bg: var(--card-back);
     --card-g1: hsl(152 69% 58%);
     --card-g2: hsl(0 80% 60%);

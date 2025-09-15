@@ -59,6 +59,8 @@
   --card-g1: #0F0; /* 1‑4 */
   --card-g2: #F00; /* 5‑8 */
   --card-g3: #F0F; /* 9‑12 */
+
+  --button-hover-bg: color-mix(in srgb, var(--button-bg) 100%, black 5%);
 }
 
 @media(width >= 64rem) {
@@ -82,6 +84,9 @@
 
 body {
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+#main {
+  padding-top: 10px;
 }
 
 /*
@@ -264,6 +269,10 @@ body {
 
   .player-area {
     transition: border-color 0.3s;
+
+    &:first-child {
+      margin-top: 15px;
+    }
   }
 
   .player-area.active-turn,
@@ -413,13 +422,11 @@ body {
   }
 
   .card-inner {
-    @apply w-full h-full overflow-hidden flex items-center justify-center absolute;
-    border-radius: inherit;
-  }
+    @apply w-full h-full rounded-[inherit] overflow-hidden flex items-center justify-center absolute will-change-transform;
 
-  .card-inner > * {
-    position: relative;
-    z-index: 1;
+    & > * {
+      @apply relative z-[1] will-change-transform;
+    }
   }
 
   &.selected {
@@ -534,11 +541,14 @@ body {
   }
 }
 
-
 @utility card-morph-wrapper {
   @apply relative card-height w-(--card-width);
 }
 
 @utility card-morph-layer {
   @apply absolute pointer-events-none transition-opacity duration-800;
+}
+
+button {
+  @apply bg-(--button-bg) text-(--button-text) hover:bg-(--button-hover-bg) border-2 rounded-md;
 }
