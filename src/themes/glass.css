@@ -103,10 +103,6 @@
     @apply liquid-glass liquid-glass-square;
   }
 
-  .discard-piles .empty-card:not(:last-child) {
-    visibility: hidden;
-  }
-
   .card:not(.empty-card) {
     @apply backdrop-blur-lg bg-current/8 *:text-white;
     @apply after:absolute after:inset-0 after:w-full after:h-full after:backdrop-blur-xl;

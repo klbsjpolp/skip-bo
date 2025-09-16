@@ -314,16 +314,6 @@ body {
     --stripes-bg: none;
   }
 
-
-
-
-
-
-
-
-
-
-
   /* Keyframes for the glass theme ambience */
   @keyframes glassFlow {
     /* layer1,            layer2,           layer3,           layer4 (subtile drift) */
@@ -371,14 +361,13 @@ body {
     }
   }
 
-
   @keyframes glassSheen {
     0%   { transform: translateX(-160%) translateY(-2%) rotate(0.001deg); }
     50%  { transform: translateX(20%) translateY(2%) rotate(0.001deg); }
     100% { transform: translateX(160%) translateY(-1%) rotate(0.001deg); }
   }
 
-    body {
+  body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
