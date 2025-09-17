@@ -8,12 +8,12 @@
     --zone-bg-color: #ffffff88;
     --text-color: #333333;
     --title-color: #ff6b6b;
-    --card-bg: #ffffff;
-    --card-border: #9381ff;
+    --card-front-color: #ffffff;
+    --card-border-color: #9381ff;
     --card-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
     --card-radius: 12px;
-    --card-back: #6a5acd;
-    --selected-border: #ffd700;
+    --card-back-color: #6a5acd;
+    --selected-border-color: #ffd700;
     --button-bg: #ff6b6b;
     --button-hover-bg: #ff5252;
     --button-text: hsl(0, 0%, 95%);
@@ -48,7 +48,7 @@
         box-shadow: 0 0 15px rgba(147, 129, 255, 0.4);
       }
       .card.selected.hoverable-card:hover {
-        box-shadow: 0 0 20px var(--selected-border);
+        box-shadow: 0 0 20px var(--selected-border-color);
       }
     }
 
@@ -78,7 +78,7 @@
           background-image:
             linear-gradient(#ffffff40, #ffffff40),
             radial-gradient(circle at 50% var(--center-y),
-              var(--card-bg) 0 var(--inner),
+              var(--card-front-color) 0 var(--inner),
 
               #8f00ff var(--inner) calc(var(--inner) + var(--band)),
               #4b0082 calc(var(--inner) + var(--band)) calc(var(--inner) + var(--band) * 2),
@@ -88,7 +88,7 @@
               #ff7f00 calc(var(--inner) + var(--band) * 5) calc(var(--inner) + var(--band) * 6),
               #ff0000 calc(var(--inner) + var(--band) * 6) calc(var(--inner) + var(--band) * 7),
 
-              var(--card-bg) calc(var(--inner) + var(--band) * 7) 100%
+              var(--card-front-color) calc(var(--inner) + var(--band) * 7) 100%
             );
           background-size: 100% 100%, 100% 200%;
           background-repeat: no-repeat;

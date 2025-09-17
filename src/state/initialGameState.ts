@@ -9,7 +9,7 @@ export function getStoredStockSize(): number {
     if (typeof window !== 'undefined' && window.localStorage) {
       const raw = window.localStorage.getItem(STOCK_STORAGE_KEY);
       const n = raw ? parseInt(raw, 10) : NaN;
-      if (!Number.isNaN(n) && n >= 5 && n <= 50 && n % 5 === 0) {
+      if (!Number.isNaN(n) && n > 0) {
         return n;
       }
     }

@@ -6,7 +6,7 @@
 @import "./themes/rainbow.css";
 @import "./themes/wool.css";
 @import "./themes/metro.css";
-@import "./themes/retro.css";
+@import "./themes/retro.css" layer(components);
 @import "./themes/pastel.css";
 
 @plugin 'tailwindcss-animate';
@@ -44,49 +44,6 @@
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
-
-  --card-width: 46px;
-  --card-height: 66px;
-  --stack-diff: 16px;
-
-  --active-turn-color: var(--primary);
-  --card-bg: white;
-  --skipbo-bg: var(--card-bg);
-  --selected-border: #f59e0b;
-  --drop-indicator-color: var(--selected-border);
-  --selected-shadow: 0 0 20px var(--selected-border);
-
-  --card-g1: #0F0; /* 1‑4 */
-  --card-g2: #F00; /* 5‑8 */
-  --card-g3: #F0F; /* 9‑12 */
-
-  --button-hover-bg: color-mix(in srgb, var(--button-bg) 100%, black 5%);
-}
-
-@media(width >= 64rem) {
-  :root {
-    --card-width: 70px;
-    --card-height: 100px;
-    --stack-diff: 20px;
-  }
-}
-
-@utility container {
-  margin-inline: auto;
-  padding-inline: 2rem;
-  @media (min-width: 640px) {
-    max-width: none;
-  }
-  @media (min-width: 1400px) {
-    max-width: 1400px;
-  }
-}
-
-body {
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-}
-#main {
-  padding-top: 10px;
 }
 
 /*
@@ -104,6 +61,60 @@ body {
   ::backdrop,
   ::file-selector-button {
     border-color: var(--color-gray-200, currentcolor);
+  }
+
+  :root {
+    --background: hsl(0 0% 100%);
+    --foreground: hsl(0 0% 3.9%);
+
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(0 0% 3.9%);
+
+    --muted: hsl(0 0% 96.1%);
+    --muted-foreground: hsl(0 0% 45.1%);
+    --accent: hsl(0 0% 96.1%);
+    --accent-foreground: hsl(0 0% 9%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(0 0% 3.9%);
+    --destructive: hsl(0 84.2% 60.2%);
+    --destructive-foreground: hsl(0 0% 98%);
+    --border: hsl(0 0% 89.8%);
+    --input: hsl(0 0% 89.8%);
+    --ring: hsl(0 0% 3.9%);
+
+    --radius: 0.5rem;
+    --stripes-bg: none;
+
+    --card-width: 46px;
+    --card-height: 66px;
+    --stack-diff: 16px;
+    --active-turn-color: var(--primary);
+    --card-front-color: white;
+    --skipbo-bg: var(--card-front-color);
+    --selected-border-color: #f59e0b;
+    --drop-indicator-color: var(--selected-border-color);
+    --selected-shadow: 0 0 20px var(--selected-border-color);
+
+    --card-g1: #0F0; /* 1‑4 */
+    --card-g2: #F00; /* 5‑8 */
+    --card-g3: #F0F; /* 9‑12 */
+
+    --button-hover-bg: color-mix(in srgb, var(--button-bg) 100%, black 5%);
+  }
+
+  body {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  #main {
+    padding-top: 10px;
+  }
+
+  @media(width >= 64rem) {
+    :root {
+      --card-width: 70px;
+      --card-height: 100px;
+      --stack-diff: 20px;
+    }
   }
 
   /* Discard pile stack positioning */
@@ -291,29 +302,6 @@ body {
     }
   }
 
-  :root {
-    --background: hsl(0 0% 100%);
-    --foreground: hsl(0 0% 3.9%);
-
-    --card: hsl(0 0% 100%);
-    --card-foreground: hsl(0 0% 3.9%);
-
-    --muted: hsl(0 0% 96.1%);
-    --muted-foreground: hsl(0 0% 45.1%);
-    --accent: hsl(0 0% 96.1%);
-    --accent-foreground: hsl(0 0% 9%);
-    --popover: hsl(0 0% 100%);
-    --popover-foreground: hsl(0 0% 3.9%);
-    --destructive: hsl(0 84.2% 60.2%);
-    --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(0 0% 89.8%);
-    --input: hsl(0 0% 89.8%);
-    --ring: hsl(0 0% 3.9%);
-
-    --radius: 0.5rem;
-    --stripes-bg: none;
-  }
-
   /* Keyframes for the glass theme ambience */
   @keyframes glassFlow {
     /* layer1,            layer2,           layer3,           layer4 (subtile drift) */
@@ -386,25 +374,34 @@ body {
   }
 }
 
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (min-width: 640px) {
+    max-width: none;
+  }
+  @media (min-width: 1400px) {
+    max-width: 1400px;
+  }
+}
+
 @utility card-height {
   height: var(--card-height);
 }
 
 @utility card {
   @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer card-height
-  lg:not-[.skipbo-text]:text-2xl not-[.skipbo-text]:text-xl overflow-hidden text-shadow-sm
-  text-(--card-color) bg-(--card-bg) rounded-(--card-radius) w-(--card-width) will-change-transform border-[1px] border-(--card-border);
-  user-select: none;
-  box-shadow: var(--card-shadow);
+  lg:not-[.skipbo-text]:text-2xl not-[.skipbo-text]:text-xl text-shadow-sm shadow-(--card-shadow)
+  text-(--card-color) bg-(--card-front-color) rounded-(--card-radius) w-(--card-width) border-[1px] border-(--card-border-color)
+  select-none will-change-transform before:will-change-transform after:will-change-transform;
   transform-origin: bottom center;
-  clip-path: inset(0 round var(--card-radius));
   --card-rotate: inherit;
   --card-translate-y: 0px;
   --card-scale: 1;
   transform: translate3d(0,var(--card-translate-y),0) scale(var(--card-scale)) rotate(var(--card-rotate));
 
   .back {
-    @apply relative w-full h-full bg-cover bg-(--card-back);
+    @apply relative w-full h-full bg-cover bg-(--card-back-color) rounded-[inherit];
     * {
       @apply text-4xl;
     }
@@ -419,8 +416,7 @@ body {
   }
 
   &.selected {
-    @apply border-(--selected-border) z-50;
-    box-shadow: var(--selected-shadow);
+    @apply border-(--selected-border-color) shadow-(--selected-shadow);
     --card-translate-y: -5px;
   }
 }
@@ -446,19 +442,19 @@ body {
 }
 
 @utility card-back {
-  background-color: var(--card-back);
+  background-color: var(--card-back-color);
 }
 
 @utility placeholder {
   width: var(--card-width);
   height: var(--card-height);
-  border: 2px dashed var(--card-border);
+  border: 2px dashed var(--card-border-color);
   border-radius: var(--card-radius);
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 18px;
-  color: var(--card-border);
+  color: var(--card-border-color);
   cursor: pointer;
 }
 
@@ -523,7 +519,7 @@ body {
     left: 0;
     right: 0;
     height: 3px;
-    background-color: var(--selected-border);
+    background-color: var(--selected-border-color);
     border-radius: 2px;
     opacity: 0.8;
     z-index: 10;

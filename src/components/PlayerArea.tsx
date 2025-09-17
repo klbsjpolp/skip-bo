@@ -214,7 +214,7 @@ function StockPile({player, playerIndex, isCurrentPlayer, gameState, selectCard,
               canBeGrabbed={false}
             />
           ) : (
-            <EmptyCard className="absolute"/>
+            <EmptyCard/>
           ))
           : (
             <Card

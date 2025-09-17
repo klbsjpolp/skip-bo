@@ -7,17 +7,17 @@
   --bg-color: #728492;
   --text-color: #333333;
   --title-color: #2b2b2b;
-  --card-bg: #ddd;
-  --card-border: var(--card-bg);
+  --card-front-color: #ddd;
+  --card-border-color: var(--card-front-color);
   --card-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2), /* A soft, dark inner shadow for depth */
     inset 0 0 5px rgba(255, 255, 255, 0.5); /* A soft, light inner shadow for highlight */
   --card-radius: calc(var(--card-height) / 10);
-  --card-back: var(--bg-color);
+  --card-back-color: var(--bg-color);
   --button-bg: #c9c9c9;
   --button-hover-bg: #bdbdbd;
 
   --skipbo-text: #333;
-  --skipbo-bg: var(--card-bg);
+  --skipbo-bg: var(--card-front-color);
   --card-g1: hsl(152, 33%, 60%);   /* 1‑4 */
   --card-g2: hsl(0, 33%, 60%);     /* 5‑8 */
   --card-g3: hsl(282, 33%, 60%);   /* 9‑12 */
@@ -29,7 +29,7 @@
     linear-gradient(90deg, rgba(0, 0, 0, 0.1) 0 1px, transparent 1px);
     background-size: 6px 6px, 6px 6px, 3px 3px, 3px 3px;
 
-    @apply before:absolute before:inset-0 before:-z-1 before:w-full before:h-full before:opacity-80 before:pointer-events-none;
+    @apply relative before:absolute before:inset-0 before:-z-1 before:opacity-80 before:pointer-events-none;
     &::before {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
@@ -77,7 +77,7 @@
   .card {
     .back {
       /* The base background color for the "yarn" */
-      --back-alternate: rgb(from color-mix(in srgb, var(--card-back), white 35%) r g b / 50%);
+      --back-alternate: rgb(from color-mix(in srgb, var(--card-back-color), white 35%) r g b / 50%);
 
       /*
       The magic happens here: we use multiple repeating linear gradients to create the pattern.

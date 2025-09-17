@@ -1,7 +1,8 @@
 @import "./utils/liquid-glass.css";
 
 .theme-glass {
-  /* Dark, premium liquid glass palette */
+  --primary: #6786d3;
+  --primary-foreground: white;
   --bg-color: #2d6698;
   --text-color: #ffffff;          /* light gray text */
   --title-color: #f3f4f6;         /* headings a touch brighter */
@@ -10,16 +11,17 @@
 
   /* Let glass panels own their background via utility */
   --zone-bg-color: transparent;   /* prevent flat bg behind glass */
+  --active-turn-color: white;
 
   /* Cards keep dark tone and soft edges */
-  --card-bg: transparent;             /* on-glass card surface */
-  --card-border: #5b6470;
+  --card-front-color: transparent;             /* on-glass card surface */
+  --card-border-color: #5b6470;
   --card-shadow: 0 1px 3px rgba(0,0,0,0.2);
   --card-radius: calc(var(--card-height) / 8);
 
   /* Accents consistent with dark glass */
-  --card-back: #1f3a8a;           /* deep indigo */
-  --selected-border: #d8ad5d;
+  --card-back-color: #1f3a8a;           /* deep indigo */
+  --selected-border-color: #d8ad5d;
   --drop-indicator-color: white;
 
   --card-g1: hsl(158, 100%, 50%);   /* 1‑4 */
@@ -105,8 +107,8 @@
 
   .card:not(.empty-card) {
     @apply backdrop-blur-lg bg-current/8 *:text-white;
-    @apply after:absolute after:inset-0 after:w-full after:h-full after:backdrop-blur-xl;
-    @apply before:absolute before:inset-0 before:w-full before:h-full before:bg-gradient-to-b before:from-white/15 before:to-transparent;
+    @apply after:absolute  after:inset-0  after:rounded-[inherit]  after:backdrop-blur-xl;
+    @apply before:absolute before:inset-0 before:rounded-[inherit] before:bg-gradient-to-b before:from-white/15 before:to-transparent;
 
     .back::after {
       @apply z-10 content-[""] absolute inset-0 pointer-events-none rounded-[inherit] mix-blend-screen;

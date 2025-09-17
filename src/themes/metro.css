@@ -8,12 +8,12 @@
   --zone-bg-color: #2d2d2d;
   --text-color: #ffffff;
   --title-color: #ffffff;
-  --card-bg: #3c3c3c;
-  --card-back: #ffd426;
-  --card-border: #5e5e5e;
+  --card-front-color: #3c3c3c;
+  --card-back-color: #ffd426;
+  --card-border-color: #5e5e5e;
   --card-shadow: none;
   --card-radius: 2px;
-  --selected-border: #1ba1e2;
+  --selected-border-color: #1ba1e2;
   --button-bg: #60a917;
   --button-hover-bg: #4c8712;
 
