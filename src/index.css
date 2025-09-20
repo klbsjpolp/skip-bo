@@ -94,6 +94,7 @@
     --selected-border-color: #f59e0b;
     --drop-indicator-color: var(--selected-border-color);
     --selected-shadow: 0 0 20px var(--selected-border-color);
+    --can-drop-shadow: 0 0 15px var(--selected-border-color);
 
     --card-g1: #0F0; /* 1‑4 */
     --card-g2: #F00; /* 5‑8 */
@@ -164,28 +165,6 @@
   .animation-draw {
     /* Cards moving from deck to hand */
     filter: brightness(1.05);
-  }
-
-  @keyframes dropPulse {
-    0%,
-    100% {
-      opacity: 0.6;
-      transform: translateX(-50%) translateY(0);
-    }
-    50% {
-      opacity: 1;
-      transform: translateX(-50%) translateY(-3px);
-    }
-  }
-
-  @keyframes borderPulse {
-    0%,
-    100% {
-      opacity: 0.4;
-    }
-    50% {
-      opacity: 0.8;
-    }
   }
 
   @keyframes neonShift {
@@ -446,16 +425,8 @@
 }
 
 @utility placeholder {
-  width: var(--card-width);
-  height: var(--card-height);
-  border: 2px dashed var(--card-border-color);
-  border-radius: var(--card-radius);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 18px;
-  color: var(--card-border-color);
-  cursor: pointer;
+  @apply cursor-pointer w-(--card-width) h-(--card-height) rounded-(--card-radius) text-(--card-border-color)
+    flex items-center justify-center border-[2px_dashed_var(--card-border-color)];
 }
 
 @utility card-corner-number {
@@ -472,38 +443,20 @@
 }
 
 @utility drop-indicator {
-  position: relative;
+  @apply relative rounded-(--card-radius);
   transition: all 0.2s ease-in-out;
 
   &.can-drop:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+    @apply cursor-pointer -translate-y-0.5 shadow-(--can-drop-shadow);
 
     &::after {
-      content: '↓';
-      position: absolute;
-      top: -25px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: var(--drop-indicator-color);
-      font-size: 18px;
-      font-weight: bold;
-      z-index: 20;
-      animation: dropPulse 1s infinite;
+      @apply content-['↓'] absolute top-[-25px] left-1/2 text-lg -translate-x-1/2
+        text-(--drop-indicator-color) font-bold z-20 animate-bounce;
     }
 
     &::before {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      border: 2px dashed var(--drop-indicator-color);
-      border-radius: calc(var(--card-radius) + 2px);
-      opacity: 0.8;
-      z-index: 15;
-      animation: borderPulse 1.5s infinite;
+      @apply content-[''] absolute z-10 opacity-80 -inset-0.5 animate-pulse rounded-[calc(var(--card-radius)+2px)]
+        border-(--drop-indicator-color) border-dashed border-2;
     }
   }
 }

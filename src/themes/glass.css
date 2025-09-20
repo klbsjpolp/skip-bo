@@ -21,7 +21,7 @@
 
   /* Accents consistent with dark glass */
   --card-back-color: #1f3a8a;           /* deep indigo */
-  --selected-border-color: #d8ad5d;
+  --selected-border-color: #d5d5d5;
   --drop-indicator-color: white;
 
   --card-g1: hsl(158, 100%, 50%);   /* 1‑4 */

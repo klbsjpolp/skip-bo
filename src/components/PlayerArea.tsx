@@ -78,61 +78,57 @@ function DiscardPile({
     return {card, cardIdx, isAnimated, key: `discard-${pileIndex}-card-${cardIdx}`};
   });
 
-  return <div className="discard-pile-stack" data-pile-index={pileIndex}>
-    <div
-      className={cn(
-        "drop-indicator",
-        isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand' && "can-drop cursor-pointer",
-        !isHuman || !isCurrentPlayer || gameState.selectedCard?.source !== 'hand' ? 'cursor-default' : ''
-      )}
-      onClick={async (e) => {
-        e.stopPropagation();
-        if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
-          await discardCard(pileIndex);
-        } else if (isHuman && isCurrentPlayer) {
-          // If this discard pile is already selected, deselect it
-          if (gameState.selectedCard?.source === 'discard' &&
-            gameState.selectedCard.discardPileIndex === pileIndex &&
-            gameState.currentPlayerIndex === playerIndex) {
-            // Clear the selection
-            clearSelection();
-          } else {
-            // Select this discard pile
-            selectCard('discard', pile.length - 1, pileIndex);
-          }
+  return <div className={cn(
+    "drop-indicator discard-pile-stack",
+    isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand' && "can-drop"
+  )} data-pile-index={pileIndex}
+    onClick={async (e) => {
+      e.stopPropagation();
+      if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
+        await discardCard(pileIndex);
+      } else if (isHuman && isCurrentPlayer) {
+        // If this discard pile is already selected, deselect it
+        if (gameState.selectedCard?.source === 'discard' &&
+          gameState.selectedCard.discardPileIndex === pileIndex &&
+          gameState.currentPlayerIndex === playerIndex) {
+          // Clear the selection
+          clearSelection();
+        } else {
+          // Select this discard pile
+          selectCard('discard', pile.length - 1, pileIndex);
         }
-      }}
-    >
-      {computedPiles.length === 0 && <EmptyCard/>}
-      {computedPiles.map(({card, cardIdx, isAnimated, key}) => {
-        if (isAnimated) {
-          const fakeCard = <div className="card opacity-0 pointer-events-none"
-                               style={{top: `${cardIdx * 20}px`, zIndex: cardIdx}}/>
-          if (cardIdx === 0)
-            return <Fragment key={key}>
-              <EmptyCard/>
-              {fakeCard}
-            </Fragment>
-          else
-            return fakeCard
-        } else
-          return <Card
-            hint={`discard pile ${pileIndex + 1}, card ${cardIdx + 1}`}
-            key={`discard-${pileIndex}-card-${cardIdx}`}
-            card={card}
-            isRevealed={true}
-            isSelected={
-              gameState.selectedCard?.source === 'discard' &&
-              gameState.selectedCard.discardPileIndex === pileIndex &&
-              gameState.currentPlayerIndex === playerIndex &&
-              cardIdx === pile.length - 1
-            }
-            canBeGrabbed={isHuman && isCurrentPlayer && cardIdx === pile.length - 1}
-            stackIndex={cardIdx}
-            // Remove onClick from Card to avoid nested handlers
-          />
-      })}
-    </div>
+      }
+    }}
+  >
+    {computedPiles.length === 0 && <EmptyCard/>}
+    {computedPiles.map(({card, cardIdx, isAnimated, key}) => {
+      if (isAnimated) {
+        const fakeCard = <div key={key} className="card opacity-0 pointer-events-none"
+                             style={{top: `${cardIdx * 20}px`, zIndex: cardIdx}}/>
+        if (cardIdx === 0)
+          return <Fragment key={key}>
+            <EmptyCard/>
+            {fakeCard}
+          </Fragment>
+        else
+          return fakeCard
+      } else
+        return <Card
+          hint={`discard pile ${pileIndex + 1}, card ${cardIdx + 1}`}
+          key={`discard-${pileIndex}-card-${cardIdx}`}
+          card={card}
+          isRevealed={true}
+          isSelected={
+            gameState.selectedCard?.source === 'discard' &&
+            gameState.selectedCard.discardPileIndex === pileIndex &&
+            gameState.currentPlayerIndex === playerIndex &&
+            cardIdx === pile.length - 1
+          }
+          canBeGrabbed={isHuman && isCurrentPlayer && cardIdx === pile.length - 1}
+          stackIndex={cardIdx}
+          // Remove onClick from Card to avoid nested handlers
+        />
+    })}
   </div>;
 }
 

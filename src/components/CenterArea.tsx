@@ -42,8 +42,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
               className={cn(
                 "relative drop-indicator build-pile",
                 gameState.selectedCard && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState)
-                  ? 'can-drop cursor-pointer'
-                  : 'cursor-default'
+                  && 'can-drop'
               )}
               onClick={async (e) => {
                 // Prevent event propagation
