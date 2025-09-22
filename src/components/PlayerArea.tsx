@@ -99,6 +99,7 @@ function DiscardPile({
         }
       }
     }}
+    style={{height: `calc(var(--card-height) + ${(pile.length <= 1 ? 0 : pile.length - 1) * 20}px)`}}
   >
     {computedPiles.length === 0 && <EmptyCard/>}
     {computedPiles.map(({card, cardIdx, isAnimated, key}) => {
@@ -152,7 +153,8 @@ function DiscardPiles({
                         clearSelection
                       }: DiscardPilesProps) {
 
-  return <div className="flex items-center gap-2">
+  // @ts-expect-error setting variable in style
+  return <div className="flex items-center gap-2" style={{"--card-rotate": "0deg"}}>
     <h3 className="min-w-fit vertical-text">Défausses</h3>
     <div className="discard-piles self-start">
       {player.discardPiles.map((pile, pileIndex) => (
@@ -196,7 +198,8 @@ function StockPile({player, playerIndex, isCurrentPlayer, gameState, selectCard,
   }, [clearSelection, gameState.currentPlayerIndex, gameState.selectedCard?.source, isCurrentPlayer, isHuman, player.stockPile.length, playerIndex, selectCard])
 
 
-  return <div className="flex items-center relative gap-2">
+  // @ts-expect-error setting variable in style
+  return <div className="flex items-center relative gap-2" style={{"--card-rotate": "0deg"}}>
     <h3 className="vertical-text">Talon ({player.stockPile.length})</h3>
     {player.stockPile.length > 0 ? (
       <div className="relative w-full stock-pile">

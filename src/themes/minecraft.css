@@ -62,48 +62,48 @@
     background-image: url("./textures/cobblestone.webp");
     background-size: 80px 80px;
     background-repeat: repeat;
+  }
 
-    &.skipbo-text {
-      background-image: url("./textures/obsidian.webp");
-      background-size: 80px 80px;
-      background-repeat: repeat;
-      color: #37ceff;
+  .skipbo-text {
+    background-image: url("./textures/obsidian.webp");
+    background-size: 80px 80px;
+    background-repeat: repeat;
+    color: #37ceff;
 
-      &::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        background-image: url("./textures/diamond.webp");
-        background-size: 40px 40px;
-        background-position: center center;
-        background-repeat: no-repeat;
-        width: 100%;
-        height: 100%;
-      }
-
-      span:not(.card-corner-number) {
-        visibility: hidden;
-      }
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      background-image: url("./textures/diamond.webp");
+      background-size: 40px 40px;
+      background-position: center center;
+      background-repeat: no-repeat;
+      width: 100%;
+      height: 100%;
     }
 
-    .back {
-      background-image: url("./textures/stone.webp");
-      background-size: 80px 80px;
-      background-repeat: repeat;
+    span:not(.card-corner-number) {
+      visibility: hidden;
+    }
+  }
 
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 10%;
-        width: 80%;
-        height: 100%;
-        background-image: url("./textures/sword.webp");
-        background-size: contain;
-        background-position: center center;
-        background-repeat: no-repeat;
-      }
+  .back {
+    background-image: url("./textures/stone.webp");
+    background-size: 80px 80px;
+    background-repeat: repeat;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 10%;
+      width: 80%;
+      height: 100%;
+      background-image: url("./textures/sword.webp");
+      background-size: contain;
+      background-position: center center;
+      background-repeat: no-repeat;
     }
   }
 }
