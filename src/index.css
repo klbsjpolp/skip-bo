@@ -8,6 +8,7 @@
 @import "./themes/metro.css";
 @import "./themes/retro.css" layer(components);
 @import "./themes/pastel.css";
+@import "./themes/minecraft.css";
 
 @plugin 'tailwindcss-animate';
 

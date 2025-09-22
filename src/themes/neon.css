@@ -81,10 +81,12 @@
           0 0 4px var(--shadow-color),
           0 0 8px var(--shadow-color);
 
-      /* Outer and inner neon glow */
-      box-shadow:
-          0 0 12px var(--secondary),             /* magenta outer */
-          inset 0 0 14px rgba(0, 255, 136, .25); /* green inner */
+      &:not(.selected) {
+        /* Outer and inner neon glow */
+        box-shadow:
+            0 0 12px var(--secondary), /* magenta outer */
+            inset 0 0 14px rgba(0, 255, 136, .25); /* green inner */
+      }
 
       /* Decorative animated neon gradient layer */
       &::before {

@@ -1,0 +1,109 @@
+.theme-minecraft {
+  /* Core palette inspired by the provided textures */
+  --primary: hsl(121 35% 43%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(33 45% 45%);
+  --secondary-foreground: hsl(0 0% 100%);
+
+  --bg-color: #2f2418;                 /* base around dirt */
+  --text-color: #e6e6e6;
+  --title-color: #ffffff;
+
+  --zone-bg-color: #5f7a21;            /* grass tint under textured layer */
+
+  --card-front-color: #e5e5e5;
+  --card-border-color: #333;
+  --card-shadow: 0 2px 0 rgba(0,0,0,.2), 0 4px 0 rgba(0,0,0,.1);
+  --card-radius: 0;
+  --card-back-color: #8c8c8c;          /* stone base color (not really visible with texture) */
+
+  /* card color groups keep vibrant, slightly gamey colors */
+  --card-g1: #0db823;   /* 1‑4 */
+  --card-g2: #e13325;   /* 5‑8 */
+  --card-g3: #4623f6;   /* 9‑12 */
+
+  --selected-border-color: #9adf5a;    /* bright grassy highlight */
+  --button-bg: #7a5a35;
+  --button-hover-bg: #6b4f30;
+
+
+  /* Global background — repeating dirt texture (SVG + noise) */
+  body {
+    font-family: 'Monaco', monospace;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    background-image: url("./textures/dirt.webp");
+    background-size: 80px 80px;
+    background-repeat: repeat;
+    image-rendering: pixelated;
+    * {
+      border-radius: 0 !important;
+    }
+  }
+
+  /* Player and center zones — grass texture */
+  .player-area .bg-layer,
+  .center-area .bg-layer {
+    background-image: url("./textures/grass.webp");
+    background-size: 80px 80px;
+    background-repeat: repeat;
+  }
+
+  /* Empty spots — wood plank texture */
+  .card.empty-card {
+    background-image: url("./textures/wood.webp");
+    background-size: 80px 80px;
+    background-repeat: repeat;
+    opacity: 1;
+  }
+
+  /* Card backs — stone texture with a diamond sword overlay */
+  .card {
+    background-image: url("./textures/cobblestone.webp");
+    background-size: 80px 80px;
+    background-repeat: repeat;
+
+    &.skipbo-text {
+      background-image: url("./textures/obsidian.webp");
+      background-size: 80px 80px;
+      background-repeat: repeat;
+      color: #37ceff;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-image: url("./textures/diamond.webp");
+        background-size: 40px 40px;
+        background-position: center center;
+        background-repeat: no-repeat;
+        width: 100%;
+        height: 100%;
+      }
+
+      span:not(.card-corner-number) {
+        visibility: hidden;
+      }
+    }
+
+    .back {
+      background-image: url("./textures/stone.webp");
+      background-size: 80px 80px;
+      background-repeat: repeat;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 10%;
+        width: 80%;
+        height: 100%;
+        background-image: url("./textures/sword.webp");
+        background-size: contain;
+        background-position: center center;
+        background-repeat: no-repeat;
+      }
+    }
+  }
+}
