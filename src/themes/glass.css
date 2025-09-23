@@ -10,7 +10,7 @@
   --button-text: hsl(0, 0%, 90%);
 
   /* Let glass panels own their background via utility */
-  --zone-bg-color: transparent;   /* prevent flat bg behind glass */
+  --zone-bg-color: #515151;   /* prevent flat bg behind glass */
   --active-turn-color: white;
 
   /* Cards keep dark tone and soft edges */
@@ -40,9 +40,6 @@
   --skipbo-bg: black;
 
   .skipbo-text {
-    @apply liquid-glass;
-    --lg-radius: var(--card-radius);
-
     .card-inner::before {
       content: "";
       position: absolute;
@@ -97,12 +94,14 @@
   }
 
   /* Apply animated liquid glass panels to player areas */
-  .player-area {
-    @apply liquid-glass;
-  }
+  .player-area, .center-area {
+    --liquid-glass-bg-color: var(--zone-bg-color);
+    @apply rounded-4xl ring-0 liquid-glass;
 
-  .center-area {
-    @apply liquid-glass liquid-glass-square;
+    &.active-turn{
+      --liquid-glass-bg-color: var(--active-turn-color);
+      @apply ring-0;
+    }
   }
 
   .card:not(.empty-card) {
@@ -178,28 +177,20 @@
   }
 
   body {
-    background-image: linear-gradient(135deg, var(--bg-color) 0%, var(--bg-color) 50%, var(--title-color) 100%);
+    /* Layered background: moving texture + gradient */
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='200' height='200' fill='none'/><g stroke='%23ffffff' stroke-opacity='0.06' stroke-width='1'><path d='M-10 10 L210 210 M-20 80 L180 280 M0 140 L200 -60 M60 -20 L260 180 M120 -30 L320 170 M-30 0 L170 200 M20 190 L220 -10' /></g></svg>"),
+      linear-gradient(135deg, var(--bg-color) 0%, var(--bg-color) 50%, var(--title-color) 100%);
+    background-size: 260px 260px, auto;
+    background-repeat: repeat, no-repeat;
+    background-position: 0 0, 0 0;
+    animation: glass-texture-pan 60s ease-in-out infinite;
+    will-change: background-position;
   }
 
-  #root {
-    /* SVG génératif en data URI ; courantColor = couleur des lignes */
-    background-size: 520px 520px;
-    background: transparent url("data:image/svg+xml;utf8,\
-      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' preserveAspectRatio='none'>\
-        <defs>\
-          <filter id='cracks' color-interpolation-filters='sRGB'>\
-            <feTurbulence type='fractalNoise' baseFrequency='0.015' numOctaves='2' seed='7' result='noise'/>\
-            <feGaussianBlur in='noise' stdDeviation='0.7' result='blur'/>\
-            <feConvolveMatrix in='blur' order='3' kernelMatrix='-1 -1 -1  -1 8 -1  -1 -1 -1' divisor='1' result='edges'/>\
-            <feComponentTransfer in='edges' result='edges2'><feFuncA type='gamma' amplitude='1' exponent='2.2' offset='0'/></feComponentTransfer>\
-            <feColorMatrix in='edges2' type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 3.5 -0.9' result='alpha'/>\
-            <feMorphology in='alpha' operator='dilate' radius='0.6' result='thick'/>\
-          </filter>\
-        </defs>\
-        <rect width='100%' height='100%' fill='none'/>\
-        <g filter='url(%23cracks)'>\
-          <rect width='100%' height='100%' fill='#fff'/>\
-        </g>\
-      </svg>") repeat;
-  }
+}
+
+@keyframes glass-texture-pan {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 260px 0, 0 0; }
 }

@@ -26,7 +26,7 @@ export function PlayerArea({
                            }: PlayerAreaProps) {
   return (
     <div className={cn(
-      "player-area ring-3 transition",
+      "player-area ring-3",
       isCurrentPlayer && "active-turn"
     )}>
       <div className="bg-layer"/>

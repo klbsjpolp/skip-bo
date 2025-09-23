@@ -25,23 +25,24 @@
       }
     }
 
-    @utility liquid-glass-square {
-      --lg-radius: 0;
-    }
     @utility liquid-glass {
-      border-radius: var(--lg-radius);
+      backdrop-filter: blur(2px);
+      background-color: hsl(from var(--liquid-glass-bg-color) h s l / 0.25);
+      border: none;
 
-      /* new clipped decorative layer — only this layer clips pseudo-elements */
-      .bg-layer {
+      &::before {
+        content: "";
+        inset: 0;
+        position: absolute;
+        --border-1: hsl(from var(--liquid-glass-bg-color) h s l / 0.13);
+        --border-2: hsl(from var(--liquid-glass-bg-color) h s l / 0.09);
         border-radius: inherit;
-        overflow: hidden;              /* clip decorations only */
-        pointer-events: none;
-        will-change: background-position, opacity;
-
-        background: rgba(255, 255, 255, 0.36);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(2px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        border: 1px solid transparent;
+        background: linear-gradient(var(--border-1), var(--border-2)) border-box;
+        mask: linear-gradient(black, black) border-box,
+        linear-gradient(black, black) padding-box;
+        -webkit-mask-composite: xor;
+        mask-composite: subtract;
       }
     }
 
