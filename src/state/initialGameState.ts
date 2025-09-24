@@ -25,6 +25,9 @@ function getGameConfig():GameConfig {
     STOCK_SIZE: getStoredStockSize(),
     BUILD_PILES_COUNT: 4,
     DISCARD_PILES_COUNT: 4,
+    CARD_VALUES_MIN: 1,
+    CARD_VALUES_MAX: 12,
+    CARD_VALUES_SKIP_BO: 0,
   };
 }
 

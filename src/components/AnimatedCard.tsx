@@ -46,7 +46,7 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
   const currentAngleY = needsFlip ? (isAnimating ? 0 : 180) : 0;
 
   const style: React.CSSProperties = {
-    position: 'fixed',
+    position: 'absolute',
     left: isAnimating ? animation.endPosition.x : animation.startPosition.x,
     top: isAnimating ? animation.endPosition.y : animation.startPosition.y,
     zIndex: 1000 - animation.sourceInfo.index, // Ensure animated cards appear above everything
@@ -54,6 +54,7 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
     transition: isAnimating ? `all ${animation.duration}ms cubic-bezier(0.4, 0.0, 0.2, 1)` : 'none',
     transform: `translate(-50%, -50%) rotateZ(${currentAngleZ}deg) rotateY(${currentAngleY}deg)`,
     transformStyle: 'preserve-3d',
+    willChange: 'transform left top',
   };
 
   const faceCommon: React.CSSProperties = {

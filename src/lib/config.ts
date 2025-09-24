@@ -1,9 +1,3 @@
-export const CARD_VALUES = {
-  MIN: 1,
-  MAX: 12,
-  SKIP_BO: 0,
-};
-
 export const MESSAGES = {
   GAME_START: "Nouvelle partie commencée !",
   INVALID_MOVE: "Mouvement invalide",

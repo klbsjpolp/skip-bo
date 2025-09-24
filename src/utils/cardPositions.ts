@@ -26,17 +26,14 @@ export const getHandCardPosition = (
   handContainer: HTMLElement,
   cardIndex: number,
 ): CardPosition => {
-  // Prefer the actual .card element center to capture overlap offsets
-  const holderElement = handContainer.querySelector(`[data-card-index="${cardIndex}"]`) as HTMLElement | null;
-  const cardElement = holderElement?.querySelector('.card') as HTMLElement | null;
-  if (cardElement) {
-    return getElementCenter(cardElement);
-  }
-  if (holderElement) {
-    return getElementCenter(holderElement);
-  }
+  const rect = handContainer.getBoundingClientRect();
+  const offset = [4, -3, -5, -3, 4][cardIndex];
 
-  return getElementCenter(handContainer);
+  //Calc from css: `calc(${overlapIndex} * (var(--card-width) - 10px))`,
+  const cardWidth = parseInt(getComputedStyle(handContainer).getPropertyValue('--card-width'), 10);
+  const cardHeight = parseInt(getComputedStyle(handContainer).getPropertyValue('--card-height'), 10);
+  const overlapOffset = 10;
+  return { x: rect.x + (cardIndex * (cardWidth - overlapOffset)) + cardWidth / 2, y: rect.y + offset + cardHeight / 2};
 };
 
 /**

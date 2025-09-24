@@ -61,6 +61,9 @@ export interface GameConfig {
   STOCK_SIZE: number;
   BUILD_PILES_COUNT: number;
   DISCARD_PILES_COUNT: number;
+  CARD_VALUES_MIN: number;
+  CARD_VALUES_MAX: number;
+  CARD_VALUES_SKIP_BO: number;
 }
 
 export interface AIStrategy {

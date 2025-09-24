@@ -18,9 +18,9 @@
   --card-back-color: #8c8c8c;          /* stone base color (not really visible with texture) */
 
   /* card color groups keep vibrant, slightly gamey colors */
-  --card-g1: #0db823;   /* 1‑4 */
-  --card-g2: #e13325;   /* 5‑8 */
-  --card-g3: #4623f6;   /* 9‑12 */
+  --card-g1: hsl(135 100% 60%);   /* 1‑4 */
+  --card-g2: hsl(0 100% 74%);    /* 5‑8 */
+  --card-g3: hsl(240 100% 74%);   /* 9‑12 */
 
   --selected-border-color: #9adf5a;    /* bright grassy highlight */
   --button-bg: #7a5a35;

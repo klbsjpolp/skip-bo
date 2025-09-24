@@ -16,7 +16,6 @@ let globalAnimationContext: {
 // Function to set the global animation context (called from React component)
 export const setGlobalDrawAnimationContext = (context: typeof globalAnimationContext) => {
   globalAnimationContext = context;
-  console.log('🔧 Global draw animation context set up:', context ? 'SUCCESS' : 'NULL');
 };
 
 // Helper function to wait for the global animation context to be available
@@ -56,14 +55,14 @@ const triggerDrawAnimation = async (
     }
 
     const endPosition = getHandCardPosition(handContainer, handIndex);
-
+    const endAngleDeg = getHandCardAngle(handContainer, handIndex);
     const duration = calculateAnimationDuration(startPosition, endPosition);
     
     const animationId = globalAnimationContext.startAnimation({
       card,
       startPosition,
       endPosition,
-      endAngleDeg: getHandCardAngle(handContainer, handIndex),
+      endAngleDeg,
       sourceRevealed: false, // Cards drawn from deck are face-down
       targetRevealed: playerIndex === 0, // Reveal to human player only
       animationType: 'draw',

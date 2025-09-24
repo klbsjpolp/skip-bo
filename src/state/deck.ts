@@ -1,9 +1,8 @@
 import {Card, GameConfig} from '@/types';
-import { CARD_VALUES } from '@/lib/config';
 
-export const createCard = (value: number): Card => ({
+export const createCard = (value: number, isSkipBo: boolean): Card => ({
   value,
-  isSkipBo: value === CARD_VALUES.SKIP_BO,
+  isSkipBo,
 });
 
 export const shuffle = <T>(array: T[]): T[] => {
@@ -19,11 +18,11 @@ export const createDeck = (config: GameConfig): Card[] => {
   const deck: Card[] = [];
 
   // Skip-Bo
-  for (let i = 0; i < config.SKIP_BO_CARDS; i++) deck.push(createCard(CARD_VALUES.SKIP_BO));
+  for (let i = 0; i < config.SKIP_BO_CARDS; i++) deck.push(createCard(config.CARD_VALUES_SKIP_BO, true));
 
   // 12 × (1-12)
-  for (let v = CARD_VALUES.MIN; v <= CARD_VALUES.MAX; v++)
-    for (let i = 0; i < 12; i++) deck.push(createCard(v));
+  for (let v = config.CARD_VALUES_MIN; v <= config.CARD_VALUES_MAX; v++)
+    for (let i = 0; i < 12; i++) deck.push(createCard(v, false));
 
   return shuffle(deck);
 };
