@@ -1,4 +1,13 @@
 .theme-minecraft {
+  --text-base: 0.85rem;
+
+  --text-xs: calc(var(--text-base) * 0.75);
+  --text-sm: calc(var(--text-base) * 0.875);
+
+  --text-lg: calc(var(--text-base) * 1.125);
+  --text-xl: calc(var(--text-base) * 1.25);
+  --text-2xl: calc(var(--text-base) * 1.5);
+
   /* Core palette inspired by the provided textures */
   --primary: hsl(121 35% 43%);
   --primary-foreground: hsl(0 0% 100%);
