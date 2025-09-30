@@ -237,7 +237,7 @@ function StockPile({player, playerIndex, isCurrentPlayer, gameState, selectCard,
     {/* Stock Pile Indicator */}
     <div className="w-1 bg-primary-foreground flex ml-1 rounded-t-sm card-height">
       <div
-        className="w-full self-end rounded-t-sm bg-primary"
+        className="w-1 self-end rounded-t-sm bg-primary"
         style={{
           height: `${(player.stockPile.length / gameState.config.STOCK_SIZE) * 100}%`,
         }}

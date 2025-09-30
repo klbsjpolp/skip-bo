@@ -19,7 +19,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
         <h3 className="min-w-fit vertical-text">
           Pioche ({gameState.deck.length})
         </h3>
-          <div className="w-20 deck">
+          <div className="deck">
           {gameState.deck.length > 0 ? (
             <Card
               hint="Deck"
