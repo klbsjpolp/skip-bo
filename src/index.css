@@ -9,6 +9,7 @@
 @import "./themes/retro.css" layer(components);
 @import "./themes/pastel.css";
 @import "./themes/minecraft.css";
+@import "./themes/steampunk.css";
 
 @plugin 'tailwindcss-animate';
 

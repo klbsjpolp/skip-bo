@@ -1,0 +1,163 @@
+/* Steampunk theme: warm brass, dark leather, and patina accents */
+.theme-steampunk {
+  /* Core palette */
+  --primary: hsl(37 61% 47%);            /* brass */
+  --primary-foreground: hsl(30 20% 10%);
+  --secondary: hsl(27 32% 32%);          /* oiled bronze */
+  --secondary-foreground: hsl(45 60% 92%);
+
+  /* Surfaces and text */
+  --bg-color: #1f1a14;                   /* workshop charcoal */
+  --zone-bg-color: #2a241c;              /* dark wood */
+  --text-color: #e7d9b9;                 /* parchment */
+  --title-color: #f3e7c9;                /* brighter parchment */
+
+  /* Cards */
+  --card-front-color: #f1e3c9;           /* aged parchment */
+  --card-border-color: #6b5640;          /* burnished brass edge */
+  --card-shadow: 0 2px 6px rgba(0,0,0,0.35);
+  --card-radius: 12px;
+  --card-back-color: #463a2f;            /* leather/bronze back */
+
+  /* Accents / states */
+  --button-bg: #8c6d1f;                  /* brass button */
+  --button-hover-bg: color-mix(in srgb, #8c6d1f 88%, black 12%);
+  --button-text: #fffaf0;
+  --selected-border-color: #e0a84f;      /* polished brass */
+  --selected-shadow: 0 0 16px rgba(224, 168, 79, 0.6);
+  --drop-indicator-color: var(--selected-border-color);
+
+  /* Card number color ranges */
+  --skipbo-text: #2a2016;
+  --skipbo-bg: var(--card-front-color);
+  --card-g1: hsl(165 32% 34%);   /* patina green */
+  --card-g2: hsl(16 61% 45%);    /* rust red */
+  --card-g3: hsl(290 28% 45%);   /* aged plum */
+
+  /* Global workshop background: dark gradient + faint blueprint grid */
+  body {
+    background-image:
+      /* faint gear sketch overlay (SVG) */ url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'><g fill='none' stroke='%23e0a84f' stroke-opacity='0.06' stroke-width='2'><circle cx='60' cy='60' r='26'/><circle cx='170' cy='170' r='34'/><path d='M60 24v12m0 48v12M24 60h12m48 0h12M170 124v12m0 48v12M134 170h12m48 0h12' stroke-linecap='round'/></g></svg>"),
+      /* blueprint grid */ linear-gradient(0deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+      radial-gradient(1200px 900px at 10% 10%, #2b241d 0%, #1f1a14 55%);
+    background-size: 240px 240px, 28px 28px, 28px 28px, auto;
+    background-repeat: repeat, repeat, repeat, no-repeat;
+    background-position: 0 0, 0 0, 0 0, center;
+  }
+
+  /* Card backs: subtle rivets over leather */
+  .card .back {
+    /* Rivets grid over a leather base */
+    --rivet: radial-gradient(circle at center, rgba(255,255,255,0.35) 0 15%, rgba(0,0,0,0.35) 16% 50%, transparent 51%);
+    background-image:
+      /* diagonal brushed tint */ linear-gradient(135deg, rgba(255, 215, 0, 0.10), rgba(0, 0, 0, 0.0) 40%, rgba(255, 215, 0, 0.10) 80%),
+      /* rivets */
+      var(--rivet), var(--rivet), var(--rivet), var(--rivet);
+    background-size:
+      cover,
+      12px 12px, 12px 12px, 12px 12px, 12px 12px;
+    background-position:
+      0 0,
+      10% 12%, 50% 28%, 72% 64%, 28% 78%;
+    background-blend-mode: overlay, normal, normal, normal, normal;
+    filter: saturate(0.95) contrast(1.05);
+  }
+
+  /* Empty cards — clearer parchment with dashed brass outline */
+  .card.empty-card {
+    opacity: 0.92; /* override base 50% to improve readability in this theme */
+    color: color-mix(in srgb, var(--text-color) 90%, black 10%);
+    background:
+      linear-gradient(135deg, rgba(224,168,79,0.1), rgba(0,0,0,0) 60%),
+      repeating-linear-gradient(45deg, rgba(0,0,0,0.04) 0 6px, rgba(255,255,255,0.05) 6px 12px),
+      var(--card-front-color);
+    box-shadow:
+      inset 0 0 0 2px rgba(224,168,79,0.45),
+      inset 0 6px 10px rgba(255,255,255,0.25),
+      inset 0 -6px 12px rgba(0,0,0,0.18);
+    text-shadow: 0 1px 0 rgba(0,0,0,0.25), 0 0 8px rgba(224,168,79,0.25);
+  }
+
+  /* Skip-Bo card — machine window with cogs and styled title */
+  .card.skipbo-text {
+    /* keep text above overlays */
+    span.card-corner-number { visibility: hidden; }
+
+    /* Simple title: no back plate, smaller single-line text */
+    > span:not(.card-corner-number) {
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: 800;
+      font-size: clamp(10px, calc(var(--card-width) * 0.34), 16px);
+      line-height: 1;
+      color: var(--skipbo-text);
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+      background: none;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      text-shadow: none;
+      padding: 0;
+    }
+
+    /* Cogs layer visible through the hole (SVG embed) */
+    .card-inner::after {
+      content: "";
+      position: absolute;
+      inset: 30% 6% 6% 6%;
+      border-radius: calc(var(--card-radius) - 6px);
+      background-color: #1a1410;
+      /* Enhanced multi-gear SVG: more cogs, layered depth, and some partially outside the frame */
+      background-image: url("textures/steampunk-clockwork.png");
+      background-size: 180%;
+      background-position: 40% 60%;
+      box-shadow: inset 2px 2px 10px rgba(0,0,0,0.6);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Frame with large rounded-rectangle hole cut-out at bottom */
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: var(--card-front-color);
+      box-shadow:
+        inset 0 2px 6px rgba(255,255,255,0.65),
+        inset 0 -6px 12px rgba(0,0,0,0.25),
+        0 1px 0 rgba(255,255,255,0.35);
+      /* cut a rounded-rectangle window near the bottom */
+      -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'><rect x='0' y='0' width='100' height='100' fill='white'/><rect x='6' y='40' width='88' height='54' rx='10' ry='10' fill='black'/></svg>") center/100% 100% no-repeat;
+      mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'><rect x='0' y='0' width='100' height='100' fill='white'/><rect x='6' y='40' width='88' height='54' rx='10' ry='10' fill='black'/></svg>") center/100% 100% no-repeat;
+      z-index: 0;
+      pointer-events: none;
+    }
+  }
+
+  /* Player and center zones — wood panel with riveted corners */
+  .player-area .bg-layer,
+  .center-area .bg-layer {
+    background-image:
+      /* wood grain */
+      linear-gradient(180deg, rgba(139, 94, 60, 0.15), rgba(0,0,0,0.0)),
+      repeating-linear-gradient(90deg, rgba(84, 64, 46, 0.4) 0 6px, rgba(106, 80, 58, 0.4) 6px 12px),
+      radial-gradient(12px 12px at 14px 14px, rgba(224,168,79,0.55) 0 40%, transparent 41%),
+      radial-gradient(12px 12px at calc(100% - 14px) 14px, rgba(224,168,79,0.55) 0 40%, transparent 41%),
+      radial-gradient(12px 12px at 14px calc(100% - 14px), rgba(224,168,79,0.55) 0 40%, transparent 41%),
+      radial-gradient(12px 12px at calc(100% - 14px) calc(100% - 14px), rgba(224,168,79,0.55) 0 40%, transparent 41%),
+      linear-gradient(var(--zone-bg-color), var(--zone-bg-color));
+    background-size: auto, auto, auto, auto, auto, auto, cover;
+    background-repeat: no-repeat;
+    box-shadow: inset 0 0 0 1px rgba(224, 168, 79, 0.25), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  .player-area.active-turn .bg-layer {
+    box-shadow: inset 0 0 0 2px rgba(224,168,79,0.5), 0 10px 28px rgba(0,0,0,0.45);
+    filter: brightness(1.03) saturate(1.03);
+  }
+}
