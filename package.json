@@ -30,7 +30,7 @@
     "react-hook-form": "^7.53.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
-    "xstate": "^5.20.1",
+    "xstate": "^5.22.0",
     "zod": "^3.23.8",
     "workbox-window": "^7.3.0"
   },
