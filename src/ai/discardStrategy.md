@@ -1,51 +1,35 @@
-# AI Discard Pile Strategy Improvement Plan
+# AI Discard Strategy Notes
 
-## Current Limitations
-1. AI selects the first available discard pile without strategic consideration
-2. AI picks the first non-Skip-Bo card to discard without evaluation
-3. AI checks discard piles in order without prioritization
+This file is a design note for the discard-related heuristics. It is not the source of truth for current behavior; see `computeBestMove.ts`, `discardUtils.ts`, and `aiConfig.ts` for the live implementation.
 
-## Proposed Strategies
+## Implemented Today
 
-### 1. Strategic Discard Pile Selection
-- Group same values together in discard piles
-- Create sequential value patterns when possible
-- Prefer empty piles over starting new sequences
-- Use piles with higher values when appropriate
+- Strategic discard-pile selection with scoring for:
+  - same-value grouping
+  - sequential values
+  - empty-pile preference
+  - high-value preservation
+- Strategic hand-card selection for discarding, including:
+  - duplicate detection
+  - penalties for values needed on build piles
+  - scarcity awareness
+  - opponent-pressure adjustments
+- Strategic play from discard piles, including:
+  - preference for larger piles
+  - bonus for completing a build pile
+  - bonus for clearing low cards
+- Difficulty-gated behavior through `aiConfig.ts`
 
-### 2. Intelligent Card Selection for Discarding
-- Prioritize discarding duplicate cards in hand
-- Avoid discarding cards needed for immediate play on build piles
-- Prefer discarding higher value cards (harder to play)
-- Consider discarding cards that block opponent's progress
+## Current Gaps
 
-### 3. Strategic Discard Pile Utilization
-- Prioritize playing from discard piles with more cards
-- Consider the impact of revealing cards underneath
-- Balance between clearing piles and maintaining useful cards
+- The so-called look-ahead mode is still a one-ply evaluation pass, not a recursive search.
+- Opponent modeling is limited to broad pressure signals such as stock-pile size.
+- There is no telemetry or benchmark suite to compare heuristic quality across versions.
+- Difficulty-specific behavior is under-documented in automated tests.
 
-### 4. Look-Ahead Discard Strategy
-- Evaluate potential future plays after discarding
-- Consider how discards affect both players' options
-- Score potential discard moves based on multiple factors
+## Good Next Steps
 
-## Implementation Plan
-
-### Phase 1: Core Utility Functions
-- `findBestDiscardPile(card, discardPiles)`
-- `selectCardToDiscard(hand, gameState)`
-- `evaluateDiscardMove(card, pile, gameState)`
-- `findBestDiscardPileToPlayFrom(discardPiles, buildPiles, gameState)`
-
-### Phase 2: Integration
-- Update discard selection logic in `computeBestMove.ts`
-- Enhance card selection for discarding
-- Improve discard pile play prioritization
-- Add game state awareness to decisions
-
-### Phase 3: Configuration
-- Add strategy weight constants
-- Implement difficulty levels
-- Allow for strategy customization
-
-This plan will significantly improve the AI's strategic use of discard piles, making it a more formidable and realistic opponent.
+1. Use `simulateMove` to convert hard mode into a real multi-step search.
+2. Add dedicated tests that assert different choices for `easy`, `medium`, and `hard`.
+3. Add scenario fixtures for endgame states, duplicate-heavy hands, and discard-pile traps.
+4. Separate "safe discard" heuristics from "setup future discard-pile play" heuristics so they can be tuned independently.
