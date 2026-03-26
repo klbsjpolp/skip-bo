@@ -26,6 +26,10 @@
   --selected-border-color: #e0a84f;      /* polished brass */
   --selected-shadow: 0 0 16px rgba(224, 168, 79, 0.6);
   --drop-indicator-color: var(--selected-border-color);
+  --victory-piece-1: #e0a84f;            /* polished brass */
+  --victory-piece-2: #b56a3d;            /* copper */
+  --victory-piece-3: #4f7a6d;            /* patina */
+  --victory-piece-4: #7b5a6e;            /* aged plum */
 
   /* Card number color ranges */
   --skipbo-text: #2a2016;
@@ -49,7 +53,7 @@
   /* Card backs: subtle rivets over leather */
   .card .back {
     /* Rivets grid over a leather base */
-    --rivet: radial-gradient(circle at center, rgba(255,255,255,0.35) 0 15%, rgba(0,0,0,0.35) 16% 50%, transparent 51%);
+    --rivet: radial-gradient(circle at center, rgba(255,255,255,0.35) 0, rgba(0,0,0,0.35) 16%, rgba(0,0,0,0.35) 50%, transparent 51%);
     background-image:
       /* diagonal brushed tint */ linear-gradient(135deg, rgba(255, 215, 0, 0.10), rgba(0, 0, 0, 0.0) 40%, rgba(255, 215, 0, 0.10) 80%),
       /* rivets */
@@ -146,10 +150,10 @@
       /* wood grain */
       linear-gradient(180deg, rgba(139, 94, 60, 0.15), rgba(0,0,0,0.0)),
       repeating-linear-gradient(90deg, rgba(84, 64, 46, 0.4) 0 6px, rgba(106, 80, 58, 0.4) 6px 12px),
-      radial-gradient(12px 12px at 14px 14px, rgba(224,168,79,0.55) 0 40%, transparent 41%),
-      radial-gradient(12px 12px at calc(100% - 14px) 14px, rgba(224,168,79,0.55) 0 40%, transparent 41%),
-      radial-gradient(12px 12px at 14px calc(100% - 14px), rgba(224,168,79,0.55) 0 40%, transparent 41%),
-      radial-gradient(12px 12px at calc(100% - 14px) calc(100% - 14px), rgba(224,168,79,0.55) 0 40%, transparent 41%),
+      radial-gradient(12px 12px at 14px 14px, rgba(224,168,79,0.55) 0%, rgba(224,168,79,0.55) 40%, transparent 41%),
+      radial-gradient(12px 12px at calc(100% - 14px) 14px, rgba(224,168,79,0.55) 0%, rgba(224,168,79,0.55) 40%, transparent 41%),
+      radial-gradient(12px 12px at 14px calc(100% - 14px), rgba(224,168,79,0.55) 0%, rgba(224,168,79,0.55) 40%, transparent 41%),
+      radial-gradient(12px 12px at calc(100% - 14px) calc(100% - 14px), rgba(224,168,79,0.55) 0%, rgba(224,168,79,0.55) 40%, transparent 41%),
       linear-gradient(var(--zone-bg-color), var(--zone-bg-color));
     background-size: auto, auto, auto, auto, auto, auto, cover;
     background-repeat: no-repeat;
@@ -159,5 +163,68 @@
   .player-area.active-turn .bg-layer {
     box-shadow: inset 0 0 0 2px rgba(224,168,79,0.5), 0 10px 28px rgba(0,0,0,0.45);
     filter: brightness(1.03) saturate(1.03);
+  }
+
+  /* Card fronts — brass/metal panel exterior with seams and rivets */
+  .card:not(.skipbo-text, .empty-card) {
+    background-image:
+      /* subtle metallic sheen */ linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.12) 100%),
+      /* warm brass tint */ linear-gradient(180deg, rgba(224,168,79,0.12), rgba(0,0,0,0) 55%),
+      /* very light brushed texture */ repeating-linear-gradient(0deg, rgba(0,0,0,0.03) 0 2px, rgba(255,255,255,0.03) 2px 4px),
+      var(--card-front-color);
+  }
+
+  /* Panel seams for number cards (avoid Skip-Bo frame which has its own mask) */
+  .card:not(.skipbo-text, .empty-card)::before {
+    content: "";
+    position: absolute;
+    inset: 6% 5%;
+    border-radius: calc(var(--card-radius) - 4px);
+    /* cross seams */
+    background:
+      linear-gradient(0deg, rgba(107,86,64,0.45), rgba(107,86,64,0.45)) 0 calc(50% - 1px) / 100% 2px no-repeat,
+      linear-gradient(90deg, rgba(107,86,64,0.45), rgba(107,86,64,0.45)) calc(50% - 1px) 0 / 2px 100% no-repeat;
+    box-shadow:
+      inset 0 0 0 2px rgba(107,86,64,0.45),
+      inset 0 10px 18px rgba(0,0,0,0.12),
+      inset 0 -10px 18px rgba(0,0,0,0.15);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Rivets on corners (and mid-seam points) for all card fronts */
+  .card:not(.skipbo-text, .empty-card) .card-inner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    /* small domed rivet */
+    --riv: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.75) 22%, rgba(0,0,0,0.55) 23%, rgba(0,0,0,0.55) 60%, transparent 61%);
+    background:
+      /* midpoints along seams if present */
+      var(--riv) 50% 12px / 10px 10px no-repeat,
+      var(--riv) 50% calc(100% - 12px) / 10px 10px no-repeat,
+      var(--riv) 12px 50% / 10px 10px no-repeat,
+      var(--riv) calc(100% - 12px) 50% / 10px 10px no-repeat;
+    pointer-events: none;
+    z-index: 0; /* stays below text (which is z=1 in .card-inner) */
+  }
+
+  /* Subtle compass rose behind numbers (from snippet idea) */
+  .card:not(.skipbo-text, .empty-card) .card-inner::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 82%;
+    height: 82%;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill='none' stroke='%235d4a3b' stroke-opacity='0.28' stroke-width='1.2'><circle cx='50' cy='50' r='32'/><line x1='50' y1='14' x2='50' y2='86'/><line x1='14' y1='50' x2='86' y2='50'/><line x1='24' y1='24' x2='76' y2='76'/><line x1='76' y1='24' x2='24' y2='76'/></g></svg>");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.18;
+    z-index: 0; /* behind text */
+    pointer-events: none;
   }
 }
