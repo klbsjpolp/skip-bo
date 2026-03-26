@@ -16,6 +16,17 @@
   --selected-border-color: #1ba1e2;
   --button-bg: #60a917;
   --button-hover-bg: #4c8712;
+  --victory-border: #ffd426;
+  --victory-accent: #ffd426;
+  --victory-piece-1: #ffd426;
+  --victory-piece-2: #ff3b30;
+  --victory-piece-3: #00befc;
+  --victory-piece-4: #60a917;
+  --victory-pattern-opacity: 0.12;
+  --victory-pattern-image:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 18%, transparent 18% 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0 18%, transparent 18% 100%);
+  --victory-pattern-size: 28px 28px;
 
   --skipbo-text: hsl(0 0% 85%);
   --skipbo-bg: #1d1d1d;
@@ -72,5 +83,19 @@
         );
       }
     }
+  }
+
+  .player-area.winner {
+    box-shadow: none;
+  }
+
+  .victory-pattern {
+    animation-duration: 16s;
+  }
+
+  .victory-burst-piece {
+    width: 11px;
+    height: 11px;
+    border-radius: 0;
   }
 }

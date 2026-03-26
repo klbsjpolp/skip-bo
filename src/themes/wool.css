@@ -21,6 +21,10 @@
   --card-g1: hsl(152, 33%, 60%);   /* 1‑4 */
   --card-g2: hsl(0, 33%, 60%);     /* 5‑8 */
   --card-g3: hsl(282, 33%, 60%);   /* 9‑12 */
+  --victory-piece-1: #d7dade;
+  --victory-piece-2: #c3c7cb;
+  --victory-piece-3: #919aa3;
+  --victory-piece-4: #6c757e;
 
   body {
     background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0 1px, transparent 1px),

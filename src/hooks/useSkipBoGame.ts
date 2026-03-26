@@ -284,6 +284,10 @@ export function useSkipBoGame() {
     dispatch({ type: 'CLEAR_SELECTION' });
   }, [dispatch]);
 
+  const debugSetWinner = useCallback((winnerIndex: number) => {
+    dispatch({ type: 'DEBUG_SET_WINNER', winnerIndex });
+  }, [dispatch]);
+
   const canPlayCardWrapper = useCallback((card: Card, buildPileIndex: number, gameState: GameState) => {
     return canPlayCard(card, buildPileIndex, gameState);
   }, []);
@@ -297,6 +301,7 @@ export function useSkipBoGame() {
     playCard,
     discardCard,
     clearSelection,
+    debugSetWinner,
     canPlayCard: canPlayCardWrapper,
     getLatestGameState,
     setDifficulty: (difficulty: AIDifficulty) => dispatch({ type: 'SET_DIFFICULTY', difficulty }),

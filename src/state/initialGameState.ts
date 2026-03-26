@@ -66,6 +66,7 @@ export const initialGameState = (): GameState => {
     selectedCard: null,
     message: 'Nouvelle partie commencée !',
     gameIsOver: false,
+    winnerIndex: null,
     aiDifficulty: 'medium', // Default AI difficulty
     config
   };

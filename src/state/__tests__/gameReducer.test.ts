@@ -19,6 +19,7 @@ describe('gameReducer', () => {
       expect(result.players[1].isAI).toBe(true);
       expect(result.currentPlayerIndex).toBe(0);
       expect(result.gameIsOver).toBe(false);
+      expect(result.winnerIndex).toBeNull();
     });
   });
 
@@ -215,6 +216,33 @@ describe('gameReducer', () => {
       expect(stateAfterSecondPlay.buildPiles[0][2].value).toBe(3);
       expect(stateAfterSecondPlay.selectedCard).toBeNull();
     });
+
+    it('should set winnerIndex when a player empties their stock pile', () => {
+      const stateWithWinningStock = {
+        ...initialState,
+        buildPiles: [[], [], [], []],
+        players: [
+          {
+            ...initialState.players[0],
+            stockPile: [{ value: 1, isSkipBo: false }],
+            hand: [{ value: 3, isSkipBo: false }, null, null, null, null]
+          },
+          initialState.players[1]
+        ]
+      };
+
+      const stateWithSelection = gameReducer(stateWithWinningStock, {
+        type: 'SELECT_CARD',
+        source: 'stock',
+        index: 0
+      });
+
+      const result = gameReducer(stateWithSelection, { type: 'PLAY_CARD', buildPile: 0 });
+
+      expect(result.gameIsOver).toBe(true);
+      expect(result.winnerIndex).toBe(0);
+      expect(result.players[0].stockPile).toHaveLength(0);
+    });
   });
 
   describe('DISCARD_CARD action', () => {
@@ -298,7 +326,20 @@ describe('gameReducer', () => {
 
       expect(result.currentPlayerIndex).toBe(0);
       expect(result.gameIsOver).toBe(false);
+      expect(result.winnerIndex).toBeNull();
       expect(result.selectedCard).toBeNull();
+    });
+  });
+
+  describe('DEBUG_SET_WINNER action', () => {
+    it('should force the selected player as winner for testing', () => {
+      const result = gameReducer(initialState, { type: 'DEBUG_SET_WINNER', winnerIndex: 1 });
+
+      expect(result.gameIsOver).toBe(true);
+      expect(result.winnerIndex).toBe(1);
+      expect(result.currentPlayerIndex).toBe(1);
+      expect(result.selectedCard).toBeNull();
+      expect(result.message).toContain("l'IA");
     });
   });
 

@@ -34,6 +34,10 @@
   --selected-border-color: #9adf5a;    /* bright grassy highlight */
   --button-bg: #7a5a35;
   --button-hover-bg: #6b4f30;
+  --victory-border: #9adf5a;
+  --victory-accent: #37ceff;
+  --victory-badge-bg: color-mix(in srgb, #2f2418 78%, #9adf5a 22%);
+  --victory-badge-text: #f4f4f4;
 
 
   /* Global background — repeating dirt texture (SVG + noise) */
@@ -114,5 +118,83 @@
       background-position: center center;
       background-repeat: no-repeat;
     }
+  }
+
+  .player-area.winner {
+    box-shadow:
+      0 0 0 2px rgba(0, 0, 0, 0.45),
+      0 0 0 4px rgba(154, 223, 90, 0.85),
+      6px 6px 0 rgba(0, 0, 0, 0.22);
+  }
+
+  .victory-burst-piece {
+    width: 14px;
+    height: 14px;
+    border-radius: 0;
+    background-color: var(--piece-color);
+    background-size: 18px 18px;
+    background-position: center;
+    background-repeat: repeat;
+    opacity: 1;
+    box-shadow:
+      inset -2px -2px 0 rgba(0, 0, 0, 0.28),
+      inset 2px 2px 0 rgba(255, 255, 255, 0.18),
+      0 0 0 2px rgba(0, 0, 0, 0.38);
+    image-rendering: pixelated;
+    filter: saturate(1.05);
+    animation-name: minecraftVictoryBurst;
+  }
+
+  .victory-burst-piece:nth-child(4n + 1) {
+    background-image: url("./textures/grass.webp");
+  }
+
+  .victory-burst-piece:nth-child(4n + 2) {
+    background-image: url("./textures/stone.webp");
+  }
+
+  .victory-burst-piece:nth-child(4n + 3) {
+    background-image: url("./textures/diamond.webp");
+  }
+
+  .victory-burst-piece:nth-child(4n + 4) {
+    background-image: url("./textures/wood.webp");
+  }
+
+  .victory-badge {
+    border-radius: 0;
+    backdrop-filter: none;
+    box-shadow:
+      0 0 0 2px rgba(0, 0, 0, 0.5),
+      4px 4px 0 rgba(0, 0, 0, 0.25);
+  }
+}
+
+@keyframes minecraftVictoryBurst {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(0.25) rotate(0deg);
+  }
+  8% {
+    opacity: 1;
+  }
+  28% {
+    opacity: 1;
+  }
+  44% {
+    opacity: 0;
+    transform: translate3d(
+      calc(-50% + var(--piece-offset-x)),
+      calc(-50% + var(--piece-offset-y)),
+      0
+    ) scale(1) rotate(var(--piece-rotation));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(
+      calc(-50% + var(--piece-offset-x)),
+      calc(-50% + var(--piece-offset-y)),
+      0
+    ) scale(1) rotate(var(--piece-rotation));
   }
 }

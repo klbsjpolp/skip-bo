@@ -4,11 +4,13 @@ import {cn} from '@/lib/utils';
 import {EmptyCard} from "@/components/EmptyCard.tsx";
 import {Fragment, MouseEventHandler, useCallback} from "react";
 import {useCardAnimation} from "@/contexts/useCardAnimation.ts";
+import {VictoryEffects} from '@/components/VictoryEffects';
 
 interface PlayerAreaProps {
   player: Player;
   playerIndex: number;
   isCurrentPlayer: boolean;
+  isWinner: boolean;
   gameState: GameState;
   selectCard: (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void;
   discardCard: (discardPileIndex: number) => Promise<{ success: boolean; message: string }>;
@@ -19,6 +21,7 @@ export function PlayerArea({
                              player,
                              playerIndex,
                              isCurrentPlayer,
+                             isWinner,
                              gameState,
                              selectCard,
                              discardCard,
@@ -27,9 +30,11 @@ export function PlayerArea({
   return (
     <div className={cn(
       "player-area ring-3",
-      isCurrentPlayer && "active-turn"
-    )}>
+      isCurrentPlayer && "active-turn",
+      isWinner && "winner"
+    )} data-player-type={player.isAI ? 'ai' : 'human'} data-player-index={playerIndex}>
       <div className="bg-layer"/>
+      {isWinner && <VictoryEffects />}
       <div className="content-layer flex items-center gap-2 lg:gap-4 h-full flex-wrap">
         <StockPile player={player} playerIndex={playerIndex} isCurrentPlayer={isCurrentPlayer} gameState={gameState}
                    selectCard={selectCard} clearSelection={clearSelection}/>

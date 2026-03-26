@@ -17,6 +17,11 @@
     --button-bg: #2a9d8f;
     --button-hover-bg: #21867a;
     --button-text: hsl(0, 0%, 95%);
+    --victory-border: #264653;
+    --victory-accent: #e76f51;
+    --victory-pattern-opacity: 0.22;
+    --victory-pattern-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='32' viewBox='0 0 48 32'%3E%3Cg fill='none' stroke='%23264653' stroke-width='1.6' stroke-linejoin='round' stroke-linecap='round' opacity='0.75'%3E%3Cpath d='M8 22 12 10l8 8 4-10 4 10 8-8 4 12z'/%3E%3Cpath d='M10 22h28'/%3E%3C/g%3E%3C/svg%3E");
+    --victory-pattern-size: 44px 30px;
 
     --skipbo-text: hsl(40 80% 80%);
     --skipbo-bg: var(--card-front-color);
@@ -74,5 +79,15 @@
             after:text-(--card-g2)   after:top-1     after:left-1.5;
         }
       }
+    }
+
+    .player-area.winner {
+      box-shadow: 4px 4px 0 var(--victory-border);
+    }
+
+    .victory-burst-layer,
+    .victory-shine,
+    .victory-sunburst {
+      display: none;
     }
   }

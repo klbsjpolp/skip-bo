@@ -16,6 +16,15 @@
   --selected-border-color: #00ff88;
   --button-bg: #ff0099;
   --button-hover-bg: #cc0077;
+  --victory-border: #00ff88;
+  --victory-accent: #00ff88;
+  --victory-piece-1: #00ff88;
+  --victory-piece-2: #ff0099;
+  --victory-piece-3: #00d4ff;
+  --victory-piece-4: #fff36e;
+  --victory-accent-opacity: 0.24;
+  --victory-shine-opacity: 0.28;
+  --victory-sunburst-opacity: 0.42;
 
   --skipbo-text: hsl(60 100% 60%);
   --skipbo-bg: var(--secondary);
@@ -131,5 +140,20 @@
         z-index: 1;
       }
     }
+  }
+
+  .player-area.winner {
+    box-shadow:
+      0 0 0 1px rgba(0, 255, 136, 0.7),
+      0 0 28px rgba(0, 255, 136, 0.28),
+      0 0 52px rgba(255, 0, 153, 0.18);
+  }
+
+  .victory-burst-piece {
+    box-shadow:
+      0 0 10px var(--piece-color),
+      0 0 22px var(--piece-color);
+    filter: saturate(1.15);
+    animation-duration: 1050ms;
   }
 }

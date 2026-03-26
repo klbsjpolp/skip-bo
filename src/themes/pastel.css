@@ -17,6 +17,13 @@
     --active-turn-color: #a5dda5;
     --button-bg: #a0d2eb;
     --button-hover-bg: #8bbbd6;
+    --victory-border: #e5b8c8;
+    --victory-accent: #ffd7e6;
+    --victory-piece-1: #f7b7c3;
+    --victory-piece-2: #f5d38d;
+    --victory-piece-3: #a7ddb5;
+    --victory-piece-4: #a9d7f0;
+    --victory-burst-size: 10px;
 
     --skipbo-text: #ffedd8;
     --skipbo-bg: hsl(350 80% 85%);
@@ -28,5 +35,11 @@
       .back {
         background: linear-gradient(135deg, #a0d2eb 0%, #bee5eb 100%);
       }
+    }
+
+    .player-area.winner {
+      box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--victory-border) 50%, transparent),
+        0 12px 24px rgba(231, 184, 200, 0.2);
     }
   }

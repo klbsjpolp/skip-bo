@@ -31,6 +31,12 @@
     --card-radius: 8px;
     --button-bg: #6366f1;
     --button-hover-bg: #4f46e5;
+    --victory-border: #e6c56b;
+    --victory-accent: #f3d47b;
+    --victory-piece-1: #f59e0b;
+    --victory-piece-2: #f472b6;
+    --victory-piece-3: #34d399;
+    --victory-piece-4: #60a5fa;
 
     /* Card color ranges - same as light theme */
     --skipbo-text: #ccc;

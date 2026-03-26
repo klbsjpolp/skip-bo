@@ -17,6 +17,7 @@ export interface GameState {
   players: Player[];
   currentPlayerIndex: number;
   gameIsOver: boolean;
+  winnerIndex: number | null;
   selectedCard: SelectedCard | null;
   message: string;
   aiDifficulty: AIDifficulty;
@@ -34,7 +35,7 @@ export interface MoveResult {
   success: boolean;
   message: string;
   gameOver?: boolean;
-  winner?: number;
+  winnerIndex?: number;
 }
 
 export const themes = [

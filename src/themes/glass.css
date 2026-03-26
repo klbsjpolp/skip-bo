@@ -23,6 +23,25 @@
   --card-back-color: #1f3a8a;           /* deep indigo */
   --selected-border-color: #d5d5d5;
   --drop-indicator-color: white;
+  --victory-border: rgba(242, 214, 153, 0.8);
+  --victory-accent: #f3d488;
+  --victory-accent-opacity: 1;
+  --victory-pattern-opacity: 0.22;
+  --victory-pattern-image:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 235, 188, 0.16) 0 2px,
+      rgba(255, 235, 188, 0) 2px 16px
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgba(201, 146, 51, 0.1) 0 1px,
+      rgba(201, 146, 51, 0) 1px 12px
+    );
+  --victory-pattern-size: 48px 48px, 36px 36px;
+  --victory-shine-opacity: 0;
+  --victory-shine-duration: 4.6s;
+  --victory-sunburst-opacity: 0;
 
   --card-g1: hsl(158, 100%, 50%);   /* 1‑4 */
   --card-g2: hsl(0, 100%, 50%);     /* 5‑8 */
@@ -186,6 +205,41 @@
     background-position: 0 0, 0 0;
     animation: glass-texture-pan 60s ease-in-out infinite;
     will-change: background-position;
+  }
+
+  .player-area.winner {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 248, 223, 0.58),
+      inset 0 0 0 3px rgba(227, 186, 100, 0.28),
+      0 0 0 1px rgba(243, 212, 136, 0.34),
+      0 16px 34px rgba(0, 0, 0, 0.22),
+      0 0 36px rgba(243, 212, 136, 0.2);
+  }
+
+  .victory-burst-layer {
+    display: none;
+  }
+
+  .victory-accent {
+    inset: 0;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 243, 210, 0.32) 0%,
+        rgba(243, 212, 136, 0.24) 38%,
+        rgba(187, 132, 48, 0.22) 100%
+      );
+    opacity: 1;
+  }
+
+  .victory-pattern {
+    mix-blend-mode: screen;
+    animation: none;
+  }
+
+  .victory-shine,
+  .victory-sunburst {
+    display: none;
   }
 
 }

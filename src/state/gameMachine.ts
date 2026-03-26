@@ -29,6 +29,12 @@ export const gameMachine = createMachine({
     animationDuration: 0,
   },
   initial: 'setup',
+  on: {
+    DEBUG_SET_WINNER: {
+      actions: 'apply',
+      target: '#skipbo.finished',
+    },
+  },
   states: {
     setup: {
       always: [

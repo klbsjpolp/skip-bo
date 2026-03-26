@@ -92,6 +92,20 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       return;
     }
 
+    case 'DEBUG_SET_WINNER': {
+      const winner = draft.players[action.winnerIndex];
+      if (!winner) {
+        return;
+      }
+
+      draft.currentPlayerIndex = action.winnerIndex;
+      draft.gameIsOver = true;
+      draft.winnerIndex = action.winnerIndex;
+      draft.selectedCard = null;
+      draft.message = MESSAGES.GAME_WON.replace('{player}', winner.isAI ? "l'IA" : 'le joueur');
+      return;
+    }
+
     case 'SELECT_CARD': {
       const player = draft.players[draft.currentPlayerIndex];
       let card;
@@ -204,6 +218,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       // Check win condition
       if (player.stockPile.length === 0) {
         draft.gameIsOver = true;
+        draft.winnerIndex = draft.currentPlayerIndex;
         draft.message = MESSAGES.GAME_WON.replace('{player}', player.isAI ? "l'IA" : 'le joueur');
       } else {
         draft.message = `${player.isAI ? "L'IA a joué une carte" : "Vous avez joué une carte"}`;

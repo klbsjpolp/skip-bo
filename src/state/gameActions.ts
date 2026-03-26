@@ -11,4 +11,5 @@ export type GameAction =
   | { type: 'END_TURN' }
   | { type: 'RESET' }
   | { type: 'SET_DIFFICULTY'; difficulty: 'easy' | 'medium' | 'hard' }
-  | { type: 'DEBUG_SET_AI_HAND'; hand: Card[] };
+  | { type: 'DEBUG_SET_AI_HAND'; hand: Card[] }
+  | { type: 'DEBUG_SET_WINNER'; winnerIndex: number };

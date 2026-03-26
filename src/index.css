@@ -97,6 +97,21 @@
     --drop-indicator-color: var(--selected-border-color);
     --selected-shadow: 0 0 20px var(--selected-border-color);
     --can-drop-shadow: 0 0 15px var(--selected-border-color);
+    --victory-border: #d8b657;
+    --victory-accent: #f4cf6a;
+    --victory-accent-soft: color-mix(in srgb, var(--victory-accent) 22%, transparent);
+    --victory-piece-1: #f59e0b;
+    --victory-piece-2: #ef4444;
+    --victory-piece-3: #22c55e;
+    --victory-piece-4: #3b82f6;
+    --victory-burst-size: 12px;
+    --victory-accent-opacity: 0;
+    --victory-pattern-opacity: 0;
+    --victory-pattern-image: none;
+    --victory-pattern-size: 24px 24px;
+    --victory-shine-opacity: 0;
+    --victory-shine-duration: 3.8s;
+    --victory-sunburst-opacity: 0;
 
     --card-g1: #0F0; /* 1‑4 */
     --card-g2: #F00; /* 5‑8 */
@@ -189,6 +204,89 @@
     }
   }
 
+  @keyframes victoryPieceBurst {
+    0% {
+      opacity: 0;
+      transform: translate3d(-50%, -50%, 0) scale(0.25) rotate(0deg);
+    }
+    8% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+      transform: translate3d(
+        calc(-50% + var(--piece-offset-x)),
+        calc(-50% + var(--piece-offset-y)),
+        0
+      ) scale(1) rotate(var(--piece-rotation));
+    }
+    100% {
+      opacity: 0;
+      transform: translate3d(
+        calc(-50% + var(--piece-offset-x)),
+        calc(-50% + var(--piece-offset-y)),
+        0
+      ) scale(1) rotate(var(--piece-rotation));
+    }
+  }
+
+  @keyframes victorySunPulse {
+    0%, 100% {
+      opacity: 0.22;
+      transform: translate(-50%, -100%) scaleY(0.92);
+    }
+    50% {
+      opacity: 0.72;
+      transform: translate(-50%, -100%) scaleY(1.06);
+    }
+  }
+
+  @keyframes victoryShineSweep {
+    0% {
+      opacity: 0;
+      transform: translate3d(-160%, 0, 0);
+    }
+    18%,
+    62% {
+      opacity: var(--victory-shine-opacity);
+    }
+    100% {
+      opacity: 0;
+      transform: translate3d(220%, 0, 0);
+    }
+  }
+
+  @keyframes victoryPatternDrift {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 32px 32px;
+    }
+  }
+
+  @keyframes victoryBadgeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes victoryStatusIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   .hand,
   .discard-piles,
   .build-piles {
@@ -256,6 +354,8 @@
 
     .bg-layer {
       @apply absolute w-full h-full top-0 left-0 overflow-hidden pointer-events-none;
+      z-index: 0;
+      border-radius: inherit;
     }
   }
 
@@ -272,9 +372,126 @@
     @apply z-10;
   }
 
+  .content-layer {
+    position: relative;
+    z-index: 2;
+  }
+
+  .game-board {
+    position: relative;
+  }
+
+  .game-status {
+    @apply flex flex-col items-center justify-center gap-2;
+  }
+
   .player-area.active-turn,
   .center-area.active-turn {
     @apply ring-(--active-turn-color);
+  }
+
+  .player-area.winner {
+    border-color: var(--victory-border);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--victory-border) 42%, transparent),
+      0 16px 30px color-mix(in srgb, var(--victory-border) 12%, transparent);
+  }
+
+  .victory-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  .victory-persistent-layer {
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .victory-burst-layer {
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .victory-accent,
+  .victory-pattern,
+  .victory-shine,
+  .victory-sunburst {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .victory-accent {
+    background:
+      radial-gradient(circle at 50% 50%, var(--victory-accent-soft) 0%, transparent 72%);
+    opacity: var(--victory-accent-opacity);
+  }
+
+  .victory-pattern {
+    background-image: var(--victory-pattern-image);
+    background-repeat: repeat;
+    background-size: var(--victory-pattern-size);
+    opacity: var(--victory-pattern-opacity);
+    animation: victoryPatternDrift 10s linear infinite;
+  }
+
+  .victory-shine {
+    top: -30%;
+    bottom: -30%;
+    left: -10%;
+    width: 36%;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.82) 46%,
+        rgba(255, 255, 255, 0) 100%
+      );
+    filter: blur(0.5px);
+    opacity: 0;
+    transform: translate3d(-160%, 0, 0);
+    animation: victoryShineSweep var(--victory-shine-duration) ease-in-out infinite;
+  }
+
+  .victory-sunburst {
+    opacity: var(--victory-sunburst-opacity);
+  }
+
+  .victory-ray {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: clamp(12px, 1.8vw, 18px);
+    height: 64%;
+    border-radius: 999px;
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--victory-accent) 82%, white 18%) 0%,
+        rgba(255, 255, 255, 0) 100%
+      );
+    mix-blend-mode: screen;
+    transform: translate(-50%, -100%) rotate(var(--ray-angle));
+    transform-origin: center top;
+    animation: victorySunPulse 2.8s ease-in-out infinite;
+    animation-delay: var(--ray-delay);
+  }
+
+  .victory-burst-piece {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--victory-burst-size);
+    height: calc(var(--victory-burst-size) * 1.6);
+    border-radius: 999px 999px 5px 5px;
+    background: var(--piece-color);
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(0.25) rotate(0deg);
+    animation: victoryPieceBurst 3000ms cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    animation-delay: calc(var(--piece-index) * 28ms);
+    will-change: transform, opacity;
   }
 
   .discard-pile-stack {
@@ -285,6 +502,14 @@
     .player-area .discard-piles {
       width: 100%;
       margin-top: 20px;
+    }
+
+    .victory-burst-piece:nth-child(n + 9) {
+      display: none;
+    }
+
+    .victory-ray:nth-child(n + 7) {
+      display: none;
     }
   }
 
@@ -357,6 +582,18 @@
 
   * {
     @apply border-border;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .victory-burst-layer {
+      display: none;
+    }
+
+    .victory-pattern,
+    .victory-shine,
+    .victory-ray {
+      animation: none !important;
+    }
   }
 }
 
