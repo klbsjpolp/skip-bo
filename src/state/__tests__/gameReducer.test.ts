@@ -331,18 +331,6 @@ describe('gameReducer', () => {
     });
   });
 
-  describe('DEBUG_SET_WINNER action', () => {
-    it('should force the selected player as winner for testing', () => {
-      const result = gameReducer(initialState, { type: 'DEBUG_SET_WINNER', winnerIndex: 1 });
-
-      expect(result.gameIsOver).toBe(true);
-      expect(result.winnerIndex).toBe(1);
-      expect(result.currentPlayerIndex).toBe(1);
-      expect(result.selectedCard).toBeNull();
-      expect(result.message).toContain("l'IA");
-    });
-  });
-
   describe('Deck reshuffling behaviors', () => {
     describe('DRAW action with deck exhaustion', () => {
       it('should draw from deck first, then reshuffle completed build piles when deck is empty', () => {

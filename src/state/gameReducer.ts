@@ -92,20 +92,6 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       return;
     }
 
-    case 'DEBUG_SET_WINNER': {
-      const winner = draft.players[action.winnerIndex];
-      if (!winner) {
-        return;
-      }
-
-      draft.currentPlayerIndex = action.winnerIndex;
-      draft.gameIsOver = true;
-      draft.winnerIndex = action.winnerIndex;
-      draft.selectedCard = null;
-      draft.message = MESSAGES.GAME_WON.replace('{player}', winner.isAI ? "l'IA" : 'le joueur');
-      return;
-    }
-
     case 'SELECT_CARD': {
       const player = draft.players[draft.currentPlayerIndex];
       let card;

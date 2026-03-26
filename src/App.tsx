@@ -8,7 +8,7 @@ import { animationServiceBridge } from '@/lib/animationServiceBridge';
 import { useEffect } from 'react';
 
 function App() {
-  const { gameState, initializeGame, selectCard, playCard, discardCard, clearSelection, canPlayCard, debugSetWinner } = useSkipBoGame();
+  const { gameState, initializeGame, selectCard, playCard, discardCard, clearSelection, canPlayCard } = useSkipBoGame();
   const { waitForAnimations } = useCardAnimation();
 
   // Connect the animation context with the service bridge
@@ -19,21 +19,8 @@ function App() {
   return (
     <div id="main" className="min-h-screen p-4 lg:p-10">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <NewGame onNewGame={initializeGame} />
-            <div className="flex flex-wrap items-center gap-2 rounded-md border px-2 py-1">
-              <span className="text-xs font-semibold uppercase tracking-[0.22em] opacity-70">
-                Debug victoire
-              </span>
-              <Button variant="outline" size="sm" onClick={() => debugSetWinner(0)}>
-                Joueur
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => debugSetWinner(1)}>
-                IA
-              </Button>
-            </div>
-          </div>
+        <div className="flex justify-between mb-2">
+          <NewGame onNewGame={initializeGame} />
           <ThemeSwitcher />
         </div>
         <GameBoard
