@@ -42,6 +42,31 @@ pnpm dev
 
 Open [http://localhost:5173](http://localhost:5173).
 
+### Sentry Setup
+
+Browser tracking only works when the Vite runtime DSN is present. Create a local env file with:
+
+```bash
+cp .env.example .env.local
+```
+
+Then set:
+
+```bash
+VITE_SENTRY_DSN=your_browser_dsn
+```
+
+`VITE_SENTRY_DSN` is the value read by [`src/instrument.ts`](/Users/pierreluc/Development/skip-bo/src/instrument.ts). Without it, the SDK loads but sends nothing.
+
+For GitHub Pages builds, add these repository secrets so the Actions build step can inject them during `vite build`:
+
+- `VITE_SENTRY_DSN`
+- `SENTRY_AUTH_TOKEN`
+
+The workflow already sets `SENTRY_ORG=pierre-luc`, `SENTRY_PROJECT=skip-bo`, and `VITE_APP_VERSION` from the commit SHA.
+
+To verify the integration after deploy, open DevTools, filter the Network tab by `envelope`, and reload the page. With the DSN configured, you should see requests to Sentry on page load. Do not test by throwing an error directly in the browser console; Sentry documents that DevTools-triggered errors are sandboxed and will not be reported.
+
 ## Scripts
 
 - `pnpm dev` starts the Vite dev server

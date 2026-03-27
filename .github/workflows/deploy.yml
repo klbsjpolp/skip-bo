@@ -50,6 +50,11 @@ jobs:
         run: pnpm run build
         env:
           NODE_ENV: production
+          VITE_APP_VERSION: ${{ github.sha }}
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: pierre-luc
+          SENTRY_PROJECT: skip-bo
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
