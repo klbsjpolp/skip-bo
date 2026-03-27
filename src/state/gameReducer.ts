@@ -1,9 +1,41 @@
 import {produce} from 'immer';
-import {GameState} from '@/types';
+import {Card, GameState, Player, SelectedCard} from '@/types';
 import {GameAction} from './gameActions';
 import {initialGameState} from './initialGameState';
 import {MESSAGES} from '@/lib/config';
 import {canPlayCard} from '@/lib/validators';
+
+const cardsMatch = (candidate: Card | null | undefined, selectedCard: Card): boolean =>
+  !!candidate &&
+  candidate.value === selectedCard.value &&
+  candidate.isSkipBo === selectedCard.isSkipBo;
+
+const hasValidDiscardPileIndex = (player: Player, discardPileIndex: number): boolean =>
+  discardPileIndex >= 0 && discardPileIndex < player.discardPiles.length;
+
+const hasValidSelectedSource = (player: Player, selectedCard: SelectedCard): boolean => {
+  switch (selectedCard.source) {
+    case 'hand':
+      return (
+        selectedCard.index >= 0 &&
+        selectedCard.index < player.hand.length &&
+        cardsMatch(player.hand[selectedCard.index], selectedCard.card)
+      );
+    case 'stock':
+      return cardsMatch(player.stockPile[player.stockPile.length - 1], selectedCard.card);
+    case 'discard':
+      return (
+        selectedCard.discardPileIndex !== undefined &&
+        hasValidDiscardPileIndex(player, selectedCard.discardPileIndex) &&
+        cardsMatch(
+          player.discardPiles[selectedCard.discardPileIndex][
+            player.discardPiles[selectedCard.discardPileIndex].length - 1
+          ],
+          selectedCard.card
+        )
+      );
+  }
+};
 
 export const gameReducer = produce((draft: GameState, action: GameAction) => {
   switch (action.type) {
@@ -17,7 +49,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       // Count empty slots in hand (null values)
       const emptySlots = player.hand.filter(card => card === null).length;
 
-      let remainingToDraw = action.count ||
+      let remainingToDraw = action.count ??
         Math.min(emptySlots, draft.deck.length + draft.completedBuildPiles.length);
 
       // If no empty slots and no count specified, return early
@@ -140,6 +172,13 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       }
 
       const player = draft.players[draft.currentPlayerIndex];
+
+      if (!hasValidSelectedSource(player, selectedCard)) {
+        draft.message = MESSAGES.INVALID_MOVE;
+        draft.selectedCard = null;
+        return;
+      }
+
       const buildPileIndex = action.buildPile;
 
       // Add card to build pile - preserve Skip-Bo identity
@@ -243,6 +282,12 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
 
       const player = draft.players[draft.currentPlayerIndex];
       const discardPileIndex = action.discardPile;
+
+      if (!hasValidSelectedSource(player, selectedCard) || !hasValidDiscardPileIndex(player, discardPileIndex)) {
+        draft.message = MESSAGES.INVALID_MOVE;
+        draft.selectedCard = null;
+        return;
+      }
 
       // Add card to discard pile
       player.discardPiles[discardPileIndex].push({

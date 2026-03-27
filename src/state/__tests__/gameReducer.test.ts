@@ -677,6 +677,61 @@ describe('gameReducer', () => {
         const skipBoInCompleted = result.completedBuildPiles.find(card => card.isSkipBo);
         expect(skipBoInCompleted).toBeDefined();
       });
+
+      it('should reject an invalid build pile index without mutating state', () => {
+        const stateWithSelection = {
+          ...initialState,
+          selectedCard: {
+            card: { value: 1, isSkipBo: false },
+            source: 'hand' as const,
+            index: 0,
+          },
+          players: [
+            {
+              ...initialState.players[0],
+              hand: [{ value: 1, isSkipBo: false }, null, null, null, null],
+            },
+            initialState.players[1],
+          ],
+        };
+
+        const result = gameReducer(stateWithSelection, {
+          type: 'PLAY_CARD',
+          buildPile: 99,
+        });
+
+        expect(result.message).toContain('Vous ne pouvez pas jouer cette carte');
+        expect(result.buildPiles[0]).toHaveLength(0);
+        expect(result.players[0].hand[0]).toEqual({ value: 1, isSkipBo: false });
+      });
+
+      it('should clear a stale hand selection instead of extending the hand array', () => {
+        const staleSelectionState = {
+          ...initialState,
+          selectedCard: {
+            card: { value: 1, isSkipBo: false },
+            source: 'hand' as const,
+            index: 9,
+          },
+          players: [
+            {
+              ...initialState.players[0],
+              hand: [{ value: 2, isSkipBo: false }, null, null, null, null],
+            },
+            initialState.players[1],
+          ],
+        };
+
+        const result = gameReducer(staleSelectionState, {
+          type: 'DISCARD_CARD',
+          discardPile: 0,
+        });
+
+        expect(result.message).toBe('Mouvement invalide');
+        expect(result.selectedCard).toBeNull();
+        expect(result.players[0].hand).toHaveLength(5);
+        expect(result.players[0].discardPiles[0]).toHaveLength(0);
+      });
     });
   });
 });
