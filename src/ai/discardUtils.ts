@@ -42,6 +42,18 @@ const analyzeCardAvailability = (gameState: GameState, targetValue: number) => {
 
 const getSoonNeededValues = (gameState: GameState): Set<number> => collectNeededValues(gameState, 2);
 
+const getValueBand = (value: number): number => {
+  if (value <= 4) {
+    return 0;
+  }
+
+  if (value <= 8) {
+    return 1;
+  }
+
+  return 2;
+};
+
 const getStockBridgeUrgency = (card: Card, gameState: GameState): number => {
   if (card.isSkipBo) {
     return 0;
@@ -87,22 +99,32 @@ const scoreDiscardPlacement = (
   let score = 0;
 
   if (discardPile.length === 0) {
-    score -= weights.newPilePenalty;
+    score += weights.emptyPileBonus - weights.newPilePenalty;
     return score;
   }
 
   const topCard = discardPile[discardPile.length - 1];
+  const valueBandDistance = Math.abs(getValueBand(topCard.value) - getValueBand(card.value));
+  let hasStrongMatch = false;
 
   if (topCard.value === card.value) {
     score += weights.sameValueDiscardPileBonus;
+    hasStrongMatch = true;
   } else if (Math.abs(topCard.value - card.value) === 1) {
     score += weights.sequentialDiscardPileBonus;
+    hasStrongMatch = true;
   }
 
-  score += (topCard.value / 12) * weights.discardOrganizationBonus;
+  if (!hasStrongMatch) {
+    if (valueBandDistance === 0) {
+      score += weights.sameBandDiscardPileBonus;
+    } else {
+      score -= weights.mismatchedDiscardPilePenalty * valueBandDistance;
+    }
+  }
 
   if (isUsefulDiscardTop(topCard, gameState)) {
-    score -= weights.buryUsefulCardPenalty;
+    score -= hasStrongMatch ? weights.buryUsefulCardPenalty / 2 : weights.buryUsefulCardPenalty;
   }
 
   if (discardPile.length > 8) {

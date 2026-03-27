@@ -9,9 +9,12 @@ export interface AIWeights {
   neededSoonPenalty: number;
   stockBridgePenalty: number;
   highValueDiscardBonus: number;
+  emptyPileBonus: number;
   newPilePenalty: number;
   sameValueDiscardPileBonus: number;
   sequentialDiscardPileBonus: number;
+  sameBandDiscardPileBonus: number;
+  mismatchedDiscardPilePenalty: number;
   buryUsefulCardPenalty: number;
   clearDiscardPileBonus: number;
   revealPlayableBonus: number;
@@ -44,9 +47,12 @@ const config: AIConfig = {
     neededSoonPenalty: 16,
     stockBridgePenalty: 10,
     highValueDiscardBonus: 4,
+    emptyPileBonus: 5,
     newPilePenalty: 2,
     sameValueDiscardPileBonus: 7,
     sequentialDiscardPileBonus: 3,
+    sameBandDiscardPileBonus: 2,
+    mismatchedDiscardPilePenalty: 3,
     buryUsefulCardPenalty: 8,
     clearDiscardPileBonus: 5,
     revealPlayableBonus: 10,
