@@ -1,6 +1,6 @@
 import { Card, GameState } from '@/types';
 import { canPlayCard } from '@/lib/validators';
-import { getWeights } from './aiConfig';
+import { getRandomnessWindow, getWeights } from './aiConfig';
 import {
   collectNeededValues,
   countVisibleNaturalCards,
@@ -9,6 +9,7 @@ import {
   getNextBuildValue,
   getPlayableBuildPiles,
   getTopStockCard,
+  pickRandomNearBestOption,
 } from './strategyUtils';
 
 const analyzeOpponents = (gameState: GameState, aiPlayerIndex: number = gameState.currentPlayerIndex) => {
@@ -124,7 +125,13 @@ const scoreDiscardPlacement = (
   }
 
   if (isUsefulDiscardTop(topCard, gameState)) {
-    score -= hasStrongMatch ? weights.buryUsefulCardPenalty / 2 : weights.buryUsefulCardPenalty;
+    if (topCard.value === card.value) {
+      score += 0;
+    } else if (hasStrongMatch) {
+      score -= weights.buryUsefulCardPenalty / 2;
+    } else {
+      score -= weights.buryUsefulCardPenalty;
+    }
   }
 
   if (discardPile.length > 8) {
@@ -139,19 +146,14 @@ export const findBestDiscardPile = (
   discardPiles: Card[][],
   gameState: GameState
 ): number => {
-  let bestPileIndex = 0;
-  let bestScore = Number.NEGATIVE_INFINITY;
+  const scoredPiles = discardPiles.map((pile, pileIndex) => ({
+    option: pileIndex,
+    score: scoreDiscardPlacement(card, pile, gameState),
+  }));
 
-  discardPiles.forEach((pile, pileIndex) => {
-    const score = scoreDiscardPlacement(card, pile, gameState);
-
-    if (score > bestScore) {
-      bestScore = score;
-      bestPileIndex = pileIndex;
-    }
-  });
-
-  return bestPileIndex;
+  return (
+    pickRandomNearBestOption(scoredPiles, getRandomnessWindow('discardPileScoreWindow'))?.option ?? 0
+  );
 };
 
 export const selectCardToDiscard = (
@@ -162,8 +164,7 @@ export const selectCardToDiscard = (
   const opponentAnalysis = analyzeOpponents(gameState);
   const neededSoonValues = getSoonNeededValues(gameState);
 
-  let bestCardIndex = -1;
-  let bestScore = Number.NEGATIVE_INFINITY;
+  const scoredCards: Array<{ option: number; score: number }> = [];
 
   hand.forEach((card, index) => {
     if (!card || card.isSkipBo) {
@@ -204,13 +205,13 @@ export const selectCardToDiscard = (
       score -= 4;
     }
 
-    if (score > bestScore) {
-      bestScore = score;
-      bestCardIndex = index;
-    }
+    scoredCards.push({ option: index, score });
   });
 
-  return bestCardIndex;
+  return (
+    pickRandomNearBestOption(scoredCards, getRandomnessWindow('discardCardScoreWindow'))?.option ??
+    -1
+  );
 };
 
 export const evaluateDiscardMove = (
@@ -251,7 +252,10 @@ export const findBestDiscardPileToPlayFrom = (
   const aiPlayer = getAIPlayer(gameState);
   const stockCard = getTopStockCard(aiPlayer);
 
-  let bestPlay: { discardPileIndex: number; buildPileIndex: number; score: number } | null = null;
+  const scoredPlays: Array<{
+    option: { discardPileIndex: number; buildPileIndex: number };
+    score: number;
+  }> = [];
 
   for (let discardPileIndex = 0; discardPileIndex < discardPiles.length; discardPileIndex++) {
     const pile = discardPiles[discardPileIndex];
@@ -291,16 +295,15 @@ export const findBestDiscardPileToPlayFrom = (
         }
       }
 
-      if (bestPlay === null || score > bestPlay.score) {
-        bestPlay = { discardPileIndex, buildPileIndex, score };
-      }
+      scoredPlays.push({
+        option: { discardPileIndex, buildPileIndex },
+        score,
+      });
     }
   }
 
-  return bestPlay
-    ? {
-        discardPileIndex: bestPlay.discardPileIndex,
-        buildPileIndex: bestPlay.buildPileIndex,
-      }
-    : null;
+  return (
+    pickRandomNearBestOption(scoredPlays, getRandomnessWindow('discardPileScoreWindow'))?.option ??
+    null
+  );
 };

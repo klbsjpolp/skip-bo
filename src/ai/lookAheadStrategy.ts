@@ -3,12 +3,13 @@ import { GameAction } from '@/state/gameActions';
 import { gameReducer } from '@/state/gameReducer';
 import { canPlayCard } from '@/lib/validators';
 import { evaluateDiscardMove } from './discardUtils';
-import { getWeights } from './aiConfig';
+import { getRandomnessWindow, getWeights } from './aiConfig';
 import {
   getAccessibleSkipBoCount,
   getAIPlayer,
   getClosestGapToStock,
   getPlayableBuildPiles,
+  pickRandomNearBestOption,
   getTopStockCard,
 } from './strategyUtils';
 
@@ -405,8 +406,7 @@ const searchTurn = (
     };
   }
 
-  let bestMove: MoveEvaluation | null = null;
-  let bestScore = Number.NEGATIVE_INFINITY;
+  const scoredMoves: Array<{ option: MoveEvaluation; score: number }> = [];
 
   candidateMoves.forEach((move) => {
     const nextState = simulateResolvedMove(gameState, move);
@@ -417,15 +417,20 @@ const searchTurn = (
         : evaluateState(nextState, aiPlayerIndex);
     const totalScore = localScore + futureScore;
 
-    if (totalScore > bestScore) {
-      bestScore = totalScore;
-      bestMove = { ...move, score: totalScore };
-    }
+    scoredMoves.push({
+      option: { ...move, score: totalScore },
+      score: totalScore,
+    });
   });
 
+  const selectedMove = pickRandomNearBestOption(
+    scoredMoves,
+    getRandomnessWindow('searchScoreWindow')
+  );
+
   return {
-    score: bestScore,
-    move: bestMove,
+    score: selectedMove?.score ?? Number.NEGATIVE_INFINITY,
+    move: selectedMove?.option ?? null,
   };
 };
 

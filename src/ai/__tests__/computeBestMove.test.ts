@@ -16,9 +16,12 @@ describe('computeBestMove', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('privilégie une séquence qui débloque la pile stock', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+
     const state = initialGameState();
 
     state.currentPlayerIndex = 1;
@@ -137,5 +140,32 @@ describe('computeBestMove', () => {
     const move = await runAIMove(state);
 
     expect(move).toEqual({ type: 'DISCARD_CARD', discardPile: 3 });
+  });
+
+  it('peut varier le choix de pile centrale quand plusieurs options se valent presque', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.99);
+
+    const state = initialGameState();
+
+    state.currentPlayerIndex = 1;
+    state.deck = [];
+    state.completedBuildPiles = [];
+    state.selectedCard = null;
+    state.buildPiles = [[], [], [], []];
+    state.players[1] = {
+      ...state.players[1],
+      isAI: true,
+      stockPile: [{ value: 1, isSkipBo: false }],
+      hand: [null, null, null, null, null],
+      discardPiles: [[], [], [], []],
+    };
+
+    const move = await runAIMove(state);
+
+    expect(move).toMatchObject({
+      type: 'SELECT_CARD',
+      source: 'stock',
+      plannedBuildPileIndex: 3,
+    });
   });
 });

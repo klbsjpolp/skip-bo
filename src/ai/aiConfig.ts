@@ -33,6 +33,12 @@ interface AIConfig {
     afterCardSelection: number;
   };
   searchDepth: number;
+  randomness: {
+    buildPileScoreWindow: number;
+    discardPileScoreWindow: number;
+    discardCardScoreWindow: number;
+    searchScoreWindow: number;
+  };
 }
 
 const config: AIConfig = {
@@ -68,6 +74,12 @@ const config: AIConfig = {
     afterCardSelection: 400,
   },
   searchDepth: 4,
+  randomness: {
+    buildPileScoreWindow: 2,
+    discardPileScoreWindow: 2,
+    discardCardScoreWindow: 1.5,
+    searchScoreWindow: 3,
+  },
 };
 
 export const getWeights = (): AIWeights => config.weights;
@@ -76,3 +88,7 @@ export const getDelay = (delayType: keyof AIConfig['delays']): number =>
   config.delays[delayType];
 
 export const getSearchDepth = (): number => config.searchDepth;
+
+export const getRandomnessWindow = (
+  windowType: keyof AIConfig['randomness']
+): number => config.randomness[windowType];

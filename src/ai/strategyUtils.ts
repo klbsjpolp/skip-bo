@@ -154,3 +154,26 @@ export const getAccessibleSkipBoCount = (player: Player): number => {
 
   return count;
 };
+
+export interface ScoredOption<T> {
+  option: T;
+  score: number;
+}
+
+export const pickRandomNearBestOption = <T>(
+  options: ScoredOption<T>[],
+  scoreWindow: number
+): ScoredOption<T> | null => {
+  if (options.length === 0) {
+    return null;
+  }
+
+  const bestScore = options.reduce(
+    (currentBest, { score }) => Math.max(currentBest, score),
+    Number.NEGATIVE_INFINITY
+  );
+  const nearBestOptions = options.filter(({ score }) => bestScore - score <= scoreWindow);
+  const chosenIndex = Math.floor(Math.random() * nearBestOptions.length);
+
+  return nearBestOptions[chosenIndex] ?? nearBestOptions[0];
+};

@@ -6,8 +6,9 @@ import {
   findBestDiscardPileToPlayFrom,
   selectCardToDiscard,
 } from './discardUtils';
-import { getDelay, getSearchDepth } from './aiConfig';
+import { getDelay, getRandomnessWindow, getSearchDepth } from './aiConfig';
 import { MoveEvaluation, lookAheadEvaluation } from './lookAheadStrategy';
+import { pickRandomNearBestOption } from './strategyUtils';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -18,8 +19,7 @@ const chooseBestBuildPile = (gameState: GameState): number | null => {
     return null;
   }
 
-  let bestBuildPile: number | null = null;
-  let bestScore = Number.NEGATIVE_INFINITY;
+  const scoredBuildPiles: Array<{ option: number; score: number }> = [];
 
   gameState.buildPiles.forEach((buildPile, buildPileIndex) => {
     if (!canPlayCard(selectedCard.card, buildPileIndex, gameState)) {
@@ -36,13 +36,13 @@ const chooseBestBuildPile = (gameState: GameState): number | null => {
       score += buildPile.length;
     }
 
-    if (score > bestScore) {
-      bestScore = score;
-      bestBuildPile = buildPileIndex;
-    }
+    scoredBuildPiles.push({ option: buildPileIndex, score });
   });
 
-  return bestBuildPile;
+  return (
+    pickRandomNearBestOption(scoredBuildPiles, getRandomnessWindow('buildPileScoreWindow'))?.option ??
+    null
+  );
 };
 
 const selectionActionFromMove = (move: MoveEvaluation): GameAction | null => {
@@ -119,11 +119,25 @@ export const computeBestMove = async (gameState: GameState): Promise<GameAction>
   if (aiPlayer.stockPile.length > 0) {
     const stockIndex = aiPlayer.stockPile.length - 1;
     const stockCard = aiPlayer.stockPile[stockIndex];
-    const buildPileIndex = gameState.buildPiles.findIndex((_, index) =>
-      canPlayCard(stockCard, index, gameState)
-    );
+    const playableBuildPiles = gameState.buildPiles.reduce<Array<{ option: number; score: number }>>(
+      (options, buildPile, index) => {
+        if (canPlayCard(stockCard, index, gameState)) {
+          options.push({
+            option: index,
+            score: buildPile.length === 11 ? 50 : buildPile.length,
+          });
+        }
 
-    if (buildPileIndex !== -1) {
+        return options;
+      },
+      []
+    );
+    const buildPileIndex = pickRandomNearBestOption(
+      playableBuildPiles,
+      getRandomnessWindow('buildPileScoreWindow')
+    )?.option;
+
+    if (buildPileIndex !== undefined) {
       return {
         type: 'SELECT_CARD',
         source: 'stock',
@@ -139,11 +153,28 @@ export const computeBestMove = async (gameState: GameState): Promise<GameAction>
       continue;
     }
 
-    const buildPileIndex = gameState.buildPiles.findIndex((_, index) =>
-      canPlayCard(handCard, index, gameState)
-    );
+    const playableBuildPiles = gameState.buildPiles.reduce<Array<{ option: number; score: number }>>(
+      (options, buildPile, index) => {
+        if (canPlayCard(handCard, index, gameState)) {
+          let score = buildPile.length;
 
-    if (buildPileIndex !== -1) {
+          if (buildPile.length === 11) {
+            score += 50;
+          }
+
+          options.push({ option: index, score });
+        }
+
+        return options;
+      },
+      []
+    );
+    const buildPileIndex = pickRandomNearBestOption(
+      playableBuildPiles,
+      getRandomnessWindow('buildPileScoreWindow')
+    )?.option;
+
+    if (buildPileIndex !== undefined) {
       return {
         type: 'SELECT_CARD',
         source: 'hand',
