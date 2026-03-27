@@ -1,190 +1,72 @@
-/**
- * Configuration options for the AI's discard strategy
- */
-
-export type AIDifficulty = 'easy' | 'medium' | 'hard';
-
-interface StrategyWeights {
-  // Weights for findBestDiscardPile
-  sameValueGrouping: number;
-  sequentialValues: number;
-  emptyPilePreference: number;
-  highValuePreference: number;
-  
-  // Weights for selectCardToDiscard
-  duplicateCardPriority: number;
-  avoidNeededValues: number;
-  highValueCardPriority: number;
-  
-  // Weights for evaluateDiscardMove
-  sameValueScore: number;
-  sequentialValueScore: number;
-  neededValuePenalty: number;
-  highValueBonus: number;
+export interface AIWeights {
+  stockStateBonus: number;
+  stockGapPenalty: number;
+  skipBoRetentionBonus: number;
+  opponentPressurePenalty: number;
+  playableTopDiscardBonus: number;
+  discardOrganizationBonus: number;
+  duplicateDiscardBonus: number;
+  neededSoonPenalty: number;
+  stockBridgePenalty: number;
+  highValueDiscardBonus: number;
   newPilePenalty: number;
-  
-  // Weights for findBestDiscardPileToPlayFrom
-  largerPilePriority: number;
-
-  useLookAheadStrategy: boolean;
+  sameValueDiscardPileBonus: number;
+  sequentialDiscardPileBonus: number;
+  buryUsefulCardPenalty: number;
+  clearDiscardPileBonus: number;
+  revealPlayableBonus: number;
+  revealStockBridgeBonus: number;
+  completePileBonus: number;
+  playFromStockBonus: number;
+  playFromDiscardBonus: number;
+  useSkipBoPenalty: number;
+  redundantSkipBoPenalty: number;
 }
 
 interface AIConfig {
-  difficulty: AIDifficulty;
-  weights: StrategyWeights;
-  
-  // Delays for AI actions (in milliseconds)
+  weights: AIWeights;
   delays: {
     beforeMove: number;
     afterCardSelection: number;
   };
-  
-  // Feature toggles
-  features: {
-    useStrategicDiscardPileSelection: boolean;
-    useStrategicCardSelection: boolean;
-    useStrategicDiscardPilePlay: boolean;
-    useLookAheadStrategy: boolean;
-  };
+  searchDepth: number;
 }
 
-// Default weights for medium difficulty
-const mediumWeights: StrategyWeights = {
-  // findBestDiscardPile weights
-  sameValueGrouping: 5,
-  sequentialValues: 3,
-  emptyPilePreference: 2,
-  highValuePreference: 1,
-  
-  // selectCardToDiscard weights
-  duplicateCardPriority: 5,
-  avoidNeededValues: 10,
-  highValueCardPriority: 3,
-  
-  // evaluateDiscardMove weights
-  sameValueScore: 5,
-  sequentialValueScore: 3,
-  neededValuePenalty: 10,
-  highValueBonus: 0.5,
-  newPilePenalty: 2,
-  
-  // findBestDiscardPileToPlayFrom weights
-  largerPilePriority: 2,
-
-  useLookAheadStrategy: true,
-};
-
-// Easy difficulty - less strategic
-const easyWeights: StrategyWeights = {
-  ...mediumWeights,
-  sameValueGrouping: 2,
-  sequentialValues: 1,
-  avoidNeededValues: 5,
-  highValueCardPriority: 1,
-  neededValuePenalty: 5,
-  useLookAheadStrategy: false,
-};
-
-// Hard difficulty - more strategic
-const hardWeights: StrategyWeights = {
-  ...mediumWeights,
-  sameValueGrouping: 8,
-  sequentialValues: 5,
-  avoidNeededValues: 15,
-  highValueCardPriority: 4,
-  neededValuePenalty: 15,
-  highValueBonus: 1,
-  largerPilePriority: 3,
-  useLookAheadStrategy: true,
-};
-
-// Configuration by difficulty level
-const configByDifficulty: Record<AIDifficulty, AIConfig> = {
-  easy: {
-    difficulty: 'easy',
-    weights: easyWeights,
-    delays: {
-      beforeMove: 500,
-      afterCardSelection: 600,
-    },
-    features: {
-      useStrategicDiscardPileSelection: true,
-      useStrategicCardSelection: false,
-      useStrategicDiscardPilePlay: false,
-      useLookAheadStrategy: false,
-    },
+const config: AIConfig = {
+  weights: {
+    stockStateBonus: 30,
+    stockGapPenalty: 5,
+    skipBoRetentionBonus: 7,
+    opponentPressurePenalty: 14,
+    playableTopDiscardBonus: 4,
+    discardOrganizationBonus: 2,
+    duplicateDiscardBonus: 6,
+    neededSoonPenalty: 16,
+    stockBridgePenalty: 10,
+    highValueDiscardBonus: 4,
+    newPilePenalty: 2,
+    sameValueDiscardPileBonus: 7,
+    sequentialDiscardPileBonus: 3,
+    buryUsefulCardPenalty: 8,
+    clearDiscardPileBonus: 5,
+    revealPlayableBonus: 10,
+    revealStockBridgeBonus: 8,
+    completePileBonus: 16,
+    playFromStockBonus: 26,
+    playFromDiscardBonus: 8,
+    useSkipBoPenalty: 10,
+    redundantSkipBoPenalty: 18,
   },
-  medium: {
-    difficulty: 'medium',
-    weights: mediumWeights,
-    delays: {
-      beforeMove: 400,
-      afterCardSelection: 500,
-    },
-    features: {
-      useStrategicDiscardPileSelection: true,
-      useStrategicCardSelection: true,
-      useStrategicDiscardPilePlay: true,
-      useLookAheadStrategy: false,
-    },
+  delays: {
+    beforeMove: 300,
+    afterCardSelection: 400,
   },
-  hard: {
-    difficulty: 'hard',
-    weights: hardWeights,
-    delays: {
-      beforeMove: 300,
-      afterCardSelection: 400,
-    },
-    features: {
-      useStrategicDiscardPileSelection: true,
-      useStrategicCardSelection: true,
-      useStrategicDiscardPilePlay: true,
-      useLookAheadStrategy: true,
-    },
-  },
+  searchDepth: 4,
 };
 
-// Current AI configuration - can be changed at runtime
-let currentDifficulty: AIDifficulty = 'hard';
+export const getWeights = (): AIWeights => config.weights;
 
-/**
- * Get the current AI configuration
- */
-export const getAIConfig = (): AIConfig => {
-  return configByDifficulty[currentDifficulty];
-};
+export const getDelay = (delayType: keyof AIConfig['delays']): number =>
+  config.delays[delayType];
 
-/**
- * Set the AI difficulty level
- * @param difficulty The difficulty level to set
- */
-export const setAIDifficulty = (difficulty: AIDifficulty): void => {
-  currentDifficulty = difficulty;
-};
-
-/**
- * Get the weights for the current difficulty level
- */
-export const getWeights = (): StrategyWeights => {
-  return configByDifficulty[currentDifficulty].weights;
-};
-
-/**
- * Check if a feature is enabled for the current difficulty level
- * @param feature The feature to check
- */
-export const isFeatureEnabled = (
-  feature: keyof AIConfig['features']
-): boolean => {
-  return configByDifficulty[currentDifficulty].features[feature];
-};
-
-/**
- * Get the delay for an AI action
- * @param delayType The type of delay to get
- */
-export const getDelay = (
-  delayType: keyof AIConfig['delays']
-): number => {
-  return configByDifficulty[currentDifficulty].delays[delayType];
-};
+export const getSearchDepth = (): number => config.searchDepth;

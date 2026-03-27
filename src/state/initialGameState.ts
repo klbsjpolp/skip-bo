@@ -67,7 +67,6 @@ export const initialGameState = (): GameState => {
     message: 'Nouvelle partie commencée !',
     gameIsOver: false,
     winnerIndex: null,
-    aiDifficulty: 'medium', // Default AI difficulty
     config
   };
 };

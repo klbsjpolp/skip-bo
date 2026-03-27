@@ -1,35 +1,30 @@
 # AI Discard Strategy Notes
 
-This file is a design note for the discard-related heuristics. It is not the source of truth for current behavior; see `computeBestMove.ts`, `discardUtils.ts`, and `aiConfig.ts` for the live implementation.
+This file is a design note for the discard-related heuristics. The live behavior is implemented in `computeBestMove.ts`, `lookAheadStrategy.ts`, and `discardUtils.ts`.
 
 ## Implemented Today
 
-- Strategic discard-pile selection with scoring for:
-  - same-value grouping
-  - sequential values
-  - empty-pile preference
-  - high-value preservation
-- Strategic hand-card selection for discarding, including:
-  - duplicate detection
-  - penalties for values needed on build piles
-  - scarcity awareness
-  - opponent-pressure adjustments
-- Strategic play from discard piles, including:
-  - preference for larger piles
-  - bonus for completing a build pile
-  - bonus for clearing low cards
-- Difficulty-gated behavior through `aiConfig.ts`
+- The AI evaluates discard choices inside a broader turn search instead of treating discard as an isolated fallback.
+- Discard selection protects cards that are needed soon on build piles.
+- Cards that help bridge toward the stock top are harder to discard.
+- Discard-pile placement avoids hiding a good top card under a weaker one whenever possible.
+- Playing from a discard pile now considers the revealed card underneath, not only the current top card.
+
+## Practical Effect
+
+- The AI wastes fewer `Skip-Bo`.
+- It preserves more useful transition cards in hand.
+- It clears discard piles more intentionally when a reveal can continue the turn.
+- It keeps discard piles more organized for future turns.
 
 ## Current Gaps
 
-- The so-called look-ahead mode is still a one-ply evaluation pass, not a recursive search.
-- Opponent modeling is limited to broad pressure signals such as stock-pile size.
-- There is no telemetry or benchmark suite to compare heuristic quality across versions.
-- Difficulty-specific behavior is under-documented in automated tests.
+- The AI still uses lightweight pressure signals for the opponent rather than a full opponent model.
+- Discard roles are emergent from heuristics, not explicit named pile policies.
+- There is no benchmark harness yet to compare discard quality across revisions.
 
 ## Good Next Steps
 
-1. Use `simulateMove` to convert hard mode into a real multi-step search.
-2. Add dedicated tests that assert different choices for `easy`, `medium`, and `hard`.
-3. Add scenario fixtures for endgame states, duplicate-heavy hands, and discard-pile traps.
-4. Separate "safe discard" heuristics from "setup future discard-pile play" heuristics so they can be tuned independently.
+1. Add scenario tests for “burying a good reveal” and “keep a bridge card for the stock”.
+2. Distinguish short-term stock-race states from slower early-game states.
+3. Tune discard heuristics with recorded board snapshots instead of ad hoc manual play.

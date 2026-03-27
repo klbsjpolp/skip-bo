@@ -111,7 +111,9 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
           card,
           source: action.source,
           index: action.index,
-          discardPileIndex: action.discardPileIndex
+          discardPileIndex: action.discardPileIndex,
+          plannedBuildPileIndex: action.plannedBuildPileIndex,
+          plannedDiscardPileIndex: action.plannedDiscardPileIndex,
         };
         draft.message = 'Sélectionnez une destination';
       }
@@ -275,9 +277,5 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
 
     case 'RESET':
       return initialGameState();
-      
-    case 'SET_DIFFICULTY':
-      draft.aiDifficulty = action.difficulty;
-      break;
   }
 });

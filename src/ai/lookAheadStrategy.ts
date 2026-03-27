@@ -1,262 +1,443 @@
-import { GameState, Card } from '@/types';
+import { Card, GameState } from '@/types';
+import { GameAction } from '@/state/gameActions';
+import { gameReducer } from '@/state/gameReducer';
 import { canPlayCard } from '@/lib/validators';
+import { evaluateDiscardMove } from './discardUtils';
 import { getWeights } from './aiConfig';
+import {
+  getAccessibleSkipBoCount,
+  getAIPlayer,
+  getClosestGapToStock,
+  getPlayableBuildPiles,
+  getTopStockCard,
+} from './strategyUtils';
 
-interface MoveEvaluation {
-  action: 'play' | 'discard';
+export interface MoveEvaluation {
+  action: 'play' | 'discard' | 'end';
   score: number;
-  source: 'stock' | 'hand' | 'discard';
+  source?: 'stock' | 'hand' | 'discard';
   sourceIndex?: number;
-  discardPileIndex?: number;
+  sourceDiscardPileIndex?: number;
   buildPileIndex?: number;
-  cardValue?: number;
+  discardPileIndex?: number;
 }
 
-/**
- * Evaluates potential future game states after a move
- * @param gameState Current game state
- * @param depth How many moves ahead to look
- * @returns Best evaluated move with score
- */
-export const lookAheadEvaluation = (
-  gameState: GameState,
-  depth: number = 2
-): MoveEvaluation | null => {
-  const aiPlayer = gameState.players[gameState.currentPlayerIndex];
+interface SearchResult {
+  score: number;
+  move: MoveEvaluation | null;
+}
 
-  if (!aiPlayer.isAI || depth <= 0) {
-    return null;
+const STOCK_WIN_BONUS = 5000;
+
+const getCardForMove = (gameState: GameState, move: MoveEvaluation): Card | null => {
+  const aiPlayer = getAIPlayer(gameState);
+
+  if (move.source === 'stock' && move.sourceIndex !== undefined) {
+    return aiPlayer.stockPile[move.sourceIndex] ?? null;
   }
 
-  const possibleMoves: MoveEvaluation[] = [];
-
-  // Evaluate stock pile moves
-  if (aiPlayer.stockPile.length > 0) {
-    const stockCard = aiPlayer.stockPile[aiPlayer.stockPile.length - 1];
-
-    // Try playing stock card on each build pile
-    for (let buildPile = 0; buildPile < gameState.buildPiles.length; buildPile++) {
-      if (canPlayCard(stockCard, buildPile, gameState)) {
-        const score = evaluatePlayMove(stockCard, buildPile, gameState, 'stock');
-        possibleMoves.push({
-          action: 'play',
-          score,
-          source: 'stock',
-          sourceIndex: aiPlayer.stockPile.length - 1,
-          buildPileIndex: buildPile,
-          cardValue: stockCard.value
-        });
-      }
-    }
+  if (move.source === 'hand' && move.sourceIndex !== undefined) {
+    return aiPlayer.hand[move.sourceIndex] ?? null;
   }
 
-  // Evaluate hand moves
-  aiPlayer.hand.forEach((handCard, handIndex) => {
-    // Skip null cards
-    if (!handCard) return;
-
-    // Try playing on build piles
-    for (let buildPile = 0; buildPile < gameState.buildPiles.length; buildPile++) {
-      if (canPlayCard(handCard, buildPile, gameState)) {
-        const score = evaluatePlayMove(handCard, buildPile, gameState, 'hand');
-        possibleMoves.push({
-          action: 'play',
-          score,
-          source: 'hand',
-          sourceIndex: handIndex,
-          buildPileIndex: buildPile,
-          cardValue: handCard.value
-        });
-      }
-    }
-
-    // Try discarding (only non-Skip-Bo cards)
-    if (!handCard.isSkipBo) {
-      for (let discardPile = 0; discardPile < aiPlayer.discardPiles.length; discardPile++) {
-        const score = evaluateDiscardMoveInternal(handCard, discardPile, gameState);
-        possibleMoves.push({
-          action: 'discard',
-          score,
-          source: 'hand',
-          sourceIndex: handIndex,
-          discardPileIndex: discardPile,
-          cardValue: handCard.value
-        });
-      }
-    }
-  });
-
-  // Evaluate discard pile moves
-  aiPlayer.discardPiles.forEach((pile, discardPileIndex) => {
-    if (pile.length === 0) return;
-
-    const topCard = pile[pile.length - 1];
-    for (let buildPile = 0; buildPile < gameState.buildPiles.length; buildPile++) {
-      if (canPlayCard(topCard, buildPile, gameState)) {
-        const score = evaluatePlayMove(topCard, buildPile, gameState, 'discard');
-        possibleMoves.push({
-          action: 'play',
-          score,
-          source: 'discard',
-          sourceIndex: pile.length - 1,
-          discardPileIndex,
-          buildPileIndex: buildPile,
-          cardValue: topCard.value
-        });
-      }
-    }
-  });
-
-  if (possibleMoves.length === 0) {
-    return null;
+  if (
+    move.source === 'discard' &&
+    move.sourceDiscardPileIndex !== undefined &&
+    move.sourceIndex !== undefined
+  ) {
+    return aiPlayer.discardPiles[move.sourceDiscardPileIndex][move.sourceIndex] ?? null;
   }
 
-  // Sort by score and return the best move
-  possibleMoves.sort((a, b) => b.score - a.score);
-  return possibleMoves[0];
+  return null;
 };
 
-/**
- * Evaluates the strategic value of playing a card
- */
-function evaluatePlayMove(
-  card: Card,
-  buildPileIndex: number,
+const createSelectAction = (move: MoveEvaluation): GameAction | null => {
+  if (!move.source || move.sourceIndex === undefined) {
+    return null;
+  }
+
+  return {
+    type: 'SELECT_CARD',
+    source: move.source,
+    index: move.sourceIndex,
+    discardPileIndex: move.sourceDiscardPileIndex,
+    plannedBuildPileIndex: move.buildPileIndex,
+    plannedDiscardPileIndex: move.discardPileIndex,
+  };
+};
+
+const createResolutionAction = (move: MoveEvaluation): GameAction | null => {
+  if (move.action === 'play' && move.buildPileIndex !== undefined) {
+    return { type: 'PLAY_CARD', buildPile: move.buildPileIndex };
+  }
+
+  if (move.action === 'discard' && move.discardPileIndex !== undefined) {
+    return { type: 'DISCARD_CARD', discardPile: move.discardPileIndex };
+  }
+
+  if (move.action === 'end') {
+    return { type: 'END_TURN' };
+  }
+
+  return null;
+};
+
+const simulateResolvedMove = (gameState: GameState, move: MoveEvaluation): GameState => {
+  const selectAction = createSelectAction(move);
+  const resolutionAction = createResolutionAction(move);
+
+  if (!selectAction || !resolutionAction) {
+    return gameState;
+  }
+
+  const selectedState = gameReducer(gameState, selectAction);
+  return gameReducer(selectedState, resolutionAction);
+};
+
+const sameSource = (
+  move: MoveEvaluation,
+  source: 'stock' | 'hand' | 'discard',
+  sourceIndex: number,
+  sourceDiscardPileIndex?: number
+): boolean =>
+  move.source === source &&
+  move.sourceIndex === sourceIndex &&
+  move.sourceDiscardPileIndex === sourceDiscardPileIndex;
+
+const hasNaturalAlternativeForBuild = (
   gameState: GameState,
-  source: 'stock' | 'hand' | 'discard'
-): number {
-  let score = 0;
-
-  // Base score for playing a card (always positive)
-  score += 10;
-
-  // Bonus for playing from stock pile (highest priority)
-  if (source === 'stock') {
-    score += 20;
+  move: MoveEvaluation
+): boolean => {
+  if (move.buildPileIndex === undefined) {
+    return false;
   }
 
-  // Bonus for completing a build pile (reaching 12)
-  const buildPile = gameState.buildPiles[buildPileIndex];
-  if (buildPile.length > 0 && buildPile[buildPile.length - 1].value === 11 && !buildPile[buildPile.length - 1].isSkipBo) {
-    if (card.value === 12 || card.isSkipBo) {
-      score += 15; // High bonus for completing a pile
+  const aiPlayer = getAIPlayer(gameState);
+
+  const stockCard = getTopStockCard(aiPlayer);
+  if (
+    stockCard &&
+    !stockCard.isSkipBo &&
+    canPlayCard(stockCard, move.buildPileIndex, gameState) &&
+    !sameSource(move, 'stock', aiPlayer.stockPile.length - 1)
+  ) {
+    return true;
+  }
+
+  for (let handIndex = 0; handIndex < aiPlayer.hand.length; handIndex++) {
+    const handCard = aiPlayer.hand[handIndex];
+    if (
+      handCard &&
+      !handCard.isSkipBo &&
+      canPlayCard(handCard, move.buildPileIndex, gameState) &&
+      !sameSource(move, 'hand', handIndex)
+    ) {
+      return true;
     }
   }
 
-  // Bonus for playing Skip-Bo cards strategically
-  if (card.isSkipBo) {
-    // Prefer using Skip-Bo to fill gaps or complete sequences
-    if (buildPile.length > 0) {
-      const nextExpected = buildPile[buildPile.length - 1].value + 1;
-      if (nextExpected > 12) {
-        score += 8; // Good use of Skip-Bo to complete pile
-      } else if (nextExpected >= 10) {
-        score += 5; // Decent use for high values
-      }
-    } else {
-      score += 3; // Using Skip-Bo as 1
+  for (let discardPileIndex = 0; discardPileIndex < aiPlayer.discardPiles.length; discardPileIndex++) {
+    const discardPile = aiPlayer.discardPiles[discardPileIndex];
+    const topCard = discardPile[discardPile.length - 1];
+
+    if (
+      topCard &&
+      !topCard.isSkipBo &&
+      canPlayCard(topCard, move.buildPileIndex, gameState) &&
+      !sameSource(move, 'discard', discardPile.length - 1, discardPileIndex)
+    ) {
+      return true;
     }
   }
 
-  // Penalty for playing low-value cards early (save them for later)
-  if (!card.isSkipBo && card.value <= 3 && buildPile.length < 5) {
-    score -= 2;
+  return false;
+};
+
+const generatePlayMoves = (gameState: GameState): MoveEvaluation[] => {
+  const aiPlayer = getAIPlayer(gameState);
+  const moves: MoveEvaluation[] = [];
+
+  const stockIndex = aiPlayer.stockPile.length - 1;
+  const stockCard = getTopStockCard(aiPlayer);
+  if (stockCard) {
+    getPlayableBuildPiles(stockCard, gameState).forEach((buildPileIndex) => {
+      moves.push({
+        action: 'play',
+        score: 0,
+        source: 'stock',
+        sourceIndex: stockIndex,
+        buildPileIndex,
+      });
+    });
   }
 
-  return score;
-}
+  aiPlayer.hand.forEach((card, handIndex) => {
+    if (!card) {
+      return;
+    }
 
-/**
- * Evaluates the strategic value of discarding a card (internal function)
- */
-function evaluateDiscardMoveInternal(
-  card: Card,
-  discardPileIndex: number,
-  gameState: GameState
-): number {
+    getPlayableBuildPiles(card, gameState).forEach((buildPileIndex) => {
+      moves.push({
+        action: 'play',
+        score: 0,
+        source: 'hand',
+        sourceIndex: handIndex,
+        buildPileIndex,
+      });
+    });
+  });
+
+  aiPlayer.discardPiles.forEach((discardPile, discardPileIndex) => {
+    const topIndex = discardPile.length - 1;
+    const topCard = discardPile[topIndex];
+
+    if (!topCard) {
+      return;
+    }
+
+    getPlayableBuildPiles(topCard, gameState).forEach((buildPileIndex) => {
+      moves.push({
+        action: 'play',
+        score: 0,
+        source: 'discard',
+        sourceIndex: topIndex,
+        sourceDiscardPileIndex: discardPileIndex,
+        buildPileIndex,
+      });
+    });
+  });
+
+  return moves;
+};
+
+const generateDiscardMoves = (gameState: GameState): MoveEvaluation[] => {
+  const aiPlayer = getAIPlayer(gameState);
+  const moves: MoveEvaluation[] = [];
+
+  aiPlayer.hand.forEach((card, handIndex) => {
+    if (!card || card.isSkipBo) {
+      return;
+    }
+
+    aiPlayer.discardPiles.forEach((_, discardPileIndex) => {
+      moves.push({
+        action: 'discard',
+        score: 0,
+        source: 'hand',
+        sourceIndex: handIndex,
+        discardPileIndex,
+      });
+    });
+  });
+
+  return moves;
+};
+
+const evaluateState = (
+  gameState: GameState,
+  aiPlayerIndex: number = gameState.currentPlayerIndex
+): number => {
   const weights = getWeights();
-  const aiPlayer = gameState.players[gameState.currentPlayerIndex];
-  const pile = aiPlayer.discardPiles[discardPileIndex];
+  const aiPlayer = getAIPlayer(gameState, aiPlayerIndex);
 
-  let score = 0;
+  if (aiPlayer.stockPile.length === 0) {
+    return STOCK_WIN_BONUS;
+  }
 
-  // Base penalty for discarding (we prefer playing)
-  score -= 5;
+  let score = -aiPlayer.stockPile.length * weights.stockStateBonus;
+  score += getAccessibleSkipBoCount(aiPlayer) * weights.skipBoRetentionBonus;
 
-  // Check what values are needed on build piles
-  const neededValues = new Set<number>();
-  gameState.buildPiles.forEach(buildPile => {
-    if (buildPile.length > 0) {
-      const nextNeeded = buildPile[buildPile.length - 1].value + 1;
-      if (nextNeeded <= 12) {
-        neededValues.add(nextNeeded);
+  const stockCard = getTopStockCard(aiPlayer);
+  if (stockCard) {
+    if (getPlayableBuildPiles(stockCard, gameState).length > 0) {
+      score += weights.playFromStockBonus;
+    }
+
+    const gapToStock = getClosestGapToStock(gameState, aiPlayerIndex);
+    if (gapToStock !== null) {
+      score -= gapToStock * weights.stockGapPenalty;
+    }
+  }
+
+  aiPlayer.discardPiles.forEach((pile) => {
+    const topCard = pile[pile.length - 1];
+    if (!topCard) {
+      return;
+    }
+
+    if (getPlayableBuildPiles(topCard, gameState).length > 0) {
+      score += weights.playableTopDiscardBonus;
+    }
+
+    if (pile.length >= 2) {
+      const nextCard = pile[pile.length - 2];
+      if (nextCard.value === topCard.value || Math.abs(nextCard.value - topCard.value) === 1) {
+        score += weights.discardOrganizationBonus;
       }
-    } else {
-      neededValues.add(1);
     }
   });
 
-  // Heavy penalty for discarding needed values
-  if (neededValues.has(card.value)) {
-    score -= weights.neededValuePenalty;
-  }
-
-  // Group similar values together
-  if (pile.length > 0) {
-    const topCard = pile[pile.length - 1];
-    if (topCard.value === card.value) {
-      score += weights.sameValueScore;
-    } else if (Math.abs(topCard.value - card.value) === 1) {
-      score += weights.sequentialValueScore;
-    }
-  }
-
-  // Prefer discarding higher values (harder to play later)
-  score += (card.value / 12) * weights.highValueBonus;
-
-  // Small penalty for starting a new pile
-  if (pile.length === 0) {
-    score -= weights.newPilePenalty;
+  const opponents = gameState.players.filter((_, index) => index !== aiPlayerIndex);
+  if (opponents.length > 0) {
+    const closestOpponentStock = Math.min(...opponents.map((player) => player.stockPile.length));
+    score -= Math.max(0, 6 - closestOpponentStock) * weights.opponentPressurePenalty;
   }
 
   return score;
-}
+};
 
-/**
- * Simulates a game state after making a move (simplified)
- */
-export const simulateMove = (
+const evaluateMove = (
   gameState: GameState,
-  move: MoveEvaluation
-): GameState => {
-  // Create a deep copy of the game state
-  const newState = JSON.parse(JSON.stringify(gameState)) as GameState;
-  const player = newState.players[newState.currentPlayerIndex];
+  move: MoveEvaluation,
+  nextState: GameState,
+  aiPlayerIndex: number
+): number => {
+  const weights = getWeights();
+  const card = getCardForMove(gameState, move);
+  let score = 0;
 
-  if (move.action === 'play' && move.buildPileIndex !== undefined) {
-    // Simulate playing a card
-    const buildPile = newState.buildPiles[move.buildPileIndex];
-
-    if (move.source === 'stock' && move.sourceIndex !== undefined) {
-      const card = player.stockPile.splice(move.sourceIndex, 1)[0];
-      if (card) buildPile.push(card);
-    } else if (move.source === 'hand' && move.sourceIndex !== undefined) {
-      const card = player.hand.splice(move.sourceIndex, 1)[0];
-      if (card) buildPile.push(card);
-    } else if (move.source === 'discard' && move.discardPileIndex !== undefined && move.sourceIndex !== undefined) {
-      const card = player.discardPiles[move.discardPileIndex].splice(move.sourceIndex, 1)[0];
-      if (card) buildPile.push(card);
+  if (move.action === 'play') {
+    if (move.source === 'stock') {
+      score += weights.playFromStockBonus;
     }
 
-    // Check if build pile is complete (reached 12)
-    if (buildPile.length === 12) {
-      newState.buildPiles[move.buildPileIndex] = [];
+    if (move.source === 'discard') {
+      score += weights.playFromDiscardBonus;
+      if (move.sourceDiscardPileIndex !== undefined) {
+        const sourcePile = getAIPlayer(gameState, aiPlayerIndex).discardPiles[move.sourceDiscardPileIndex];
+        const revealedCard = sourcePile[sourcePile.length - 2];
+
+        if (revealedCard) {
+          if (getPlayableBuildPiles(revealedCard, nextState).length > 0) {
+            score += weights.revealPlayableBonus;
+          }
+
+          const nextStockCard = getTopStockCard(getAIPlayer(nextState, aiPlayerIndex));
+          if (
+            nextStockCard &&
+            !nextStockCard.isSkipBo &&
+            !revealedCard.isSkipBo &&
+            revealedCard.value < nextStockCard.value
+          ) {
+            const gap = nextStockCard.value - revealedCard.value;
+            if (gap >= 1 && gap <= 2) {
+              score += weights.revealStockBridgeBonus * (3 - gap);
+            }
+          }
+        }
+      }
     }
-  } else if (move.action === 'discard' && move.discardPileIndex !== undefined && move.sourceIndex !== undefined) {
-    // Simulate discarding a card
-    const card = player.hand.splice(move.sourceIndex, 1)[0];
-    if (card) player.discardPiles[move.discardPileIndex].push(card);
+
+    if (move.buildPileIndex !== undefined) {
+      const buildPile = gameState.buildPiles[move.buildPileIndex];
+      if (buildPile.length === 11) {
+        score += weights.completePileBonus;
+      }
+    }
+
+    if (card?.isSkipBo) {
+      score -= weights.useSkipBoPenalty;
+
+      if (hasNaturalAlternativeForBuild(gameState, move)) {
+        score -= weights.redundantSkipBoPenalty;
+      }
+    }
+
+    const beforeGap = getClosestGapToStock(gameState, aiPlayerIndex);
+    const afterGap = getClosestGapToStock(nextState, aiPlayerIndex);
+    if (beforeGap !== null && afterGap !== null && afterGap < beforeGap) {
+      score += (beforeGap - afterGap) * weights.stockGapPenalty * 2;
+    }
   }
 
-  return newState;
+  if (move.action === 'discard' && card && move.discardPileIndex !== undefined) {
+    score += evaluateDiscardMove(card, move.discardPileIndex, gameState);
+  }
+
+  return score;
+};
+
+const searchTurn = (
+  gameState: GameState,
+  aiPlayerIndex: number,
+  depth: number
+): SearchResult => {
+  if (depth <= 0 || gameState.gameIsOver) {
+    return { score: evaluateState(gameState, aiPlayerIndex), move: null };
+  }
+
+  const playMoves = generatePlayMoves(gameState);
+  const discardMoves = generateDiscardMoves(gameState);
+
+  const hasNonSkipBoPlay = playMoves.some((move) => {
+    if (move.source === 'stock') {
+      return true;
+    }
+
+    const card = getCardForMove(gameState, move);
+    return !!card && !card.isSkipBo;
+  });
+
+  const rankedDiscardMoves = discardMoves
+    .map((move) => {
+      const card = getCardForMove(gameState, move);
+      return {
+        move,
+        score:
+          card && move.discardPileIndex !== undefined
+            ? evaluateDiscardMove(card, move.discardPileIndex, gameState)
+            : Number.NEGATIVE_INFINITY,
+      };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 6)
+    .map(({ move }) => move);
+
+  const candidateMoves =
+    hasNonSkipBoPlay || playMoves.some((move) => move.source === 'stock')
+      ? playMoves
+      : [...playMoves, ...rankedDiscardMoves];
+
+  if (candidateMoves.length === 0) {
+    return {
+      score: evaluateState(gameState, aiPlayerIndex) - 5,
+      move: { action: 'end', score: 0 },
+    };
+  }
+
+  let bestMove: MoveEvaluation | null = null;
+  let bestScore = Number.NEGATIVE_INFINITY;
+
+  candidateMoves.forEach((move) => {
+    const nextState = simulateResolvedMove(gameState, move);
+    const localScore = evaluateMove(gameState, move, nextState, aiPlayerIndex);
+    const futureScore =
+      move.action === 'play' && !nextState.gameIsOver
+        ? searchTurn(nextState, aiPlayerIndex, depth - 1).score
+        : evaluateState(nextState, aiPlayerIndex);
+    const totalScore = localScore + futureScore;
+
+    if (totalScore > bestScore) {
+      bestScore = totalScore;
+      bestMove = { ...move, score: totalScore };
+    }
+  });
+
+  return {
+    score: bestScore,
+    move: bestMove,
+  };
+};
+
+export const lookAheadEvaluation = (
+  gameState: GameState,
+  depth: number = 4
+): MoveEvaluation | null => {
+  const aiPlayer = getAIPlayer(gameState);
+
+  if (!aiPlayer.isAI) {
+    return null;
+  }
+
+  return searchTurn(gameState, gameState.currentPlayerIndex, depth).move;
 };

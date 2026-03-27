@@ -20,7 +20,6 @@ export interface GameState {
   winnerIndex: number | null;
   selectedCard: SelectedCard | null;
   message: string;
-  aiDifficulty: AIDifficulty;
   config: GameConfig;
 }
 
@@ -29,6 +28,8 @@ export interface SelectedCard {
   source: 'hand' | 'stock' | 'discard';
   index: number;
   discardPileIndex?: number;
+  plannedBuildPileIndex?: number;
+  plannedDiscardPileIndex?: number;
 }
 
 export interface MoveResult {
@@ -53,8 +54,6 @@ export const themes = [
 ];
 
 export type Theme = typeof themes[number]['value'];
-
-export type AIDifficulty = 'easy' | 'medium' | 'hard';
 
 export interface GameConfig {
   DECK_SIZE: number;

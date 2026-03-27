@@ -1,4 +1,3 @@
-import { DifficultySwitcher } from './DifficultySwitcher';
 import { Button } from '@/components/ui/button.tsx';
 import {StockPileSizeSwitcher} from "@/components/StockPileSizeSwitcher.tsx";
 
@@ -18,7 +17,6 @@ function NewGame({ onNewGame }: NewGameProps) {
   return (
     <div className="flex items-baseline gap-2">
       <StockPileSizeSwitcher />
-      <DifficultySwitcher />
       <Button variant="secondary" onClick={handleNewGame}>Nouvelle partie</Button>
     </div>
   );

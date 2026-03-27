@@ -6,7 +6,7 @@ A Skip-Bo implementation built with React 18, TypeScript, and Vite. The project 
 
 - Human vs AI gameplay
 - XState-driven turn flow for draw, think, animate, and resolve phases
-- Strategic AI discard logic with configurable difficulty levels
+- Strategic AI with stock-first search, planned move targets, and improved Skip-Bo/discard heuristics
 - Automatic hand refill and completed-pile reshuffling
 - 11 visual themes
 - PWA registration for offline-ready builds
@@ -55,7 +55,7 @@ Open [http://localhost:5173](http://localhost:5173).
 
 ```text
 src/
-├── ai/           AI decision logic, difficulty config, and strategy notes
+├── ai/           AI decision logic, heuristics, search, and strategy notes
 ├── components/   Game board, player areas, controls, and UI primitives
 ├── contexts/     Animation context and provider
 ├── hooks/        Main gameplay hook used by the app shell
@@ -74,7 +74,9 @@ src/
 - Hands use fixed-size arrays with `null` slots. Removing a hand card should set the slot to `null`, not splice the array.
 - AI turns are driven by [`src/state/gameMachine.ts`](/Users/pierreluc/Development/skip-bo/src/state/gameMachine.ts).
 - The AI entry point is [`src/ai/computeBestMove.ts`](/Users/pierreluc/Development/skip-bo/src/ai/computeBestMove.ts).
-- Difficulty source of truth is `GameState.aiDifficulty`, which is synchronized into the AI config before move evaluation.
+- The AI always runs with the strongest strategy profile; there is no user-facing difficulty mode anymore.
+- AI card selection now keeps its planned destination between `SELECT_CARD` and the following resolver step.
+- The AI search simulates short turn sequences through the reducer, so it can prefer moves that unblock its stock pile a few actions later.
 - Completed build piles move into `completedBuildPiles` and are reshuffled back into `deck` when necessary.
 
 ## Themes
@@ -96,6 +98,6 @@ Available themes:
 ## Documentation
 
 - [`README.md`](/Users/pierreluc/Development/skip-bo/README.md): high-level project overview
-- [`src/ai/README.md`](/Users/pierreluc/Development/skip-bo/src/ai/README.md): AI architecture and difficulty behavior
+- [`src/ai/README.md`](/Users/pierreluc/Development/skip-bo/src/ai/README.md): AI architecture and strategy behavior
 - [`AGENTS.md`](/Users/pierreluc/Development/skip-bo/AGENTS.md): working notes for AI/code agents
 - [`src/ai/discardStrategy.md`](/Users/pierreluc/Development/skip-bo/src/ai/discardStrategy.md): AI strategy notes and backlog
