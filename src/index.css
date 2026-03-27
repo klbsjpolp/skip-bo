@@ -414,6 +414,13 @@
     overflow: hidden;
   }
 
+  .victory-burst-group {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transform: translate(var(--burst-offset-x, 0px), var(--burst-offset-y, 0px));
+  }
+
   .victory-accent,
   .victory-pattern,
   .victory-shine,
@@ -490,7 +497,7 @@
     opacity: 0;
     transform: translate3d(-50%, -50%, 0) scale(0.25) rotate(0deg);
     animation: victoryPieceBurst 3000ms cubic-bezier(0.16, 1, 0.3, 1) infinite;
-    animation-delay: calc(var(--piece-index) * 28ms);
+    animation-delay: calc(var(--burst-delay, 0ms) + var(--piece-index) * 28ms);
     will-change: transform, opacity;
   }
 

@@ -26,6 +26,33 @@ const SUNBURST_RAYS = Array.from({ length: 8 }, (_, index) => ({
   } as VictoryStyle,
 }));
 
+const BURST_GROUPS = [
+  {
+    key: 'center',
+    style: {
+      '--burst-offset-x': '0px',
+      '--burst-offset-y': '0px',
+      '--burst-delay': '0ms',
+    } as VictoryStyle,
+  },
+  {
+    key: 'left',
+    style: {
+      '--burst-offset-x': '-140px',
+      '--burst-offset-y': '-20px',
+      '--burst-delay': '250ms',
+    } as VictoryStyle,
+  },
+  {
+    key: 'right',
+    style: {
+      '--burst-offset-x': '220px',
+      '--burst-offset-y': '35px',
+      '--burst-delay': '600ms',
+    } as VictoryStyle,
+  },
+];
+
 export function VictoryEffects() {
   return (
     <>
@@ -41,8 +68,12 @@ export function VictoryEffects() {
       </div>
 
       <div className="victory-layer victory-burst-layer" aria-hidden="true">
-        {BURST_PIECES.map(({ key, style }) => (
-          <span key={key} className="victory-burst-piece" style={style} />
+        {BURST_GROUPS.map(({ key: groupKey, style: groupStyle }) => (
+          <div key={groupKey} className="victory-burst-group" style={groupStyle}>
+            {BURST_PIECES.map(({ key, style }) => (
+              <span key={`${groupKey}-${key}`} className="victory-burst-piece" style={style} />
+            ))}
+          </div>
         ))}
       </div>
     </>
