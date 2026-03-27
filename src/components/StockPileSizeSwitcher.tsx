@@ -1,15 +1,11 @@
 import {Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue, SelectLabel} from "@/components/ui/select.tsx";
 import {DEFAULT_STOCK_SIZE, getStoredStockSize, STOCK_STORAGE_KEY} from "@/state/initialGameState.ts";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 
 const options = Array.from({ length: 10 }, (_, i) => (i + 1) * 5); // 5..50
 
 export function StockPileSizeSwitcher() {
-  const [stockSize, setStockSize] = useState<number>(DEFAULT_STOCK_SIZE);
-
-  useEffect(() => {
-    setStockSize(getStoredStockSize());
-  }, []);
+  const [stockSize, setStockSize] = useState<number>(() => getStoredStockSize());
 
   const handleValueChange = (value: string) => {
     const stockSize = parseInt(value, 10);

@@ -2,7 +2,7 @@ import {Player, GameState, Card as CardType} from '@/types';
 import {Card} from '@/components/Card';
 import {cn} from '@/lib/utils';
 import {EmptyCard} from "@/components/EmptyCard.tsx";
-import {Fragment, MouseEventHandler, useCallback} from "react";
+import {Fragment, MouseEventHandler} from "react";
 import {useCardAnimation} from "@/contexts/useCardAnimation.ts";
 import {VictoryEffects} from '@/components/VictoryEffects';
 
@@ -184,7 +184,7 @@ function StockPile({player, playerIndex, isCurrentPlayer, gameState, selectCard,
   const {isCardBeingAnimated} = useCardAnimation();
   const isHuman = !player.isAI;
 
-  const stockPileOnClick: MouseEventHandler = useCallback((e) => {
+  const stockPileOnClick: MouseEventHandler = (e) => {
     // Prevent event propagation
     e.stopPropagation();
 
@@ -200,7 +200,7 @@ function StockPile({player, playerIndex, isCurrentPlayer, gameState, selectCard,
         selectCard('stock', player.stockPile.length - 1);
       }
     }
-  }, [clearSelection, gameState.currentPlayerIndex, gameState.selectedCard?.source, isCurrentPlayer, isHuman, player.stockPile.length, playerIndex, selectCard])
+  };
 
 
   // @ts-expect-error setting variable in style
@@ -265,7 +265,7 @@ function HandSection({player, playerIndex, isCurrentPlayer, gameState, selectCar
   const isHuman = !player.isAI;
   const handOverlaps = player.hand.length > 4;
 
-  const handCardOnClick: MouseEventHandler = useCallback((e) => {
+  const handCardOnClick: MouseEventHandler = (e) => {
     // Prevent event propagation
     e.stopPropagation();
 
@@ -285,7 +285,7 @@ function HandSection({player, playerIndex, isCurrentPlayer, gameState, selectCar
         selectCard('hand', index);
       }
     }
-  }, [clearSelection, gameState.currentPlayerIndex, gameState.selectedCard?.index, gameState.selectedCard?.source, isCurrentPlayer, isHuman, playerIndex, selectCard]);
+  };
 
 
   return <div className="flex items-center gap-2">

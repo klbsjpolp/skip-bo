@@ -43,13 +43,16 @@ const CardComponent: React.FC<CardProps> = ({
   const morphingAfterDelay = 700;
 
   useLayoutEffect(() => {
-    let timer1: NodeJS.Timeout, timer2: NodeJS.Timeout;
+    let startTimer: ReturnType<typeof setTimeout> | undefined;
+    let timer1: ReturnType<typeof setTimeout> | undefined;
+    let timer2: ReturnType<typeof setTimeout> | undefined;
     if (card && card.isSkipBo) {
-      setMorphing('yes');
+      startTimer = setTimeout(() => setMorphing('yes'), 0);
       timer1 = setTimeout(() => setMorphing('after'), morphingDelay);
       timer2 = setTimeout(() => setMorphing('no'), morphingDelay + morphingAfterDelay);
     }
     return () =>  {
+      clearTimeout(startTimer);
       clearTimeout(timer1);
       clearTimeout(timer2);
     }

@@ -31,8 +31,11 @@ export function useSkipBoGame() {
   const state = snapshot.context.G;
   const dispatch = send;                     // alias pour préserver la suite du code
   const stateRef = useRef<GameState>(state);
-  stateRef.current = state;
   const { startAnimation, removeAnimation, waitForAnimations } = useCardAnimation();
+
+  React.useLayoutEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   // Set up global animation context for AI animations and draw animations
   React.useEffect(() => {
