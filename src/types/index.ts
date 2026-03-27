@@ -66,10 +66,3 @@ export interface GameConfig {
   CARD_VALUES_MAX: number;
   CARD_VALUES_SKIP_BO: number;
 }
-
-export interface AIStrategy {
-  name: string;
-  priority: number;
-  canExecute: (gameState: GameState, playerIndex: number) => boolean;
-  execute: (gameState: GameState, playerIndex: number) => MoveResult;
-}

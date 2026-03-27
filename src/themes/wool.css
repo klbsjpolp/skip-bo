@@ -71,6 +71,10 @@
     }
   }
 
+  .animated-card .card.skipbo-text .card-corner-number {
+    z-index: 1;
+  }
+
   .card .card-inner {
     opacity: 0.5; /* Adjust for desired intensity */
     /* This creates a seamless, random noise pattern */
