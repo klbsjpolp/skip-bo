@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from 'path'
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from 'vite-plugin-pwa'
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 export default defineConfig(({ mode }) => {
   const isProd = mode === 'production'
@@ -10,9 +11,15 @@ export default defineConfig(({ mode }) => {
 
   return {
     base,
+    build: { sourcemap: "hidden" },
     plugins: [
       react(),
       tailwindcss(),
+      sentryVitePlugin({
+        org: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT,
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+      }),
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: [

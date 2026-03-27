@@ -17,7 +17,7 @@ function App() {
   }, [waitForAnimations]);
 
   return (
-    <div id="main" className="min-h-screen p-4 lg:p-10">
+    <div id="main" className="min-h-screen p-4 lg:p-10">OMG
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between mb-2">
           <NewGame onNewGame={initializeGame} />
