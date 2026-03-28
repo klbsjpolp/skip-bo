@@ -1,6 +1,6 @@
 import type {Card as CardType} from '@/types';
 import {cn} from '@/lib/utils';
-import type {MouseEventHandler, CSSProperties} from "react";
+import type {MouseEventHandler, CSSProperties, KeyboardEventHandler, HTMLAttributes} from "react";
 import React, { memo, useState, useLayoutEffect} from "react";
 
 interface CardProps {
@@ -36,7 +36,8 @@ const CardComponent: React.FC<CardProps> = ({
                                               canBeGrabbed = false,
                                               stackIndex = undefined,
                                               overlapIndex = undefined,
-                                              displayValue: overriddenDisplayValue
+                                              displayValue: overriddenDisplayValue,
+                                              hint,
                                             }) => {
   const [morphing, setMorphing] = useState<'no' | 'yes' | 'after'>('no');
 
@@ -97,6 +98,20 @@ const CardComponent: React.FC<CardProps> = ({
   );
 
   if (card && shouldMorph) {
+    const interactiveProps: HTMLAttributes<HTMLDivElement> = onClick ? {
+      onClick,
+      role: 'button',
+      tabIndex: 0,
+      'aria-label': hint ?? cardValue,
+      'aria-pressed': isSelected ? true : undefined,
+      onKeyDown: ((event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onClick(event as unknown as Parameters<NonNullable<CardProps['onClick']>>[0]);
+        }
+      }) as KeyboardEventHandler<HTMLDivElement>,
+    } : {};
+
     // During morphing: outer card acts as a transparent wrapper to preserve layout/hover positions.
     const fromOpacity = morphing === 'yes' ? 1 : 0; // fade out after delay
     const toOpacity = morphing === 'yes' ? 0 : 1;   // fade in after delay
@@ -105,6 +120,7 @@ const CardComponent: React.FC<CardProps> = ({
       <div
         className='card-morph-wrapper'
         style={style}
+        {...interactiveProps}
       >
         {/* FROM (Skip-Bo) layer */}
         <div
@@ -136,6 +152,19 @@ const CardComponent: React.FC<CardProps> = ({
 
   // Default: render single card as before
   const content = renderContent(cardValue);
+  const interactiveProps: HTMLAttributes<HTMLDivElement> = onClick ? {
+    onClick,
+    role: 'button',
+    tabIndex: 0,
+    'aria-label': hint ?? cardValue,
+    'aria-pressed': isSelected ? true : undefined,
+    onKeyDown: ((event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        onClick(event as unknown as Parameters<NonNullable<CardProps['onClick']>>[0]);
+      }
+    }) as KeyboardEventHandler<HTMLDivElement>,
+  } : {};
 
   return (card ?
       <div
@@ -149,9 +178,9 @@ const CardComponent: React.FC<CardProps> = ({
           !canBeGrabbed && 'cursor-default',
           className
         )}
-        onClick={onClick}
         style={style}
         data-value={card.value}
+        {...interactiveProps}
       >
         {content}
       </div>

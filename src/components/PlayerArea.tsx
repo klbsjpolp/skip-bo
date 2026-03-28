@@ -33,7 +33,13 @@ export function PlayerArea({
       "player-area ring-3",
       isCurrentPlayer && "active-turn",
       isWinner && "winner"
-    )} data-player-type={player.isAI ? 'ai' : 'human'} data-player-index={playerIndex}>
+    )}
+      data-player-type={player.isAI ? 'ai' : 'human'}
+      data-player-index={playerIndex}
+      data-player-state={isWinner ? 'winner' : isCurrentPlayer ? 'active' : 'idle'}
+      data-testid={player.isAI ? 'ai-player-area' : 'human-player-area'}
+      aria-label={player.isAI ? 'Zone du joueur IA' : 'Zone du joueur humain'}
+    >
       <div className="bg-layer"/>
       {isWinner && <VictoryEffects />}
       <div className="content-layer flex items-center gap-2 lg:gap-4 h-full flex-wrap">
@@ -84,25 +90,44 @@ function DiscardPile({
     return {card, cardIdx, isAnimated, key: `discard-${pileIndex}-card-${cardIdx}`};
   });
 
+  const canInteract = isHuman && isCurrentPlayer;
+
+  const handleDiscardPilePress = () => {
+    if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
+      void discardCard(pileIndex);
+    } else if (isHuman && isCurrentPlayer) {
+      // If this discard pile is already selected, deselect it
+      if (gameState.selectedCard?.source === 'discard' &&
+        gameState.selectedCard.discardPileIndex === pileIndex &&
+        gameState.currentPlayerIndex === playerIndex) {
+        // Clear the selection
+        clearSelection();
+      } else {
+        // Select this discard pile
+        selectCard('discard', pile.length - 1, pileIndex);
+      }
+    }
+  };
+
   return <div className={cn(
     "drop-indicator discard-pile-stack",
     isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand' && "can-drop"
   )} data-pile-index={pileIndex}
+    role={canInteract ? 'button' : undefined}
+    tabIndex={canInteract ? 0 : undefined}
+    aria-label={`Défausse ${pileIndex + 1}`}
     onClick={(e) => {
       e.stopPropagation();
-      if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
-        void discardCard(pileIndex);
-      } else if (isHuman && isCurrentPlayer) {
-        // If this discard pile is already selected, deselect it
-        if (gameState.selectedCard?.source === 'discard' &&
-          gameState.selectedCard.discardPileIndex === pileIndex &&
-          gameState.currentPlayerIndex === playerIndex) {
-          // Clear the selection
-          clearSelection();
-        } else {
-          // Select this discard pile
-          selectCard('discard', pile.length - 1, pileIndex);
-        }
+      handleDiscardPilePress();
+    }}
+    onKeyDown={(e) => {
+      if (!canInteract) {
+        return;
+      }
+
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleDiscardPilePress();
       }
     }}
     style={{height: `calc(var(--card-height) + ${(pile.length <= 1 ? 0 : pile.length - 1) * 20}px)`}}
@@ -161,7 +186,7 @@ function DiscardPiles({
 
   // @ts-expect-error setting variable in style
   return <div className="flex items-center gap-2" style={{"--card-rotate": "0deg"}}>
-    <h3 className="min-w-fit vertical-text">Défausses</h3>
+    <div className="min-w-fit vertical-text">Défausses</div>
     <div className="discard-piles self-start">
       {player.discardPiles.map((pile, pileIndex) => (
         <DiscardPile key={`discard-${pileIndex}`} pile={pile} pileIndex={pileIndex} playerIndex={playerIndex}
@@ -207,7 +232,7 @@ function StockPile({player, playerIndex, isCurrentPlayer, gameState, selectCard,
 
   // @ts-expect-error setting variable in style
   return <div className="flex items-center relative gap-2" style={{"--card-rotate": "0deg"}}>
-    <h3 className="vertical-text">Talon ({player.stockPile.length})</h3>
+    <div className="vertical-text">Talon ({player.stockPile.length})</div>
     {player.stockPile.length > 0 ? (
       <div className="relative w-full stock-pile">
         {/* Show the top card unless it's being animated */}
@@ -291,7 +316,7 @@ function HandSection({player, playerIndex, isCurrentPlayer, gameState, selectCar
 
 
   return <div className="flex items-center gap-2">
-    <h3 className="vertical-text">Main</h3>
+    <div className="vertical-text">Main</div>
     <div className={cn(
       "hand-area",
       handOverlaps && "overlap-hand"

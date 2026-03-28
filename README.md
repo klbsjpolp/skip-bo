@@ -8,9 +8,10 @@ A Skip-Bo implementation built with React 18, TypeScript, and Vite. The project 
 - XState-driven turn flow for draw, think, animate, and resolve phases
 - Strategic AI with stock-first search, planned move targets, and improved Skip-Bo/discard heuristics
 - Automatic hand refill and completed-pile reshuffling
-- 11 visual themes
+- 13 visual themes
 - PWA registration for offline-ready builds
 - Vitest coverage for reducer, state machine, and key card behaviors
+- Playwright coverage for theme, layout, and accessibility regressions
 
 ## Tech Stack
 
@@ -74,6 +75,9 @@ To verify the integration after deploy, open DevTools, filter the Network tab by
 - `pnpm preview` serves the production build locally
 - `pnpm lint` runs ESLint
 - `pnpm test` runs the Vitest suite
+- `pnpm test:e2e` runs the Playwright UI suite
+- `pnpm test:visual` runs the desktop visual-regression suite
+- `pnpm test:visual:update` refreshes desktop visual baselines
 - `pnpm typecheck` runs `tsc --noEmit`
 
 ## Project Structure
@@ -111,14 +115,24 @@ Available themes:
 - Light
 - Dark
 - Pastel
+- Bonbon
 - Rainbow
 - Metro
 - Neon
 - Retro
+- Espace
 - Glass
 - Wool
 - Minecraft
 - Steampunk
+
+## UI Regression Testing
+
+- Desktop visual baselines live in `tests/ui/*.spec.ts-snapshots/` when they are committed and are generated from Playwright on Chromium.
+- Deterministic UI fixtures are available in development with `?fixture=ready-human`, `?fixture=selected-hand`, `?fixture=ai-turn`, and `?fixture=victory-human`.
+- Theme switching tests set `localStorage.theme` directly for coverage, with one separate test that changes the theme through the live switcher.
+- Screenshot assertions are skipped when the matching baseline file is absent, so the functional UI checks can still run on branches without committed snapshots.
+- Mobile smoke coverage currently checks horizontal overflow on representative themes rather than maintaining a second visual baseline set.
 
 ## Documentation
 

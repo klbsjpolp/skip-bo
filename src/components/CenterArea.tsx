@@ -12,13 +12,13 @@ interface CenterAreaProps {
 export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps) {
 
   return (
-    <div className="center-area">
+    <div className="center-area" data-testid="center-area">
       <div className="bg-layer"/>
       <div className="content-layer flex items-center gap-2 lg:gap-4 h-full">
         {/* Deck Section */}
-        <h3 className="min-w-fit vertical-text">
+        <div className="min-w-fit vertical-text">
           Pioche ({gameState.deck.length})
-        </h3>
+        </div>
           <div className="deck">
           {gameState.deck.length > 0 ? (
             <Card
@@ -33,27 +33,45 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
         </div>
 
         {/* Build Piles Section */}
-        <h3 className="min-w-fit vertical-text">Piles de<br />construction</h3>
+        <div className="min-w-fit vertical-text">Piles de<br />construction</div>
         <div className="build-piles">
-          {gameState.buildPiles.map((pile, index) => (
+          {gameState.buildPiles.map((pile, index) => {
+            const canDropSelectedCard = Boolean(
+              gameState.selectedCard &&
+              gameState.currentPlayerIndex === 0 &&
+              canPlayCard(gameState.selectedCard.card, index, gameState)
+            );
+
+            const handleBuildPilePress = () => {
+              if (canDropSelectedCard) {
+                void playCard(index);
+              }
+            };
+
+            return (
             <div
               key={`build-${index}`}
               data-build-pile={index}
+              role={canDropSelectedCard ? 'button' : undefined}
+              tabIndex={canDropSelectedCard ? 0 : undefined}
+              aria-label={`Pile de construction ${index + 1}`}
               className={cn(
                 "relative drop-indicator build-pile",
-                gameState.selectedCard && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState)
-                  && 'can-drop'
+                canDropSelectedCard && 'can-drop'
               )}
               onClick={(e) => {
                 // Prevent event propagation
                 e.stopPropagation();
+                handleBuildPilePress();
+              }}
+              onKeyDown={(e) => {
+                if (!canDropSelectedCard) {
+                  return;
+                }
 
-                // Only allow playing a card if there's a selected card, it's the human player's turn,
-                // and the card can be played on this build pile
-                if (gameState.selectedCard &&
-                    gameState.currentPlayerIndex === 0 &&
-                    canPlayCard(gameState.selectedCard.card, index, gameState)) {
-                  void playCard(index);
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleBuildPilePress();
                 }
               }}
             >
@@ -70,15 +88,15 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                   />
               ) : (
                   <EmptyCard
-                    canDropCard={gameState.selectedCard !== null && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState)}
+                    canDropCard={canDropSelectedCard}
                     className={cn(
                       "drop-indicator",
-                      gameState.selectedCard && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState) && "can-drop"
+                      canDropSelectedCard && "can-drop"
                     )}
                   />
               )}
             </div>
-          ))}
+          )})}
         </div>
 
         {/* Grow - blank space */}

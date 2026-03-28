@@ -49,7 +49,7 @@ const BURST_GROUPS = [
 export function VictoryEffects() {
   return (
     <>
-      <div className="victory-layer victory-persistent-layer" aria-hidden="true">
+      <div className="victory-layer victory-persistent-layer" aria-hidden="true" data-testid="victory-effects">
         <div className="victory-accent" />
         <div className="victory-pattern" />
         <div className="victory-shine" />

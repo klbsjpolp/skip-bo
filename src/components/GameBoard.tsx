@@ -26,7 +26,10 @@ export function GameBoard({
   const winner = gameState.winnerIndex !== null ? gameState.players[gameState.winnerIndex] : null;
 
   return (
-    <div className={cn("game-board max-w-7xl mx-auto", winner && "game-board-victory")}>
+    <div
+      className={cn("game-board max-w-7xl mx-auto", winner && "game-board-victory")}
+      data-testid="game-board"
+    >
       {/* AI Player Area */}
       <PlayerArea
         player={aiPlayer}
@@ -47,7 +50,7 @@ export function GameBoard({
       />
 
       {/* Game Message */}
-      <h1 className="my-4 lg:my-6">
+      <h1 className="my-4 lg:my-6" data-testid="game-message">
         {gameState.message}
       </h1>
 

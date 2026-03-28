@@ -23,7 +23,7 @@ export function StockPileSizeSwitcher() {
       value={String(stockSize)}
       onValueChange={handleValueChange}
     >
-      <SelectTrigger className="w-15">
+      <SelectTrigger className="w-15" aria-label="Taille de pile de départ">
         <SelectValue placeholder={DEFAULT_STOCK_SIZE} />
       </SelectTrigger>
       <SelectContent>

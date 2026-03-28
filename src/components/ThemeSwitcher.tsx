@@ -12,14 +12,14 @@ export function ThemeSwitcher() {
     return IconComponent ? <IconComponent className="w-4 h-4 mr-2" /> : null;
   };
 
-  return (<div className="relative">
+  return (<div className="relative" data-testid="theme-switcher">
     <Select value={theme} onValueChange={setTheme}>
-      <SelectTrigger className="w-32">
+      <SelectTrigger className="w-32" data-testid="theme-switcher-trigger" aria-label="Thème">
         <SelectValue placeholder="Thème" />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent data-testid="theme-switcher-content">
         {themes.map(({ value, label, icon }) => (
-          <SelectItem key={value} value={value}>
+          <SelectItem key={value} value={value} data-testid={`theme-option-${value}`}>
             <div className="flex items-center">
               {getIcon(icon)}
               {label}

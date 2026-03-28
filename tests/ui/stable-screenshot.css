@@ -1,0 +1,18 @@
+*,
+*::before,
+*::after {
+  animation: none !important;
+  transition: none !important;
+  caret-color: transparent !important;
+}
+
+html {
+  scroll-behavior: auto !important;
+}
+
+.card-animation-layer,
+.animated-card,
+.victory-burst-layer,
+.victory-shine {
+  display: none !important;
+}

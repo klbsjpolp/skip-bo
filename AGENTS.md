@@ -5,6 +5,8 @@ Repo-local guidance for AI and coding agents working on this project.
 ## Fast Commands
 
 - `pnpm test`
+- `pnpm test:e2e`
+- `pnpm test:visual`
 - `pnpm lint`
 - `pnpm typecheck`
 - `pnpm dev`
@@ -38,11 +40,15 @@ Repo-local guidance for AI and coding agents working on this project.
 
 - Reducer and state-machine changes should usually update tests under [`src/state/__tests__`](/Users/pierreluc/Development/skip-bo/src/state/__tests__).
 - Card rendering and interaction changes should usually update tests under [`src/components/__tests__`](/Users/pierreluc/Development/skip-bo/src/components/__tests__).
+- Theme, layout, and general UI regressions should usually update the Playwright coverage under `/Users/pierreluc/Development/skip-bo/tests/ui`.
 - If you touch animation timing or DOM assumptions, validate both human and AI turns in the browser.
+- Desktop visual baselines are Chromium snapshots. Keep snapshot updates in a consistent environment when possible.
+- Playwright screenshot assertions intentionally no-op when the matching baseline file is absent, so branches can keep the functional UI checks without carrying the snapshot payload.
 
 ## Useful Debug Hook
 
 - `?aiHand=` can force the AI hand in the draw service for local debugging. Supported formats include `1,2,3,4,5`, `1-2-3-4-5`, and `[1,2,3,4,5]`.
+- `?fixture=` enables static UI fixtures in local development for browser tests and visual review. Supported values are `ready-human`, `selected-hand`, `ai-turn`, and `victory-human`.
 
 ## Documentation Maintenance
 
