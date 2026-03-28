@@ -8,7 +8,6 @@ export const MESSAGES = {
   CARD_PLAYED: "Carte jouée",
   TURN_ENDED: "Tour terminé",
   GAME_WON: "La partie est gagnée par {player} !",
-  AI_THINKING: "L'IA réfléchit...",
   SELECT_CARD: "Sélectionnez une carte",
   SELECT_DESTINATION: "Sélectionnez une destination",
 };

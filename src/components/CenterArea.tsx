@@ -60,7 +60,10 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
               {pile.length > 0 ? (
                   <Card
                     hint={`Construction pile ${index + 1}`}
-                    card={pile[pile.length - 1]}
+                    card={{
+                      ...pile[pile.length - 1],
+                      isSkipBo: false, // Force card-normal class for styling
+                    }}
                     isRevealed={true}
                     canBeGrabbed={false}
                     displayValue={pile.length.toString()} // Show the sequential position (1-12) instead of card value

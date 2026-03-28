@@ -147,15 +147,18 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
           plannedBuildPileIndex: action.plannedBuildPileIndex,
           plannedDiscardPileIndex: action.plannedDiscardPileIndex,
         };
-        draft.message = 'Sélectionnez une destination';
+        const player = draft.players[draft.currentPlayerIndex];
+        draft.message = player ? "L'IA joue" : 'Sélectionnez une destination';
       }
       break;
     }
 
-    case 'CLEAR_SELECTION':
+    case 'CLEAR_SELECTION': {
       draft.selectedCard = null;
-      draft.message = 'Sélectionnez une carte';
+      const player = draft.players[draft.currentPlayerIndex];
+      draft.message = player ? "L'IA joue" : 'Sélectionnez une carte';
       break;
+    }
 
     case 'PLAY_CARD': {
       const { selectedCard } = draft;
@@ -248,7 +251,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
         draft.winnerIndex = draft.currentPlayerIndex;
         draft.message = MESSAGES.GAME_WON.replace('{player}', player.isAI ? "l'IA" : 'le joueur');
       } else {
-        draft.message = `${player.isAI ? "L'IA a joué une carte" : "Vous avez joué une carte"}`;
+        draft.message = `${player.isAI ? "L'IA joue" : "Vous avez joué une carte"}`;
       }
 
       // Clear selection
@@ -304,7 +307,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       // Set message
       const currentPlayer = draft.players[1 - draft.currentPlayerIndex]; // Previous player
       const nextPlayer = draft.players[draft.currentPlayerIndex]; // New current player
-      draft.message = `${currentPlayer.isAI ? "Tour de l'IA terminé" : "Votre tour est terminé"}. ${nextPlayer.isAI ? "L'IA joue maintenant" : "C'est votre tour"}`;
+      draft.message = `${currentPlayer.isAI ? "Tour de l'IA terminé" : "Votre tour est terminé"}. ${nextPlayer.isAI ? "L'IA joue" : "C'est votre tour"}`;
 
       // Clear selection
       draft.selectedCard = null;

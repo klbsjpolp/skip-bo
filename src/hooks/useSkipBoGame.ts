@@ -59,7 +59,7 @@ export function useSkipBoGame() {
     if (!currentState.selectedCard) {
       return { success: false, message: 'Aucune carte sélectionnée' };
     }
-
+    
     if (!canPlayCard(currentState.selectedCard.card, buildPile, currentState)) {
       return { success: false, message: 'Vous ne pouvez pas jouer cette carte' };
     }
