@@ -148,7 +148,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
           plannedDiscardPileIndex: action.plannedDiscardPileIndex,
         };
         const player = draft.players[draft.currentPlayerIndex];
-        draft.message = player ? "L'IA joue" : 'Sélectionnez une destination';
+        draft.message = player.isAI ? "L'IA joue" : 'Sélectionnez une destination';
       }
       break;
     }
@@ -156,7 +156,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
     case 'CLEAR_SELECTION': {
       draft.selectedCard = null;
       const player = draft.players[draft.currentPlayerIndex];
-      draft.message = player ? "L'IA joue" : 'Sélectionnez une carte';
+      draft.message = player.isAI ? "L'IA joue" : 'Sélectionnez une carte';
       break;
     }
 
