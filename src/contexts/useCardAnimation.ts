@@ -1,5 +1,5 @@
 import {createContext, useContext} from "react";
-import {AnimationContextType} from "@/contexts/CardAnimationContext.tsx";
+import type {AnimationContextType} from "@/contexts/CardAnimationContext.tsx";
 
 export const CardAnimationContext = createContext<AnimationContextType | undefined>(undefined);
 

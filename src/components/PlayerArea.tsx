@@ -1,8 +1,9 @@
-import {Player, GameState, Card as CardType} from '@/types';
+import type {Player, GameState, Card as CardType} from '@/types';
 import {Card} from '@/components/Card';
 import {cn} from '@/lib/utils';
 import {EmptyCard} from "@/components/EmptyCard.tsx";
-import {Fragment, MouseEventHandler} from "react";
+import type { MouseEventHandler} from "react";
+import {Fragment} from "react";
 import {useCardAnimation} from "@/contexts/useCardAnimation.ts";
 import {VictoryEffects} from '@/components/VictoryEffects';
 
@@ -87,10 +88,10 @@ function DiscardPile({
     "drop-indicator discard-pile-stack",
     isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand' && "can-drop"
   )} data-pile-index={pileIndex}
-    onClick={async (e) => {
+    onClick={(e) => {
       e.stopPropagation();
       if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
-        await discardCard(pileIndex);
+        void discardCard(pileIndex);
       } else if (isHuman && isCurrentPlayer) {
         // If this discard pile is already selected, deselect it
         if (gameState.selectedCard?.source === 'discard' &&

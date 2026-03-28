@@ -1,9 +1,9 @@
 import {assign, createMachine, fromPromise} from 'xstate';
 import {gameReducer} from './gameReducer';
-import {GameAction} from './gameActions';
+import type {GameAction} from './gameActions';
 import {initialGameState} from './initialGameState';
 import {computeBestMove} from '@/ai/computeBestMove';
-import {Card, GameState} from '@/types';
+import type {Card, GameState} from '@/types';
 import {triggerAIAnimation} from '@/services/aiAnimationService';
 import {triggerMultipleDrawAnimations} from '@/services/drawAnimationService';
 import {animationGate} from '@/services/animationGate';
@@ -379,7 +379,7 @@ export const gameMachine = createMachine({
 
             // 1) Try JSON array first (e.g., "[1,2,3,4,5]")
             try {
-              const maybe = JSON.parse(raw);
+              const maybe: unknown = JSON.parse(raw);
               if (Array.isArray(maybe)) {
                 numbers = maybe
                   .map((n) => (typeof n === 'string' ? parseInt(n, 10) : Number(n)))

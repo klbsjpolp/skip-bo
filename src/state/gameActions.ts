@@ -1,4 +1,4 @@
-import { Card } from '@/types';
+import type { Card } from '@/types';
 
 export type GameAction =
   | { type: 'INIT' }

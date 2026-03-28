@@ -1,7 +1,7 @@
 import React, { useCallback, useRef } from 'react';
 import { useMachine } from '@xstate/react';
 import { gameMachine } from '@/state/gameMachine';
-import { GameState, MoveResult, Card } from '@/types';
+import type { GameState, MoveResult, Card } from '@/types';
 import { canPlayCard } from '@/lib/validators';
 import {
   getHandCardPosition,
@@ -181,16 +181,11 @@ export function useSkipBoGame() {
           
           // Trigger draw animations
           if (cardsToAnimate.length > 0) {
-            console.log(`🔄 useSkipBoGame: Starting draw animations for ${cardsToAnimate.length} cards`);
-            const startTime = Date.now();
-
-            const drawAnimationDuration = await triggerMultipleDrawAnimations(
+            await triggerMultipleDrawAnimations(
               currentState.currentPlayerIndex,
               cardsToAnimate,
               handIndices,
             );
-            
-            console.log(`⏱️ useSkipBoGame: Received drawAnimationDuration: ${drawAnimationDuration}ms after ${Date.now() - startTime}ms`);
 
             // Do NOT wait for draw animations to complete here.
             // Start-of-turn draws already apply state immediately and then wait in the state machine.

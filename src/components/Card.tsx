@@ -1,6 +1,7 @@
-import {Card as CardType} from '@/types';
+import type {Card as CardType} from '@/types';
 import {cn} from '@/lib/utils';
-import React, {MouseEventHandler, CSSProperties, memo, useState, useLayoutEffect} from "react";
+import type {MouseEventHandler, CSSProperties} from "react";
+import React, { memo, useState, useLayoutEffect} from "react";
 
 interface CardProps {
   card: CardType | null,

@@ -1,11 +1,11 @@
-import {Card} from '@/types';
+import type {Card} from '@/types';
 import {
   calculateAnimationDuration,
   getDeckPosition,
   getHandCardAngle,
   getHandCardPosition
 } from '@/utils/cardPositions';
-import {CardAnimationData} from "@/contexts/CardAnimationContext.tsx";
+import type {CardAnimationData} from "@/contexts/CardAnimationContext.tsx";
 
 // Global reference to the animation context
 let globalAnimationContext: {
@@ -20,12 +20,12 @@ export const setGlobalDrawAnimationContext = (context: typeof globalAnimationCon
 
 // Helper function to wait for the global animation context to be available
 // Function to trigger draw animations from deck to hand
-const triggerDrawAnimation = async (
+const triggerDrawAnimation = (
   playerIndex: number,
   card: Card,
   handIndex: number,
   initialDelay: number = 0
-): Promise<{ duration: number; animationId: string }> => {
+): { duration: number; animationId: string } => {
   if (!globalAnimationContext) {
     console.warn('Animation context not available for draw action');
     return { duration: 0, animationId: '' };
@@ -91,8 +91,6 @@ export const triggerMultipleDrawAnimations = async (
   handIndices: number[],
   staggerDelay: number = 500
 ): Promise<number> => {
-  console.log(`🎯 triggerMultipleDrawAnimations called for player ${playerIndex} with ${cards.length} cards. handIndices: ${JSON.stringify(handIndices)}`);
-  
   if (cards.length !== handIndices.length) {
     console.warn('Cards and hand indices arrays must have the same length');
     return 0;
@@ -102,19 +100,17 @@ export const triggerMultipleDrawAnimations = async (
     return 0;
   }
 
-  const animationPromises = cards.map((card, index) => {
+  const animationResults = cards.map((card, index) => {
     const initialDelay = index * staggerDelay;
     return triggerDrawAnimation(playerIndex, card, handIndices[index], initialDelay);
   });
 
   try {
-    const results = await Promise.all(animationPromises);
+    const totalDuration = animationResults
+      .map(result => result.duration)
+      .reduce((a, b) => a > b ? a : b, 0);
 
-    const totalDuration = results.map(result => result.duration).reduce((a, b) => a > b ? a : b, 0);
-
-    console.log(`✅ triggerMultipleDrawAnimations: All ${cards.length} animations triggered. Total estimated duration: ${totalDuration}ms`);
     return totalDuration;
-
   } catch (error) {
     console.error('Error triggering one or more draw animations:', error);
     return 0;

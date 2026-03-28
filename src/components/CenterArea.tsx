@@ -1,4 +1,4 @@
-import { GameState, Card as CardType } from '@/types';
+import type { GameState, Card as CardType } from '@/types';
 import { Card } from '@/components/Card';
 import {EmptyCard} from "@/components/EmptyCard.tsx";
 import { cn } from '@/lib/utils';
@@ -44,7 +44,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                 gameState.selectedCard && gameState.currentPlayerIndex === 0 && canPlayCard(gameState.selectedCard.card, index, gameState)
                   && 'can-drop'
               )}
-              onClick={async (e) => {
+              onClick={(e) => {
                 // Prevent event propagation
                 e.stopPropagation();
 
@@ -53,7 +53,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                 if (gameState.selectedCard &&
                     gameState.currentPlayerIndex === 0 &&
                     canPlayCard(gameState.selectedCard.card, index, gameState)) {
-                  await playCard(index);
+                  void playCard(index);
                 }
               }}
             >

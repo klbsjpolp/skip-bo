@@ -1,7 +1,8 @@
 import App from "@/App.tsx";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from 'next-themes'
-import {Theme, themes} from "@/types";
+import type {Theme} from "@/types";
+import { themes} from "@/types";
 import {CardAnimationProvider} from "@/contexts/CardAnimationContext.tsx";
 import {CardAnimationLayer} from "@/components/CardAnimationLayer.tsx";
 import React from "react";

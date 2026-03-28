@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/Card';
-import { CardAnimationData } from '@/contexts/CardAnimationContext';
+import type { CardAnimationData } from '@/contexts/CardAnimationContext';
 import { cn } from '@/lib/utils';
 
 interface AnimatedCardProps {
@@ -29,8 +29,6 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
         const half = Math.max(1, Math.floor(animation.duration * 0.35)); //For cubic-bezier(0.4, 0.0, 0.2, 1), the midpoint is ~35%
         flipTimer = setTimeout(() => setIsRevealed(animation.targetRevealed), half);
       }
-
-      console.log(`🎭 Card ${animation.card.value} animation INIT - Type: ${animation.animationType}, flip=${needsFlip}`);
     }, animation.initialDelay);
 
     return () => {

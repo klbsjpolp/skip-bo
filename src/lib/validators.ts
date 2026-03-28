@@ -1,4 +1,4 @@
-import { Card, GameState } from '@/types';
+import type { Card, GameState } from '@/types';
 
 export const canPlayCard = (card: Card, buildPileIndex: number, gameState: GameState): boolean => {
   const buildPile = gameState.buildPiles[buildPileIndex];

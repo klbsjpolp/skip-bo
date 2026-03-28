@@ -1,6 +1,6 @@
 import {produce} from 'immer';
-import {Card, GameState, Player, SelectedCard} from '@/types';
-import {GameAction} from './gameActions';
+import type {Card, GameState, Player, SelectedCard} from '@/types';
+import type {GameAction} from './gameActions';
 import {initialGameState} from './initialGameState';
 import {MESSAGES} from '@/lib/config';
 import {canPlayCard} from '@/lib/validators';

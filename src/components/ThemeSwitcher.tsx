@@ -2,7 +2,7 @@ import { useTheme } from 'next-themes';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {themes} from "@/types";
 import * as Lucide from 'lucide-react';
-import {ComponentType, SVGProps} from "react";
+import type {ComponentType, SVGProps} from "react";
 
 export function ThemeSwitcher() {
   const { setTheme, theme } = useTheme();

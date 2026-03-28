@@ -1,12 +1,12 @@
-import { GameState, Card } from '@/types';
-import { GameAction } from '@/state/gameActions';
+import type { GameState, Card } from '@/types';
+import type { GameAction } from '@/state/gameActions';
 import {
   getHandCardPosition,
   getStockCardPosition,
   getBuildPilePosition,
   calculateAnimationDuration, getHandCardAngle, getNextDiscardCardPosition
 } from '@/utils/cardPositions';
-import {CardAnimationData} from "@/contexts/CardAnimationContext.tsx";
+import type {CardAnimationData} from "@/contexts/CardAnimationContext.tsx";
 
 // Global reference to the animation context
 let globalAnimationContext: {

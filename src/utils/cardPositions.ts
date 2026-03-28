@@ -103,7 +103,7 @@ export const getHandCardAngle = (
   handContainer: HTMLElement,
   cardIndex: number,
 ): number => {
-  const holderElement = handContainer.querySelector(`[data-card-index="${cardIndex}"]`) as HTMLElement | null;
+  const holderElement = handContainer.querySelector(`[data-card-index="${cardIndex}"]`);
   if (!holderElement) return 0;
   const style = window.getComputedStyle(holderElement);
   const rotateVar = style.getPropertyValue('--card-rotate');
@@ -119,14 +119,14 @@ export const getNextDiscardCardPosition = (
   discardContainer: HTMLElement,
   pileIndex: number
 ): CardPosition => {
-  const pileElement = discardContainer.querySelector(`[data-pile-index="${pileIndex}"]`) as HTMLElement | null;
+  const pileElement = discardContainer.querySelector<HTMLElement>(`[data-pile-index="${pileIndex}"]`);
   if (!pileElement) {
     // Fallback: container center
     return getElementCenter(discardContainer);
   }
 
   // Determine how many real cards are in the pile (exclude placeholder which has opacity-50)
-  const allCards = Array.from(pileElement.querySelectorAll('.card')) as HTMLElement[];
+  const allCards = Array.from(pileElement.querySelectorAll<HTMLElement>('.card'));
   const realCards = allCards.filter(el => !el.classList.contains('opacity-50'));
 
   if (realCards.length === 0) {

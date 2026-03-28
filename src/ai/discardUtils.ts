@@ -1,4 +1,4 @@
-import { Card, GameState } from '@/types';
+import type { Card, GameState } from '@/types';
 import { canPlayCard } from '@/lib/validators';
 import { getRandomnessWindow, getWeights } from './aiConfig';
 import {

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { createActor, waitFor } from 'xstate';
 import { gameMachine } from '@/state/gameMachine';
 import { gameReducer } from '@/state/gameReducer';
-import { GameAction } from '@/state/gameActions';
+import type { GameAction } from '@/state/gameActions';
 import { initialGameState } from '@/state/initialGameState';
 
 // Mock the AI module

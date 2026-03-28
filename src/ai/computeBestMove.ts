@@ -1,5 +1,5 @@
-import { GameState } from '@/types';
-import { GameAction } from '@/state/gameActions';
+import type { GameState } from '@/types';
+import type { GameAction } from '@/state/gameActions';
 import { canPlayCard } from '@/lib/validators';
 import {
   findBestDiscardPile,
@@ -7,7 +7,8 @@ import {
   selectCardToDiscard,
 } from './discardUtils';
 import { getDelay, getRandomnessWindow, getSearchDepth } from './aiConfig';
-import { MoveEvaluation, lookAheadEvaluation } from './lookAheadStrategy';
+import type { MoveEvaluation} from './lookAheadStrategy';
+import { lookAheadEvaluation } from './lookAheadStrategy';
 import { pickRandomNearBestOption } from './strategyUtils';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { gameReducer } from '@/state/gameReducer';
 import { initialGameState } from '@/state/initialGameState';
-import { GameState } from '@/types';
+import type { GameState } from '@/types';
 
 describe('gameReducer', () => {
   let initialState: GameState;

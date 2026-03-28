@@ -1,5 +1,5 @@
-import { Card, GameState } from '@/types';
-import { GameAction } from '@/state/gameActions';
+import type { Card, GameState } from '@/types';
+import type { GameAction } from '@/state/gameActions';
 import { gameReducer } from '@/state/gameReducer';
 import { canPlayCard } from '@/lib/validators';
 import { evaluateDiscardMove } from './discardUtils';

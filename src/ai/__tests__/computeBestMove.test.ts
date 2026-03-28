@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { computeBestMove } from '@/ai/computeBestMove';
 import { initialGameState } from '@/state/initialGameState';
-import { GameState } from '@/types';
+import type { GameState } from '@/types';
 
 const runAIMove = async (gameState: GameState) => {
   const movePromise = computeBestMove(gameState);

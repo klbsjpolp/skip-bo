@@ -1,4 +1,4 @@
-import { Card, GameState, Player } from '@/types';
+import type { Card, GameState, Player } from '@/types';
 import { canPlayCard } from '@/lib/validators';
 
 export const getAIPlayer = (

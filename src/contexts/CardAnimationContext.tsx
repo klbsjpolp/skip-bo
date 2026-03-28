@@ -1,6 +1,7 @@
-import {FC, ReactNode, useCallback, useEffect, useRef, useState} from 'react';
+import type {FC, ReactNode} from 'react';
+import { useCallback, useEffect, useRef, useState} from 'react';
 import { flushSync } from 'react-dom';
-import {Card} from '@/types';
+import type {Card} from '@/types';
 import {CardAnimationContext} from "./useCardAnimation";
 
 export interface CardAnimationData {

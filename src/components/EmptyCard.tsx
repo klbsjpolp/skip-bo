@@ -1,5 +1,5 @@
 import {cn} from '@/lib/utils';
-import {MouseEventHandler} from "react";
+import type {MouseEventHandler} from "react";
 
 interface EmptyCardProps {
   onClick?: MouseEventHandler;

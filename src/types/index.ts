@@ -48,6 +48,7 @@ export const themes = [
   { value: 'theme-metro' as const, label: 'Metro', icon: 'Building2' },
   { value: 'theme-neon' as const, label: 'Néon', icon: 'Zap' },
   { value: 'theme-retro' as const, label: 'Rétro', icon: 'Radio' },
+  { value: 'theme-retro-space' as const, label: "Espace", icon: 'Rocket' },
   { value: 'theme-glass' as const, label: 'Verre', icon: 'Squircle' },
   { value: 'theme-wool' as const, label: 'Laine', icon: 'Spool' },
   { value: 'theme-minecraft' as const, label: 'Minecraft', icon: 'Blocks' },

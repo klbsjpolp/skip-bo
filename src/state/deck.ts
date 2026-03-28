@@ -1,4 +1,4 @@
-import {Card, GameConfig} from '@/types';
+import type {Card, GameConfig} from '@/types';
 
 export const createCard = (value: number, isSkipBo: boolean): Card => ({
   value,

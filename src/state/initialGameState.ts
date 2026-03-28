@@ -1,4 +1,4 @@
-import {Card, GameConfig, GameState} from '@/types';
+import type {Card, GameConfig, GameState} from '@/types';
 import { createDeck } from './deck';
 
 export const STOCK_STORAGE_KEY = 'skipbo_stock_size';
@@ -35,8 +35,8 @@ export const initialGameState = (): GameState => {
   const config = getGameConfig();
   const deck = createDeck(config);
   const players = [
-    { isAI: false, stockPile: [] as Card[], hand: [] as Card[], discardPiles: Array.from({ length: config.DISCARD_PILES_COUNT }, () => [] as Card[]) },
-    { isAI: true,  stockPile: [] as Card[], hand: [] as Card[], discardPiles: Array.from({ length: config.DISCARD_PILES_COUNT }, () => [] as Card[]) }
+    { isAI: false, stockPile: [] as Card[], hand: [] as (Card | null)[], discardPiles: Array.from({ length: config.DISCARD_PILES_COUNT }, () => [] as Card[]) },
+    { isAI: true,  stockPile: [] as Card[], hand: [] as (Card | null)[], discardPiles: Array.from({ length: config.DISCARD_PILES_COUNT }, () => [] as Card[]) }
   ];
 
   // Deal stock piles
@@ -47,7 +47,7 @@ export const initialGameState = (): GameState => {
   // Deal initial hands
   players.forEach(player => {
     // Initialize hand with fixed length of config.HAND_SIZE, filled with null
-    player.hand = Array(config.HAND_SIZE).fill(null);
+    player.hand = Array<Card | null>(config.HAND_SIZE).fill(null);
     
     // Fill hand with cards from deck
     for (let i = 0; i < config.HAND_SIZE; i++) {
