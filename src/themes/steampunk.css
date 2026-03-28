@@ -166,7 +166,7 @@
   }
 
   /* Card fronts — brass/metal panel exterior with seams and rivets */
-  .card:not(.skipbo-text, .empty-card) {
+  .card.normal-card {
     background-image:
       /* subtle metallic sheen */ linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.12) 100%),
       /* warm brass tint */ linear-gradient(180deg, rgba(224,168,79,0.12), rgba(0,0,0,0) 55%),
@@ -180,7 +180,7 @@
   }
 
   /* Panel seams for number cards (avoid Skip-Bo frame which has its own mask) */
-  .card:not(.skipbo-text, .empty-card)::before {
+  .card.normal-card .card-inner-2::before {
     content: "";
     position: absolute;
     inset: 6% 5%;
@@ -195,7 +195,7 @@
   }
 
   /* Rivets on corners (and mid-seam points) for all card fronts */
-  .card:not(.skipbo-text, .empty-card) .card-inner::before {
+  .card.normal-card .card-inner::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -211,7 +211,7 @@
   }
 
   /* Subtle compass rose behind numbers (from snippet idea) */
-  .card:not(.skipbo-text, .empty-card) .card-inner::after {
+  .card.normal-card .card-inner::after {
     content: "";
     position: absolute;
     top: 50%;
@@ -223,7 +223,7 @@
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    opacity: 0.18;
+    opacity: 0.5;
     z-index: 0; /* behind text */
     pointer-events: none;
   }

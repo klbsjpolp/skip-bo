@@ -76,8 +76,8 @@
           @apply relative z-0
             before:absolute before:z-[-1] before:content-['Skip-Bo']
             after:absolute  after:z-[-1]  after:content-['Skip-Bo']
-            before:text-(--card-g1)  before:bottom-1 before:right-1.5
-            after:text-(--card-g2)   after:top-1     after:left-1.5;
+            before:card-range-1  before:bottom-1 before:right-1.5
+            after:card-range-2   after:top-1     after:left-1.5;
         }
       }
     }

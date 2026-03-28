@@ -49,7 +49,6 @@
   --victory-accent-opacity: 0.65;
   --victory-shine-opacity: 0.45;
   --victory-shine-duration: 3.4s;
-  --victory-sunburst-opacity: 0.22;
 
   --skipbo-text: #fff5fb;
   --skipbo-bg: #ff8fb7;
@@ -59,14 +58,7 @@
 
   body {
     font-family: "Trebuchet MS", "Arial Rounded MT Bold", ui-rounded, sans-serif;
-    background:
-      radial-gradient(circle at top, rgb(255 255 255 / 0.9) 0%, rgb(255 255 255 / 0) 28%),
-      radial-gradient(circle at 16% 18%, rgb(255 132 177 / 0.34) 0 8%, transparent 8.5%),
-      radial-gradient(circle at 82% 14%, rgb(115 225 189 / 0.3) 0 8%, transparent 8.5%),
-      radial-gradient(circle at 22% 78%, rgb(255 213 111 / 0.26) 0 7%, transparent 7.5%),
-      radial-gradient(circle at 84% 72%, rgb(181 147 255 / 0.26) 0 8%, transparent 8.5%),
-      linear-gradient(180deg, #ffc9df 0%, #ffe7f2 44%, #f1fff8 100%);
-    background-attachment: fixed;
+    background: radial-gradient(circle at top, rgb(255 255 255 / 0.9) 0%, rgb(255 255 255 / 0) 28%) radial-gradient(circle at 16% 18%, rgb(255 132 177 / 0.34) 0 8%, transparent 8.5%) radial-gradient(circle at 82% 14%, rgb(115 225 189 / 0.3) 0 8%, transparent 8.5%) radial-gradient(circle at 22% 78%, rgb(255 213 111 / 0.26) 0 7%, transparent 7.5%) radial-gradient(circle at 84% 72%, rgb(181 147 255 / 0.26) 0 8%, transparent 8.5%) linear-gradient(180deg, #ffc9df 0%, #ffe7f2 44%, #f1fff8 100%) fixed;
   }
 
   #main {
@@ -180,14 +172,15 @@
     overflow: hidden;
     background-color: #fffafc;
 
-    .card-inner::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at top, rgb(255 255 255 / 0.9), rgb(255 255 255 / 0) 42%),
+    &.normal-card {
+      .card-inner::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top, rgb(255 255 255 / 0.9), rgb(255 255 255 / 0) 42%),
         linear-gradient(180deg, rgb(255 255 255 / 0.08), rgb(255 182 210 / 0.14));
-      pointer-events: none;
+        pointer-events: none;
+      }
     }
 
     .back {

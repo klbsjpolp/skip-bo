@@ -42,7 +42,6 @@
   --victory-pattern-drift-to: 48px 48px, 36px 36px;
   --victory-shine-opacity: 0;
   --victory-shine-duration: 4.6s;
-  --victory-sunburst-opacity: 0;
 
   --card-g1: hsl(158, 100%, 50%);   /* 1‑4 */
   --card-g2: hsl(0, 100%, 50%);     /* 5‑8 */
@@ -123,77 +122,77 @@
       @apply ring-0;
     }
   }
-
-  .card:not(.empty-card) {
+  
+  .card {
     @apply backdrop-blur-lg bg-current/8 *:text-white;
     @apply after:absolute  after:inset-0  after:rounded-[inherit]  after:backdrop-blur-xl;
-    @apply before:absolute before:inset-0 before:rounded-[inherit] before:bg-gradient-to-b before:from-white/15 before:to-transparent;
+    @apply before:absolute before:inset-0 before:rounded-[inherit] before:bg-linear-to-b before:from-white/15 before:to-transparent;
+  }
 
-    .back::after {
-      @apply z-10 content-[""] absolute inset-0 pointer-events-none rounded-[inherit] mix-blend-screen;
+  .card .back::after {
+    @apply z-10 content-[""] absolute inset-0 pointer-events-none rounded-[inherit] mix-blend-screen;
 
-      filter: drop-shadow(0 0 2px var(--crack-glow)) drop-shadow(0 0 6px rgba(160, 208, 255, 0.10));
-      /* Layer order:
-         1) Impact core highlight
-         2) Crack rays (thin bright lines at various angles through center)
-         3) Subtle radial vignette to fade crack ends
-      */
-      background: /* 2) Primary fracture (thicker main crack from bottom-right toward center) */ conic-gradient(
-          at 82% 82%,
-          transparent 0deg 223.5deg,
-          rgba(255, 255, 255, 0.62) 223.5deg 224.5deg,
-          transparent 224.5deg 360deg
-      ),
-        /* 3) Crack rays (emanating from bottom-right using conic gradients) */ /* Principal vertical rays (90° and 270°) */ conic-gradient(
-          at 82% 82%,
-          transparent 0deg 89.65deg,
-          var(--crack-color) 89.65deg 90.35deg,
-          transparent 90.35deg 269.65deg,
-          var(--crack-color) 269.65deg 270.35deg,
-          transparent 270.35deg 360deg
-      ),
-        /* Remaining principal and secondary branches from same origin */ conic-gradient(
-          at 82% 82%,
-            /* 25° */ transparent 0deg 24.65deg,
-          var(--crack-color) 24.65deg 25.35deg,
-            /* 60° */ transparent 25.35deg 59.65deg,
-          var(--crack-color) 59.65deg 60.35deg,
-            /* 65° (opposite of -115°) */ transparent 60.35deg 64.65deg,
-          var(--crack-color) 64.65deg 65.35deg,
-            /* 110° */ transparent 65.35deg 109.65deg,
-          var(--crack-color) 109.65deg 110.35deg,
-            /* 120° (opposite of -60°) */ transparent 110.35deg 119.65deg,
-          var(--crack-color) 119.65deg 120.35deg,
-            /* 155° (opposite of -25°) */ transparent 120.35deg 154.65deg,
-          var(--crack-color) 154.65deg 155.35deg,
-            /* 205° (opposite of 25°) */ transparent 155.35deg 204.65deg,
-          var(--crack-color) 204.65deg 205.35deg,
-            /* 240° (opposite of 60°) */ transparent 205.35deg 239.65deg,
-          var(--crack-color) 239.65deg 240.35deg,
-            /* 245° (opposite of 65°) */ transparent 240.35deg 244.65deg,
-          var(--crack-color) 244.65deg 245.35deg,
-            /* 300° (opposite of 120°, equals -60°) */ transparent 245.35deg 299.65deg,
-          var(--crack-color) 299.65deg 300.35deg,
-            /* 335° (opposite of 155°, equals -25°) */ transparent 300.35deg 334.65deg,
-          var(--crack-color) 334.65deg 335.35deg,
-          transparent 335.35deg 360deg
-      ),
-        /* 4) Spider-web rings (subtle concentric fracture halos) */ repeating-radial-gradient(
-          circle at 82% 82%,
-          rgba(255, 255, 255, 0.08) 0,
-          rgba(255, 255, 255, 0.08) 1px,
-          rgba(255, 255, 255, 0.0) 1px,
-          rgba(255, 255, 255, 0.0) 8px
-      ),
-      repeating-radial-gradient(
-          circle at 82% 82%,
-          rgba(160, 208, 255, 0.06) 0,
-          rgba(160, 208, 255, 0.06) 1px,
-          transparent 1px,
-          transparent 14px
-      ),
-        /* 5) Vignette so lines taper toward edges (simulate energy dissipation) */ radial-gradient(circle at 82% 82%, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0.18) 62%, rgba(0, 0, 0, 0.3) 100%);
-    }
+    filter: drop-shadow(0 0 2px var(--crack-glow)) drop-shadow(0 0 6px rgba(160, 208, 255, 0.10));
+    /* Layer order:
+       1) Impact core highlight
+       2) Crack rays (thin bright lines at various angles through center)
+       3) Subtle radial vignette to fade crack ends
+    */
+    background: /* 2) Primary fracture (thicker main crack from bottom-right toward center) */ conic-gradient(
+        at 82% 82%,
+        transparent 0deg 223.5deg,
+        rgba(255, 255, 255, 0.62) 223.5deg 224.5deg,
+        transparent 224.5deg 360deg
+    ),
+      /* 3) Crack rays (emanating from bottom-right using conic gradients) */ /* Principal vertical rays (90° and 270°) */ conic-gradient(
+        at 82% 82%,
+        transparent 0deg 89.65deg,
+        var(--crack-color) 89.65deg 90.35deg,
+        transparent 90.35deg 269.65deg,
+        var(--crack-color) 269.65deg 270.35deg,
+        transparent 270.35deg 360deg
+    ),
+      /* Remaining principal and secondary branches from same origin */ conic-gradient(
+        at 82% 82%,
+          /* 25° */ transparent 0deg 24.65deg,
+        var(--crack-color) 24.65deg 25.35deg,
+          /* 60° */ transparent 25.35deg 59.65deg,
+        var(--crack-color) 59.65deg 60.35deg,
+          /* 65° (opposite of -115°) */ transparent 60.35deg 64.65deg,
+        var(--crack-color) 64.65deg 65.35deg,
+          /* 110° */ transparent 65.35deg 109.65deg,
+        var(--crack-color) 109.65deg 110.35deg,
+          /* 120° (opposite of -60°) */ transparent 110.35deg 119.65deg,
+        var(--crack-color) 119.65deg 120.35deg,
+          /* 155° (opposite of -25°) */ transparent 120.35deg 154.65deg,
+        var(--crack-color) 154.65deg 155.35deg,
+          /* 205° (opposite of 25°) */ transparent 155.35deg 204.65deg,
+        var(--crack-color) 204.65deg 205.35deg,
+          /* 240° (opposite of 60°) */ transparent 205.35deg 239.65deg,
+        var(--crack-color) 239.65deg 240.35deg,
+          /* 245° (opposite of 65°) */ transparent 240.35deg 244.65deg,
+        var(--crack-color) 244.65deg 245.35deg,
+          /* 300° (opposite of 120°, equals -60°) */ transparent 245.35deg 299.65deg,
+        var(--crack-color) 299.65deg 300.35deg,
+          /* 335° (opposite of 155°, equals -25°) */ transparent 300.35deg 334.65deg,
+        var(--crack-color) 334.65deg 335.35deg,
+        transparent 335.35deg 360deg
+    ),
+      /* 4) Spider-web rings (subtle concentric fracture halos) */ repeating-radial-gradient(
+        circle at 82% 82%,
+        rgba(255, 255, 255, 0.08) 0,
+        rgba(255, 255, 255, 0.08) 1px,
+        rgba(255, 255, 255, 0.0) 1px,
+        rgba(255, 255, 255, 0.0) 8px
+    ),
+    repeating-radial-gradient(
+        circle at 82% 82%,
+        rgba(160, 208, 255, 0.06) 0,
+        rgba(160, 208, 255, 0.06) 1px,
+        transparent 1px,
+        transparent 14px
+    ),
+      /* 5) Vignette so lines taper toward edges (simulate energy dissipation) */ radial-gradient(circle at 82% 82%, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0.18) 62%, rgba(0, 0, 0, 0.3) 100%);
   }
 
   body {

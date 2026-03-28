@@ -115,7 +115,6 @@
     --victory-pattern-animation: victoryPatternDrift 2s linear infinite;
     --victory-shine-opacity: 0;
     --victory-shine-duration: 3.8s;
-    --victory-sunburst-opacity: 0;
     --victory-flyby-opacity: 0;
 
     --card-g1: #0F0; /* 1‑4 */
@@ -472,10 +471,6 @@
     animation: victoryShineSweep var(--victory-shine-duration) ease-in-out infinite;
   }
 
-  .victory-sunburst {
-    opacity: var(--victory-sunburst-opacity);
-  }
-
   .victory-ray {
     position: absolute;
     top: 50%;
@@ -659,7 +654,7 @@
     }
   }
 
-  .card-inner {
+  .card-inner, .card-inner-2 {
     @apply w-full h-full rounded-[inherit] overflow-hidden flex items-center justify-center absolute will-change-transform;
 
     & > * {
@@ -694,7 +689,7 @@
 }
 
 @utility card-back {
-  background-color: var(--card-back-color);
+  background: var(--card-back-bg, var(--card-back-color));
 }
 
 @utility placeholder {

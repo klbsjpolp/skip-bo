@@ -26,7 +26,11 @@
   --victory-piece-3: #919aa3;
   --victory-piece-4: #6c757e;
   --victory-pattern-opacity: 0.5;
+  --victory-pattern-tile-size: clamp(72px, 9vw, 92px);
   --victory-pattern-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M84 38 146 136' stroke='%23b1a899' stroke-width='8'/%3E%3Cpath d='M142 38 85 140' stroke='%23c2b9aa' stroke-width='8'/%3E%3Ccircle cx='80' cy='33' r='7' fill='%23b1a899'/%3E%3Ccircle cx='145' cy='34' r='7' fill='%23c2b9aa'/%3E%3Cpath d='M85 140 70 171' stroke='%23a79d90' stroke-width='7'/%3E%3Cpath d='M111 154c0 30-24 54-54 54S3 184 3 154s24-54 54-54 54 24 54 54Z' transform='translate(53 -4)' fill='%23cfd3d8' stroke='%23868e99' stroke-width='4'/%3E%3Cg stroke-width='5'%3E%3Cpath d='M79 102c20-13 44-14 66-2' stroke='%23919aa3'/%3E%3Cpath d='M71 117c28-17 61-17 88 0' stroke='%239aa2ab'/%3E%3Cpath d='M66 133c31-14 68-14 97 1' stroke='%23808891'/%3E%3Cpath d='M68 150c31-13 67-12 93 4' stroke='%23949ca5'/%3E%3Cpath d='M76 166c24-11 51-10 72 3' stroke='%23778089'/%3E%3Cpath d='M95 91c18 19 28 43 27 71' stroke='%23868e99'/%3E%3Cpath d='M123 103c-3 19-1 40 7 60' stroke='%239da5ae'/%3E%3C/g%3E%3Cpath d='M110 177c-12 12-22 27-24 40' stroke='%23808891' stroke-width='5'/%3E%3C/g%3E%3C/svg%3E");
+  --victory-pattern-size: var(--victory-pattern-tile-size) var(--victory-pattern-tile-size);
+  --victory-pattern-drift-to: var(--victory-pattern-tile-size) var(--victory-pattern-tile-size);
+  --victory-pattern-animation: victoryPatternDrift 12s linear infinite;
 
   body {
     background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0 1px, transparent 1px),

@@ -28,6 +28,10 @@
     --victory-pattern-size: 48px 48px;
     --victory-pattern-drift-to: 48px 48px;
     --victory-pattern-animation: victoryPatternDrift 6s linear infinite;
+    --card-back-bg: linear-gradient(
+      to bottom,
+      #ff6b6b 0%, /* Red */ #ffb347 16.6%, /* Orange */ #ffff66 33.2%, /* Yellow */ #4caf50 49.8%, /* Green */ #5d9cec 66.4%, /* Blue */ #9381ff 83%, /* Indigo */ #d183e8 100% /* Violet */
+    );
 
     --skipbo-text: white;
     --card-g1: #4caf50;
@@ -64,13 +68,6 @@
     }
 
     .card {
-      .back {
-        background-image: linear-gradient(
-          to bottom,
-          #ff6b6b 0%, /* Red */ #ffb347 16.6%, /* Orange */ #ffff66 33.2%, /* Yellow */ #4caf50 49.8%, /* Green */ #5d9cec 66.4%, /* Blue */ #9381ff 83%, /* Indigo */ #d183e8 100% /* Violet */
-        );
-      }
-
       &.skipbo-text {
         @apply text-shadow-black;
         /* Réglages rapides */

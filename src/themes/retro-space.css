@@ -46,7 +46,6 @@
   --victory-pattern-drift-to: 28px 28px;
   --victory-shine-opacity: 0;
   --victory-shine-duration: 4.2s;
-  --victory-sunburst-opacity: 0;
   --victory-flyby-opacity: 0.95;
 
   --skipbo-text: #f6efe3;
@@ -264,13 +263,13 @@
     }
   }
 
-  .card:not(.skipbo-text, .empty-card) {
+  .card.normal-card {
     background:
       linear-gradient(145deg, rgb(255 255 255 / 0.28), rgb(255 255 255 / 0) 30%, rgb(0 0 0 / 0.08) 100%),
       linear-gradient(180deg, #ece4d8 0%, #d4c9bb 100%);
   }
 
-  .card:not(.skipbo-text, .empty-card) .card-inner::after {
+  .card.normal-card .card-inner::after {
     content: "";
     position: absolute;
     inset: 6% 5%;
@@ -286,7 +285,7 @@
     z-index: 0;
   }
 
-  .card:not(.skipbo-text, .empty-card) .card-inner::before {
+  .card.normal-card .card-inner::before {
     content: "";
     position: absolute;
     inset: 14%;

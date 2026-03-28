@@ -90,6 +90,7 @@ const CardComponent: React.FC<CardProps> = ({
   const renderContent = (value: string) => (
     isRevealed ? <>
       <div className='card-inner'></div>
+      <div className='card-inner-2'></div>
       <span className='card-corner-number'>{value}</span>
       <span>{value}</span>
     </> : <div className='back'></div>
@@ -140,7 +141,7 @@ const CardComponent: React.FC<CardProps> = ({
       <div
         className={cn(
           'card',
-          card && card.isSkipBo && isRevealed && 'skip-bo',
+          (card && isRevealed) && (card.isSkipBo ? 'skip-bo' : 'normal-card'), 
           colourClass,
           morphing === 'after' && `transition duration-800`,
           isSelected && 'selected',
