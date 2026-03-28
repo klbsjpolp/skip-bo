@@ -184,6 +184,7 @@ interface StockPileProps {
 function StockPile({player, playerIndex, isCurrentPlayer, gameState, selectCard, clearSelection}: StockPileProps) {
   const {isCardBeingAnimated} = useCardAnimation();
   const isHuman = !player.isAI;
+  const stockProgressHeight = `${(player.stockPile.length / gameState.config.STOCK_SIZE) * 100}%`;
 
   const stockPileOnClick: MouseEventHandler = (e) => {
     // Prevent event propagation
@@ -243,9 +244,9 @@ function StockPile({player, playerIndex, isCurrentPlayer, gameState, selectCard,
     {/* Stock Pile Indicator */}
     <div className="w-1 bg-primary-foreground flex ml-1 rounded-t-sm card-height">
       <div
-        className="w-1 self-end rounded-t-sm bg-primary"
+        className="w-1 self-end rounded-t-sm bg-primary transition-[height] duration-300 ease-out motion-reduce:transition-none"
         style={{
-          height: `${(player.stockPile.length / gameState.config.STOCK_SIZE) * 100}%`,
+          height: stockProgressHeight,
         }}
       ></div>
     </div>
