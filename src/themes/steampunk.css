@@ -124,7 +124,7 @@
         left: 50%;
         transform: translateX(-50%);
         font-weight: 800;
-        font-size: clamp(10px, calc(var(--card-width) * 0.34), 16px);
+        font-size: calc(var(--card-width) * 0.22);
         line-height: 1;
         color: var(--skipbo-text);
         white-space: nowrap;
