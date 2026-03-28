@@ -26,7 +26,8 @@
   --victory-pattern-image:
     linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 18%, transparent 18% 100%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0 18%, transparent 18% 100%);
-  --victory-pattern-size: 28px 28px;
+  --victory-pattern-size: 24px 24px;
+  --victory-pattern-drift-to: 24px 24px;
 
   --skipbo-text: hsl(0 0% 85%);
   --skipbo-bg: #1d1d1d;

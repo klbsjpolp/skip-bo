@@ -39,6 +39,7 @@
       rgba(201, 146, 51, 0) 1px 12px
     );
   --victory-pattern-size: 48px 48px, 36px 36px;
+  --victory-pattern-drift-to: 48px 48px, 36px 36px;
   --victory-shine-opacity: 0;
   --victory-shine-duration: 4.6s;
   --victory-sunburst-opacity: 0;

@@ -8,7 +8,7 @@
 @import "./themes/metro.css";
 @import "./themes/retro.css" layer(components);
 @import "./themes/pastel.css";
-@import "./themes/bonbon.css";
+@import "./themes/candy.css";
 @import "./themes/minecraft.css";
 @import "./themes/steampunk.css";
 
@@ -109,7 +109,9 @@
     --victory-accent-opacity: 0;
     --victory-pattern-opacity: 0;
     --victory-pattern-image: none;
-    --victory-pattern-size: 24px 24px;
+    --victory-pattern-size: 48px 48px;
+    --victory-pattern-drift-to: 24px 24px;
+    --victory-pattern-animation: victoryPatternDrift 2s linear infinite;
     --victory-shine-opacity: 0;
     --victory-shine-duration: 3.8s;
     --victory-sunburst-opacity: 0;
@@ -262,7 +264,7 @@
       background-position: 0 0;
     }
     to {
-      background-position: 32px 32px;
+      background-position: var(--victory-pattern-drift-to);
     }
   }
 
@@ -442,7 +444,7 @@
     background-repeat: repeat;
     background-size: var(--victory-pattern-size);
     opacity: var(--victory-pattern-opacity);
-    animation: victoryPatternDrift 10s linear infinite;
+    animation: var(--victory-pattern-animation);
   }
 
   .victory-shine {
@@ -623,7 +625,7 @@
 @utility card {
   @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer card-height
   lg:not-[.skipbo-text]:text-2xl not-[.skipbo-text]:text-xl text-shadow-sm shadow-(--card-shadow)
-  text-(--card-color) bg-(--card-front-color) rounded-(--card-radius) w-(--card-width) border-[1px] border-(--card-border-color)
+  text-(--card-color) bg-(--card-front-color) rounded-(--card-radius) w-(--card-width) border border-(--card-border-color)
   select-none will-change-auto before:will-change-auto after:will-change-auto;
   transform-origin: bottom center;
   --card-rotate: inherit;
@@ -632,7 +634,7 @@
   transform: translate3d(0,var(--card-translate-y),0) scale(var(--card-scale)) rotate(var(--card-rotate));
 
   .back {
-    @apply relative w-full h-full bg-cover bg-(--card-back-color) rounded-[inherit];
+    @apply relative w-full h-full bg-cover card-back rounded-[inherit];
     * {
       @apply text-4xl;
     }
@@ -642,7 +644,7 @@
     @apply w-full h-full rounded-[inherit] overflow-hidden flex items-center justify-center absolute will-change-transform;
 
     & > * {
-      @apply relative z-[1] will-change-transform;
+      @apply relative z-1 will-change-transform;
     }
   }
 
@@ -677,7 +679,7 @@
 }
 
 @utility placeholder {
-  @apply cursor-pointer w-(--card-width) h-(--card-height) rounded-(--card-radius) text-(--card-border-color)
+  @apply cursor-pointer w-(--card-width) card-height rounded-(--card-radius) text-(--card-border-color)
     flex items-center justify-center border-[2px_dashed_var(--card-border-color)];
 }
 
@@ -702,7 +704,7 @@
     @apply cursor-pointer -translate-y-0.5 shadow-(--can-drop-shadow);
 
     &::after {
-      @apply content-['↓'] absolute top-[-25px] left-1/2 text-lg -translate-x-1/2
+      @apply content-['↓'] absolute -top-6.25 left-1/2 text-lg -translate-x-1/2
         text-(--drop-indicator-color) font-bold z-20 animate-bounce;
     }
 

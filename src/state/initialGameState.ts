@@ -65,8 +65,8 @@ export const initialGameState = (): GameState => {
     currentPlayerIndex: 0,
     selectedCard: null,
     message: 'Nouvelle partie commencée !',
-    gameIsOver: false,
-    winnerIndex: null,
+    gameIsOver: true,
+    winnerIndex: 0,
     config
   };
 };
