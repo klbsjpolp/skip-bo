@@ -12,6 +12,7 @@ const BURST_PIECES = Array.from({ length: 12 }, (_, index) => {
       '--piece-index': index,
       '--piece-offset-x': `${Math.round(Math.cos(angle) * distance)}px`,
       '--piece-offset-y': `${Math.round(Math.sin(angle) * distance)}px`,
+      '--piece-flight-rotation': `${Math.round((angle * 180) / Math.PI + 90)}deg`,
       '--piece-rotation': `${index * 31 - 18}deg`,
       '--piece-color': `var(--victory-piece-${(index % 4) + 1})`,
     } as VictoryStyle,
@@ -75,6 +76,10 @@ export function VictoryEffects() {
             ))}
           </div>
         ))}
+      </div>
+
+      <div className="victory-layer victory-flyby-layer" aria-hidden="true">
+        <span className="victory-flyby-rocket" />
       </div>
     </>
   );
