@@ -128,7 +128,7 @@ Available themes:
 
 ## UI Regression Testing
 
-- Desktop visual baselines live in `tests/ui/*.spec.ts-snapshots/` when they are committed and are generated from Playwright on Chromium.
+- Desktop visual baselines live in `tests/ui/*.spec.ts-snapshots/`, are generated from Playwright on Chromium, and are stored in Git LFS when committed.
 - Deterministic UI fixtures are available in development with `?fixture=ready-human`, `?fixture=selected-hand`, `?fixture=ai-turn`, and `?fixture=victory-human`.
 - Theme switching tests set `localStorage.theme` directly for coverage, with one separate test that changes the theme through the live switcher.
 - Screenshot assertions are skipped when the matching baseline file is absent, so the functional UI checks can still run on branches without committed snapshots.

@@ -42,7 +42,7 @@ Repo-local guidance for AI and coding agents working on this project.
 - Card rendering and interaction changes should usually update tests under [`src/components/__tests__`](/Users/pierreluc/Development/skip-bo/src/components/__tests__).
 - Theme, layout, and general UI regressions should usually update the Playwright coverage under `/Users/pierreluc/Development/skip-bo/tests/ui`.
 - If you touch animation timing or DOM assumptions, validate both human and AI turns in the browser.
-- Desktop visual baselines are Chromium snapshots. Keep snapshot updates in a consistent environment when possible.
+- Desktop visual baselines are Chromium snapshots stored via Git LFS. Keep snapshot updates in a consistent environment when possible.
 - Playwright screenshot assertions intentionally no-op when the matching baseline file is absent, so branches can keep the functional UI checks without carrying the snapshot payload.
 
 ## Useful Debug Hook
