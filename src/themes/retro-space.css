@@ -28,6 +28,9 @@
   --button-bg: #d87939;
   --button-hover-bg: #c4672d;
   --button-text: #fcf4e8;
+  --retro-space-corner-top: 8px;
+  --retro-space-corner-left: 8px;
+  --retro-space-corner-font-size: var(--text-xs);
 
   --victory-border: #e1a25b;
   --victory-accent: #ffd59d;
@@ -44,9 +47,6 @@
     linear-gradient(180deg, rgb(241 149 77 / 0.24) 0 8%, transparent 8% 100%);
   --victory-pattern-size: 28px 28px;
   --victory-pattern-drift-to: 28px 28px;
-  --victory-shine-opacity: 0;
-  --victory-shine-duration: 4.2s;
-  --victory-flyby-opacity: 0.95;
 
   --skipbo-text: #f6efe3;
   --skipbo-bg: #10263c;
@@ -220,9 +220,8 @@
     }
 
     .card-corner-number {
+      @apply top-(--retro-space-corner-top) left-(--retro-space-corner-left) text-(length:--retro-space-corner-font-size);
       opacity: 0.96;
-      top: 10px;
-      left: 10px;
       text-shadow:
         0 1px 0 rgb(255 255 255 / 0.4),
         0 0 6px rgb(7 17 29 / 0.16);
@@ -424,10 +423,6 @@
     display: none;
   }
 
-  .victory-shine {
-    display: none;
-  }
-
   .victory-burst-piece {
     --piece-start-rotation: var(--piece-flight-rotation);
     --piece-end-rotation: var(--piece-flight-rotation);
@@ -460,11 +455,20 @@
       0 0 10px color-mix(in srgb, var(--piece-color) 28%, transparent);
   }
 
-  .victory-flyby-rocket {
-    animation: retroSpaceVictoryFlyby 5.2s cubic-bezier(0.7, 0, 1, 1) infinite;
+  .victory-shine {
+    position: absolute;
+    opacity: 1;
+    top: 18%;
+    left: -28%;
+    width: clamp(108px, 15vw, 164px);
+    height: clamp(30px, 4vw, 44px);
+    pointer-events: none;
+    will-change: transform;
+    animation: retroSpaceVictoryFlyby 5.2s cubic-bezier(0.8, 0, 1, 1) infinite;
+    background: none;
   }
 
-  .victory-flyby-rocket::before {
+  .victory-shine::before {
     content: "";
     position: absolute;
     inset: 28% 44% 28% 0;
@@ -481,7 +485,7 @@
     filter: blur(0.6px);
   }
 
-  .victory-flyby-rocket::after {
+  .victory-shine::after {
     content: "";
     position: absolute;
     inset: 8% 0 8% 34%;
@@ -506,24 +510,30 @@
       0 14px 26px rgb(0 0 0 / 0.32),
       0 0 0 1px rgb(245 236 220 / 0.18);
   }
+
+  /* On small screens the discard-pile stack offset is only 16 px,
+     so the default retro-space corner-number position leaves almost
+     no visible room. Pull the number tighter by overriding the
+     inherited theme tokens only below lg. */
+  .discard-pile-stack {
+    @variant max-lg {
+      --retro-space-corner-top: 5px;
+      --retro-space-corner-left: 7px;
+      --retro-space-corner-font-size: 9px;
+    }
+  }
 }
 
 @keyframes retroSpaceVictoryFlyby {
   0% {
     left: -32%;
-    opacity: 0;
     transform: translateY(10px) rotate(3deg) scale(0.88);
   }
-  12% {
-    opacity: var(--victory-flyby-opacity);
-  }
   45% {
-    opacity: var(--victory-flyby-opacity);
     transform: translateY(-3px) rotate(1deg) scale(1);
   }
   100% {
     left: 102%;
-    opacity: 0;
     transform: translateY(6px) rotate(-2deg) scale(0.96);
   }
 }

@@ -64,10 +64,6 @@ export function VictoryEffects() {
           </div>
         ))}
       </div>
-
-      <div className="victory-layer victory-flyby-layer" aria-hidden="true">
-        <span className="victory-flyby-rocket" />
-      </div>
     </>
   );
 }
