@@ -11,9 +11,7 @@ import {
 } from './helpers.ts';
 
 test.describe('Layout and interaction coverage', () => {
-  test('theme switcher updates and persists the selected theme', async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== 'chromium-desktop', 'Theme switcher visual checks are desktop-only.');
-
+  test('@desktop theme switcher updates and persists the selected theme', async ({ page }, testInfo) => {
     await gotoFixture(page, 'ready-human', 'theme-light');
 
     await page.getByTestId('theme-switcher-trigger').click();
@@ -31,9 +29,7 @@ test.describe('Layout and interaction coverage', () => {
   });
 
   for (const theme of representativeThemes) {
-    test(`${theme} selected-hand state shows selection and drop affordances`, async ({ page }, testInfo) => {
-      test.skip(testInfo.project.name !== 'chromium-desktop', 'Selection baselines are desktop-only.');
-
+    test(`@desktop ${theme} selected-hand state shows selection and drop affordances`, async ({ page }, testInfo) => {
       await gotoFixture(page, 'selected-hand', theme);
       await expectThemeClass(page, theme);
       await expect(page.locator('.card.selected')).toHaveCount(1);
@@ -45,9 +41,7 @@ test.describe('Layout and interaction coverage', () => {
       });
     });
 
-    test(`${theme} ai-turn state stays stable`, async ({ page }, testInfo) => {
-      test.skip(testInfo.project.name !== 'chromium-desktop', 'AI baselines are desktop-only.');
-
+    test(`@desktop ${theme} ai-turn state stays stable`, async ({ page }, testInfo) => {
       await gotoFixture(page, 'ai-turn', theme);
       await expectThemeClass(page, theme);
       await expect(page.getByTestId('ai-player-area')).toHaveAttribute('data-player-state', 'active');
@@ -58,9 +52,7 @@ test.describe('Layout and interaction coverage', () => {
       });
     });
 
-    test(`${theme} victory-human state stays readable`, async ({ page }, testInfo) => {
-      test.skip(testInfo.project.name !== 'chromium-desktop', 'Victory baselines are desktop-only.');
-
+    test(`@desktop ${theme} victory-human state stays readable`, async ({ page }, testInfo) => {
       await gotoFixture(page, 'victory-human', theme);
       await expectThemeClass(page, theme);
       await expect(page.getByTestId('human-player-area')).toHaveAttribute('data-player-state', 'winner');
@@ -71,9 +63,7 @@ test.describe('Layout and interaction coverage', () => {
       });
     });
 
-    test(`${theme} mobile layout avoids horizontal overflow`, async ({ page }, testInfo) => {
-      test.skip(testInfo.project.name !== 'chromium-mobile', 'Mobile overflow checks only run on the mobile project.');
-
+    test(`@mobile ${theme} mobile layout avoids horizontal overflow`, async ({ page }) => {
       await gotoFixture(page, 'ready-human', theme);
       await expectThemeClass(page, theme);
       await expectNoHorizontalOverflow(page);
@@ -90,14 +80,11 @@ test.describe('Accessibility smoke', () => {
     expect(results.violations).toEqual([]);
   };
 
-  test('ready-human fixture has no axe violations', async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== 'chromium-desktop', 'Accessibility smoke is desktop-only.');
+  test('@desktop ready-human fixture has no axe violations', async ({ page }) => {
     await assertNoViolations('theme-light', 'ready-human', page);
   });
 
-  test('theme switcher open state has no axe violations', async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== 'chromium-desktop', 'Accessibility smoke is desktop-only.');
-
+  test('@desktop theme switcher open state has no axe violations', async ({ page }) => {
     await gotoFixture(page, 'ready-human', 'theme-retro-space');
     await page.getByTestId('theme-switcher-trigger').click();
 

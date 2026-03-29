@@ -43,6 +43,7 @@ Repo-local guidance for AI and coding agents working on this project.
 - Theme, layout, and general UI regressions should usually update the Playwright coverage under `/Users/pierreluc/Development/skip-bo/tests/ui`.
 - If you touch animation timing or DOM assumptions, validate both human and AI turns in the browser.
 - Desktop visual baselines are Chromium snapshots stored via Git LFS. Keep snapshot updates in a consistent environment when possible.
+- Playwright projects collect tests by `@desktop` and `@mobile` tags so desktop-only cases are not materialized as skips on the mobile project.
 - Playwright screenshot assertions intentionally no-op when the matching baseline file is absent, so branches can keep the functional UI checks without carrying the snapshot payload.
 
 ## Useful Debug Hook

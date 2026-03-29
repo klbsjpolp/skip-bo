@@ -130,6 +130,7 @@ Available themes:
 
 - Desktop visual baselines live in `tests/ui/*.spec.ts-snapshots/`, are generated from Playwright on Chromium, and are stored in Git LFS when committed.
 - Deterministic UI fixtures are available in development with `?fixture=ready-human`, `?fixture=selected-hand`, `?fixture=ai-turn`, and `?fixture=victory-human`.
+- Playwright projects collect tests by `@desktop` and `@mobile` tags so CI only runs the cases that apply to each runner profile.
 - Theme switching tests set `localStorage.theme` directly for coverage, with one separate test that changes the theme through the live switcher.
 - Screenshot assertions are skipped when the matching baseline file is absent, so the functional UI checks can still run on branches without committed snapshots.
 - Mobile smoke coverage currently checks horizontal overflow on representative themes rather than maintaining a second visual baseline set.

@@ -5,9 +5,7 @@ import { expectScreenshotIfBaselineExists, expectThemeClass, gotoFixture, readCa
 
 test.describe('Theme contract', () => {
   for (const theme of themes.map(({ value }) => value as Theme)) {
-    test(`${theme} renders the ready-human fixture`, async ({ page }, testInfo) => {
-      test.skip(testInfo.project.name !== 'chromium-desktop', 'Visual baselines are desktop-only.');
-
+    test(`@desktop ${theme} renders the ready-human fixture`, async ({ page }, testInfo) => {
       await gotoFixture(page, 'ready-human', theme);
       await expectThemeClass(page, theme);
 
