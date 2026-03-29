@@ -82,6 +82,18 @@ export const getDeckPosition = (centerContainer: HTMLElement): CardPosition => {
 };
 
 /**
+ * Get the position of the retreat pile.
+ */
+export const getRetreatPilePosition = (centerContainer: HTMLElement): CardPosition => {
+  const retreatPileElement = centerContainer.querySelector('[data-retreat-pile]') as HTMLElement;
+  if (retreatPileElement) {
+    return getElementCenter(retreatPileElement);
+  }
+
+  return getElementCenter(centerContainer);
+};
+
+/**
  * Calculate animation duration based on distance
  */
 export const calculateAnimationDuration = (

@@ -124,6 +124,30 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       return;
     }
 
+    case 'DEBUG_FILL_BUILD_PILE': {
+      if (action.buildPile < 0 || action.buildPile >= draft.buildPiles.length) {
+        draft.message = MESSAGES.INVALID_MOVE;
+        return;
+      }
+
+      draft.buildPiles[action.buildPile] = Array.from(
+        { length: draft.config.CARD_VALUES_MAX - 1 },
+        (_, index) => ({ value: index + 1, isSkipBo: false }),
+      );
+
+      const humanPlayer = draft.players[0];
+      if (humanPlayer.hand.length > 0) {
+        humanPlayer.hand[0] = {
+          value: draft.config.CARD_VALUES_MAX,
+          isSkipBo: false,
+        };
+      }
+
+      draft.selectedCard = null;
+      draft.message = 'Pile de construction prête (debug)';
+      return;
+    }
+
     case 'SELECT_CARD': {
       const player = draft.players[draft.currentPlayerIndex];
       let card;

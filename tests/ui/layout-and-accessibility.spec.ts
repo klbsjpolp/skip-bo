@@ -11,6 +11,25 @@ import {
 } from './helpers.ts';
 
 test.describe('Layout and interaction coverage', () => {
+  test('@desktop retreat-filled fixture keeps center order and retreat counter', async ({ page }) => {
+    await gotoFixture(page, 'retreat-filled', 'theme-light');
+
+    await expect(page.getByTestId('retreat-pile-title')).toHaveText('Retrait (5)');
+    await expect(page.getByTestId('retreat-pile').locator('.card')).toHaveCount(3);
+
+    const [deckBox, buildBox, retreatBox] = await Promise.all([
+      page.getByTestId('center-deck-section').boundingBox(),
+      page.getByTestId('center-build-section').boundingBox(),
+      page.getByTestId('center-retreat-section').boundingBox(),
+    ]);
+
+    expect(deckBox).not.toBeNull();
+    expect(buildBox).not.toBeNull();
+    expect(retreatBox).not.toBeNull();
+    expect(deckBox!.x).toBeLessThan(buildBox!.x);
+    expect(buildBox!.x).toBeLessThan(retreatBox!.x);
+  });
+
   test('@desktop theme switcher updates and persists the selected theme', async ({ page }, testInfo) => {
     await gotoFixture(page, 'ready-human', 'theme-light');
 
@@ -69,6 +88,11 @@ test.describe('Layout and interaction coverage', () => {
       await expectNoHorizontalOverflow(page);
     });
   }
+
+  test('@mobile retreat-filled fixture avoids horizontal overflow', async ({ page }) => {
+    await gotoFixture(page, 'retreat-filled', 'theme-light');
+    await expectNoHorizontalOverflow(page);
+  });
 });
 
 test.describe('Accessibility smoke', () => {

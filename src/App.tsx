@@ -15,6 +15,7 @@ const fixtureActionResult = Promise.resolve({ success: true, message: 'Fixture m
 interface AppShellProps {
   gameState: GameState;
   initializeGame: () => void;
+  debugFillBuildPile: () => void;
   selectCard: (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void;
   playCard: (buildPileIndex: number) => Promise<{ success: boolean; message: string }>;
   discardCard: (discardPileIndex: number) => Promise<{ success: boolean; message: string }>;
@@ -25,6 +26,7 @@ interface AppShellProps {
 function AppShell({
   gameState,
   initializeGame,
+  debugFillBuildPile,
   selectCard,
   playCard,
   discardCard,
@@ -43,7 +45,7 @@ function AppShell({
           className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
           data-testid="app-toolbar"
         >
-          <NewGame onNewGame={initializeGame} />
+          <NewGame onNewGame={initializeGame} onDebugFillBuildPile={debugFillBuildPile} />
           <ThemeSwitcher />
         </div>
         <GameBoard
@@ -73,6 +75,7 @@ function FixtureApp({ fixtureName }: { fixtureName: UiFixtureName }) {
     <AppShell
       gameState={gameState}
       initializeGame={() => undefined}
+      debugFillBuildPile={() => undefined}
       selectCard={() => undefined}
       playCard={() => fixtureActionResult}
       discardCard={() => fixtureActionResult}
@@ -83,7 +86,15 @@ function FixtureApp({ fixtureName }: { fixtureName: UiFixtureName }) {
 }
 
 function LiveApp() {
-  const { gameState, initializeGame, selectCard, playCard, discardCard, clearSelection } = useSkipBoGame();
+  const {
+    gameState,
+    initializeGame,
+    debugFillBuildPile,
+    selectCard,
+    playCard,
+    discardCard,
+    clearSelection,
+  } = useSkipBoGame();
   const { waitForAnimations } = useCardAnimation();
 
   // Connect the animation context with the service bridge
@@ -95,6 +106,7 @@ function LiveApp() {
     <AppShell
       gameState={gameState}
       initializeGame={initializeGame}
+      debugFillBuildPile={() => debugFillBuildPile(0)}
       selectCard={selectCard}
       playCard={playCard}
       discardCard={discardCard}

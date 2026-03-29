@@ -11,7 +11,12 @@ import {
 } from '@/utils/cardPositions';
 import { setGlobalAnimationContext } from '@/services/aiAnimationService';
 import { setGlobalDrawAnimationContext, triggerMultipleDrawAnimations } from '@/services/drawAnimationService';
+import {
+  setGlobalCompletedPileAnimationContext,
+  triggerCompletedBuildPileAnimation,
+} from '@/services/completedBuildPileAnimationService';
 import {useCardAnimation} from "@/contexts/useCardAnimation.ts";
+import { getCompletedBuildPileCards } from '@/lib/retreatPile';
 
 // Helper function to check if a PLAY_CARD action will result in an empty hand
 const willPlayCardEmptyHand = (gameState: GameState): boolean => {
@@ -41,11 +46,16 @@ export function useSkipBoGame() {
   React.useEffect(() => {
     setGlobalAnimationContext({ startAnimation, waitForAnimations });
     setGlobalDrawAnimationContext({ startAnimation, removeAnimation });
+    setGlobalCompletedPileAnimationContext({ startAnimation });
   }, [startAnimation, removeAnimation, waitForAnimations]);
 
   /* wrappers compatibles avec l'UI existante */
   const initializeGame = useCallback(() => {
     dispatch({ type: 'INIT' });
+  }, [dispatch]);
+
+  const debugFillBuildPile = useCallback((buildPile: number) => {
+    dispatch({ type: 'DEBUG_FILL_BUILD_PILE', buildPile });
   }, [dispatch]);
 
   const selectCard = useCallback((source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => {
@@ -54,6 +64,7 @@ export function useSkipBoGame() {
 
   const playCard = useCallback(async (buildPile: number): Promise<MoveResult> => {
     const currentState = stateRef.current;
+    const completedBuildPileCards = getCompletedBuildPileCards(currentState, buildPile);
     
     // Validate before dispatching
     if (!currentState.selectedCard) {
@@ -122,12 +133,28 @@ export function useSkipBoGame() {
             },
           });
           
-          // Wait for play animation to complete
-          await new Promise(resolve => setTimeout(resolve, duration));
+          await waitForAnimations();
         }
       }
     } catch (error) {
       console.warn('Play animation failed, continuing with game logic:', error);
+    }
+
+    if (completedBuildPileCards) {
+      try {
+        const completionAnimationDuration = triggerCompletedBuildPileAnimation(
+          currentState,
+          buildPile,
+          completedBuildPileCards,
+          currentState.completedBuildPiles.length,
+        );
+
+        if (completionAnimationDuration > 0) {
+          await waitForAnimations();
+        }
+      } catch (error) {
+        console.warn('Completed build pile animation failed, continuing with game logic:', error);
+      }
     }
 
     // If hand will be emptied, trigger draw animations before dispatching
@@ -200,7 +227,7 @@ export function useSkipBoGame() {
 
     dispatch({ type: 'PLAY_CARD', buildPile });
     return { success: true, message: 'Carte jouée' };
-  }, [dispatch, startAnimation]);
+  }, [dispatch, startAnimation, waitForAnimations]);
 
   const discardCard = useCallback((discardPile: number): Promise<MoveResult> => {
     return new Promise((resolve) => {
@@ -290,6 +317,7 @@ export function useSkipBoGame() {
   return {
     gameState: state,
     initializeGame,
+    debugFillBuildPile,
     selectCard,
     playCard,
     discardCard,

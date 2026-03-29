@@ -9,7 +9,7 @@ import tseslint from 'typescript-eslint'
 const tsconfigRootDir = dirname(fileURLToPath(import.meta.url))
 
 export default tseslint.config(
-  { ignores: ['coverage', 'dist', 'vite.config.d.ts'] },
+  { ignores: ['coverage', 'dist', 'playwright-report', 'test-results', 'vite.config.d.ts'] },
   {
     files: ['src/**/*.{ts,tsx}'],
     extends: [

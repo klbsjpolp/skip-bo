@@ -5,6 +5,7 @@ export const uiFixtureNames = [
   'ready-human',
   'selected-hand',
   'ai-turn',
+  'retreat-filled',
   'victory-human',
 ] as const;
 
@@ -96,6 +97,18 @@ const createAiTurnFixture = (): GameState => ({
   message: "L'IA joue",
 });
 
+const createRetreatFilledFixture = (): GameState => ({
+  ...createBaseState(),
+  completedBuildPiles: [
+    card(2),
+    card(5),
+    card(7, true),
+    card(9),
+    card(11),
+  ],
+  message: MESSAGES.SELECT_CARD,
+});
+
 const createVictoryHumanFixture = (): GameState => {
   const state = createBaseState();
   state.players[0].stockPile = [];
@@ -109,6 +122,7 @@ const fixtureFactories: Record<UiFixtureName, () => GameState> = {
   'ready-human': createReadyHumanFixture,
   'selected-hand': createSelectedHandFixture,
   'ai-turn': createAiTurnFixture,
+  'retreat-filled': createRetreatFilledFixture,
   'victory-human': createVictoryHumanFixture,
 };
 

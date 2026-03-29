@@ -5,9 +5,11 @@ import {initialGameState} from './initialGameState';
 import {computeBestMove} from '@/ai/computeBestMove';
 import type {Card, GameState} from '@/types';
 import {triggerAIAnimation} from '@/services/aiAnimationService';
+import { triggerCompletedBuildPileAnimation } from '@/services/completedBuildPileAnimationService';
 import {triggerMultipleDrawAnimations} from '@/services/drawAnimationService';
 import {animationGate} from '@/services/animationGate';
 import {animationServiceBridge} from "@/lib/animationServiceBridge.ts";
+import { getCompletedBuildPileCards } from '@/lib/retreatPile';
 
 // Helper function to check if a PLAY_CARD action will result in an empty hand
 const willPlayCardEmptyHand = (gameState: GameState): boolean => {
@@ -90,6 +92,10 @@ export const gameMachine = createMachine({
             END_TURN: {
               actions: 'apply',
               target: '#skipbo.botTurn',
+            },
+            DEBUG_FILL_BUILD_PILE: {
+              actions: 'apply',
+              guard: 'isHumanAction',
             },
             RESET: {
               actions: 'apply',
@@ -281,16 +287,27 @@ export const gameMachine = createMachine({
     animationGate,
     botService: fromPromise(async ({ input }: { input: { G: GameState } }) => {
       const action = await computeBestMove(input.G);
-      let totalAnimationDuration = 0;
+      const completedBuildPileCards =
+        action.type === 'PLAY_CARD' ? getCompletedBuildPileCards(input.G, action.buildPile) : null;
 
       // Check if PLAY_CARD will empty the hand and trigger draw animations
       if (action.type === 'PLAY_CARD' && willPlayCardEmptyHand(input.G)) {
         // First trigger the play card animation
         if (input.G.selectedCard) {
-          const playAnimationDuration = await triggerAIAnimation(input.G, action);
-          totalAnimationDuration += playAnimationDuration;
+          await triggerAIAnimation(input.G, action);
+          await animationServiceBridge.waitForAnimations();
         }
-        
+
+        if (action.type === 'PLAY_CARD' && completedBuildPileCards) {
+          triggerCompletedBuildPileAnimation(
+            input.G,
+            action.buildPile,
+            completedBuildPileCards,
+            input.G.completedBuildPiles.length,
+          );
+          await animationServiceBridge.waitForAnimations();
+        }
+
         // Then trigger draw animations for the hand refill
         const gameStateAfterPlay = { ...input.G };
         const player = gameStateAfterPlay.players[gameStateAfterPlay.currentPlayerIndex];
@@ -344,14 +361,11 @@ export const gameMachine = createMachine({
             
             // Trigger draw animations
             if (cardsToAnimate.length > 0) {
-              const drawAnimationDuration = await triggerMultipleDrawAnimations(
+              await triggerMultipleDrawAnimations(
                 gameStateAfterPlay.currentPlayerIndex,
                 cardsToAnimate,
                 handIndices,
               );
-              totalAnimationDuration += drawAnimationDuration;
-
-              // *** Wait for draw animations to complete before proceeding ***
               await animationServiceBridge.waitForAnimations();
             }
           }
@@ -359,12 +373,23 @@ export const gameMachine = createMachine({
       } else {
         // Trigger animation for other AI actions that need it
         if ((action.type === 'PLAY_CARD' || action.type === 'DISCARD_CARD') && input.G.selectedCard) {
-          totalAnimationDuration = await triggerAIAnimation(input.G, action);
+          await triggerAIAnimation(input.G, action);
+          await animationServiceBridge.waitForAnimations();
+        }
+
+        if (action.type === 'PLAY_CARD' && completedBuildPileCards) {
+          triggerCompletedBuildPileAnimation(
+            input.G,
+            action.buildPile,
+            completedBuildPileCards,
+            input.G.completedBuildPiles.length,
+          );
           await animationServiceBridge.waitForAnimations();
         }
       }
-      
-      return { action, animationDuration: totalAnimationDuration };
+
+      // All AI animations were awaited before applying the reducer action.
+      return { action, animationDuration: 0 };
     }),
     drawService: fromPromise(async ({ input }: { input: { G: GameState } }) => {
       const gameState = input.G;

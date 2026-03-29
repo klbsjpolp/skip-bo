@@ -17,4 +17,5 @@ export type GameAction =
   | { type: 'DISCARD_CARD'; discardPile: number }
   | { type: 'END_TURN' }
   | { type: 'RESET' }
-  | { type: 'DEBUG_SET_AI_HAND'; hand: Card[] };
+  | { type: 'DEBUG_SET_AI_HAND'; hand: Card[] }
+  | { type: 'DEBUG_FILL_BUILD_PILE'; buildPile: number };
