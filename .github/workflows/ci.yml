@@ -43,7 +43,7 @@ jobs:
       run: pnpm build
 
   ui:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v5
@@ -65,7 +65,7 @@ jobs:
       run: pnpm install
 
     - name: Install Playwright browser
-      run: pnpm exec playwright install --with-deps chromium
+      run: pnpm exec playwright install chromium
 
     - name: Run UI regression tests
       run: pnpm test:e2e
