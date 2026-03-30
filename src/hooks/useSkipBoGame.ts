@@ -10,13 +10,18 @@ import {
   calculateAnimationDuration, getHandCardAngle, getNextDiscardCardPosition
 } from '@/utils/cardPositions';
 import { setGlobalAnimationContext } from '@/services/aiAnimationService';
-import { setGlobalDrawAnimationContext, triggerMultipleDrawAnimations } from '@/services/drawAnimationService';
+import {
+  calculateMultipleDrawAnimationDuration,
+  setGlobalDrawAnimationContext,
+  triggerMultipleDrawAnimations,
+} from '@/services/drawAnimationService';
 import {
   setGlobalCompletedPileAnimationContext,
   triggerCompletedBuildPileAnimation,
 } from '@/services/completedBuildPileAnimationService';
 import {useCardAnimation} from "@/contexts/useCardAnimation.ts";
 import { getCompletedBuildPileCards } from '@/lib/retreatPile';
+import { planHandRefill } from '@/lib/handRefill';
 
 // Helper function to check if a PLAY_CARD action will result in an empty hand
 const willPlayCardEmptyHand = (gameState: GameState): boolean => {
@@ -77,6 +82,22 @@ export function useSkipBoGame() {
 
     // Check if this play will empty the hand and trigger animations accordingly
     const willEmptyHand = willPlayCardEmptyHand(currentState);
+    let refillCards: Card[] = [];
+    let refillHandIndices: number[] = [];
+
+    if (willEmptyHand && currentState.selectedCard?.source === 'hand') {
+      const player = currentState.players[currentState.currentPlayerIndex];
+      const handAfterPlay = [...player.hand];
+      handAfterPlay[currentState.selectedCard.index] = null;
+
+      const refillPlan = planHandRefill(
+        handAfterPlay,
+        currentState.deck,
+        currentState.completedBuildPiles,
+      );
+      refillCards = refillPlan.cards;
+      refillHandIndices = refillPlan.handIndices;
+    }
     
     // Trigger play animation first
     try {
@@ -140,92 +161,48 @@ export function useSkipBoGame() {
       console.warn('Play animation failed, continuing with game logic:', error);
     }
 
+    let completionAnimationDuration = 0;
+
     if (completedBuildPileCards) {
       try {
-        const completionAnimationDuration = triggerCompletedBuildPileAnimation(
+        completionAnimationDuration = triggerCompletedBuildPileAnimation(
           currentState,
           buildPile,
           completedBuildPileCards,
           currentState.completedBuildPiles.length,
         );
-
-        if (completionAnimationDuration > 0) {
-          await waitForAnimations();
-        }
       } catch (error) {
         console.warn('Completed build pile animation failed, continuing with game logic:', error);
       }
     }
 
-    // If hand will be emptied, trigger draw animations before dispatching
-    if (willEmptyHand) {
-      try {
-        const player = currentState.players[currentState.currentPlayerIndex];
-        const handCopy = [...player.hand];
-        handCopy[currentState.selectedCard.index] = null;
-        
-        // Calculate cards that will be drawn (same logic as in gameReducer)
-        const emptySlots = handCopy.filter(card => card === null).length;
-        const cardsToDraw = Math.min(emptySlots, currentState.deck.length + currentState.completedBuildPiles.length);
-        
-        if (cardsToDraw > 0) {
-          const cardsToAnimate: Card[] = [];
-          const handIndices: number[] = [];
-          
-          // Simulate the draw to get the cards that will be drawn
-          let remainingToDraw = cardsToDraw;
-          const deckCopy = [...currentState.deck];
-          const completedBuildPilesCopy = [...currentState.completedBuildPiles];
-          
-          // First, get cards from existing deck
-          for (let i = 0; i < handCopy.length && remainingToDraw > 0; i++) {
-            if (handCopy[i] === null && deckCopy.length > 0) {
-              cardsToAnimate.push(deckCopy.shift()!);
-              handIndices.push(i);
-              remainingToDraw--;
-            }
-          }
-          
-          // If we need more cards and have completed build piles, reshuffle
-          if (remainingToDraw > 0 && completedBuildPilesCopy.length > 0) {
-            deckCopy.push(...completedBuildPilesCopy);
-            
-            // Shuffle deck
-            for (let i = deckCopy.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
-              [deckCopy[i], deckCopy[j]] = [deckCopy[j], deckCopy[i]];
-            }
-            
-            // Get remaining cards
-            for (let i = 0; i < handCopy.length && remainingToDraw > 0; i++) {
-              if (handCopy[i] === null && deckCopy.length > 0) {
-                cardsToAnimate.push(deckCopy.shift()!);
-                handIndices.push(i);
-                remainingToDraw--;
-              }
-            }
-          }
-          
-          // Trigger draw animations
-          if (cardsToAnimate.length > 0) {
-            await triggerMultipleDrawAnimations(
-              currentState.currentPlayerIndex,
-              cardsToAnimate,
-              handIndices,
-            );
+    const drawAnimationDuration =
+      refillHandIndices.length > 0
+        ? calculateMultipleDrawAnimationDuration(
+          currentState.currentPlayerIndex,
+          refillHandIndices,
+          500,
+          completionAnimationDuration,
+        )
+        : 0;
 
-            // Do NOT wait for draw animations to complete here.
-            // Start-of-turn draws already apply state immediately and then wait in the state machine.
-            // Mirror that behavior here so cards appear as each animation finishes.
-            // We keep the animations running in the background without blocking the state update.
-          }
-        }
-      } catch (error) {
+    dispatch({
+      type: 'PLAY_CARD',
+      buildPile,
+      animationDuration: Math.max(completionAnimationDuration, drawAnimationDuration),
+    });
+
+    if (refillCards.length > 0) {
+      void triggerMultipleDrawAnimations(
+        currentState.currentPlayerIndex,
+        refillCards,
+        refillHandIndices,
+        500,
+        completionAnimationDuration,
+      ).catch((error) => {
         console.warn('Draw animation failed, continuing with game logic:', error);
-      }
+      });
     }
-
-    dispatch({ type: 'PLAY_CARD', buildPile });
     return { success: true, message: 'Carte jouée' };
   }, [dispatch, startAnimation, waitForAnimations]);
 

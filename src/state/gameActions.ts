@@ -13,7 +13,7 @@ export type GameAction =
       plannedDiscardPileIndex?: number;
     }
   | { type: 'CLEAR_SELECTION' }
-  | { type: 'PLAY_CARD'; buildPile: number }
+  | { type: 'PLAY_CARD'; buildPile: number; animationDuration?: number }
   | { type: 'DISCARD_CARD'; discardPile: number }
   | { type: 'END_TURN' }
   | { type: 'RESET' }

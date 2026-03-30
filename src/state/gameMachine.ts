@@ -10,6 +10,7 @@ import {triggerMultipleDrawAnimations} from '@/services/drawAnimationService';
 import {animationGate} from '@/services/animationGate';
 import {animationServiceBridge} from "@/lib/animationServiceBridge.ts";
 import { getCompletedBuildPileCards } from '@/lib/retreatPile';
+import { planHandRefill } from '@/lib/handRefill';
 
 // Helper function to check if a PLAY_CARD action will result in an empty hand
 const willPlayCardEmptyHand = (gameState: GameState): boolean => {
@@ -233,6 +234,10 @@ export const gameMachine = createMachine({
           const { animationDuration } = (event as unknown as { output: { action: GameAction, animationDuration: number } }).output;
           return animationDuration;
         }
+        if (event && typeof event === 'object' && 'animationDuration' in event) {
+          const { animationDuration } = event as { animationDuration?: number };
+          return animationDuration ?? 0;
+        }
         return 0;
       }
     }),
@@ -289,6 +294,7 @@ export const gameMachine = createMachine({
       const action = await computeBestMove(input.G);
       const completedBuildPileCards =
         action.type === 'PLAY_CARD' ? getCompletedBuildPileCards(input.G, action.buildPile) : null;
+      let animationDuration = 0;
 
       // Check if PLAY_CARD will empty the hand and trigger draw animations
       if (action.type === 'PLAY_CARD' && willPlayCardEmptyHand(input.G)) {
@@ -298,76 +304,41 @@ export const gameMachine = createMachine({
           await animationServiceBridge.waitForAnimations();
         }
 
-        if (action.type === 'PLAY_CARD' && completedBuildPileCards) {
-          triggerCompletedBuildPileAnimation(
-            input.G,
-            action.buildPile,
-            completedBuildPileCards,
-            input.G.completedBuildPiles.length,
+        const completionAnimationDuration =
+          action.type === 'PLAY_CARD' && completedBuildPileCards
+            ? triggerCompletedBuildPileAnimation(
+              input.G,
+              action.buildPile,
+              completedBuildPileCards,
+              input.G.completedBuildPiles.length,
+            )
+            : 0;
+
+        animationDuration = completionAnimationDuration;
+
+        // Then trigger draw animations for the hand refill.
+        const player = input.G.players[input.G.currentPlayerIndex];
+        if (input.G.selectedCard?.source === 'hand') {
+          const handAfterPlay = [...player.hand];
+          handAfterPlay[input.G.selectedCard.index] = null;
+
+          const { cards, handIndices } = planHandRefill(
+            handAfterPlay,
+            input.G.deck,
+            input.G.completedBuildPiles,
           );
-          await animationServiceBridge.waitForAnimations();
-        }
 
-        // Then trigger draw animations for the hand refill
-        const gameStateAfterPlay = { ...input.G };
-        const player = gameStateAfterPlay.players[gameStateAfterPlay.currentPlayerIndex];
-        
-        // Simulate the hand becoming empty
-        if (gameStateAfterPlay.selectedCard?.source === 'hand') {
-          const handCopy = [...player.hand];
-          handCopy[gameStateAfterPlay.selectedCard.index] = null;
-          
-          // Calculate cards that will be drawn (same logic as in gameReducer)
-          const emptySlots = handCopy.filter(card => card === null).length;
-          const cardsToDraw = Math.min(emptySlots, gameStateAfterPlay.deck.length + gameStateAfterPlay.completedBuildPiles.length);
-          
-          if (cardsToDraw > 0) {
-            const cardsToAnimate: Card[] = [];
-            const handIndices: number[] = [];
-            
-            // Simulate the draw to get the cards that will be drawn
-            let remainingToDraw = cardsToDraw;
-            const deckCopy = [...gameStateAfterPlay.deck];
-            const completedBuildPilesCopy = [...gameStateAfterPlay.completedBuildPiles];
-            
-            // First, get cards from existing deck
-            for (let i = 0; i < handCopy.length && remainingToDraw > 0; i++) {
-              if (handCopy[i] === null && deckCopy.length > 0) {
-                cardsToAnimate.push(deckCopy.shift()!);
-                handIndices.push(i);
-                remainingToDraw--;
-              }
-            }
-            
-            // If we need more cards and have completed build piles, reshuffle
-            if (remainingToDraw > 0 && completedBuildPilesCopy.length > 0) {
-              deckCopy.push(...completedBuildPilesCopy);
-
-              // Shuffle deck
-              for (let i = deckCopy.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [deckCopy[i], deckCopy[j]] = [deckCopy[j], deckCopy[i]];
-              }
-              
-              // Get remaining cards
-              for (let i = 0; i < handCopy.length && remainingToDraw > 0; i++) {
-                if (handCopy[i] === null && deckCopy.length > 0) {
-                  cardsToAnimate.push(deckCopy.shift()!);
-                  handIndices.push(i);
-                  remainingToDraw--;
-                }
-              }
-            }
-            
-            // Trigger draw animations
-            if (cardsToAnimate.length > 0) {
+          if (cards.length > 0) {
+            animationDuration = Math.max(
+              animationDuration,
               await triggerMultipleDrawAnimations(
-                gameStateAfterPlay.currentPlayerIndex,
-                cardsToAnimate,
+                input.G.currentPlayerIndex,
+                cards,
                 handIndices,
-              );
-              await animationServiceBridge.waitForAnimations();
-            }
+                500,
+                completionAnimationDuration,
+              ),
+            );
           }
         }
       } else {
@@ -378,18 +349,16 @@ export const gameMachine = createMachine({
         }
 
         if (action.type === 'PLAY_CARD' && completedBuildPileCards) {
-          triggerCompletedBuildPileAnimation(
+          animationDuration = triggerCompletedBuildPileAnimation(
             input.G,
             action.buildPile,
             completedBuildPileCards,
             input.G.completedBuildPiles.length,
           );
-          await animationServiceBridge.waitForAnimations();
         }
       }
 
-      // All AI animations were awaited before applying the reducer action.
-      return { action, animationDuration: 0 };
+      return { action, animationDuration };
     }),
     drawService: fromPromise(async ({ input }: { input: { G: GameState } }) => {
       const gameState = input.G;
@@ -430,58 +399,20 @@ export const gameMachine = createMachine({
           }
         } catch { /* ignore invalid aiHand param */ }
       }
-      // Count empty slots in hand (null values)
-      const emptySlots = player.hand.filter(card => card === null).length;
-      // Calculate how many cards will be drawn
-      const cardsToDraw = Math.min(emptySlots, gameState.deck.length + gameState.completedBuildPiles.length);
+      const { cards, handIndices } = planHandRefill(
+        player.hand,
+        gameState.deck,
+        gameState.completedBuildPiles,
+      );
+      const cardsToDraw = cards.length;
       let animationDuration = 0;
 
       if (cardsToDraw > 0) {
-        // Prepare cards and hand indices for animation
-        const cardsToAnimate: Card[] = [];
-        const handIndices: number[] = [];
-
-        // Simulate the draw to get the cards that will be drawn
-        let remainingToDraw = cardsToDraw;
-        const deckCopy = [...gameState.deck];
-        const completedBuildPilesCopy = [...gameState.completedBuildPiles];
-
-        // First, get cards from existing deck
-        for (let i = 0; i < player.hand.length && remainingToDraw > 0; i++) {
-          if (player.hand[i] === null && deckCopy.length > 0) {
-            cardsToAnimate.push(deckCopy.shift()!);
-            handIndices.push(i);
-            remainingToDraw--;
-          }
-        }
-
-        // If we need more cards and have completed build piles, reshuffle
-        if (remainingToDraw > 0 && completedBuildPilesCopy.length > 0) {
-          // Add completed build piles to deck and shuffle
-          deckCopy.push(...completedBuildPilesCopy);
-
-          // Shuffle deck
-          for (let i = deckCopy.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [deckCopy[i], deckCopy[j]] = [deckCopy[j], deckCopy[i]];
-          }
-
-          // Get remaining cards
-          for (let i = 0; i < player.hand.length && remainingToDraw > 0; i++) {
-            if (player.hand[i] === null && deckCopy.length > 0) {
-              cardsToAnimate.push(deckCopy.shift()!);
-              handIndices.push(i);
-              remainingToDraw--;
-            }
-          }
-        }
-
-        // Trigger animations if we have cards to animate
-        if (cardsToAnimate.length > 0) {
-          // Fire and forget: start animations but don't block the draw state update
+        // Fire and forget: start animations but don't block the draw state update.
+        if (cards.length > 0) {
           animationDuration = await triggerMultipleDrawAnimations(
             gameState.currentPlayerIndex,
-            cardsToAnimate,
+            cards,
             handIndices,
           );
         }

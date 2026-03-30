@@ -18,8 +18,54 @@ export const setGlobalDrawAnimationContext = (context: typeof globalAnimationCon
   globalAnimationContext = context;
 };
 
-// Helper function to wait for the global animation context to be available
-// Function to trigger draw animations from deck to hand
+const getDrawAnimationMetrics = (
+  playerIndex: number,
+  handIndex: number,
+): {
+  startPosition: { x: number; y: number };
+  endPosition: { x: number; y: number };
+  endAngleDeg: number;
+  duration: number;
+} | null => {
+  try {
+    // Get the correct player area based on player index
+    // Note: DOM order is AI (index 0), Human (index 1), but playerIndex is Human=0, AI=1
+    const playerAreas = document.querySelectorAll('.player-area');
+    const domIndex = playerIndex === 0 ? 1 : 0; // Human=1, AI=0 in DOM
+    const playerAreaElement = playerAreas[domIndex] as HTMLElement;
+    const centerAreaElement = document.querySelector('.center-area') as HTMLElement;
+
+    if (!playerAreaElement || !centerAreaElement) {
+      console.warn('Required DOM elements not found for draw animation');
+      return null;
+    }
+
+    // Calculate start position (deck)
+    const startPosition = getDeckPosition(centerAreaElement);
+
+    // Calculate end position (hand slot)
+    const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
+    if (!handContainer) {
+      console.warn('Hand container not found for draw animation');
+      return null;
+    }
+
+    const endPosition = getHandCardPosition(handContainer, handIndex);
+    const endAngleDeg = getHandCardAngle(handContainer, handIndex);
+    const duration = calculateAnimationDuration(startPosition, endPosition);
+
+    return {
+      startPosition,
+      endPosition,
+      endAngleDeg,
+      duration,
+    };
+  } catch (error) {
+    console.warn('Draw animation failed:', error);
+    return null;
+  }
+};
+
 const triggerDrawAnimation = (
   playerIndex: number,
   card: Card,
@@ -31,43 +77,22 @@ const triggerDrawAnimation = (
     return { duration: 0, animationId: '' };
   }
 
+  const metrics = getDrawAnimationMetrics(playerIndex, handIndex);
+  if (!metrics) {
+    return { duration: 0, animationId: '' };
+  }
+
   try {
-    // Get the correct player area based on player index
-    // Note: DOM order is AI (index 0), Human (index 1), but playerIndex is Human=0, AI=1
-    const playerAreas = document.querySelectorAll('.player-area');
-    const domIndex = playerIndex === 0 ? 1 : 0; // Human=1, AI=0 in DOM
-    const playerAreaElement = playerAreas[domIndex] as HTMLElement;
-    const centerAreaElement = document.querySelector('.center-area') as HTMLElement;
-
-    if (!playerAreaElement || !centerAreaElement) {
-      console.warn('Required DOM elements not found for draw animation');
-      return { duration: 0, animationId: '' };
-    }
-
-    // Calculate start position (deck)
-    const startPosition = getDeckPosition(centerAreaElement);
-
-    // Calculate end position (hand slot)
-    const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
-    if (!handContainer) {
-      console.warn('Hand container not found for draw animation');
-      return { duration: 0, animationId: '' };
-    }
-
-    const endPosition = getHandCardPosition(handContainer, handIndex);
-    const endAngleDeg = getHandCardAngle(handContainer, handIndex);
-    const duration = calculateAnimationDuration(startPosition, endPosition);
-    
     const animationId = globalAnimationContext.startAnimation({
       card,
-      startPosition,
-      endPosition,
-      endAngleDeg,
+      startPosition: metrics.startPosition,
+      endPosition: metrics.endPosition,
+      endAngleDeg: metrics.endAngleDeg,
       sourceRevealed: false, // Cards drawn from deck are face-down
       targetRevealed: playerIndex === 0, // Reveal to human player only
       animationType: 'draw',
       initialDelay,
-      duration,
+      duration: metrics.duration,
       sourceInfo: {
         playerIndex,
         source: 'deck',
@@ -76,7 +101,7 @@ const triggerDrawAnimation = (
       },
     });
 
-    return { duration: duration + initialDelay, animationId };
+    return { duration: metrics.duration + initialDelay, animationId };
   } catch (error) {
     console.warn('Draw animation failed:', error);
   }
@@ -84,12 +109,28 @@ const triggerDrawAnimation = (
   return { duration: 0, animationId: '' };
 };
 
+export const calculateMultipleDrawAnimationDuration = (
+  playerIndex: number,
+  handIndices: number[],
+  staggerDelay: number = 500,
+  baseDelay: number = 0,
+): number =>
+  handIndices.reduce((maxDuration, handIndex, index) => {
+    const metrics = getDrawAnimationMetrics(playerIndex, handIndex);
+    if (!metrics) {
+      return maxDuration;
+    }
+
+    return Math.max(maxDuration, metrics.duration + baseDelay + index * staggerDelay);
+  }, 0);
+
 // Function to trigger multiple draw animations with staggered start times (no cumulative delays)
 export const triggerMultipleDrawAnimations = async (
   playerIndex: number,
   cards: Card[],
   handIndices: number[],
-  staggerDelay: number = 500
+  staggerDelay: number = 500,
+  baseDelay: number = 0,
 ): Promise<number> => {
   if (cards.length !== handIndices.length) {
     console.warn('Cards and hand indices arrays must have the same length');
@@ -101,7 +142,7 @@ export const triggerMultipleDrawAnimations = async (
   }
 
   const animationResults = cards.map((card, index) => {
-    const initialDelay = index * staggerDelay;
+    const initialDelay = baseDelay + index * staggerDelay;
     return triggerDrawAnimation(playerIndex, card, handIndices[index], initialDelay);
   });
 
