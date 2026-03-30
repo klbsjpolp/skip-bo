@@ -47,6 +47,21 @@ test.describe('Layout and interaction coverage', () => {
     await expectThemeClass(page, 'theme-retro-space');
   });
 
+  test('@desktop theme-retro deck card back keeps its striped background', async ({ page }) => {
+    await gotoFixture(page, 'ready-human', 'theme-retro');
+    await expectThemeClass(page, 'theme-retro');
+
+    const deckBack = page.getByTestId('center-deck-section').locator('.deck .back');
+    await expect(deckBack).toBeVisible();
+
+    const backgroundImage = await deckBack.evaluate((element) =>
+      getComputedStyle(element).backgroundImage,
+    );
+
+    expect(backgroundImage).not.toBe('none');
+    expect(backgroundImage).toContain('repeating-linear-gradient');
+  });
+
   for (const theme of representativeThemes) {
     test(`@desktop ${theme} selected-hand state shows selection and drop affordances`, async ({ page }, testInfo) => {
       await gotoFixture(page, 'selected-hand', theme);

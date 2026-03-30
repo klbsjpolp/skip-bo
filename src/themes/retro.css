@@ -12,6 +12,29 @@
     --card-shadow: 3px 3px 0 var(--card-border-color);
     --card-radius: 15px;
     --card-back-color: var(--zone-bg-color);
+    --retro-back-transparent-size: calc(var(--card-height) / 50);
+    --retro-back-stripe-size: calc(var(--card-height) / 10);
+    --card-back-bg:
+      repeating-linear-gradient(
+        45deg,
+        var(--card-g1) 0,
+        var(--card-g1) calc(var(--retro-back-stripe-size) * 1),
+        transparent calc(var(--retro-back-stripe-size) * 1),
+        transparent calc(var(--retro-back-stripe-size) * 1 + var(--retro-back-transparent-size) * 1),
+        var(--card-g2) calc(var(--retro-back-stripe-size) * 1 + var(--retro-back-transparent-size) * 1),
+        var(--card-g2) calc(var(--retro-back-stripe-size) * 2 + var(--retro-back-transparent-size) * 1),
+        transparent calc(var(--retro-back-stripe-size) * 2 + var(--retro-back-transparent-size) * 1),
+        transparent calc(var(--retro-back-stripe-size) * 2 + var(--retro-back-transparent-size) * 2),
+        var(--card-g3) calc(var(--retro-back-stripe-size) * 2 + var(--retro-back-transparent-size) * 2),
+        var(--card-g3) calc(var(--retro-back-stripe-size) * 3 + var(--retro-back-transparent-size) * 2),
+        transparent calc(var(--retro-back-stripe-size) * 3 + var(--retro-back-transparent-size) * 2),
+        transparent calc(var(--retro-back-stripe-size) * 3 + var(--retro-back-transparent-size) * 3),
+        var(--card-front-color) calc(var(--retro-back-stripe-size) * 3 + var(--retro-back-transparent-size) * 3),
+        var(--card-front-color) calc(var(--retro-back-stripe-size) * 4 + var(--retro-back-transparent-size) * 3),
+        transparent calc(var(--retro-back-stripe-size) * 4 + var(--retro-back-transparent-size) * 3),
+        transparent calc(var(--retro-back-stripe-size) * 4 + var(--retro-back-transparent-size) * 4)
+      ),
+      linear-gradient(var(--card-back-color), var(--card-back-color));
     --selected-border-color: var(--primary);
     --selected-shadow: 3px 3px 0 var(--primary);
     --button-bg: #2a9d8f;
@@ -32,29 +55,6 @@
 
     .card {
       @apply shadow-2xl;
-      .back {
-        --transparent-size: calc(var(--card-height) / 50);
-        --stripe-size: calc(var(--card-height) / 10);
-        background-image: repeating-linear-gradient(
-                45deg,
-                var(--card-g1)  0,
-                var(--card-g1)  calc(var(--stripe-size) * 1),
-                transparent     calc(var(--stripe-size) * 1),
-                transparent     calc(var(--stripe-size) * 1 + var(--transparent-size) * 1),
-                var(--card-g2)  calc(var(--stripe-size) * 1 + var(--transparent-size) * 1),
-                var(--card-g2)  calc(var(--stripe-size) * 2 + var(--transparent-size) * 1),
-                transparent     calc(var(--stripe-size) * 2 + var(--transparent-size) * 1),
-                transparent     calc(var(--stripe-size) * 2 + var(--transparent-size) * 2),
-                var(--card-g3)  calc(var(--stripe-size) * 2 + var(--transparent-size) * 2),
-                var(--card-g3)  calc(var(--stripe-size) * 3 + var(--transparent-size) * 2),
-                transparent     calc(var(--stripe-size) * 3 + var(--transparent-size) * 2),
-                transparent     calc(var(--stripe-size) * 3 + var(--transparent-size) * 3),
-                var(--card-front-color)  calc(var(--stripe-size) * 3 + var(--transparent-size) * 3),
-                var(--card-front-color)  calc(var(--stripe-size) * 4 + var(--transparent-size) * 3),
-                transparent     calc(var(--stripe-size) * 4 + var(--transparent-size) * 3),
-                transparent     calc(var(--stripe-size) * 4 + var(--transparent-size) * 4)
-        );
-      }
       &.skipbo-text {
         .card-inner {
           @apply before:absolute before:top-0   before:left-0 before:w-full before:h-1/6
