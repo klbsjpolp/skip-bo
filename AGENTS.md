@@ -62,6 +62,9 @@ Repo-local guidance for AI and coding agents working on this project.
 - Theme, layout, and accessibility regressions should usually update Playwright coverage under [`tests/ui`](/Users/pierreluc/Development/skip-bo/tests/ui).
 - [`tests/ui/helpers.ts`](/Users/pierreluc/Development/skip-bo/tests/ui/helpers.ts) is the shared entrypoint for fixture navigation, theme seeding, overflow checks, and conditional screenshot assertions.
 - Desktop visual baselines are Chromium snapshots stored under `tests/ui/*.spec.ts-snapshots/` and typically committed through Git LFS.
+- If you change shared board layout or fixture-visible UI (especially [`src/components/CenterArea.tsx`](/Users/pierreluc/Development/skip-bo/src/components/CenterArea.tsx), [`src/testing/uiFixtures.ts`](/Users/pierreluc/Development/skip-bo/src/testing/uiFixtures.ts), or anything that affects the `ready-human` fixture), run `pnpm exec playwright test tests/ui/theme-contract.spec.ts --project=chromium-desktop` before finishing.
+- If that theme-contract suite fails across many or all themes at once, inspect one generated diff under `test-results/` before assuming a product bug. Broad, same-shape screenshot failures usually mean the committed baselines need to be refreshed for an intentional UI change.
+- When the visual change is intentional, update the committed Playwright baselines with `pnpm test:visual:update` and include the snapshot changes in the same task instead of leaving CI red.
 - Playwright projects collect tests by `@desktop` and `@mobile` tags so desktop-only cases are not materialized as skips on the mobile project.
 - Screenshot assertions intentionally return early when the baseline file is missing, so functional checks can still run on branches without snapshot payloads.
 
