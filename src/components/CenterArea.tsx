@@ -15,12 +15,23 @@ interface CenterAreaProps {
 }
 
 export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps) {
-  const { isCardBeingAnimated } = useCardAnimation();
-  const retreatPreviewStartIndex = Math.max(
-    gameState.completedBuildPiles.length - RETREAT_PILE_PREVIEW_LIMIT,
+  const { activeAnimations, isCardBeingAnimated } = useCardAnimation();
+  const pendingRetreatCardsCount = activeAnimations.filter(
+    (animation) => animation.animationType === 'complete',
+  ).length;
+  const visibleCompletedBuildPileCount = Math.max(
+    gameState.completedBuildPiles.length - pendingRetreatCardsCount,
     0,
   );
-  const retreatPreviewCards = gameState.completedBuildPiles.slice(-RETREAT_PILE_PREVIEW_LIMIT);
+  const visibleCompletedBuildPiles =
+    visibleCompletedBuildPileCount === gameState.completedBuildPiles.length
+      ? gameState.completedBuildPiles
+      : gameState.completedBuildPiles.slice(0, visibleCompletedBuildPileCount);
+  const retreatPreviewStartIndex = Math.max(
+    visibleCompletedBuildPileCount - RETREAT_PILE_PREVIEW_LIMIT,
+    0,
+  );
+  const retreatPreviewCards = visibleCompletedBuildPiles.slice(-RETREAT_PILE_PREVIEW_LIMIT);
 
   return (
     <div className="center-area" data-testid="center-area">
