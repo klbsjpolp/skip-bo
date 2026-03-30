@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
-import type { Theme } from '../../src/types/index.ts';
+import { themes, type Theme } from '../../src/types/index.ts';
 import {
   expectScreenshotIfBaselineExists,
   expectNoHorizontalOverflow,
@@ -45,6 +45,34 @@ test.describe('Layout and interaction coverage', () => {
     await page.reload();
     await expect(page.getByTestId('app-main')).toBeVisible();
     await expectThemeClass(page, 'theme-retro-space');
+  });
+
+  test('@desktop random theme button picks a different theme and persists it', async ({ page }) => {
+    await gotoFixture(page, 'ready-human', 'theme-light');
+    await expectThemeClass(page, 'theme-light');
+
+    const availableThemes = themes.map(({ value }) => value as Theme);
+
+    await page.getByTestId('theme-randomizer-button').click();
+    await page.waitForFunction(
+      ({ themeValues, previousTheme }) =>
+        themeValues.some((value) => document.documentElement.classList.contains(value) && value !== previousTheme),
+      { themeValues: availableThemes, previousTheme: 'theme-light' satisfies Theme },
+    );
+
+    const selectedTheme = await page.evaluate(
+      (themeValues) =>
+        themeValues.find((value) => document.documentElement.classList.contains(value)) ?? null,
+      availableThemes,
+    );
+
+    expect(selectedTheme).not.toBeNull();
+    expect(selectedTheme).not.toBe('theme-light');
+    await expectThemeClass(page, selectedTheme as Theme);
+
+    await page.reload();
+    await expect(page.getByTestId('app-main')).toBeVisible();
+    await expectThemeClass(page, selectedTheme as Theme);
   });
 
   test('@desktop theme-retro deck card back keeps its striped background', async ({ page }) => {
