@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.1.1](https://github.com/klbsjpolp/skip-bo/compare/v0.1.0...v0.1.1) (2026-04-03)
+
+
+### Bug Fixes
+
+* **ui:** adjust card color for better visual consistency ([b61df65](https://github.com/klbsjpolp/skip-bo/commit/b61df65ba95b05e26e9c7332c83c642562d0048e))
+
+
+
 # 0.1.0 (2026-04-03)
 
 
