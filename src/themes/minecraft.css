@@ -30,7 +30,7 @@
   /* card color groups keep vibrant, slightly gamey colors */
   --card-g1: hsl(135 100% 64%);   /* 1‑4 */
   --card-g2: hsl(2 100% 76%);     /* 5‑8 */
-  --card-g3: hsl(240 100% 78%);   /* 9‑12 */
+  --card-g3: hsl(216 100% 75%);   /* 9‑12 */
 
   --selected-border-color: #9adf5a;    /* bright grassy highlight */
   --button-bg: #7a5a35;
