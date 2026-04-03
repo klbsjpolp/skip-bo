@@ -66,7 +66,7 @@ function AppShell({
         )}
         <div className="mt-4 flex justify-end">
           <p
-            className="font-mono text-[11px] text-muted-foreground/80 tabular-nums"
+            className="app-version-badge text-xs text-muted-foreground/80 tabular-nums"
             data-testid="app-version"
           >
             Version {APP_VERSION}

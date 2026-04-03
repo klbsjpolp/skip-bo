@@ -187,6 +187,22 @@
       0 0 0 2px rgba(0, 0, 0, 0.5),
       4px 4px 0 rgba(0, 0, 0, 0.25);
   }
+
+  .app-version-badge {
+    padding: 0.2rem 0.45rem;
+    color: #f4f4f4;
+    background: color-mix(in srgb, #2f2418 88%, black 12%);
+    border: 2px solid rgba(0, 0, 0, 0.55);
+    box-shadow:
+      inset 1px 1px 0 rgba(255, 255, 255, 0.08),
+      2px 2px 0 rgba(0, 0, 0, 0.3);
+    text-shadow:
+      1px 0 0 var(--minecraft-text-outline),
+      -1px 0 0 var(--minecraft-text-outline),
+      0 1px 0 var(--minecraft-text-outline),
+      0 -1px 0 var(--minecraft-text-outline),
+      1px 1px 0 var(--minecraft-text-outline);
+  }
 }
 
 @keyframes minecraftVictoryBurst {
