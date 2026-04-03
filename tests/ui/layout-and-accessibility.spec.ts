@@ -32,6 +32,7 @@ test.describe('Layout and interaction coverage', () => {
 
   test('@desktop theme switcher updates and persists the selected theme', async ({ page }, testInfo) => {
     await gotoFixture(page, 'ready-human', 'theme-light');
+    await expect(page.getByTestId('app-version')).toHaveText(/^Version v\d+\.\d+\.\d+/);
 
     await page.getByTestId('theme-switcher-trigger').click();
     await expect(page.getByTestId('theme-switcher-content')).toBeVisible();

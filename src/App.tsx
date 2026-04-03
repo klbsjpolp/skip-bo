@@ -7,6 +7,7 @@ import { useCardAnimation } from '@/contexts/useCardAnimation';
 import { animationServiceBridge } from '@/lib/animationServiceBridge';
 import { useEffect } from 'react';
 import { canPlayCard } from '@/lib/validators';
+import { APP_VERSION } from '@/lib/appVersion';
 import { getRequestedUiFixtureName, getUiFixture, type UiFixtureName } from '@/testing/uiFixtures';
 import type { GameState } from '@/types';
 
@@ -63,6 +64,14 @@ function AppShell({
             </Button>
           </div>
         )}
+        <div className="mt-4 flex justify-end">
+          <p
+            className="font-mono text-[11px] text-muted-foreground/80 tabular-nums"
+            data-testid="app-version"
+          >
+            Version {APP_VERSION}
+          </p>
+        </div>
       </div>
     </main>
   );
