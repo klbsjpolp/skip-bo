@@ -57,14 +57,14 @@ Then set:
 VITE_SENTRY_DSN=your_browser_dsn
 ```
 
-`VITE_SENTRY_DSN` is the value read by [`src/instrument.ts`](/Users/pierreluc/Development/skip-bo/src/instrument.ts). Without it, the SDK loads but sends nothing.
+`VITE_SENTRY_DSN` is the value read by [`src/instrument.ts`](src/instrument.ts). Without it, the SDK loads but sends nothing.
 
 For GitHub Pages builds, add these repository secrets so the Actions build step can inject them during `vite build`:
 
 - `VITE_SENTRY_DSN`
 - `SENTRY_AUTH_TOKEN`
 
-The workflow already sets `SENTRY_ORG=pierre-luc`, `SENTRY_PROJECT=skip-bo`, and `VITE_APP_VERSION` from the commit SHA.
+The workflow already sets `SENTRY_ORG=pierre-luc`, `SENTRY_PROJECT=skip-bo`, and `VITE_APP_VERSION` from the release tag created during deploy.
 
 To verify the integration after deploy, open DevTools, filter the Network tab by `envelope`, and reload the page. With the DSN configured, you should see requests to Sentry on page load. Do not test by throwing an error directly in the browser console; Sentry documents that DevTools-triggered errors are sandboxed and will not be reported.
 
@@ -72,13 +72,26 @@ To verify the integration after deploy, open DevTools, filter the Network tab by
 
 - `pnpm dev` starts the Vite dev server
 - `pnpm build` runs TypeScript compilation and creates a production build
+- `pnpm commit` opens the Commitizen prompt for an Angular-style commit message
 - `pnpm preview` serves the production build locally
+- `pnpm release` bumps the semver version, updates `CHANGELOG.md`, and creates a release commit and tag
+- `pnpm release:dry-run` previews the next semver bump without writing files or tags
+- `pnpm release:first` creates the first tagged release from the current version
 - `pnpm lint` runs ESLint
 - `pnpm test` runs the Vitest suite
 - `pnpm test:e2e` runs the Playwright UI suite
 - `pnpm test:visual` runs the desktop visual-regression suite
 - `pnpm test:visual:update` refreshes desktop visual baselines
 - `pnpm typecheck` runs `tsc --noEmit`
+
+## Commit And Release Workflow
+
+- Commit messages use the Angular conventional-commit format and are validated by Husky + Commitlint on `git commit`.
+- Use `pnpm commit` if you want an interactive prompt instead of writing the message by hand.
+- `feat:` commits trigger a minor version bump, `fix:` commits trigger a patch bump, and `!` or `BREAKING CHANGE:` triggers a major bump.
+- Releases are created with `pnpm release` and tagged as `v<version>`.
+- Pushes to `main` also run the release flow in GitHub Actions, publish the matching GitHub Release, and deploy GitHub Pages from that release commit.
+- For the first tagged release in this repo, run `pnpm release:first`. Use `pnpm release:dry-run` to inspect the next bump before cutting it.
 
 ## Project Structure
 
@@ -101,8 +114,8 @@ src/
 - `players[0]` is the human player and `players[1]` is the AI player.
 - The UI renders the AI area first, so DOM order does not match player index. This matters in animation code.
 - Hands use fixed-size arrays with `null` slots. Removing a hand card should set the slot to `null`, not splice the array.
-- AI turns are driven by [`src/state/gameMachine.ts`](/Users/pierreluc/Development/skip-bo/src/state/gameMachine.ts).
-- The AI entry point is [`src/ai/computeBestMove.ts`](/Users/pierreluc/Development/skip-bo/src/ai/computeBestMove.ts).
+- AI turns are driven by [`src/state/gameMachine.ts`](src/state/gameMachine.ts).
+- The AI entry point is [`src/ai/computeBestMove.ts`](src/ai/computeBestMove.ts).
 - The AI always runs with the strongest strategy profile; there is no user-facing difficulty mode anymore.
 - AI card selection now keeps its planned destination between `SELECT_CARD` and the following resolver step.
 - The AI search simulates short turn sequences through the reducer, so it can prefer moves that unblock its stock pile a few actions later.
@@ -137,7 +150,7 @@ Available themes:
 
 ## Documentation
 
-- [`README.md`](/Users/pierreluc/Development/skip-bo/README.md): high-level project overview
-- [`src/ai/README.md`](/Users/pierreluc/Development/skip-bo/src/ai/README.md): AI architecture and strategy behavior
-- [`AGENTS.md`](/Users/pierreluc/Development/skip-bo/AGENTS.md): working notes for AI/code agents
-- [`src/ai/discardStrategy.md`](/Users/pierreluc/Development/skip-bo/src/ai/discardStrategy.md): AI strategy notes and backlog
+- [`README.md`](README.md): high-level project overview
+- [`src/ai/README.md`](src/ai/README.md): AI architecture and strategy behavior
+- [`AGENTS.md`](AGENTS.md): working notes for AI/code agents
+- [`src/ai/discardStrategy.md`](src/ai/discardStrategy.md): AI strategy notes and backlog

@@ -1,0 +1,5 @@
+{
+  "preset": "angular",
+  "tagPrefix": "v",
+  "releaseCommitMessageFormat": "chore(release): {{currentTag}}"
+}
