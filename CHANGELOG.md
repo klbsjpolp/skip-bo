@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.0.1](https://github.com/klbsjpolp/skip-bo/compare/v1.0.0...v1.0.1) (2026-04-04)
+
+
+### Bug Fixes
+
+* align infra format and theme switcher snapshot ([dc152ca](https://github.com/klbsjpolp/skip-bo/commit/dc152cab43752d19e78b84aa215f9db51a9a3a8d))
+
+
+
 # [1.0.0](https://github.com/klbsjpolp/skip-bo/compare/v0.1.1...v1.0.0) (2026-04-04)
 
 
