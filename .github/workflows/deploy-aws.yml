@@ -61,14 +61,8 @@ jobs:
       - name: Check OpenTofu formatting
         run: pnpm tofu:fmt
 
-      - name: Initialize OpenTofu without backend
-        run: tofu -chdir=infra/terraform/envs/prod init -backend=false
-
-      - name: Validate OpenTofu
-        run: pnpm tofu:validate
-
-      - name: Create offline OpenTofu plan
-        run: tofu -chdir=infra/terraform/envs/prod plan -input=false -lock=false -refresh=false
+      - name: Validate OpenTofu offline plan
+        run: pnpm --dir infra/terraform validate:offline:prod
 
   apply:
     if: github.event_name == 'workflow_dispatch' && inputs.apply

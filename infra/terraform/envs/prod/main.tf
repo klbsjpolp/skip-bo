@@ -6,12 +6,14 @@ locals {
     Project     = "skip-bo"
     Service     = "realtime-api"
   }, var.extra_tags)
-  sentry_enabled = trimspace(coalesce(var.sentry_dsn, "")) != ""
+  sentry_dsn_value     = var.sentry_dsn == null ? "" : trimspace(var.sentry_dsn)
+  sentry_release_value = var.sentry_release == null ? "" : trimspace(var.sentry_release)
+  sentry_enabled       = local.sentry_dsn_value != ""
   sentry_environment_variables = local.sentry_enabled ? merge({
-    SENTRY_DSN         = trimspace(var.sentry_dsn)
+    SENTRY_DSN         = local.sentry_dsn_value
     SENTRY_ENVIRONMENT = var.environment
-    }, trimspace(coalesce(var.sentry_release, "")) != "" ? {
-    SENTRY_RELEASE = trimspace(var.sentry_release)
+    }, local.sentry_release_value != "" ? {
+    SENTRY_RELEASE = local.sentry_release_value
     } : {}, var.sentry_traces_sample_rate == null ? {} : {
     SENTRY_TRACES_SAMPLE_RATE = tostring(var.sentry_traces_sample_rate)
   }) : {}

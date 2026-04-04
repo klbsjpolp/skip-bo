@@ -7,6 +7,7 @@
     "fmt": "tofu fmt -check -recursive .",
     "init:prod": "tofu -chdir=envs/prod init",
     "plan:prod": "tofu -chdir=envs/prod plan",
+    "validate:offline:prod": "bash ./scripts/validate-offline-prod.sh",
     "validate:prod": "tofu -chdir=envs/prod validate"
   }
 }
