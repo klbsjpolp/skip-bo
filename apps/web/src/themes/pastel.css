@@ -21,11 +21,20 @@
     --button-hover-bg: #8bbbd6;
     --victory-border: #e5b8c8;
     --victory-accent: #ffd7e6;
+    --victory-accent-soft: color-mix(in srgb, var(--victory-accent) 34%, transparent);
     --victory-piece-1: #f7b7c3;
     --victory-piece-2: #f5d38d;
     --victory-piece-3: #a7ddb5;
     --victory-piece-4: #a9d7f0;
-    --victory-burst-size: 10px;
+    --victory-burst-size: 9px;
+    --victory-accent-opacity: 0.9;
+    --victory-pattern-opacity: 0.18;
+    --victory-pattern-image:
+      radial-gradient(circle at 10px 10px, rgba(255, 255, 255, 0.62) 0 2px, transparent 2.5px),
+      radial-gradient(circle at 26px 24px, rgba(255, 255, 255, 0.4) 0 3px, transparent 3.5px);
+    --victory-pattern-size: 36px 36px;
+    --victory-pattern-drift-to: 36px 36px;
+    --victory-shine-opacity: 0.22;
     --card-back-bg: linear-gradient(135deg, #a0d2eb 0%, #bee5eb 100%);
 
     --skipbo-text: #ffedd8;
