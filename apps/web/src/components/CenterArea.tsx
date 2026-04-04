@@ -71,13 +71,6 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                   animation.sourceInfo.source === 'build' &&
                   animation.sourceInfo.index === index,
               );
-              const buildPileHasIncomingPlayAnimation = activeAnimations.some(
-                (animation) =>
-                  animation.targetInfo?.source === 'build' &&
-                  animation.targetInfo.index === index,
-              );
-              const buildPileIsAnimating = buildPileIsCompleting || buildPileHasIncomingPlayAnimation;
-
               const handleBuildPilePress = () => {
                 if (canDropSelectedCard) {
                   void playCard(index);
@@ -110,7 +103,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                     }
                   }}
                 >
-                  {pile.length > 0 && !buildPileIsAnimating ? (
+                  {pile.length > 0 && !buildPileIsCompleting ? (
                     <Card
                       hint={`Construction pile ${index + 1}`}
                       card={{

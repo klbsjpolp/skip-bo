@@ -70,6 +70,28 @@ const createCompletionAnimations = (count: number): CardAnimationData[] =>
     },
   }));
 
+const createIncomingBuildAnimation = (buildPileIndex: number): CardAnimationData => ({
+  id: `play-build-${buildPileIndex}`,
+  card: card(4),
+  startPosition: { x: 0, y: 0 },
+  endPosition: { x: 100, y: 100 },
+  animationType: 'play',
+  sourceRevealed: true,
+  targetRevealed: true,
+  initialDelay: 0,
+  duration: 300,
+  sourceInfo: {
+    playerIndex: 0,
+    source: 'hand',
+    index: 0,
+  },
+  targetInfo: {
+    playerIndex: 0,
+    source: 'build',
+    index: buildPileIndex,
+  },
+});
+
 const renderCenterArea = (
   gameState: GameState,
   activeAnimations: CardAnimationData[] = [],
@@ -115,5 +137,16 @@ describe('CenterArea', () => {
     ).map((element) => Number(element.dataset.value));
 
     expect(retreatCards).toEqual([5, 7, 9]);
+  });
+
+  test('keeps the current top build card visible while an incoming play animation is active', () => {
+    const gameState = createGameState([]);
+    gameState.buildPiles[0] = [card(1), card(2), card(3)];
+
+    const { container } = renderCenterArea(gameState, [createIncomingBuildAnimation(0)]);
+    const buildPile = container.querySelector<HTMLElement>('[data-build-pile="0"]');
+
+    expect(buildPile?.querySelector('.card[data-value="3"]')).not.toBeNull();
+    expect(buildPile?.querySelector('.empty-card')).toBeNull();
   });
 });
