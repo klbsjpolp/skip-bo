@@ -53,13 +53,13 @@ function AppShell({
   return (
     <main
       id="main"
-      className="min-h-screen px-4 pb-4 pt-2 lg:px-10 lg:pb-10 lg:pt-4"
+      className="min-h-screen px-4 pb-4 pt-1 lg:px-10 lg:pb-10 lg:pt-2"
       data-testid="app-main"
       data-ui-fixture={fixtureName}
     >
       <div className="mx-auto max-w-7xl">
         <div
-          className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
+          className="mb-1 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
           data-testid="app-toolbar"
         >
           <div
