@@ -67,7 +67,6 @@ function AppShell({
               data-testid="app-toolbar-left"
           >
             <NewGame
-              onDebugFillBuildPile={debugFillBuildPile}
               onJoinOnlineGame={onJoinOnlineGame}
               onStartLocalGame={onStartLocalGame}
               onStartOnlineGame={onStartOnlineGame}
@@ -91,7 +90,20 @@ function AppShell({
             </Button>
           </div>
         )}
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <div>
+            {import.meta.env.DEV && debugFillBuildPile ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={debugFillBuildPile}
+                className="h-auto px-1.5 py-0.5 text-[0.65rem] text-muted-foreground/80"
+                data-testid="debug-fill-build-pile-button"
+              >
+                Debug
+              </Button>
+            ) : null}
+          </div>
           <p
             className="app-version-badge text-xs text-muted-foreground/80 tabular-nums"
             data-testid="app-version"

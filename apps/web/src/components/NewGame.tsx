@@ -15,7 +15,6 @@ import {getStoredStockSize} from '@/state/initialGameState.ts';
 import {isValidRoomCode, normalizeRoomCode} from '@skipbo/multiplayer-protocol';
 
 interface NewGameProps {
-  onDebugFillBuildPile?: () => void;
   onJoinOnlineGame: (roomCode: string) => Promise<void>;
   onStartLocalGame: () => void;
   onStartOnlineGame: (stockSize: number) => Promise<void>;
@@ -56,7 +55,6 @@ const MODE_OPTIONS: ModeOption[] = [
 ];
 
 function NewGame({
-  onDebugFillBuildPile,
   onJoinOnlineGame,
   onStartLocalGame,
   onStartOnlineGame,
@@ -289,15 +287,6 @@ function NewGame({
           ) : null}
         </DialogContent>
       </Dialog>
-      {import.meta.env.DEV && onDebugFillBuildPile ? (
-        <Button
-          variant="outline"
-          onClick={onDebugFillBuildPile}
-          data-testid="debug-fill-build-pile-button"
-        >
-          Debug: pile prête
-        </Button>
-      ) : null}
     </div>
   );
 }
