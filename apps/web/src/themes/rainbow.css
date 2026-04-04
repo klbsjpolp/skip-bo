@@ -132,8 +132,8 @@
       inset: auto;
       top: 50%;
       left: 50%;
-      width: clamp(94px, 18vw, 156px);
-      height: clamp(94px, 18vw, 156px);
+      width: clamp(88px, 17vw, 148px);
+      height: clamp(88px, 17vw, 148px);
       opacity: 0.92;
       transform: translate(-50%, -50%);
       background:
