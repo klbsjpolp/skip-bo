@@ -52,6 +52,7 @@ export function VictoryEffects() {
       <div className="victory-layer victory-persistent-layer" aria-hidden="true" data-testid="victory-effects">
         <div className="victory-accent" />
         <div className="victory-pattern" />
+        <div className="victory-emblem" />
         <div className="victory-shine" />
       </div>
 

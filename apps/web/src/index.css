@@ -448,6 +448,7 @@
 
   .victory-accent,
   .victory-pattern,
+  .victory-emblem,
   .victory-shine,
   .victory-sunburst {
     position: absolute;
@@ -467,6 +468,10 @@
     background-size: var(--victory-pattern-size);
     opacity: var(--victory-pattern-opacity);
     animation: var(--victory-pattern-animation);
+  }
+
+  .victory-emblem {
+    display: none;
   }
 
   .victory-shine {
