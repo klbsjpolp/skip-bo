@@ -81,7 +81,7 @@ function DiscardPile({
                      }: DiscardPileProps) {
   const {activeAnimations, isCardBeingAnimated} = useCardAnimation();
   const isHuman = !player.isAI;
-  const hasIncomingDiscardAnimation = activeAnimations.some(
+  const hasIncomingDiscardAnimation = !isCurrentPlayer && activeAnimations.some(
     (animation) =>
       animation.targetInfo?.source === 'discard' &&
       animation.targetInfo.playerIndex === playerIndex &&

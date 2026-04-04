@@ -100,7 +100,7 @@ const createIncomingDiscardAnimation = (
 });
 
 describe('Online animation masking', () => {
-  test('hides a build pile top card while an incoming play animation is active', () => {
+  test('keeps a build pile top card visible while an incoming play animation is active', () => {
     const gameState = createGameState();
     gameState.buildPiles[0] = [card(7)];
 
@@ -116,8 +116,8 @@ describe('Online animation masking', () => {
 
     const buildPile = screen.getByLabelText('Pile de construction 1');
 
-    expect(buildPile.querySelector('.empty-card')).not.toBeNull();
-    expect(buildPile.querySelector('.card[data-value="7"]')).toBeNull();
+    expect(buildPile.querySelector('.empty-card')).toBeNull();
+    expect(buildPile.querySelector('.card[data-value="7"]')).not.toBeNull();
   });
 
   test('hides a discard pile top card while an incoming discard animation is active', () => {
@@ -145,5 +145,32 @@ describe('Online animation masking', () => {
     ).map((element) => element.dataset.value);
 
     expect(visibleCardValues).toEqual(['3']);
+  });
+
+  test('keeps a discard pile top card visible for the current player during a local incoming discard animation', () => {
+    const gameState = createGameState();
+    gameState.players[0].discardPiles[0] = [card(3), card(7)];
+
+    render(
+      <CardAnimationContext.Provider value={createAnimationContext([createIncomingDiscardAnimation(0, 0)])}>
+        <PlayerArea
+          player={gameState.players[0]}
+          playerIndex={0}
+          isCurrentPlayer={true}
+          isWinner={false}
+          gameState={gameState}
+          selectCard={vi.fn()}
+          discardCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
+          clearSelection={vi.fn()}
+        />
+      </CardAnimationContext.Provider>,
+    );
+
+    const discardPile = screen.getByLabelText('Défausse 1');
+    const visibleCardValues = Array.from(
+      discardPile.querySelectorAll<HTMLElement>('.card[data-value]'),
+    ).map((element) => element.dataset.value);
+
+    expect(visibleCardValues).toEqual(['3', '7']);
   });
 });
