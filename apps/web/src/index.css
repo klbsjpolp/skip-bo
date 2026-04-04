@@ -132,9 +132,6 @@
   body {
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
-  #main {
-    padding-top: 10px;
-  }
 
   @media(width >= 64rem) {
     :root {
@@ -393,10 +390,6 @@
   .player-area {
     @apply z-20;
     transition: border-color 0.6s, background-color 0.6s, box-shadow 0.6s;
-
-    &:first-child {
-      margin-top: 15px;
-    }
   }
 
   .center-area {

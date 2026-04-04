@@ -51,12 +51,12 @@ function AppShell({
   statusStrip,
 }: AppShellProps) {
   return (
-    <main
-      id="main"
-      className="min-h-screen p-4 lg:p-10"
-      data-testid="app-main"
-      data-ui-fixture={fixtureName}
-    >
+      <main
+        id="main"
+        className="min-h-screen px-4 pb-4 pt-3 lg:px-10 lg:pb-10 lg:pt-6"
+        data-testid="app-main"
+        data-ui-fixture={fixtureName}
+      >
       <div className="mx-auto max-w-7xl">
         <div
           className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
