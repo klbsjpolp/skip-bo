@@ -1,0 +1,14 @@
+aws_region = "ca-central-1"
+
+allowed_origins = [
+  "*",
+]
+
+extra_tags = {
+  Owner = "pierreluc"
+}
+
+# Optional backend Sentry monitoring
+# sentry_dsn = "https://examplePublicKey@o0.ingest.sentry.io/0"
+# sentry_release = "git-sha-or-tag"
+# sentry_traces_sample_rate = 0.1

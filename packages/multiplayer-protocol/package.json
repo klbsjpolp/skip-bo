@@ -1,0 +1,24 @@
+{
+  "name": "@skipbo/multiplayer-protocol",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src tests --ext ts --report-unused-disable-directives --max-warnings 0",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@skipbo/game-core": "workspace:*",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1",
+    "vitest": "^4.1.2"
+  }
+}

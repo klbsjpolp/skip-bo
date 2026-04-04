@@ -7,5 +7,5 @@
     "allowSyntheticDefaultImports": true,
     "types": ["node"]
   },
-  "include": ["vite.config.ts", "playwright.config.ts"]
+  "include": ["apps/web/vite.config.ts", "apps/web/playwright.config.ts", "apps/web/vitest.config.ts"]
 }

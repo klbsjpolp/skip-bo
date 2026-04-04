@@ -1,0 +1,30 @@
+{
+  "name": "@skipbo/realtime-api",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "node ./scripts/build.mjs",
+    "dev": "tsx watch ./src/local-dev.ts",
+    "lint": "eslint src tests --ext ts --report-unused-disable-directives --max-warnings 0",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@aws-sdk/client-apigatewaymanagementapi": "^3.924.0",
+    "@aws-sdk/client-dynamodb": "^3.924.0",
+    "@aws-sdk/lib-dynamodb": "^3.924.0",
+    "@sentry/aws-serverless": "^10.47.0",
+    "@skipbo/game-core": "workspace:*",
+    "@skipbo/multiplayer-protocol": "workspace:*",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.153",
+    "esbuild": "^0.25.9",
+    "tsx": "^4.20.5",
+    "vite": "^7.3.1",
+    "vitest": "^4.1.2"
+  }
+}

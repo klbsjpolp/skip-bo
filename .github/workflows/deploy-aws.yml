@@ -1,0 +1,133 @@
+name: Deploy AWS Realtime Stack
+
+on:
+  pull_request:
+    branches: [main, master, develop]
+    paths:
+      - 'apps/realtime-api/**'
+      - 'packages/game-core/**'
+      - 'packages/multiplayer-protocol/**'
+      - 'infra/terraform/**'
+      - '.github/workflows/deploy-aws.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/realtime-api/**'
+      - 'packages/game-core/**'
+      - 'packages/multiplayer-protocol/**'
+      - 'infra/terraform/**'
+      - '.github/workflows/deploy-aws.yml'
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: 'Apply the production OpenTofu plan after approval'
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          run_install: false
+
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22.x
+          cache: 'pnpm'
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v2
+        with:
+          tofu_wrapper: false
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build realtime API bundle
+        run: pnpm --filter @skipbo/realtime-api build
+
+      - name: Check OpenTofu formatting
+        run: pnpm tofu:fmt
+
+      - name: Initialize OpenTofu without backend
+        run: tofu -chdir=infra/terraform/envs/prod init -backend=false
+
+      - name: Validate OpenTofu
+        run: pnpm tofu:validate
+
+      - name: Create offline OpenTofu plan
+        run: tofu -chdir=infra/terraform/envs/prod plan -input=false -lock=false -refresh=false
+
+  apply:
+    if: github.event_name == 'workflow_dispatch' && inputs.apply
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: aws-prod
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          run_install: false
+
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22.x
+          cache: 'pnpm'
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v2
+        with:
+          tofu_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ca-central-1
+          role-to-assume: ${{ secrets.AWS_OPENTOFU_ROLE_ARN }}
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Capture app version
+        id: app_version
+        run: echo "value=v$(node -p 'require(\"./package.json\").version')" >> "$GITHUB_OUTPUT"
+
+      - name: Build realtime API bundle
+        run: pnpm --filter @skipbo/realtime-api build
+
+      - name: Write backend config
+        run: |
+          cat <<'EOF' > infra/terraform/envs/prod/backend.hcl
+          ${{ secrets.TOFU_BACKEND_CONFIG_HCL }}
+          EOF
+
+      - name: Initialize OpenTofu with remote state
+        run: tofu -chdir=infra/terraform/envs/prod init -backend-config=backend.hcl
+
+      - name: Create production plan
+        run: tofu -chdir=infra/terraform/envs/prod plan -input=false -out=tfplan
+        env:
+          TF_VAR_sentry_dsn: ${{ secrets.VITE_SENTRY_DSN }}
+          TF_VAR_sentry_release: ${{ steps.app_version.outputs.value }}
+
+      - name: Apply production plan
+        run: tofu -chdir=infra/terraform/envs/prod apply -input=false tfplan
+        env:
+          TF_VAR_sentry_dsn: ${{ secrets.VITE_SENTRY_DSN }}
+          TF_VAR_sentry_release: ${{ steps.app_version.outputs.value }}

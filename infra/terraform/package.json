@@ -1,0 +1,12 @@
+{
+  "name": "@skipbo/opentofu",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "apply:prod": "tofu -chdir=envs/prod apply",
+    "fmt": "tofu fmt -check -recursive .",
+    "init:prod": "tofu -chdir=envs/prod init",
+    "plan:prod": "tofu -chdir=envs/prod plan",
+    "validate:prod": "tofu -chdir=envs/prod validate"
+  }
+}

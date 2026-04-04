@@ -9,9 +9,15 @@ import tseslint from 'typescript-eslint'
 const tsconfigRootDir = dirname(fileURLToPath(import.meta.url))
 
 export default tseslint.config(
-  { ignores: ['coverage', 'dist', 'playwright-report', 'test-results', 'vite.config.d.ts'] },
+  { ignores: ['coverage', 'dist', 'playwright-report', 'test-results', 'vite.config.d.ts', '**/dist', '**/dist-types'] },
   {
-    files: ['src/**/*.{ts,tsx}'],
+    files: ['apps/**/*.{ts,tsx}', 'packages/**/*.{ts,tsx}'],
+    ignores: [
+      'apps/**/tests/**/*.{ts,tsx}',
+      'packages/**/tests/**/*.{ts,tsx}',
+      '**/__tests__/**/*.{ts,tsx}',
+      '**/*.{test,spec}.{ts,tsx}',
+    ],
     extends: [
       js.configs.recommended,
       ...tseslint.configs.recommendedTypeChecked,
@@ -47,7 +53,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['vite.config.ts', 'vitest.config.ts', 'playwright.config.ts'],
+    files: ['apps/*/{vite,vitest,playwright}.config.ts'],
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     languageOptions: {
       ecmaVersion: 'latest',
@@ -55,7 +61,12 @@ export default tseslint.config(
     },
   },
   {
-    files: ['tests/**/*.{ts,tsx}'],
+    files: [
+      'apps/**/tests/**/*.{ts,tsx}',
+      'packages/**/tests/**/*.{ts,tsx}',
+      '**/__tests__/**/*.{ts,tsx}',
+      '**/*.{test,spec}.{ts,tsx}',
+    ],
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     languageOptions: {
       ecmaVersion: 'latest',
@@ -64,9 +75,6 @@ export default tseslint.config(
         ...globals.node,
       },
     },
-  },
-  {
-    files: ['**/__tests__/**/*.{ts,tsx}', '**/*.{test,spec}.{ts,tsx}'],
     rules: {
       '@typescript-eslint/unbound-method': 'off',
     },

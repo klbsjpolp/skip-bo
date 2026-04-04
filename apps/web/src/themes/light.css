@@ -1,0 +1,41 @@
+.theme-light {
+    --primary: hsl(0 0% 9%);
+    --primary-foreground: hsl(0 0% 98%);
+    --secondary: hsl(0 0% 96.1%);
+    --secondary-foreground: hsl(0 0% 9%);
+    --success: #22c55e;
+    --success-foreground: hsl(0 0% 98%);
+
+    --bg-color: #e5e7eb;
+    --zone-bg-color: #f9fafb;
+    --text-color: #374151;
+    --title-color: #374151;
+    --card-front-color: white;
+    --card-back-color: #3b82f6;
+    --card-back-color-2: #22c55e;
+    --card-border-color: #9ca3af;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    --card-radius: 8px;
+    --button-bg: #4f46e5;
+    --button-hover-bg: #4338ca;
+    --button-text: white;
+    --victory-border: #d1a63c;
+    --victory-accent: #f4cf6a;
+    --victory-piece-1: #ef4444;
+    --victory-piece-2: #f59e0b;
+    --victory-piece-3: #22c55e;
+    --victory-piece-4: #3b82f6;
+    --card-back-bg: linear-gradient(45deg,
+      var(--card-back-color-2) 0%,
+      var(--card-back-color-2) 50%,
+      var(--card-back-color) 50%,
+      var(--card-back-color) 100%
+    );
+
+    /* Card color ranges */
+    --skipbo-text: #333;
+    --skipbo-bg: var(--card-back-color-2);
+    --card-g1: hsl(152 69% 58%);   /* 1‑4 */
+    --card-g2: hsl(0 80% 60%);     /* 5‑8 */
+    --card-g3: hsl(283 55% 57%);   /* 9‑12 */
+  }

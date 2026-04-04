@@ -1,156 +1,132 @@
-# Skip-Bo React Application
+# Skip-Bo
 
-A Skip-Bo implementation built with React 18, TypeScript, and Vite. The project uses an XState state machine for turn orchestration, a heuristic AI opponent, and animated card movement for both human and AI actions.
+Skip-Bo is a lightweight `pnpm` monorepo with an offline-first React game, a shared rules engine, and an AWS serverless multiplayer backend.
 
-## Current Features
+## Product behavior
 
-- Human vs AI gameplay
-- XState-driven turn flow for draw, think, animate, and resolve phases
-- Strategic AI with stock-first search, planned move targets, and improved Skip-Bo/discard heuristics
-- Automatic hand refill and completed-pile reshuffling
-- 13 visual themes
-- PWA registration for offline-ready builds
-- Vitest coverage for reducer, state machine, and key card behaviors
-- Playwright coverage for theme, layout, and accessibility regressions
+- The app boots straight into a local game against AI.
+- `Nouvelle partie` opens a modal with:
+  - `Local vs AI`
+  - `Start online`
+  - `Join online`
+- Online play is private human-vs-human only and joined by a 5-character Crockford base32 room code.
+- There is no lobby route or waiting-room screen. The board stays visible while the room code and waiting state are shown inline.
+- `Rejouer` preserves the finished game type. Local restarts locally; online creates a fresh hosted room.
 
-## Tech Stack
+## Workspace layout
 
-- React 18
-- TypeScript 5
-- Vite 5
-- XState 5
-- Immer
-- Tailwind CSS 4
-- Radix UI primitives
-- `next-themes`
-- `lucide-react`
-- Vitest and Testing Library
-- `vite-plugin-pwa` / Workbox
+```text
+apps/
+├── realtime-api/         AWS Lambda handlers for HTTP and WebSocket APIs
+└── web/                  React/Vite app, AI, animations, fixtures, and tests
+packages/
+├── game-core/            Shared reducer, validators, deck setup, and domain types
+└── multiplayer-protocol/ HTTP and WebSocket DTOs plus redacted client views
+infra/
+└── terraform/            AWS infrastructure modules, managed with OpenTofu
+docs/
+├── architecture/
+├── protocols/
+└── runbooks/
+```
 
-## Getting Started
+## Prerequisites
 
-### Prerequisites
-
-- Node.js 18 or later
+- Node.js 20 or later
 - `pnpm`
+- OpenTofu 1.9 or later if you want to work on the AWS stack
 
-### Install and Run
+## Getting started
+
+Install once from the repo root:
 
 ```bash
 pnpm install
+```
+
+Run the web app:
+
+```bash
 pnpm dev
+```
+
+Run the realtime API local watcher:
+
+```bash
+pnpm dev:api
 ```
 
 Open [http://localhost:5173](http://localhost:5173).
 
-### Sentry Setup
+## Environment variables
 
-Browser tracking only works when the Vite runtime DSN is present. Create a local env file with:
+The web app only needs backend configuration when you want online play:
 
 ```bash
-cp .env.example .env.local
+VITE_SKIPBO_API_URL=https://<http-api-id>.execute-api.ca-central-1.amazonaws.com
 ```
 
-Then set:
+Sentry remains optional:
 
 ```bash
 VITE_SENTRY_DSN=your_browser_dsn
 ```
 
-`VITE_SENTRY_DSN` is the value read by [`src/instrument.ts`](src/instrument.ts). Without it, the SDK loads but sends nothing.
+The realtime Lambda backend can use Sentry too. Configure it through OpenTofu with:
 
-For GitHub Pages builds, add these repository secrets so the Actions build step can inject them during `vite build`:
+```bash
+TF_VAR_sentry_dsn=your_sentry_dsn
+TF_VAR_sentry_release=v$(node -p 'require("./package.json").version')
+```
 
+For GitHub Pages deployment, add these repository secrets:
+
+- `VITE_SKIPBO_API_URL`
 - `VITE_SENTRY_DSN`
 - `SENTRY_AUTH_TOKEN`
 
-The workflow already sets `SENTRY_ORG=pierre-luc`, `SENTRY_PROJECT=skip-bo`, and `VITE_APP_VERSION` from the release tag created during deploy.
+The AWS apply workflow reuses `VITE_SENTRY_DSN` for the backend too and sends `v<package.json version>` as the backend Sentry release.
 
-To verify the integration after deploy, open DevTools, filter the Network tab by `envelope`, and reload the page. With the DSN configured, you should see requests to Sentry on page load. Do not test by throwing an error directly in the browser console; Sentry documents that DevTools-triggered errors are sandboxed and will not be reported.
+The Pages workflow also injects `VITE_APP_VERSION` from the release tag.
 
-## Scripts
+## Common commands
 
-- `pnpm dev` starts the Vite dev server
-- `pnpm build` runs TypeScript compilation and creates a production build
-- `pnpm commit` opens the Commitizen prompt for an Angular-style commit message
-- `pnpm preview` serves the production build locally
-- `pnpm release` bumps the semver version, updates `CHANGELOG.md`, and creates a release commit and tag
-- `pnpm release:dry-run` previews the next semver bump without writing files or tags
-- `pnpm release:first` creates the first tagged release from the current version
-- `pnpm lint` runs ESLint
-- `pnpm test` runs the Vitest suite
-- `pnpm test:e2e` runs the Playwright UI suite
-- `pnpm test:visual` runs the desktop visual-regression suite
-- `pnpm test:visual:update` refreshes desktop visual baselines
-- `pnpm typecheck` runs `tsc --noEmit`
+- `pnpm dev`: run the web app
+- `pnpm dev:api`: watch the Lambda app locally
+- `pnpm build`: build `game-core`, `multiplayer-protocol`, `realtime-api`, and `web`
+- `pnpm lint`: run ESLint across workspace packages
+- `pnpm test`: run Vitest suites across workspace packages
+- `pnpm test:e2e`: run Playwright UI coverage for the web app
+- `pnpm test:visual`: run the desktop visual-regression suite
+- `pnpm typecheck`: run `tsc --noEmit` across workspace packages
+- `pnpm tofu:init`: initialize the production OpenTofu environment
+- `pnpm tofu:plan`: create the production OpenTofu plan
+- `pnpm tofu:apply`: apply the production OpenTofu plan
 
-## Commit And Release Workflow
+## Multiplayer backend
 
-- Commit messages use the Angular conventional-commit format and are validated by Husky + Commitlint on `git commit`.
-- Use `pnpm commit` if you want an interactive prompt instead of writing the message by hand.
-- `feat:` commits trigger a minor version bump, `fix:` commits trigger a patch bump, and `!` or `BREAKING CHANGE:` triggers a major bump.
-- Releases are created with `pnpm release` and tagged as `v<version>`.
-- Pushes to `main` also run the release flow in GitHub Actions, publish the matching GitHub Release, and deploy GitHub Pages from that release commit.
-- For the first tagged release in this repo, run `pnpm release:first`. Use `pnpm release:dry-run` to inspect the next bump before cutting it.
+The online stack is intentionally small:
 
-## Project Structure
+- HTTP API Gateway for `POST /rooms` and `POST /rooms/join`
+- WebSocket API Gateway for live room updates
+- Lambda for create, join, connect, disconnect, and message handling
+- DynamoDB for room state and active WebSocket connections
+- CloudWatch logs and minimal Lambda error alarms
+- Optional Sentry monitoring for browser and realtime Lambda errors
 
-```text
-src/
-├── ai/           AI decision logic, heuristics, search, and strategy notes
-├── components/   Game board, player areas, controls, and UI primitives
-├── contexts/     Animation context and provider
-├── hooks/        Main gameplay hook used by the app shell
-├── lib/          Validators, config, and shared utilities
-├── services/     AI and draw animation orchestration
-├── state/        Deck setup, reducer, selectors, and XState machine
-├── themes/       Theme CSS files
-├── types/        Shared TypeScript types
-└── utils/        Positioning helpers for animations
-```
+The server is authoritative for online rooms. It shuffles, deals, validates actions, and sends a redacted snapshot to each player after every accepted action.
 
-## Gameplay and AI Notes
+## Testing
 
-- `players[0]` is the human player and `players[1]` is the AI player.
-- The UI renders the AI area first, so DOM order does not match player index. This matters in animation code.
-- Hands use fixed-size arrays with `null` slots. Removing a hand card should set the slot to `null`, not splice the array.
-- AI turns are driven by [`src/state/gameMachine.ts`](src/state/gameMachine.ts).
-- The AI entry point is [`src/ai/computeBestMove.ts`](src/ai/computeBestMove.ts).
-- The AI always runs with the strongest strategy profile; there is no user-facing difficulty mode anymore.
-- AI card selection now keeps its planned destination between `SELECT_CARD` and the following resolver step.
-- The AI search simulates short turn sequences through the reducer, so it can prefer moves that unblock its stock pile a few actions later.
-- Completed build piles move into `completedBuildPiles` and are reshuffled back into `deck` when necessary.
-
-## Themes
-
-Available themes:
-
-- Light
-- Dark
-- Pastel
-- Bonbon
-- Rainbow
-- Metro
-- Neon
-- Retro
-- Espace
-- Glass
-- Wool
-- Minecraft
-- Steampunk
-
-## UI Regression Testing
-
-- Desktop visual baselines live in `tests/ui/*.spec.ts-snapshots/`, are generated from Playwright on Chromium, and are stored in Git LFS when committed.
-- Deterministic UI fixtures are available in development with `?fixture=ready-human`, `?fixture=selected-hand`, `?fixture=ai-turn`, and `?fixture=victory-human`.
-- Playwright projects collect tests by `@desktop` and `@mobile` tags so CI only runs the cases that apply to each runner profile.
-- Theme switching tests set `localStorage.theme` directly for coverage, with one separate test that changes the theme through the live switcher.
-- Screenshot assertions are skipped when the matching baseline file is absent, so the functional UI checks can still run on branches without committed snapshots.
-- Mobile smoke coverage currently checks horizontal overflow on representative themes rather than maintaining a second visual baseline set.
+- Shared rules and backend tests run with Vitest.
+- Browser interaction, layout, and accessibility coverage lives under `apps/web/tests/ui`.
+- Desktop visual baselines live under `apps/web/tests/ui/*.spec.ts-snapshots/`.
+- Deterministic browser fixtures are still available through `?fixture=...`.
 
 ## Documentation
 
-- [`README.md`](README.md): high-level project overview
-- [`src/ai/README.md`](src/ai/README.md): AI architecture and strategy behavior
-- [`AGENTS.md`](AGENTS.md): working notes for AI/code agents
-- [`src/ai/discardStrategy.md`](src/ai/discardStrategy.md): AI strategy notes and backlog
+- [`AGENTS.md`](AGENTS.md): repo-local coding guidance
+- [`apps/web/src/ai/README.md`](apps/web/src/ai/README.md): AI architecture notes
+- [`docs/architecture/online-multiplayer.md`](docs/architecture/online-multiplayer.md): monorepo and multiplayer architecture
+- [`docs/protocols/realtime-events.md`](docs/protocols/realtime-events.md): room protocol details
+- [`docs/runbooks/opentofu-aws-realtime.md`](docs/runbooks/opentofu-aws-realtime.md): OpenTofu bootstrap and deploy flow

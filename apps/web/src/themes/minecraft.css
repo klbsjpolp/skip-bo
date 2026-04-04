@@ -1,0 +1,237 @@
+.theme-minecraft {
+  --text-base: 0.85rem;
+
+  --text-xs: calc(var(--text-base) * 0.75);
+  --text-sm: calc(var(--text-base) * 0.875);
+
+  --text-lg: calc(var(--text-base) * 1.125);
+  --text-xl: calc(var(--text-base) * 1.25);
+  --text-2xl: calc(var(--text-base) * 1.5);
+
+  /* Core palette inspired by the provided textures */
+  --primary: hsl(121 35% 43%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(33 45% 45%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --success: #9adf5a;
+  --success-foreground: #1a1a1a;
+
+  --bg-color: #2f2418;                 /* base around dirt */
+  --text-color: #e6e6e6;
+  --title-color: #ffffff;
+
+  --zone-bg-color: #5f7a21;            /* grass tint under textured layer */
+
+  --card-front-color: #e5e5e5;
+  --card-border-color: #333;
+  --card-shadow: 0 2px 0 rgba(0,0,0,.2), 0 4px 0 rgba(0,0,0,.1);
+  --card-radius: 0;
+  --card-back-color: #8c8c8c;          /* stone base color (not really visible with texture) */
+  --minecraft-text-outline: #1a1a1a;
+
+  /* card color groups keep vibrant, slightly gamey colors */
+  --card-g1: hsl(135 100% 64%);   /* 1‑4 */
+  --card-g2: hsl(2 100% 76%);     /* 5‑8 */
+  --card-g3: hsl(216 100% 75%);   /* 9‑12 */
+
+  --selected-border-color: #9adf5a;    /* bright grassy highlight */
+  --button-bg: #7a5a35;
+  --button-hover-bg: #6b4f30;
+  --victory-border: #9adf5a;
+  --victory-accent: #37ceff;
+  --victory-badge-bg: color-mix(in srgb, #2f2418 78%, #9adf5a 22%);
+  --victory-badge-text: #f4f4f4;
+
+
+  /* Global background — repeating dirt texture (SVG + noise) */
+  body {
+    font-family: 'Monaco', monospace;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    background-image: url("./textures/dirt.webp");
+    background-size: 80px 80px;
+    background-repeat: repeat;
+    image-rendering: pixelated;
+    * {
+      border-radius: 0 !important;
+    }
+  }
+
+  /* Player and center zones — grass texture */
+  .player-area .bg-layer,
+  .center-area .bg-layer {
+    background-image: url("./textures/grass.webp");
+    background-size: 80px 80px;
+    background-repeat: repeat;
+  }
+
+  /* Empty spots — wood plank texture */
+  .card.empty-card {
+    background-image: url("./textures/wood.webp");
+    background-size: 80px 80px;
+    background-repeat: repeat;
+    opacity: 1;
+  }
+
+  /* Card backs — stone texture with a diamond sword overlay */
+  .card {
+    &.normal-card {
+      background-image: url("./textures/cobblestone.webp");
+      background-size: 80px 80px;
+      background-repeat: repeat;
+
+      &::before {
+        display: none;
+      }
+      
+      > span {
+        text-shadow:
+                1px 0 0 var(--minecraft-text-outline),
+                -1px 0 0 var(--minecraft-text-outline),
+                0 1px 0 var(--minecraft-text-outline),
+                0 -1px 0 var(--minecraft-text-outline),
+                1px 1px 0 var(--minecraft-text-outline),
+                -1px 1px 0 var(--minecraft-text-outline),
+                1px -1px 0 var(--minecraft-text-outline),
+                -1px -1px 0 var(--minecraft-text-outline);
+      }
+    }
+    
+    &.skipbo-text {
+      background-image: url("./textures/obsidian.webp");
+      background-size: 80px 80px;
+      background-repeat: repeat;
+      color: #37ceff;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-image: url("./textures/diamond.webp");
+        background-size: 40px 40px;
+        background-position: center center;
+        background-repeat: no-repeat;
+        width: 100%;
+        height: 100%;
+      }
+
+      span:not(.card-corner-number) {
+        visibility: hidden;
+      }
+    }
+    
+    .back {
+      background-image: url("./textures/stone.webp");
+      background-size: 80px 80px;
+      background-repeat: repeat;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 10%;
+        width: 80%;
+        height: 100%;
+        background-image: url("./textures/sword.webp");
+        background-size: contain;
+        background-position: center center;
+        background-repeat: no-repeat;
+      }
+    }
+  }
+
+  .player-area.winner {
+    box-shadow:
+      0 0 0 2px rgba(0, 0, 0, 0.45),
+      0 0 0 4px rgba(154, 223, 90, 0.85),
+      6px 6px 0 rgba(0, 0, 0, 0.22);
+  }
+
+  .victory-burst-piece {
+    width: 14px;
+    height: 14px;
+    border-radius: 0;
+    background-color: var(--piece-color);
+    background-size: 18px 18px;
+    background-position: center;
+    background-repeat: repeat;
+    opacity: 1;
+    box-shadow:
+      inset -2px -2px 0 rgba(0, 0, 0, 0.28),
+      inset 2px 2px 0 rgba(255, 255, 255, 0.18),
+      0 0 0 2px rgba(0, 0, 0, 0.38);
+    image-rendering: pixelated;
+    filter: saturate(1.05);
+    animation-name: minecraftVictoryBurst;
+  }
+
+  .victory-burst-piece:nth-child(4n + 1) {
+    background-image: url("./textures/grass.webp");
+  }
+
+  .victory-burst-piece:nth-child(4n + 2) {
+    background-image: url("./textures/stone.webp");
+  }
+
+  .victory-burst-piece:nth-child(4n + 3) {
+    background-image: url("./textures/diamond.webp");
+  }
+
+  .victory-burst-piece:nth-child(4n + 4) {
+    background-image: url("./textures/wood.webp");
+  }
+
+  .victory-badge {
+    border-radius: 0;
+    backdrop-filter: none;
+    box-shadow:
+      0 0 0 2px rgba(0, 0, 0, 0.5),
+      4px 4px 0 rgba(0, 0, 0, 0.25);
+  }
+
+  .app-version-badge {
+    padding: 0.2rem 0.45rem;
+    color: #f4f4f4;
+    background: color-mix(in srgb, #2f2418 88%, black 12%);
+    border: 2px solid rgba(0, 0, 0, 0.55);
+    box-shadow:
+      inset 1px 1px 0 rgba(255, 255, 255, 0.08),
+      2px 2px 0 rgba(0, 0, 0, 0.3);
+    text-shadow:
+      1px 0 0 var(--minecraft-text-outline),
+      -1px 0 0 var(--minecraft-text-outline),
+      0 1px 0 var(--minecraft-text-outline),
+      0 -1px 0 var(--minecraft-text-outline),
+      1px 1px 0 var(--minecraft-text-outline);
+  }
+}
+
+@keyframes minecraftVictoryBurst {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(0.25) rotate(0deg);
+  }
+  8% {
+    opacity: 1;
+  }
+  28% {
+    opacity: 1;
+  }
+  44% {
+    opacity: 0;
+    transform: translate3d(
+      calc(-50% + var(--piece-offset-x)),
+      calc(-50% + var(--piece-offset-y)),
+      0
+    ) scale(1) rotate(var(--piece-rotation));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(
+      calc(-50% + var(--piece-offset-x)),
+      calc(-50% + var(--piece-offset-y)),
+      0
+    ) scale(1) rotate(var(--piece-rotation));
+  }
+}
