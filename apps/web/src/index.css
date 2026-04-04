@@ -112,6 +112,7 @@
     --victory-piece-3: #22c55e;
     --victory-piece-4: #3b82f6;
     --victory-burst-size: 11px;
+    --victory-burst-distance-scale: 0.88;
     --victory-accent-opacity: 0;
     --victory-pattern-opacity: 0;
     --victory-pattern-image: none;
@@ -526,6 +527,10 @@
   }
 
   @media (max-width: 640px) {
+    :root {
+      --victory-burst-distance-scale: 0.72;
+    }
+
     .player-area .discard-piles {
       width: 100%;
       margin-top: 20px;

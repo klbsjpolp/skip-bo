@@ -10,8 +10,8 @@ const BURST_PIECES = Array.from({ length: 12 }, (_, index) => {
     key: `burst-${index}`,
     style: {
       '--piece-index': index,
-      '--piece-offset-x': `${Math.round(Math.cos(angle) * distance)}px`,
-      '--piece-offset-y': `${Math.round(Math.sin(angle) * distance)}px`,
+      '--piece-offset-x': `calc(${Math.round(Math.cos(angle) * distance)}px * var(--victory-burst-distance-scale, 1))`,
+      '--piece-offset-y': `calc(${Math.round(Math.sin(angle) * distance)}px * var(--victory-burst-distance-scale, 1))`,
       '--piece-flight-rotation': `${Math.round((angle * 180) / Math.PI + 90)}deg`,
       '--piece-rotation': `${index * 31 - 18}deg`,
       '--piece-color': `var(--victory-piece-${(index % 4) + 1})`,
@@ -31,16 +31,16 @@ const BURST_GROUPS = [
   {
     key: 'left',
     style: {
-      '--burst-offset-x': '-120px',
-      '--burst-offset-y': '-16px',
+      '--burst-offset-x': 'calc(-120px * var(--victory-burst-distance-scale, 1))',
+      '--burst-offset-y': 'calc(-16px * var(--victory-burst-distance-scale, 1))',
       '--burst-delay': '250ms',
     } as VictoryStyle,
   },
   {
     key: 'right',
     style: {
-      '--burst-offset-x': '190px',
-      '--burst-offset-y': '28px',
+      '--burst-offset-x': 'calc(190px * var(--victory-burst-distance-scale, 1))',
+      '--burst-offset-y': 'calc(28px * var(--victory-burst-distance-scale, 1))',
       '--burst-delay': '600ms',
     } as VictoryStyle,
   },
