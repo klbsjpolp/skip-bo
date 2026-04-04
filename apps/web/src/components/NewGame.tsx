@@ -1,5 +1,5 @@
 import {Asterisk, LoaderCircle, Plug, Plus, type LucideIcon} from 'lucide-react';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 
 import {StockPileSizeSwitcher} from '@/components/StockPileSizeSwitcher.tsx';
 import {Button} from '@/components/ui/button.tsx';
@@ -64,6 +64,7 @@ function NewGame({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<'create-online' | 'join-online' | null>(null);
+  const [queuedLocalStart, setQueuedLocalStart] = useState(false);
   const [roomCode, setRoomCode] = useState('');
   const [selectedMode, setSelectedMode] = useState<NewGameMode>('local');
   const [stockSize, setStockSize] = useState<number>(() => getStoredStockSize());
@@ -82,6 +83,22 @@ function NewGame({
     setRoomCode('');
     setSelectedMode('local');
   };
+
+  useEffect(() => {
+    if (isOpen || !queuedLocalStart) {
+      return;
+    }
+
+    const frameId = requestAnimationFrame(() => {
+      onStartLocalGame();
+      resetDialogState();
+      setQueuedLocalStart(false);
+    });
+
+    return () => {
+      cancelAnimationFrame(frameId);
+    };
+  }, [isOpen, onStartLocalGame, queuedLocalStart]);
 
   const handleStartOnline = async () => {
     setErrorMessage(null);
@@ -120,9 +137,8 @@ function NewGame({
   };
 
   const handleStartLocal = () => {
-    onStartLocalGame();
+    setQueuedLocalStart(true);
     setIsOpen(false);
-    resetDialogState();
   };
 
   return (
