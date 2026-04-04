@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.0.2](https://github.com/klbsjpolp/skip-bo/compare/v1.0.1...v1.0.2) (2026-04-04)
+
+
+### Bug Fixes
+
+* validate opentofu offline in ci ([19e61e7](https://github.com/klbsjpolp/skip-bo/commit/19e61e73a74ce9c644f1f9620d800c0b81be1419))
+
+
+
 ## [1.0.1](https://github.com/klbsjpolp/skip-bo/compare/v1.0.0...v1.0.1) (2026-04-04)
 
 
