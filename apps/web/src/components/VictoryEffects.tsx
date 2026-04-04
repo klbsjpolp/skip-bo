@@ -4,7 +4,7 @@ type VictoryStyle = CSSProperties;
 
 const BURST_PIECES = Array.from({ length: 12 }, (_, index) => {
   const angle = (Math.PI * 2 * index) / 12 - Math.PI / 2;
-  const distance = 52 + (index % 3) * 18;
+  const distance = 48 + (index % 3) * 15;
 
   return {
     key: `burst-${index}`,
@@ -31,16 +31,16 @@ const BURST_GROUPS = [
   {
     key: 'left',
     style: {
-      '--burst-offset-x': '-140px',
-      '--burst-offset-y': '-20px',
+      '--burst-offset-x': '-120px',
+      '--burst-offset-y': '-16px',
       '--burst-delay': '250ms',
     } as VictoryStyle,
   },
   {
     key: 'right',
     style: {
-      '--burst-offset-x': '220px',
-      '--burst-offset-y': '35px',
+      '--burst-offset-x': '190px',
+      '--burst-offset-y': '28px',
       '--burst-delay': '600ms',
     } as VictoryStyle,
   },
