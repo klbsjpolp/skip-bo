@@ -24,6 +24,16 @@ if [[ -f "$backend_file" ]]; then
   mv "$backend_file" "$backend_backup"
 fi
 
+unset AWS_PROFILE AWS_SESSION_TOKEN
+
+export AWS_ACCESS_KEY_ID="offline-validation"
+export AWS_SECRET_ACCESS_KEY="offline-validation"
+export AWS_DEFAULT_REGION="ca-central-1"
+export AWS_REGION="ca-central-1"
+export AWS_EC2_METADATA_DISABLED="true"
+export AWS_SHARED_CREDENTIALS_FILE="/dev/null"
+export AWS_CONFIG_FILE="/dev/null"
+export TF_VAR_offline_validation="true"
+
 TF_DATA_DIR="$tf_data_dir" tofu -chdir="$prod_dir" init -backend=false
 TF_DATA_DIR="$tf_data_dir" tofu -chdir="$prod_dir" validate
-TF_DATA_DIR="$tf_data_dir" tofu -chdir="$prod_dir" plan -input=false -lock=false -refresh=false

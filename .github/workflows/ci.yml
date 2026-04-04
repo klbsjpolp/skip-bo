@@ -118,5 +118,5 @@ jobs:
       - name: Check OpenTofu formatting
         run: pnpm tofu:fmt
 
-      - name: Validate OpenTofu offline plan
+      - name: Validate OpenTofu offline config
         run: pnpm --dir infra/terraform validate:offline:prod

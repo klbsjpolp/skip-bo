@@ -49,6 +49,12 @@ variable "log_retention_days" {
   default     = 30
 }
 
+variable "offline_validation" {
+  description = "Enables credential-free provider behavior for CI-side offline validation."
+  type        = bool
+  default     = false
+}
+
 variable "sentry_dsn" {
   description = "Optional Sentry DSN used to enable backend monitoring in the realtime Lambda functions."
   type        = string
