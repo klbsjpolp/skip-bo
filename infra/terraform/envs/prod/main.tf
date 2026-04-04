@@ -10,9 +10,9 @@ locals {
   sentry_environment_variables = local.sentry_enabled ? merge({
     SENTRY_DSN         = trimspace(var.sentry_dsn)
     SENTRY_ENVIRONMENT = var.environment
-  }, trimspace(coalesce(var.sentry_release, "")) != "" ? {
+    }, trimspace(coalesce(var.sentry_release, "")) != "" ? {
     SENTRY_RELEASE = trimspace(var.sentry_release)
-  } : {}, var.sentry_traces_sample_rate == null ? {} : {
+    } : {}, var.sentry_traces_sample_rate == null ? {} : {
     SENTRY_TRACES_SAMPLE_RATE = tostring(var.sentry_traces_sample_rate)
   }) : {}
 }
