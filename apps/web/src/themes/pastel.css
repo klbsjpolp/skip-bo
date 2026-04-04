@@ -21,20 +21,20 @@
     --button-hover-bg: #8bbbd6;
     --victory-border: #e5b8c8;
     --victory-accent: #ffd7e6;
-    --victory-accent-soft: color-mix(in srgb, var(--victory-accent) 34%, transparent);
+    --victory-accent-soft: color-mix(in srgb, var(--victory-accent) 46%, transparent);
     --victory-piece-1: #f7b7c3;
     --victory-piece-2: #f5d38d;
     --victory-piece-3: #a7ddb5;
     --victory-piece-4: #a9d7f0;
-    --victory-burst-size: 9px;
+    --victory-burst-size: 10px;
     --victory-accent-opacity: 0.9;
-    --victory-pattern-opacity: 0.18;
+    --victory-pattern-opacity: 0.24;
     --victory-pattern-image:
       radial-gradient(circle at 10px 10px, rgba(255, 255, 255, 0.62) 0 2px, transparent 2.5px),
       radial-gradient(circle at 26px 24px, rgba(255, 255, 255, 0.4) 0 3px, transparent 3.5px);
     --victory-pattern-size: 36px 36px;
     --victory-pattern-drift-to: 36px 36px;
-    --victory-shine-opacity: 0.22;
+    --victory-shine-opacity: 0.3;
     --card-back-bg: linear-gradient(135deg, #a0d2eb 0%, #bee5eb 100%);
 
     --skipbo-text: #ffedd8;
@@ -45,7 +45,8 @@
 
     .player-area.winner {
       box-shadow:
-        0 0 0 1px color-mix(in srgb, var(--victory-border) 50%, transparent),
-        0 12px 24px rgba(231, 184, 200, 0.2);
+        0 0 0 1px color-mix(in srgb, var(--victory-border) 72%, transparent),
+        0 0 0 5px color-mix(in srgb, var(--victory-accent) 16%, transparent),
+        0 14px 28px rgba(231, 184, 200, 0.28);
     }
   }
