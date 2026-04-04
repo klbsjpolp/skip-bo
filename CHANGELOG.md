@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.0.0](https://github.com/klbsjpolp/skip-bo/compare/v0.1.1...v1.0.0) (2026-04-04)
+
+
+### Features
+
+* split skip-bo into a workspace monorepo ([6a53836](https://github.com/klbsjpolp/skip-bo/commit/6a53836a61bffbb70c16fe5faac18168dd0443ec))
+
+
+### BREAKING CHANGES
+
+* repo scripts, paths, deployment workflows, and package layout now use the apps/packages/infra workspace structure.
+
+
+
 ## [0.1.1](https://github.com/klbsjpolp/skip-bo/compare/v0.1.0...v0.1.1) (2026-04-03)
 
 
