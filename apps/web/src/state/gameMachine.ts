@@ -27,10 +27,10 @@ const willPlayCardEmptyHand = (gameState: GameState): boolean => {
 
 export const gameMachine = createMachine({
   id: 'skipbo',
-  context: {
+  context: () => ({
     G: initialGameState(),
     animationDuration: 0,
-  },
+  }),
   initial: 'setup',
   states: {
     setup: {

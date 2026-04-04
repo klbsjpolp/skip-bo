@@ -4,6 +4,7 @@ import { gameMachine } from '@/state/gameMachine';
 import { gameReducer } from '@/state/gameReducer';
 import type { GameAction } from '@/state/gameActions';
 import { initialGameState } from '@/state/initialGameState';
+import * as initialGameStateModule from '@/state/initialGameState';
 
 // Mock the AI module
 vi.mock('@/ai/computeBestMove', () => ({
@@ -30,6 +31,20 @@ describe('gameMachine', () => {
     expect(actor.getSnapshot().matches('humanTurn')).toBe(true);
     expect(actor.getSnapshot().context.G).toBeDefined();
     expect(actor.getSnapshot().context.G.players).toHaveLength(2);
+  });
+
+  it('should rebuild the initial game state for each new actor', async () => {
+    const initialGameStateSpy = vi.spyOn(initialGameStateModule, 'initialGameState');
+
+    const firstActor = createActor(gameMachine);
+    firstActor.start();
+    await waitFor(firstActor, (state) => state.matches('humanTurn.ready'));
+
+    const secondActor = createActor(gameMachine);
+    secondActor.start();
+    await waitFor(secondActor, (state) => state.matches('humanTurn.ready'));
+
+    expect(initialGameStateSpy).toHaveBeenCalledTimes(2);
   });
 
   it('should handle INIT event from any state', async () => {
