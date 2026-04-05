@@ -88,6 +88,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Validate online API configuration
+        run: |
+          if [ -z "${VITE_SKIPBO_API_URL}" ]; then
+            echo "Missing VITE_SKIPBO_API_URL GitHub secret for web deployment." >&2
+            exit 1
+          fi
+        env:
+          VITE_SKIPBO_API_URL: ${{ secrets.VITE_SKIPBO_API_URL }}
+
+      - name: Generate web runtime config
+        run: |
+          node -e 'const fs = require("fs"); fs.writeFileSync("apps/web/public/runtime-config.json", JSON.stringify({ apiBaseUrl: process.env.VITE_SKIPBO_API_URL }, null, 2) + "\n");'
+        env:
+          VITE_SKIPBO_API_URL: ${{ secrets.VITE_SKIPBO_API_URL }}
+
       - name: Build web app
         run: pnpm --filter @skipbo/web build
         env:
@@ -97,7 +112,6 @@ jobs:
           SENTRY_PROJECT: skip-bo
           VITE_APP_VERSION: ${{ needs.release.outputs.release_tag }}
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
-          VITE_SKIPBO_API_URL: ${{ secrets.VITE_SKIPBO_API_URL }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4

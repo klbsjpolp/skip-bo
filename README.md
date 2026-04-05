@@ -60,7 +60,7 @@ Open [http://localhost:5173](http://localhost:5173).
 
 ## Environment variables
 
-The web app only needs backend configuration when you want online play:
+The web app only needs backend configuration when you want online play locally:
 
 ```bash
 VITE_SKIPBO_API_URL=https://<http-api-id>.execute-api.ca-central-1.amazonaws.com
@@ -84,6 +84,8 @@ For GitHub Pages deployment, add these repository secrets:
 - `VITE_SKIPBO_API_URL`
 - `VITE_SENTRY_DSN`
 - `SENTRY_AUTH_TOKEN`
+
+The Pages workflow writes `apps/web/public/runtime-config.json` from `VITE_SKIPBO_API_URL` before building so installed PWA builds can resolve the multiplayer backend at runtime.
 
 The AWS apply workflow reuses `VITE_SENTRY_DSN` for the backend too and sends `v<package.json version>` as the backend Sentry release.
 

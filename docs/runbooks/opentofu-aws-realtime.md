@@ -56,7 +56,7 @@ pnpm tofu:apply
 ## After deployment
 
 1. Copy the `http_api_url` OpenTofu output into the `VITE_SKIPBO_API_URL` GitHub secret used by the web deployment workflow.
-2. Redeploy the web app so create/join room calls target the live backend.
+2. Redeploy the web app so the workflow rewrites `apps/web/public/runtime-config.json` with the live backend URL.
 3. Open two browsers, create a room, join it with the second browser, and confirm:
    - room code display
    - live selection sync
