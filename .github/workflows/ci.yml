@@ -31,10 +31,12 @@ jobs:
         node-version: [22.x]
 
     steps:
+      - uses: actions/checkout@v5
+        with:
+          lfs: true
       - uses: ./.github/actions/setup-node
         with:
           node-version: ${{ matrix.node-version }}
-          lfs: true
 
       - name: Run lint
         run: pnpm lint
@@ -52,9 +54,10 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: ./.github/actions/setup-node
+      - uses: actions/checkout@v5
         with:
           lfs: true
+      - uses: ./.github/actions/setup-node
 
       - name: Install Playwright browser
         run: pnpm --filter @skipbo/web exec playwright install chromium
@@ -82,6 +85,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-node
 
       - name: Setup OpenTofu

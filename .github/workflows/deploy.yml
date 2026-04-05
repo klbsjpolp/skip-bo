@@ -64,9 +64,10 @@ jobs:
       release_tag: ${{ steps.release_meta.outputs.release_tag }}
       release_version: ${{ steps.release_meta.outputs.release_version }}
     steps:
-      - uses: ./.github/actions/setup-node
+      - uses: actions/checkout@v5
         with:
           ref: main # Garantir qu'on est sur main pour la release
+      - uses: ./.github/actions/setup-node
 
       - name: Configure git author
         shell: bash
@@ -100,9 +101,10 @@ jobs:
     outputs:
       api_url: ${{ steps.get_url.outputs.value }}
     steps:
-      - uses: ./.github/actions/setup-node
+      - uses: actions/checkout@v5
         with:
           ref: ${{ needs.release.outputs.release_sha }}
+      - uses: ./.github/actions/setup-node
 
       - uses: opentofu/setup-opentofu@v2
         with:
@@ -151,6 +153,7 @@ jobs:
     outputs:
       api_url: ${{ steps.resolve.outputs.value }}
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-node
 
       - uses: opentofu/setup-opentofu@v2
@@ -192,9 +195,10 @@ jobs:
       )
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/actions/setup-node
+      - uses: actions/checkout@v5
         with:
           ref: ${{ needs.release.outputs.release_sha }}
+      - uses: ./.github/actions/setup-node
 
       - uses: actions/configure-pages@v6
 

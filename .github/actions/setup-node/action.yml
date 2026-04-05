@@ -5,23 +5,10 @@ inputs:
     description: 'Node.js version'
     required: false
     default: '22.x'
-  lfs:
-    description: 'Whether to enable LFS'
-    required: false
-    default: 'false'
-  ref:
-    description: 'Git reference to checkout'
-    required: false
-    default: ''
 
 runs:
   using: 'composite'
   steps:
-    - uses: actions/checkout@v5
-      with:
-        lfs: ${{ inputs.lfs }}
-        ref: ${{ inputs.ref }}
-
     - uses: pnpm/action-setup@v5
       with:
         run_install: false
