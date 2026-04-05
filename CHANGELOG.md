@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.0.8](https://github.com/klbsjpolp/skip-bo/compare/v1.0.7...v1.0.8) (2026-04-05)
+
+
+### Bug Fixes
+
+* **web:** improve dialog styles and theme secondary color consistency ([f43c215](https://github.com/klbsjpolp/skip-bo/commit/f43c215e8ef446929296f925fc8d408d984a2913))
+
+
+
 ## [1.0.7](https://github.com/klbsjpolp/skip-bo/compare/v1.0.6...v1.0.7) (2026-04-05)
 
 
