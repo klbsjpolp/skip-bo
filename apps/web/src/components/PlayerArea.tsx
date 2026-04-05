@@ -81,8 +81,10 @@ function DiscardPile({
                      }: DiscardPileProps) {
   const {activeAnimations, isCardBeingAnimated} = useCardAnimation();
   const isHuman = !player.isAI;
-  const hasIncomingDiscardAnimation = !isCurrentPlayer && activeAnimations.some(
+  const hasIncomingDiscardAnimation = activeAnimations.some(
     (animation) =>
+      animation.animationType === 'discard' &&
+      animation.targetSettledInState &&
       animation.targetInfo?.source === 'discard' &&
       animation.targetInfo.playerIndex === playerIndex &&
       animation.targetInfo.discardPileIndex === pileIndex,
@@ -215,6 +217,9 @@ interface StockPileProps {
   clearSelection: () => void;
 }
 
+const isHiddenMultiplayerCard = (card: CardType | null | undefined): card is CardType =>
+  card !== null && card !== undefined && card.value === 0 && !card.isSkipBo;
+
 function StockPile({player, playerIndex, isCurrentPlayer, gameState, selectCard, clearSelection}: StockPileProps) {
   const {isCardBeingAnimated} = useCardAnimation();
   const isHuman = !player.isAI;
@@ -250,7 +255,7 @@ function StockPile({player, playerIndex, isCurrentPlayer, gameState, selectCard,
             <Card
               hint={player.stockPile.length === 2 ? 'Second card in stock' : 'Second card in stock (hidden)'}
               card={player.stockPile[player.stockPile.length - 2]}
-              isRevealed={true}
+              isRevealed={!isHiddenMultiplayerCard(player.stockPile[player.stockPile.length - 2])}
               canBeGrabbed={false}
             />
           ) : (

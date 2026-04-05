@@ -17,6 +17,8 @@ export interface CardAnimationData {
   // Optional rotation angles (degrees) for smoother, accurate animation
   startAngleDeg?: number;
   endAngleDeg?: number;
+  // True when the authoritative UI state already contains the animated card at the target.
+  targetSettledInState?: boolean;
   // Source information to identify which card should be hidden
   sourceInfo: {
     playerIndex: number;

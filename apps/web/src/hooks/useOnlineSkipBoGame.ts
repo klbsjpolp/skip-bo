@@ -419,6 +419,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                   void triggerAIAnimation(previousState, opponentTransition.action, {
                     cardOverride: opponentTransition.animationCard,
                     sourceRevealedOverride: opponentTransition.sourceRevealed,
+                    targetSettledInStateOverride: true,
                     targetRevealedOverride: true,
                   }).then((opponentAnimationDuration) => {
                     if (
@@ -643,6 +644,15 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     }
 
     const willEmptyHand = willPlayCardEmptyHand(currentState);
+    let optimisticViewCommitted = false;
+    const commitOptimisticPlayView = () => {
+      if (optimisticViewCommitted || !viewRef.current) {
+        return;
+      }
+
+      optimisticViewCommitted = true;
+      commitView(applyOptimisticPlayView(viewRef.current, buildPile, willEmptyHand));
+    };
 
     try {
       const playerAreas = document.querySelectorAll('.player-area');
@@ -675,7 +685,8 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         const endPosition = getBuildPilePosition(centerAreaElement, buildPile);
 
         if (startPosition) {
-          const duration = calculateAnimationDuration(startPosition, endPosition);
+          const duration = calculateAnimationDuration(startPosition, endPosition) * 1.2;
+          window.setTimeout(commitOptimisticPlayView, duration);
           startAnimation({
             card: currentState.selectedCard.card,
             startPosition,
@@ -685,7 +696,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
             sourceRevealed: true,
             targetRevealed: true,
             initialDelay: 0,
-            duration: duration * 1.2,
+            duration,
             sourceInfo: {
               playerIndex: currentState.currentPlayerIndex,
               source: currentState.selectedCard.source,
@@ -706,9 +717,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       console.warn('Play animation failed, continuing with online game logic:', error);
     }
 
-    if (viewRef.current) {
-      commitView(applyOptimisticPlayView(viewRef.current, buildPile, willEmptyHand));
-    }
+    commitOptimisticPlayView();
 
     if (completedBuildPileCards) {
       triggerCompletedBuildPileAnimation(
@@ -741,6 +750,15 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     }
 
     let animationDuration = 0;
+    let optimisticViewCommitted = false;
+    const commitOptimisticDiscardView = () => {
+      if (optimisticViewCommitted || !viewRef.current) {
+        return;
+      }
+
+      optimisticViewCommitted = true;
+      commitView(applyOptimisticDiscardView(viewRef.current, discardPile));
+    };
 
     try {
       const playerAreas = document.querySelectorAll('.player-area');
@@ -755,6 +773,11 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
           if (discardContainer) {
             const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
             animationDuration = calculateAnimationDuration(startPosition, endPosition);
+            window.setTimeout(() => {
+              commitOptimisticDiscardView();
+              sendAction({ type: 'DISCARD_CARD', discardPile });
+              resolve({ success: true, message: 'Carte défaussée' });
+            }, animationDuration);
             startAnimation({
               card: currentState.selectedCard.card,
               startPosition,
@@ -785,14 +808,11 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       console.warn('Discard animation failed, continuing with online game logic:', error);
     }
 
-    window.setTimeout(() => {
-      if (viewRef.current) {
-        commitView(applyOptimisticDiscardView(viewRef.current, discardPile));
-      }
-
+    if (animationDuration === 0) {
+      commitOptimisticDiscardView();
       sendAction({ type: 'DISCARD_CARD', discardPile });
       resolve({ success: true, message: 'Carte défaussée' });
-    }, animationDuration);
+    }
   }), [commitView, gameState, sendAction, startAnimation]);
 
   return {

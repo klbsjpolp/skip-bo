@@ -72,7 +72,7 @@ const createCompletionAnimations = (count: number): CardAnimationData[] =>
 
 const createIncomingBuildAnimation = (buildPileIndex: number): CardAnimationData => ({
   id: `play-build-${buildPileIndex}`,
-  card: card(4),
+  card: card(5),
   startPosition: { x: 0, y: 0 },
   endPosition: { x: 100, y: 100 },
   animationType: 'play',
@@ -90,6 +90,12 @@ const createIncomingBuildAnimation = (buildPileIndex: number): CardAnimationData
     source: 'build',
     index: buildPileIndex,
   },
+});
+
+const createSettledIncomingBuildAnimation = (buildPileIndex: number): CardAnimationData => ({
+  ...createIncomingBuildAnimation(buildPileIndex),
+  id: `settled-build-${buildPileIndex}`,
+  targetSettledInState: true,
 });
 
 const renderCenterArea = (
@@ -141,12 +147,23 @@ describe('CenterArea', () => {
 
   test('keeps the current top build card visible while an incoming play animation is active', () => {
     const gameState = createGameState([]);
-    gameState.buildPiles[0] = [card(1), card(2), card(3)];
+    gameState.buildPiles[0] = [card(1), card(2), card(3), card(4)];
 
     const { container } = renderCenterArea(gameState, [createIncomingBuildAnimation(0)]);
     const buildPile = container.querySelector<HTMLElement>('[data-build-pile="0"]');
 
-    expect(buildPile?.querySelector('.card[data-value="3"]')).not.toBeNull();
-    expect(buildPile?.querySelector('.empty-card')).toBeNull();
+    expect(buildPile?.querySelector('.card[data-value="4"]')).not.toBeNull();
+    expect(buildPile?.querySelector('.card[data-value="3"]')).toBeNull();
+  });
+
+  test('shows the previous top build card when the incoming online card is already present in state', () => {
+    const gameState = createGameState([]);
+    gameState.buildPiles[0] = [card(1), card(2), card(3), card(4), card(5)];
+
+    const { container } = renderCenterArea(gameState, [createSettledIncomingBuildAnimation(0)]);
+    const buildPile = container.querySelector<HTMLElement>('[data-build-pile="0"]');
+
+    expect(buildPile?.querySelector('.card[data-value="4"]')).not.toBeNull();
+    expect(buildPile?.querySelector('.card[data-value="5"]')).toBeNull();
   });
 });

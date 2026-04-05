@@ -11,6 +11,7 @@ import type {CardAnimationData} from "@/contexts/CardAnimationContext.tsx";
 interface TriggerAIAnimationOptions {
   cardOverride?: Card;
   sourceRevealedOverride?: boolean;
+  targetSettledInStateOverride?: boolean;
   targetRevealedOverride?: boolean;
 }
 
@@ -139,6 +140,7 @@ export const triggerAIAnimation = async (
         startAngleDeg,
         animationType,
         sourceRevealed: options.sourceRevealedOverride ?? ((animationType === 'play' && gameState.selectedCard?.source !== 'hand') || (animationType === 'discard' && false)), // Hand cards are revealed, stock/discard are not
+        targetSettledInState: options.targetSettledInStateOverride ?? false,
         targetRevealed: options.targetRevealedOverride ?? true, // Cards played or discarded by AI are revealed to human
         initialDelay: 0,
         duration,
