@@ -1,0 +1,244 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      force_backend:
+        description: 'Force backend deployment'
+        type: boolean
+        default: false
+      force_frontend:
+        description: 'Force frontend deployment'
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    steps:
+      - run: echo "Gate passed"
+
+  detect-changes:
+    needs: gate
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'apps/realtime-api/**'
+              - 'packages/game-core/**'
+              - 'packages/multiplayer-protocol/**'
+              - 'infra/terraform/**'
+            frontend:
+              - 'apps/web/**'
+              - 'packages/**'
+
+  release:
+    needs: [gate, detect-changes]
+    if: github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    outputs:
+      release_sha: ${{ steps.release_meta.outputs.release_sha }}
+      release_tag: ${{ steps.release_meta.outputs.release_tag }}
+      release_version: ${{ steps.release_meta.outputs.release_version }}
+    steps:
+      - uses: ./.github/actions/setup-node
+        with:
+          ref: main # Garantir qu'on est sur main pour la release
+
+      - name: Configure git author
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Create release commit and tag
+        shell: bash
+        run: pnpm release -- --no-verify
+
+      - name: Push release commit and tag
+        shell: bash
+        run: git push --follow-tags origin HEAD:main
+
+      - name: Capture release metadata
+        id: release_meta
+        shell: bash
+        run: |
+          echo "release_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "release_tag=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
+          echo "release_version=$(node -p 'require(\"./package.json\").version')" >> "$GITHUB_OUTPUT"
+
+  deploy-backend:
+    needs: [gate, detect-changes, release]
+    if: >
+      needs.detect-changes.outputs.backend == 'true' ||
+      (github.event_name == 'workflow_dispatch' && inputs.force_backend)
+    runs-on: ubuntu-latest
+    environment: aws-prod
+    outputs:
+      api_url: ${{ steps.get_url.outputs.value }}
+    steps:
+      - uses: ./.github/actions/setup-node
+        with:
+          ref: ${{ needs.release.outputs.release_sha }}
+
+      - uses: opentofu/setup-opentofu@v2
+        with:
+          tofu_wrapper: false
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ca-central-1
+          role-to-assume: ${{ secrets.AWS_OPENTOFU_ROLE_ARN }}
+
+      - name: Build realtime API bundle
+        run: pnpm --filter @skipbo/realtime-api build
+
+      - name: Write backend config
+        run: |
+          cat <<'EOF' > infra/terraform/envs/prod/backend.hcl
+          ${{ secrets.TOFU_BACKEND_CONFIG_HCL }}
+          EOF
+
+      - name: Initialize OpenTofu with remote state
+        run: tofu -chdir=infra/terraform/envs/prod init -backend-config=backend.hcl
+
+      - name: Create production plan
+        run: tofu -chdir=infra/terraform/envs/prod plan -input=false -out=tfplan
+        env:
+          TF_VAR_sentry_dsn: ${{ secrets.VITE_SENTRY_DSN }}
+          TF_VAR_sentry_release: ${{ needs.release.outputs.release_tag }}
+
+      - name: Apply production plan
+        run: tofu -chdir=infra/terraform/envs/prod apply -input=false tfplan
+        env:
+          TF_VAR_sentry_dsn: ${{ secrets.VITE_SENTRY_DSN }}
+          TF_VAR_sentry_release: ${{ needs.release.outputs.release_tag }}
+
+      - name: Get API URL from OpenTofu output
+        id: get_url
+        run: |
+          URL=$(tofu -chdir=infra/terraform/envs/prod output -raw http_api_url)
+          echo "value=$URL" >> "$GITHUB_OUTPUT"
+
+  get-api-url:
+    needs: [gate, detect-changes, deploy-backend]
+    if: always() && needs.gate.result == 'success'
+    runs-on: ubuntu-latest
+    environment: aws-prod
+    outputs:
+      api_url: ${{ steps.resolve.outputs.value }}
+    steps:
+      - uses: ./.github/actions/setup-node
+
+      - uses: opentofu/setup-opentofu@v2
+        with:
+          tofu_wrapper: false
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ca-central-1
+          role-to-assume: ${{ secrets.AWS_OPENTOFU_ROLE_ARN }}
+
+      - name: Resolve API URL
+        id: resolve
+        shell: bash
+        run: |
+          URL="${{ needs.deploy-backend.outputs.api_url }}"
+          if [ -z "$URL" ]; then
+            cat <<'EOF' > infra/terraform/envs/prod/backend.hcl
+            ${{ secrets.TOFU_BACKEND_CONFIG_HCL }}
+            EOF
+            tofu -chdir=infra/terraform/envs/prod init -backend-config=backend.hcl
+            URL=$(tofu -chdir=infra/terraform/envs/prod output -raw http_api_url)
+          fi
+          if [ -z "$URL" ]; then
+            URL="${{ secrets.VITE_SKIPBO_API_URL }}"
+          fi
+          echo "value=$URL" >> "$GITHUB_OUTPUT"
+
+  build-frontend:
+    needs: [gate, detect-changes, release, get-api-url]
+    if: >
+      always() &&
+      needs.gate.result == 'success' &&
+      needs.release.result == 'success' &&
+      needs.get-api-url.result == 'success' &&
+      (
+        needs.detect-changes.outputs.frontend == 'true' ||
+        (github.event_name == 'workflow_dispatch' && inputs.force_frontend)
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/setup-node
+        with:
+          ref: ${{ needs.release.outputs.release_sha }}
+
+      - uses: actions/configure-pages@v6
+
+      - name: Generate runtime config
+        shell: bash
+        run: |
+          echo "{\"apiBaseUrl\":\"${{ needs.get-api-url.outputs.api_url }}\"}" \
+            > apps/web/public/runtime-config.json
+
+      - name: Build web app
+        run: pnpm --filter @skipbo/web build
+        env:
+          NODE_ENV: production
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: pierre-luc
+          SENTRY_PROJECT: skip-bo
+          VITE_APP_VERSION: ${{ needs.release.outputs.release_tag }}
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./apps/web/dist
+
+  deploy-pages:
+    needs: [release, build-frontend]
+    if: needs.release.result == 'success' && needs.build-frontend.result == 'success'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+  github-release:
+    needs: [release, deploy-pages]
+    if: needs.release.result == 'success' && (needs.deploy-pages.result == 'success' || needs.deploy-pages.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.release.outputs.release_tag }}
+          name: ${{ needs.release.outputs.release_tag }}
+          generate_release_notes: true

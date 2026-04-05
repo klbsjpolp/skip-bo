@@ -7,6 +7,22 @@ on:
     branches: [main, master, develop]
 
 jobs:
+  check-paths:
+    runs-on: ubuntu-latest
+    outputs:
+      infra: ${{ steps.filter.outputs.infra }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            infra:
+              - 'infra/**'
+              - 'apps/realtime-api/**'
+              - 'packages/game-core/**'
+              - 'packages/multiplayer-protocol/**'
+
   workspace:
     runs-on: ubuntu-latest
 
@@ -15,23 +31,10 @@ jobs:
         node-version: [22.x]
 
     steps:
-      - uses: actions/checkout@v5
-        with:
-          lfs: true
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v5
-        with:
-          run_install: false
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v5
+      - uses: ./.github/actions/setup-node
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install
+          lfs: true
 
       - name: Run lint
         run: pnpm lint
@@ -49,23 +52,9 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-node
         with:
           lfs: true
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v5
-        with:
-          run_install: false
-
-      - name: Use Node.js 22.x
-        uses: actions/setup-node@v5
-        with:
-          node-version: 22.x
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install
 
       - name: Install Playwright browser
         run: pnpm --filter @skipbo/web exec playwright install chromium
@@ -88,29 +77,17 @@ jobs:
           path: apps/web/test-results
 
   opentofu:
+    needs: check-paths
+    if: needs.check-paths.outputs.infra == 'true'
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v5
-        with:
-          run_install: false
-
-      - name: Use Node.js 22.x
-        uses: actions/setup-node@v5
-        with:
-          node-version: 22.x
-          cache: 'pnpm'
+      - uses: ./.github/actions/setup-node
 
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v2
         with:
           tofu_wrapper: false
-
-      - name: Install dependencies
-        run: pnpm install
 
       - name: Build realtime API bundle
         run: pnpm --filter @skipbo/realtime-api build

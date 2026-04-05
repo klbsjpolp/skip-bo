@@ -1,5 +1,5 @@
 {
   "preset": "angular",
   "tagPrefix": "v",
-  "releaseCommitMessageFormat": "chore(release): {{currentTag}}"
+  "releaseCommitMessageFormat": "chore(release): {{currentTag}} [skip ci]"
 }
