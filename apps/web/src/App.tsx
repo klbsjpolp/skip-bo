@@ -39,7 +39,7 @@ interface AppShellProps {
 
 function AppShell({
   clearSelection,
-                    debugStrip,
+  debugStrip,
   discardCard,
   fixtureName,
   gameState,
@@ -91,8 +91,9 @@ function AppShell({
               </Button>
             </div>
         )}
-        <div className={`mt-4 flex items-center gap-3 ${debugStrip ? 'justify-between' : 'justify-end'}`}>
+        <div className="mt-4 flex items-center gap-3 justify-between">
           {debugStrip}
+          <div className="grow"></div>
           <p
               className="app-version-badge text-xs text-muted-foreground/80 tabular-nums"
               data-testid="app-version"
