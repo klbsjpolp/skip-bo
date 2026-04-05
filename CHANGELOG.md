@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.0.6](https://github.com/klbsjpolp/skip-bo/compare/v1.0.5...v1.0.6) (2026-04-05)
+
+
+### Bug Fixes
+
+* **web:** conditionally adjust debugStrip alignment in App layout ([8ab6662](https://github.com/klbsjpolp/skip-bo/commit/8ab6662ae78d790bd110b81e578a18f00373130c))
+* **web:** update meta tag for mobile web app compatibility ([92d466e](https://github.com/klbsjpolp/skip-bo/commit/92d466ed72bc60586133550a5b7b49fdebdac94a))
+
+
+
 ## [1.0.5](https://github.com/klbsjpolp/skip-bo/compare/v1.0.4...v1.0.5) (2026-04-05)
 
 
