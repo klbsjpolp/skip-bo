@@ -91,7 +91,7 @@ function AppShell({
               </Button>
             </div>
         )}
-        <div className="mt-4 flex items-center justify-between gap-3">
+        <div className={`mt-4 flex items-center gap-3 ${debugStrip ? 'justify-between' : 'justify-end'}`}>
           {debugStrip}
           <p
               className="app-version-badge text-xs text-muted-foreground/80 tabular-nums"
