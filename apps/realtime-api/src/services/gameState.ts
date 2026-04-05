@@ -61,7 +61,8 @@ const isSupportedOnlineAction = (action: GameAction): boolean =>
   action.type !== 'DRAW_SINGLE_CARD' &&
   action.type !== 'RESET' &&
   action.type !== 'DEBUG_SET_AI_HAND' &&
-  action.type !== 'DEBUG_FILL_BUILD_PILE';
+  action.type !== 'DEBUG_FILL_BUILD_PILE' &&
+  action.type !== 'DEBUG_WIN';
 
 export const createOnlineInitialGameState = (stockSize?: number): GameState => {
   const state = initialGameState({ stockSize });
@@ -133,6 +134,7 @@ export const validateOnlineAction = (gameState: GameState, action: GameAction): 
     case 'RESET':
     case 'DEBUG_SET_AI_HAND':
     case 'DEBUG_FILL_BUILD_PILE':
+    case 'DEBUG_WIN':
       return 'Cette action n’est pas autorisée en multijoueur';
   }
 };
