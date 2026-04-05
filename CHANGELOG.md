@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.1.0](https://github.com/klbsjpolp/skip-bo/compare/v1.0.12...v1.1.0) (2026-04-05)
+
+
+### Features
+
+* **web:** add runtime-based API configuration for online multiplayer ([67ae85b](https://github.com/klbsjpolp/skip-bo/commit/67ae85bb96c4beb9452e75ac05e01f1bd65490ac))
+
+
+
 ## [1.0.12](https://github.com/klbsjpolp/skip-bo/compare/v1.0.11...v1.0.12) (2026-04-05)
 
 
