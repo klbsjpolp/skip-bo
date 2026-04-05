@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# 1.2.0 (2026-04-05)
+
+
+### Features
+
+* **ci:** add support for multiple AWS roles and update permissions ([ed6a115](https://github.com/klbsjpolp/skip-bo/commit/ed6a115458b6b11e1686a1fad490d2b498830ab1))
+
+
+
 ## 1.1.1 (2026-04-05)
 
 
