@@ -1,8 +1,8 @@
 import {Check, CircleCheck, Copy, Flag, LoaderCircle} from 'lucide-react';
-import { useState } from 'react';
+import {useState} from 'react';
 
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import {Button} from '@/components/ui/button';
+import {cn} from '@/lib/utils';
 
 interface OnlineStatusStripProps {
   connectedSeats: number[];
@@ -64,9 +64,10 @@ export function OnlineStatusStrip({
         {roomStatus === 'FINISHED' && (<Flag className="text-muted-foreground"/>)}
       </span>
       {roomStatus === 'WAITING' && (<>
-          <div className="flex flex-row rounded-xl border gap-1 py-0.5 px-1 bg-background/70 items-center">
-            <p className="text-sm font-medium font-mono tracking-[0.2em] text-primary-foreground">{roomCode}</p>
-            <Button type="button" size="sm" variant="ghost" onClick={() => void handleCopy()}>
+            <div
+                className="flex flex-row rounded-xl border gap-1 py-0.5 px-2 bg-secondary text-secondary-foreground items-center">
+              <p className="text-sm font-medium font-mono tracking-[0.2em]">{roomCode}</p>
+              <Button type="button" size="icon-xs" variant="ghost" onClick={() => void handleCopy()}>
               {copied ? <Check data-icon="inline-start" /> : connectionStatus === 'connecting' ? null : <Copy data-icon="inline-start" />}
             </Button>
           </div>
