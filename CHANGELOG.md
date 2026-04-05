@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.0.5](https://github.com/klbsjpolp/skip-bo/compare/v1.0.4...v1.0.5) (2026-04-05)
+
+
+### Bug Fixes
+
+* **ci:** restore realtime guard and refresh snapshots ([44038db](https://github.com/klbsjpolp/skip-bo/commit/44038db222bc8a1511994f5cee39ee2a50521be6))
+
+
+
 ## [1.0.4](https://github.com/klbsjpolp/skip-bo/compare/v1.0.3...v1.0.4) (2026-04-05)
 
 
