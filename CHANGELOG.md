@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.0.4](https://github.com/klbsjpolp/skip-bo/compare/v1.0.3...v1.0.4) (2026-04-05)
+
+
+### Bug Fixes
+
+* **web:** add engraved glass victory crown ([c4f6778](https://github.com/klbsjpolp/skip-bo/commit/c4f67783d7b0d60e6a9ce54b10f88e188f44f902))
+* **web:** close new game dialog before local restart ([8afce6d](https://github.com/klbsjpolp/skip-bo/commit/8afce6dbaa40a57af162f0e969c1c59f91e0ee90))
+* **web:** fill retro victory crowns ([c4e7b84](https://github.com/klbsjpolp/skip-bo/commit/c4e7b8474c060313075b0275cdbfbf231aac8014))
+* **web:** fill retro victory crowns ([92ca2c7](https://github.com/klbsjpolp/skip-bo/commit/92ca2c7827399fcb071edf4250a7bd08adb3227f))
+* **web:** fill retro victory crowns ([0d6c47d](https://github.com/klbsjpolp/skip-bo/commit/0d6c47de634e1ac59b1eff2cf9419e5ae51ef5aa))
+* **web:** fill retro victory crowns ([00b3d54](https://github.com/klbsjpolp/skip-bo/commit/00b3d5474257a63fde5644dfab78ea6844a1d0d6))
+* **web:** improve pastel victory visibility ([aaf24b4](https://github.com/klbsjpolp/skip-bo/commit/aaf24b4f64eeb39a79b79500f2e152c2bc24bbbf))
+* **web:** keep build piles visible during play animation ([198946a](https://github.com/klbsjpolp/skip-bo/commit/198946a5ba630e8b9dd9ab31c4237844c479e729))
+* **web:** keep local discard piles visible during discard animation ([377231f](https://github.com/klbsjpolp/skip-bo/commit/377231f3231fca53c0b92bff85296634788ff16d))
+* **web:** move debug button to footer ([06efbc0](https://github.com/klbsjpolp/skip-bo/commit/06efbc02d4cc6b33df21a2e26a1d7a0bfe9b8bd7))
+* **web:** rebuild local deck on each new game ([70e5743](https://github.com/klbsjpolp/skip-bo/commit/70e574311db78d82f58987f039900470277f2cb0))
+* **web:** reduce rainbow victory sun size ([b8ed84e](https://github.com/klbsjpolp/skip-bo/commit/b8ed84eb34ac14b07bd6c4482d19d3800d8d3f8a))
+* **web:** reduce top page spacing ([76639c9](https://github.com/klbsjpolp/skip-bo/commit/76639c9fee5a64caed3aeb84825471b0abef3172))
+* **web:** reduce top page whitespace ([3446f24](https://github.com/klbsjpolp/skip-bo/commit/3446f24477dca5b0b9618d0ae97a6d9000dbc586))
+* **web:** reduce victory firework scale ([4593bd6](https://github.com/klbsjpolp/skip-bo/commit/4593bd654d6ec26c9c138ba3eb7dee8284d8f9f8))
+* **web:** reduce victory firework spread ([593c245](https://github.com/klbsjpolp/skip-bo/commit/593c24542a9a024c750c14105c8f4deba7aa827b))
+* **web:** shrink rainbow victory sun ([87a7f1b](https://github.com/klbsjpolp/skip-bo/commit/87a7f1bdb2b992c34b54723fac4b84a1be277d79))
+* **web:** shrink rainbow victory sun on small screens ([c0dd1f5](https://github.com/klbsjpolp/skip-bo/commit/c0dd1f5eef779940cd33f65ef27cb62c36cd1d0a))
+* **web:** soften glass victory crown ([d47c30c](https://github.com/klbsjpolp/skip-bo/commit/d47c30c56a1a0f2b31ec271650e4d23afb5317c1))
+* **web:** strengthen pastel victory contrast ([cfa8c08](https://github.com/klbsjpolp/skip-bo/commit/cfa8c0892646a9a4cfceaa4cf0cab960d36462f0))
+* **web:** tighten top page spacing ([1069b91](https://github.com/klbsjpolp/skip-bo/commit/1069b91c21e33fcbdc7d28515bdbe211b87309bb))
+* **web:** type lazy game machine context ([4ce4ab6](https://github.com/klbsjpolp/skip-bo/commit/4ce4ab66b6bd4fea8b5b3cecdc0edb5ba599109a))
+* **web:** unify button variant styles and move debug controls to footer ([938a019](https://github.com/klbsjpolp/skip-bo/commit/938a019b0bb2136d3682e84902c97d7322c4cfc8))
+
+
+
 ## [1.0.3](https://github.com/klbsjpolp/skip-bo/compare/v1.0.2...v1.0.3) (2026-04-04)
 
 
