@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.0.11](https://github.com/klbsjpolp/skip-bo/compare/v1.0.10...v1.0.11) (2026-04-05)
+
+
+### Bug Fixes
+
+* **web:** improve animation handling for settled card states ([beb961b](https://github.com/klbsjpolp/skip-bo/commit/beb961b81c77cbab6f98244d51193f8865afe108))
+
+
+
 ## [1.0.10](https://github.com/klbsjpolp/skip-bo/compare/v1.0.9...v1.0.10) (2026-04-05)
 
 
