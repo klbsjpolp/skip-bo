@@ -11,16 +11,15 @@
   /* Core palette inspired by the provided textures */
   --primary: #7a5a35;
   --primary-foreground: #e6e6e6;
-  --secondary: hsl(33 45% 45%);
+  --secondary: #3c401d;
   --secondary-foreground: hsl(0 0% 100%);
   --success: #9adf5a;
   --success-foreground: #1a1a1a;
+  --muted-foreground: #ccc;
 
   --background: #2f2418;                 /* base around dirt */
   --text-color: #e6e6e6;
   --title-color: #ffffff;
-
-  --zone-bg-color: #5f7a21;            /* grass tint under textured layer */
 
   --card-front-color: #e5e5e5;
   --card-border-color: #333;

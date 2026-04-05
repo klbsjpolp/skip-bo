@@ -3,14 +3,14 @@
 .theme-glass {
   --primary: #6786d3;
   --primary-foreground: hsl(0, 0%, 90%);
+  --secondary: hsl(0, 0%, 32%, 30%);
   --success: #7ee9c8;
   --success-foreground: #0f2b3d;
   --background: #2d6698;
   --text-color: #ffffff;          /* light gray text */
   --title-color: #f3f4f6;         /* headings a touch brighter */
+  --muted-foreground: #ddd;
 
-  /* Let glass panels own their background via utility */
-  --zone-bg-color: #515151;   /* prevent flat bg behind glass */
   --active-turn-color: white;
 
   /* Cards keep dark tone and soft edges */
@@ -116,7 +116,7 @@
 
   /* Apply animated liquid glass panels to player areas */
   .player-area, .center-area {
-    --liquid-glass-bg-color: var(--zone-bg-color);
+    --liquid-glass-bg-color: var(--secondary);
     @apply rounded-4xl ring-0 liquid-glass;
 
     &.active-turn{

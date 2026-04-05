@@ -379,7 +379,7 @@
 
   .player-area,
   .center-area {
-    @apply ring-transparent relative lg:p-5 p-3 rounded-lg lg:mb-5 mb-3 bg-(--zone-bg-color) isolate;
+    @apply ring-transparent relative lg:p-5 p-3 rounded-lg lg:mb-5 mb-3 bg-secondary text-secondary-foreground isolate;
     border: 2px solid transparent;
 
     .bg-layer {

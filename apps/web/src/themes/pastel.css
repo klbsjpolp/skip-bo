@@ -1,13 +1,12 @@
 .theme-pastel {
     --primary: hsl(170 70% 70%);
     --primary-foreground: hsl(0 0% 20%);
-    --secondary: hsl(350 80% 85%);
+    --secondary: #f4edaf;
     --secondary-foreground: hsl(0 0% 20%);
     --success: #a5dda5;
     --success-foreground: #3d4a42;
 
     --background: #fbef8b;
-    --zone-bg-color: #f4edaf;
     --text-color: #5a6270;
     --title-color: #4a5568;
     --card-front-color: #ffffff;

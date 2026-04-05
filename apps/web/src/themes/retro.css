@@ -1,19 +1,18 @@
 .theme-retro {
     --primary: hsl(174 59% 39%);
     --primary-foreground: hsl(0 0% 95%);
-    --secondary: hsl(11 83% 62%);
-    --secondary-foreground: hsl(0 0% 100%);
+    --secondary: #e9c46a;
+    --secondary-foreground: #264653;
     --success: #2a9d8f;
     --success-foreground: hsl(0 0% 100%);
 
     --background: #f4f1de;
-    --zone-bg-color: #e9c46a;
     --text-color: #264653;
     --card-front-color: #f4a261;
     --card-border-color: #e76f51;
     --card-shadow: 3px 3px 0 var(--card-border-color);
     --card-radius: 15px;
-    --card-back-color: var(--zone-bg-color);
+    --card-back-color: var(--secondary);
     --retro-back-transparent-size: calc(var(--card-height) / 50);
     --retro-back-stripe-size: calc(var(--card-height) / 10);
     --card-back-bg:

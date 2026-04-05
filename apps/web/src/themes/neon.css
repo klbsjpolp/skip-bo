@@ -1,13 +1,12 @@
 .theme-neon {
   --primary: #ff0099;
   --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(324 100% 50%);
+  --secondary: #1a1a1a;
   --secondary-foreground: hsl(0 0% 100%);
   --success: #00ff88;
   --success-foreground: hsl(0 0% 0%);
 
   --background: #0a0a0a;
-  --zone-bg-color: #1a1a1a;
   --text-color: #00ff88;
   --title-color: #ff0099;
   --card-front-color: #1a1a1a;

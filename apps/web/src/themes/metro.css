@@ -1,13 +1,12 @@
 .theme-metro {
   --primary: #60a917;
   --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(0 100% 45%);
+  --secondary: #2d2d2d;
   --secondary-foreground: hsl(0 0% 100%);
   --success: #60a917;
   --success-foreground: hsl(0 0% 100%);
 
   --background: #1d1d1d;
-  --zone-bg-color: #2d2d2d;
   --text-color: #ffffff;
   --title-color: #ffffff;
   --card-front-color: #3c3c3c;

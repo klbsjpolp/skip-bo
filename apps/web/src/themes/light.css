@@ -1,13 +1,12 @@
 .theme-light {
     --primary: #4f46e5;
     --primary-foreground: hsl(0 0% 98%);
-    --secondary: hsl(0 0% 96.1%);
+    --secondary: #f9fafb;
     --secondary-foreground: hsl(0 0% 9%);
     --success: #22c55e;
     --success-foreground: hsl(0 0% 98%);
 
     --background: #e5e7eb;
-    --zone-bg-color: #f9fafb;
     --text-color: #374151;
     --title-color: #374151;
     --card-front-color: white;

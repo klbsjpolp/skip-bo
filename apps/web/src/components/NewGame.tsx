@@ -149,7 +149,7 @@ function NewGame({
         }}
       >
         <DialogTrigger asChild>
-          <Button>Nouvelle partie</Button>
+          <Button size="sm">Nouvelle partie</Button>
         </DialogTrigger>
         <DialogContent className="w-[min(32rem,calc(100vw-1rem))] max-h-[calc(100svh-1rem)] gap-3 overflow-y-auto p-3 sm:p-4">
           <DialogHeader className="pr-10">
@@ -182,7 +182,7 @@ function NewGame({
           </div>
 
           {selectedMode !== 'join-online' ? (
-            <section className="rounded-xl border bg-card/40 p-3">
+            <section className="rounded-xl border bg-card/40 p-3 bg-secondary text-secondary-foreground">
               <div className="flex flex-col gap-1">
                 <h2 className="text-sm font-medium">Paramètres</h2>
                 <p className="text-xs text-muted-foreground">{stockSizeDetail}</p>
@@ -193,7 +193,7 @@ function NewGame({
             </section>
           ) : null}
 
-          <section className="rounded-xl border bg-card/40 p-3">
+          <section className="rounded-xl border bg-card/40 p-3 bg-secondary text-secondary-foreground">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <SelectedModeIcon className="size-5" />

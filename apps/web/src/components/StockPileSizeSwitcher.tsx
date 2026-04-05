@@ -32,7 +32,7 @@ export function StockPileSizeSwitcher({
 
   return (
     <div className="flex items-center justify-between gap-3">
-      <span className="text-sm text-muted-foreground">Taille de pile</span>
+      <span className="text-sm">Taille de pile</span>
       <Select value={String(stockSize)} onValueChange={handleValueChange}>
         <SelectTrigger className="w-20 shrink-0" aria-label="Taille de pile de départ">
           <SelectValue placeholder={String(DEFAULT_STOCK_SIZE)} />

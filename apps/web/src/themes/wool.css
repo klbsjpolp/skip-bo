@@ -1,12 +1,13 @@
 .theme-wool {
   --primary: #c9c9c9;
   --primary-foreground: #333333;
-  --secondary: hsl(0 0% 30%);
-  --secondary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(206 13% 60%);
+  --secondary-foreground: #333333;
   --success: hsl(152 33% 60%);
-  --success-foreground: #1f2933;
+  --success-foreground: hsl(210 24% 16%);
+  --muted-foreground: hsl(0 0% 90%);
 
-  --background: #728492;
+  --background: hsl(206 13% 51%);
   --text-color: #333333;
   --title-color: #2b2b2b;
   --card-front-color: #ddd;
@@ -46,6 +47,7 @@
   }
 
   .center-area, .player-area {
+    background: transparent;
     box-shadow: 10px 10px 20px color-mix(in srgb, var(--background), black 15%),
       -10px -10px 20px color-mix(in srgb, var(--background), white 35%);
   }

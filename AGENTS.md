@@ -97,6 +97,7 @@ Repo-local guidance for AI and coding agents working on this project.
 ## Commit And Release Workflow
 
 - Commit messages use the Angular conventional-commit format and are validated by the Husky `commit-msg` hook through [`commitlint.config.cjs`](commitlint.config.cjs).
+- Keep the full commit header (`type(scope): subject`) at 72 characters or fewer to satisfy the enforced `header-max-length` rule.
 - Use `pnpm commit` for the interactive Commitizen prompt when hand-writing the message is slower or error-prone.
 - Semver releases are cut with `pnpm release`, which uses the Angular preset from [`.versionrc.json`](.versionrc.json) to update `package.json`, generate `CHANGELOG.md`, create a release commit, and create a `v<version>` tag.
 - `feat:` maps to a minor bump, `fix:` maps to a patch bump, and `!` or `BREAKING CHANGE:` maps to a major bump.

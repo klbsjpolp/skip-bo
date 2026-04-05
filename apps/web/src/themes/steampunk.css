@@ -4,14 +4,15 @@
   --primary: hsl(37 61% 47%);            /* brass */
   --primary-foreground: hsl(30 20% 10%);
   --secondary: hsl(27 32% 32%);          /* oiled bronze */
-  --secondary-foreground: hsl(45 60% 92%);
+  --secondary-foreground: #e7d9b9;
   --success: hsl(165 32% 34%);
   --success-foreground: hsl(45 60% 92%);
+  --muted-foreground: hsl(42 0% 82%);
 
   /* Surfaces and text */
   --background: #1f1a14;                   /* workshop charcoal */
   --zone-bg-color: #2a241c;              /* dark wood */
-  --text-color: #e7d9b9;                 /* parchment */
+  --text-color: hsl(42 49% 82%);                 /* parchment */
   --title-color: #f3e7c9;                /* brighter parchment */
 
   /* Cards */

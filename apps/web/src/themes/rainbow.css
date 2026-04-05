@@ -1,13 +1,12 @@
 .theme-rainbow {
     --primary: hsl(0 100% 70%);
     --primary-foreground: hsl(0 0% 95%);
-    --secondary: #9381ff;
-    --secondary-foreground: hsl(0 0% 100%);
+    --secondary: #ffffff88;
+    --secondary-foreground: #333333;
     --success: #4caf50;
     --success-foreground: hsl(0 0% 100%);
 
     --background: #87ceeb; /* Sky Blue */
-    --zone-bg-color: #ffffff88;
     --text-color: #333333;
     --title-color: #ff6b6b;
     --card-front-color: #ffffff;

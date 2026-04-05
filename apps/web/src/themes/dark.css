@@ -6,7 +6,7 @@
     --popover-foreground: hsl(0 0% 98%);
     --primary: #6366f1;
     --primary-foreground: hsl(0 0% 98%);
-    --secondary: hsl(0 0% 14.9%);
+    --secondary: #1f2937;
     --secondary-foreground: hsl(0 0% 98%);
     --success: #34d399;
     --success-foreground: hsl(0 0% 9%);
@@ -20,7 +20,6 @@
     --ring: hsl(0 0% 83.1%);
 
     /* Skip-Bo game theme variables - Dark theme */
-    --zone-bg-color: #1f2937;
     --text-color: #d1d5db;
     --title-color: #f9fafb;
     --card-front-color: #374151;
