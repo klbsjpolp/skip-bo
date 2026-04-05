@@ -1,12 +1,12 @@
 .theme-metro {
-  --primary: hsl(160 100% 32%);
+  --primary: #60a917;
   --primary-foreground: hsl(0 0% 100%);
   --secondary: hsl(0 100% 45%);
   --secondary-foreground: hsl(0 0% 100%);
   --success: #60a917;
   --success-foreground: hsl(0 0% 100%);
 
-  --bg-color: #1d1d1d;
+  --background: #1d1d1d;
   --zone-bg-color: #2d2d2d;
   --text-color: #ffffff;
   --title-color: #ffffff;
@@ -16,8 +16,6 @@
   --card-shadow: none;
   --card-radius: 2px;
   --selected-border-color: #1ba1e2;
-  --button-bg: #60a917;
-  --button-hover-bg: #4c8712;
   --victory-border: #ffd426;
   --victory-accent: #ffd426;
   --victory-piece-1: #ffd426;

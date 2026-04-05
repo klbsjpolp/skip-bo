@@ -50,7 +50,6 @@ export function ThemeSwitcher() {
       </Select>
       <Button
         type="button"
-        variant="outline"
         size="sm"
         onClick={setRandomTheme}
         aria-label="Thème aléatoire"

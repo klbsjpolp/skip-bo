@@ -6,7 +6,7 @@
     --success: #a5dda5;
     --success-foreground: #3d4a42;
 
-    --bg-color: #fbef8b;
+    --background: #fbef8b;
     --zone-bg-color: #f4edaf;
     --text-color: #5a6270;
     --title-color: #4a5568;
@@ -17,8 +17,6 @@
     --card-back-color: #a0d2eb;
     --selected-border-color: #a0d2eb;
     --active-turn-color: #a5dda5;
-    --button-bg: #a0d2eb;
-    --button-hover-bg: #8bbbd6;
     --victory-border: #e5b8c8;
     --victory-accent: #ffd7e6;
     --victory-accent-soft: color-mix(in srgb, var(--victory-accent) 46%, transparent);

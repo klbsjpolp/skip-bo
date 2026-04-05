@@ -1,29 +1,30 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import {type ReactNode, useEffect, useState} from 'react';
 
-import type { CreateRoomResponse } from '@skipbo/multiplayer-protocol';
+import type {CreateRoomResponse} from '@skipbo/multiplayer-protocol';
 
-import { useLocalSkipBoGame } from '@/hooks/useLocalSkipBoGame';
-import { useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
-import type { GameType } from '@/app/types';
-import { OnlineStatusStrip } from '@/components/OnlineStatusStrip';
-import { ThemeSwitcher } from '@/components/ThemeSwitcher';
-import { GameBoard } from '@/components/GameBoard';
-import { Button } from '@/components/ui/button';
+import {useLocalSkipBoGame} from '@/hooks/useLocalSkipBoGame';
+import {useOnlineSkipBoGame} from '@/hooks/useOnlineSkipBoGame';
+import type {GameType} from '@/app/types';
+import {OnlineStatusStrip} from '@/components/OnlineStatusStrip';
+import {ThemeSwitcher} from '@/components/ThemeSwitcher';
+import {GameBoard} from '@/components/GameBoard';
+import {Button} from '@/components/ui/button';
 import NewGame from '@/components/NewGame';
-import { useCardAnimation } from '@/contexts/useCardAnimation';
-import { animationServiceBridge } from '@/lib/animationServiceBridge';
-import { APP_VERSION } from '@/lib/appVersion';
-import { canPlayCard } from '@/lib/validators';
-import { createOnlineRoom, joinOnlineRoom } from '@/online/api';
-import { getStoredStockSize } from '@/state/initialGameState';
-import { getRequestedUiFixtureName, getUiFixture, type UiFixtureName } from '@/testing/uiFixtures';
-import type { GameState } from '@/types';
+import {useCardAnimation} from '@/contexts/useCardAnimation';
+import {animationServiceBridge} from '@/lib/animationServiceBridge';
+import {APP_VERSION} from '@/lib/appVersion';
+import {canPlayCard} from '@/lib/validators';
+import {createOnlineRoom, joinOnlineRoom} from '@/online/api';
+import {getStoredStockSize} from '@/state/initialGameState';
+import {getRequestedUiFixtureName, getUiFixture, type UiFixtureName} from '@/testing/uiFixtures';
+import type {GameState} from '@/types';
+import {DebugStrip} from "@/components/DebugStrip";
 
 const fixtureActionResult = Promise.resolve({ success: true, message: 'Fixture mode' });
 
 interface AppShellProps {
   clearSelection: () => void;
-  debugFillBuildPile?: () => void;
+  debugStrip?: ReactNode;
   discardCard: (discardPileIndex: number) => Promise<{ success: boolean; message: string }>;
   fixtureName?: UiFixtureName;
   gameState: GameState;
@@ -38,7 +39,7 @@ interface AppShellProps {
 
 function AppShell({
   clearSelection,
-  debugFillBuildPile,
+                    debugStrip,
   discardCard,
   fixtureName,
   gameState,
@@ -52,61 +53,49 @@ function AppShell({
 }: AppShellProps) {
   return (
     <main
-      id="main"
-      className="min-h-screen px-4 pb-4 pt-1 lg:px-10 lg:pb-10 lg:pt-2"
-      data-testid="app-main"
-      data-ui-fixture={fixtureName}
+        id="main"
+        className="min-h-screen px-4 pb-4 pt-1 lg:px-10 lg:pb-10 lg:pt-2"
+        data-testid="app-main"
+        data-ui-fixture={fixtureName}
     >
       <div className="mx-auto max-w-7xl">
         <div
-          className="mb-1 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
-          data-testid="app-toolbar"
+            className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
+            data-testid="app-toolbar"
         >
           <div
               className="flex flex-row gap-2 items-center"
               data-testid="app-toolbar-left"
           >
             <NewGame
-              onJoinOnlineGame={onJoinOnlineGame}
-              onStartLocalGame={onStartLocalGame}
-              onStartOnlineGame={onStartOnlineGame}
+                onJoinOnlineGame={onJoinOnlineGame}
+                onStartLocalGame={onStartLocalGame}
+                onStartOnlineGame={onStartOnlineGame}
             />
             {statusStrip}
           </div>
-          <ThemeSwitcher />
+          <ThemeSwitcher/>
         </div>
         <GameBoard
-          gameState={gameState}
-          selectCard={selectCard}
-          playCard={playCard}
-          discardCard={discardCard}
-          clearSelection={clearSelection}
-          canPlayCard={canPlayCard}
+            gameState={gameState}
+            selectCard={selectCard}
+            playCard={playCard}
+            discardCard={discardCard}
+            clearSelection={clearSelection}
+            canPlayCard={canPlayCard}
         />
         {gameState.gameIsOver && (
-          <div className="mt-5 text-center">
-            <Button onClick={() => void onReplay()} size="lg" data-testid="replay-button">
-              Rejouer
-            </Button>
-          </div>
+            <div className="mt-5 text-center">
+              <Button onClick={() => void onReplay()} size="lg" data-testid="replay-button">
+                Rejouer
+              </Button>
+            </div>
         )}
         <div className="mt-4 flex items-center justify-between gap-3">
-          <div>
-            {import.meta.env.DEV && debugFillBuildPile ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={debugFillBuildPile}
-                className="h-auto px-1.5 py-0.5 text-[0.65rem] text-muted-foreground/80"
-                data-testid="debug-fill-build-pile-button"
-              >
-                Debug
-              </Button>
-            ) : null}
-          </div>
+          {debugStrip}
           <p
-            className="app-version-badge text-xs text-muted-foreground/80 tabular-nums"
-            data-testid="app-version"
+              className="app-version-badge text-xs text-muted-foreground/80 tabular-nums"
+              data-testid="app-version"
           >
             Version {APP_VERSION}
           </p>
@@ -151,6 +140,7 @@ function LocalGameScreen({
   const {
     clearSelection,
     debugFillBuildPile,
+    debugWin,
     discardCard,
     gameState,
     playCard,
@@ -160,7 +150,10 @@ function LocalGameScreen({
   return (
     <AppShell
       clearSelection={clearSelection}
-      debugFillBuildPile={() => debugFillBuildPile(0)}
+      debugStrip={<DebugStrip
+          debugFillBuildPile={() => debugFillBuildPile(0)}
+          debugWin={debugWin}
+      />}
       discardCard={discardCard}
       gameState={gameState}
       onJoinOnlineGame={onJoinOnlineGame}

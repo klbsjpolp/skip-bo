@@ -9,14 +9,14 @@
   --text-2xl: calc(var(--text-base) * 1.5);
 
   /* Core palette inspired by the provided textures */
-  --primary: hsl(121 35% 43%);
-  --primary-foreground: hsl(0 0% 100%);
+  --primary: #7a5a35;
+  --primary-foreground: #e6e6e6;
   --secondary: hsl(33 45% 45%);
   --secondary-foreground: hsl(0 0% 100%);
   --success: #9adf5a;
   --success-foreground: #1a1a1a;
 
-  --bg-color: #2f2418;                 /* base around dirt */
+  --background: #2f2418;                 /* base around dirt */
   --text-color: #e6e6e6;
   --title-color: #ffffff;
 
@@ -35,8 +35,6 @@
   --card-g3: hsl(216 100% 75%);   /* 9‑12 */
 
   --selected-border-color: #9adf5a;    /* bright grassy highlight */
-  --button-bg: #7a5a35;
-  --button-hover-bg: #6b4f30;
   --victory-border: #9adf5a;
   --victory-accent: #37ceff;
   --victory-badge-bg: color-mix(in srgb, #2f2418 78%, #9adf5a 22%);

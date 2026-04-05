@@ -1,15 +1,9 @@
-import {Asterisk, LoaderCircle, Plug, Plus, type LucideIcon} from 'lucide-react';
+import {Asterisk, LoaderCircle, type LucideIcon, Plug, Plus} from 'lucide-react';
 import {useEffect, useState} from 'react';
 
 import {StockPileSizeSwitcher} from '@/components/StockPileSizeSwitcher.tsx';
 import {Button} from '@/components/ui/button.tsx';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,} from '@/components/ui/dialog';
 import {Input} from '@/components/ui/input';
 import {getStoredStockSize} from '@/state/initialGameState.ts';
 import {isValidRoomCode, normalizeRoomCode} from '@skipbo/multiplayer-protocol';
@@ -155,7 +149,7 @@ function NewGame({
         }}
       >
         <DialogTrigger asChild>
-          <Button variant="secondary">Nouvelle partie</Button>
+          <Button>Nouvelle partie</Button>
         </DialogTrigger>
         <DialogContent className="w-[min(32rem,calc(100vw-1rem))] max-h-[calc(100svh-1rem)] gap-3 overflow-y-auto p-3 sm:p-4">
           <DialogHeader className="pr-10">

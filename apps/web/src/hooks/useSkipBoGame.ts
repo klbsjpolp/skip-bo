@@ -1,15 +1,17 @@
-import React, { useCallback, useRef } from 'react';
-import { useMachine } from '@xstate/react';
-import { gameMachine } from '@/state/gameMachine';
-import type { GameState, MoveResult, Card } from '@/types';
-import { canPlayCard } from '@/lib/validators';
+import React, {useCallback, useRef} from 'react';
+import {useMachine} from '@xstate/react';
+import {gameMachine} from '@/state/gameMachine';
+import type {Card, GameState, MoveResult} from '@/types';
+import {canPlayCard} from '@/lib/validators';
 import {
-  getHandCardPosition,
-  getStockCardPosition,
+  calculateAnimationDuration,
   getBuildPilePosition,
-  calculateAnimationDuration, getHandCardAngle, getNextDiscardCardPosition
+  getHandCardAngle,
+  getHandCardPosition,
+  getNextDiscardCardPosition,
+  getStockCardPosition
 } from '@/utils/cardPositions';
-import { setGlobalAnimationContext } from '@/services/aiAnimationService';
+import {setGlobalAnimationContext} from '@/services/aiAnimationService';
 import {
   calculateMultipleDrawAnimationDuration,
   setGlobalDrawAnimationContext,
@@ -20,8 +22,8 @@ import {
   triggerCompletedBuildPileAnimation,
 } from '@/services/completedBuildPileAnimationService';
 import {useCardAnimation} from "@/contexts/useCardAnimation.ts";
-import { getCompletedBuildPileCards } from '@/lib/retreatPile';
-import { planHandRefill } from '@/lib/handRefill';
+import {getCompletedBuildPileCards} from '@/lib/retreatPile';
+import {planHandRefill} from '@/lib/handRefill';
 
 // Helper function to check if a PLAY_CARD action will result in an empty hand
 const willPlayCardEmptyHand = (gameState: GameState): boolean => {
@@ -61,6 +63,10 @@ export function useSkipBoGame() {
 
   const debugFillBuildPile = useCallback((buildPile: number) => {
     dispatch({ type: 'DEBUG_FILL_BUILD_PILE', buildPile });
+  }, [dispatch]);
+
+  const debugWin = useCallback(() => {
+    dispatch({ type: 'DEBUG_WIN' });
   }, [dispatch]);
 
   const selectCard = useCallback((source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => {
@@ -306,6 +312,7 @@ export function useSkipBoGame() {
     gameState: state,
     initializeGame,
     debugFillBuildPile,
+    debugWin,
     selectCard,
     playCard,
     discardCard,

@@ -9,7 +9,7 @@
   --success-foreground: hsl(45 60% 92%);
 
   /* Surfaces and text */
-  --bg-color: #1f1a14;                   /* workshop charcoal */
+  --background: #1f1a14;                   /* workshop charcoal */
   --zone-bg-color: #2a241c;              /* dark wood */
   --text-color: #e7d9b9;                 /* parchment */
   --title-color: #f3e7c9;                /* brighter parchment */
@@ -22,8 +22,6 @@
   --card-back-color: #463a2f;            /* leather/bronze back */
 
   /* Accents / states */
-  --button-bg: #8c6d1f;                  /* brass button */
-  --button-hover-bg: color-mix(in srgb, #8c6d1f 88%, black 12%);
   --button-text: #fffaf0;
   --selected-border-color: #e0a84f;      /* polished brass */
   --selected-shadow: 0 0 16px rgba(224, 168, 79, 0.6);

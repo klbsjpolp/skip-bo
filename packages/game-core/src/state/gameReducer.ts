@@ -148,6 +148,17 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       return;
     }
 
+    case 'DEBUG_WIN': {
+      const humanPlayer = draft.players[0];
+      humanPlayer.stockPile = [];
+      draft.currentPlayerIndex = 0;
+      draft.selectedCard = null;
+      draft.gameIsOver = true;
+      draft.winnerIndex = 0;
+      draft.message = MESSAGES.GAME_WON.replace('{player}', 'le joueur');
+      return;
+    }
+
     case 'SELECT_CARD': {
       const player = draft.players[draft.currentPlayerIndex];
       let card;

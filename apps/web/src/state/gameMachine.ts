@@ -38,6 +38,12 @@ export const gameMachine = createMachine({
     G: initialGameState(),
     animationDuration: 0,
   }),
+  on: {
+    DEBUG_WIN: {
+      actions: 'apply',
+      target: '.finished',
+    },
+  },
   initial: 'setup',
   states: {
     setup: {

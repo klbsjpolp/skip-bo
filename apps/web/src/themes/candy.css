@@ -1,6 +1,6 @@
 .theme-bonbon {
-  --primary: hsl(333 92% 64%);
-  --primary-foreground: hsl(0 0% 100%);
+  --primary: #ff76a5;
+  --primary-foreground: #fff8fc;
   --secondary: hsl(334 100% 86%);
   --secondary-foreground: hsl(334 42% 24%);
   --success: #45bf9c;
@@ -16,10 +16,8 @@
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(334 30% 24%);
   --border: hsl(332 82% 72%);
-  --input: hsl(334 100% 91%);
   --ring: hsl(333 92% 64%);
 
-  --bg-color: #ffdceb;
   --zone-bg-color: rgb(255 243 249 / 0.92);
   --text-color: #6e3353;
   --title-color: #b02d67;
@@ -35,9 +33,6 @@
   --selected-shadow: 0 0 0 3px rgb(255 255 255 / 0.7), 0 0 24px rgb(255 111 159 / 0.45);
   --can-drop-shadow: 0 12px 30px rgb(255 111 159 / 0.25);
   --active-turn-color: #73e1bd;
-  --button-bg: #ff76a5;
-  --button-hover-bg: #f85f95;
-  --button-text: #fff8fc;
   --drop-indicator-color: #ff5c92;
 
   --victory-border: #ff9bbc;

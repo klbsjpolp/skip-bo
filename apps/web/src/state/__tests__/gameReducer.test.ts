@@ -126,6 +126,29 @@ describe('gameReducer', () => {
     });
   });
 
+  describe('DEBUG_WIN action', () => {
+    it('should force a human victory state', () => {
+      const stateWithAiTurn = {
+        ...initialState,
+        currentPlayerIndex: 1,
+        selectedCard: {
+          card: initialState.players[1].hand[0]!,
+          source: 'hand' as const,
+          index: 0,
+        },
+      };
+
+      const result = gameReducer(stateWithAiTurn, { type: 'DEBUG_WIN' });
+
+      expect(result.players[0].stockPile).toHaveLength(0);
+      expect(result.currentPlayerIndex).toBe(0);
+      expect(result.gameIsOver).toBe(true);
+      expect(result.winnerIndex).toBe(0);
+      expect(result.selectedCard).toBeNull();
+      expect(result.message).toBe('La partie est gagnée par le joueur !');
+    });
+  });
+
   describe('PLAY_CARD action', () => {
     it('should not play card if no card is selected', () => {
       const result = gameReducer(initialState, { type: 'PLAY_CARD', buildPile: 0 });

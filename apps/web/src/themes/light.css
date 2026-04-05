@@ -1,12 +1,12 @@
 .theme-light {
-    --primary: hsl(0 0% 9%);
+    --primary: #4f46e5;
     --primary-foreground: hsl(0 0% 98%);
     --secondary: hsl(0 0% 96.1%);
     --secondary-foreground: hsl(0 0% 9%);
     --success: #22c55e;
     --success-foreground: hsl(0 0% 98%);
 
-    --bg-color: #e5e7eb;
+    --background: #e5e7eb;
     --zone-bg-color: #f9fafb;
     --text-color: #374151;
     --title-color: #374151;
@@ -16,9 +16,6 @@
     --card-border-color: #9ca3af;
     --card-shadow: 0 1px 3px rgba(0,0,0,0.2);
     --card-radius: 8px;
-    --button-bg: #4f46e5;
-    --button-hover-bg: #4338ca;
-    --button-text: white;
     --victory-border: #d1a63c;
     --victory-accent: #f4cf6a;
     --victory-piece-1: #ef4444;

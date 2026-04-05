@@ -1,12 +1,12 @@
 .theme-neon {
-  --primary: hsl(157 100% 50%);
-  --primary-foreground: hsl(0 0% 0%);
+  --primary: #ff0099;
+  --primary-foreground: hsl(0 0% 100%);
   --secondary: hsl(324 100% 50%);
   --secondary-foreground: hsl(0 0% 100%);
   --success: #00ff88;
   --success-foreground: hsl(0 0% 0%);
 
-  --bg-color: #0a0a0a;
+  --background: #0a0a0a;
   --zone-bg-color: #1a1a1a;
   --text-color: #00ff88;
   --title-color: #ff0099;
@@ -16,8 +16,6 @@
   --card-radius: 12px;
   --card-back-color: #0066ff;
   --selected-border-color: #00ff88;
-  --button-bg: #ff0099;
-  --button-hover-bg: #cc0077;
   --victory-border: #00ff88;
   --victory-accent: #00ff88;
   --victory-piece-1: #00ff88;

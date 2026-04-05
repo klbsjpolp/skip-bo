@@ -19,10 +19,12 @@
 
 @theme {
   --color-border: var(--border);
-  --color-input: var(--input);
   --color-ring: var(--ring);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-input: var(--input);
+  --color-input-foreground: var(--input-foreground);
 
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
@@ -88,8 +90,9 @@
     --success: hsl(142 72% 42%);
     --success-foreground: hsl(0 0% 98%);
     --border: hsl(0 0% 89.8%);
-    --input: hsl(0 0% 89.8%);
     --ring: hsl(0 0% 3.9%);
+    --input: var(--primary);
+    --input-foreground: var(--primary-foreground);
 
     --radius: 0.5rem;
     --stripes-bg: none;
@@ -126,8 +129,6 @@
     --card-g1: #0F0; /* 1‑4 */
     --card-g2: #F00; /* 5‑8 */
     --card-g3: #F0F; /* 9‑12 */
-
-    --button-hover-bg: color-mix(in srgb, var(--button-bg) 100%, black 5%);
   }
 
   body {
@@ -382,9 +383,7 @@
     border: 2px solid transparent;
 
     .bg-layer {
-      @apply absolute w-full h-full top-0 left-0 overflow-hidden pointer-events-none;
-      z-index: 0;
-      border-radius: inherit;
+      @apply absolute w-full h-full top-0 left-0 overflow-hidden pointer-events-none z-0 rounded-[inherit];
     }
   }
 
@@ -398,12 +397,11 @@
   }
 
   .content-layer {
-    position: relative;
-    z-index: 2;
+    @apply relative z-2;
   }
 
   .game-board {
-    position: relative;
+    @apply relative;
   }
 
   .game-status {
@@ -451,9 +449,7 @@
   .victory-emblem,
   .victory-shine,
   .victory-sunburst {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
+    @apply absolute inset-0 pointer-events-none w-full h-full;
   }
 
   .victory-accent {
@@ -471,7 +467,7 @@
   }
 
   .victory-emblem {
-    display: none;
+    @apply bg-contain bg-center bg-no-repeat block inset-auto top-1/2 left-1/2 -translate-1/2 bg-(image:--victory-emblem-image) opacity-(--victory-emblem-opacity);
   }
 
   .victory-shine {
@@ -604,9 +600,8 @@
   }
 
   body {
+    @apply bg-background text-(--text-color);
     font-family: 'Inter', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
   }
 
   h1 {
@@ -767,8 +762,4 @@
 
 @utility card-morph-layer {
   @apply absolute pointer-events-none transition-opacity duration-800;
-}
-
-button {
-  @apply bg-(--button-bg) text-(--button-text) hover:bg-(--button-hover-bg) border-2 rounded-md;
 }

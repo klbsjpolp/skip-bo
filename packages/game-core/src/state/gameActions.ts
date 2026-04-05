@@ -18,4 +18,5 @@ export type GameAction =
   | { type: 'END_TURN' }
   | { type: 'RESET' }
   | { type: 'DEBUG_SET_AI_HAND'; hand: Card[] }
-  | { type: 'DEBUG_FILL_BUILD_PILE'; buildPile: number };
+  | { type: 'DEBUG_FILL_BUILD_PILE'; buildPile: number }
+  | { type: 'DEBUG_WIN' };
