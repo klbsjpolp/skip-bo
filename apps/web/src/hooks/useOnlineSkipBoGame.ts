@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { canPlayCard, gameReducer, getCompletedBuildPileCards, initialGameState, planHandRefill, type Card, type GameState, type MoveResult } from '@skipbo/game-core';
+import { canPlayCard, gameReducer, getCompletedBuildPileCards, initialGameState, type Card, type GameState, type MoveResult } from '@skipbo/game-core';
 import { serializeClientGameView, type ClientGameView, type CreateRoomResponse, type ServerMessage } from '@skipbo/multiplayer-protocol';
 
 import type { GameAction } from '@/state/gameActions';
@@ -110,11 +110,21 @@ const applyOptimisticPlayView = (
     buildPile,
   });
 
-  if (shouldHideRefilledHand) {
-    optimisticState.players[0].hand = optimisticState.players[0].hand.map(() => null);
-  }
+  const optimisticStateForView = shouldHideRefilledHand
+    ? {
+        ...optimisticState,
+        players: optimisticState.players.map((player, index) => (
+          index === 0
+            ? {
+                ...player,
+                hand: player.hand.map(() => null),
+              }
+            : player
+        )),
+      }
+    : optimisticState;
 
-  return serializeLocalView(optimisticState, currentView);
+  return serializeLocalView(optimisticStateForView, currentView);
 };
 
 const applyOptimisticDiscardView = (
@@ -258,16 +268,21 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const reconnectTimeoutRef = useRef<number | null>(null);
   const turnPresentationTimeoutRef = useRef<number | null>(null);
   const { removeAnimation, startAnimation, waitForAnimations } = useCardAnimation();
+  const commitView = useCallback((nextView: ClientGameView | null) => {
+    viewRef.current = nextView;
+    setView(nextView);
+  }, []);
+  const updateView = useCallback((updater: (currentView: ClientGameView | null) => ClientGameView | null) => {
+    const nextView = updater(viewRef.current);
+    viewRef.current = nextView;
+    setView(nextView);
+  }, []);
 
   useEffect(() => {
     setGlobalAnimationContext({ startAnimation, waitForAnimations });
     setGlobalDrawAnimationContext({ startAnimation, removeAnimation });
     setGlobalCompletedPileAnimationContext({ startAnimation });
   }, [removeAnimation, startAnimation, waitForAnimations]);
-
-  useEffect(() => {
-    viewRef.current = view;
-  }, [view]);
 
   useEffect(() => {
     const clearPingInterval = () => {
@@ -432,7 +447,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                 }
               }
 
-              setView(message.view);
+              commitView(message.view);
               break;
             }
             case 'presence':
@@ -443,7 +458,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                     room: message.room,
                   }
                 : authoritativeViewRef.current;
-              setView((previousView) =>
+              updateView((previousView) =>
                 previousView
                   ? {
                       ...previousView,
@@ -454,7 +469,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
               break;
             case 'actionRejected':
               setLastError(message.reason);
-              setView(authoritativeViewRef.current ?? viewRef.current);
+              commitView(authoritativeViewRef.current ?? viewRef.current);
               break;
             case 'roomClosed':
               authoritativeViewRef.current = authoritativeViewRef.current
@@ -466,7 +481,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                     },
                   }
                 : authoritativeViewRef.current;
-              setView((previousView) =>
+              updateView((previousView) =>
                 previousView
                   ? {
                       ...previousView,
@@ -529,7 +544,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         socket.close();
       }
     };
-  }, [session]);
+  }, [commitView, session, updateView]);
 
   const gameState = useMemo(
     () => {
@@ -583,7 +598,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       return;
     }
 
-    setView((previousView) =>
+    updateView((previousView) =>
       previousView
         ? {
             ...previousView,
@@ -599,10 +614,10 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     );
 
     sendAction({ type: 'SELECT_CARD', source, index, discardPileIndex });
-  }, [connectionStatus, gameState, sendAction]);
+  }, [connectionStatus, gameState, sendAction, updateView]);
 
   const clearSelection = useCallback(() => {
-    setView((previousView) =>
+    updateView((previousView) =>
       previousView
         ? {
             ...previousView,
@@ -613,7 +628,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     );
 
     sendAction({ type: 'CLEAR_SELECTION' });
-  }, [sendAction]);
+  }, [sendAction, updateView]);
 
   const playCard = useCallback(async (buildPile: number): Promise<MoveResult> => {
     const currentState = gameState;
@@ -628,21 +643,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     }
 
     const willEmptyHand = willPlayCardEmptyHand(currentState);
-    let refillCards: Card[] = [];
-    let refillHandIndices: number[] = [];
-
-    if (willEmptyHand && currentState.selectedCard.source === 'hand') {
-      const player = currentState.players[currentState.currentPlayerIndex];
-      const handAfterPlay = [...player.hand];
-      handAfterPlay[currentState.selectedCard.index] = null;
-      const refillPlan = planHandRefill(
-        handAfterPlay,
-        currentState.deck,
-        currentState.completedBuildPiles,
-      );
-      refillCards = refillPlan.cards;
-      refillHandIndices = refillPlan.handIndices;
-    }
 
     try {
       const playerAreas = document.querySelectorAll('.player-area');
@@ -706,44 +706,21 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       console.warn('Play animation failed, continuing with online game logic:', error);
     }
 
-    let completionAnimationDuration = 0;
+    if (viewRef.current) {
+      commitView(applyOptimisticPlayView(viewRef.current, buildPile, willEmptyHand));
+    }
+
     if (completedBuildPileCards) {
-      completionAnimationDuration = triggerCompletedBuildPileAnimation(
+      triggerCompletedBuildPileAnimation(
         currentState,
         buildPile,
         completedBuildPileCards,
         currentState.completedBuildPiles.length,
       );
     }
-
-    if (refillCards.length > 0) {
-      const drawAnimationDuration = calculateMultipleDrawAnimationDuration(
-        currentState.currentPlayerIndex,
-        refillHandIndices,
-        500,
-        completionAnimationDuration,
-      );
-
-      void triggerMultipleDrawAnimations(
-        currentState.currentPlayerIndex,
-        refillCards,
-        refillHandIndices,
-        500,
-        completionAnimationDuration,
-      ).catch((error) => {
-        console.warn('Draw animation failed, continuing with online game logic:', error);
-      });
-
-      void drawAnimationDuration;
-    }
-
-    if (viewRef.current) {
-      setView(applyOptimisticPlayView(viewRef.current, buildPile, willEmptyHand));
-    }
-
     sendAction({ type: 'PLAY_CARD', buildPile });
     return { success: true, message: 'Carte jouée' };
-  }, [gameState, sendAction, startAnimation, waitForAnimations]);
+  }, [commitView, gameState, sendAction, startAnimation, waitForAnimations]);
 
   const discardCard = useCallback((discardPile: number): Promise<MoveResult> => new Promise((resolve) => {
     const currentState = gameState;
@@ -810,13 +787,13 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
 
     window.setTimeout(() => {
       if (viewRef.current) {
-        setView(applyOptimisticDiscardView(viewRef.current, discardPile));
+        commitView(applyOptimisticDiscardView(viewRef.current, discardPile));
       }
 
       sendAction({ type: 'DISCARD_CARD', discardPile });
       resolve({ success: true, message: 'Carte défaussée' });
     }, animationDuration);
-  }), [gameState, sendAction, startAnimation]);
+  }), [commitView, gameState, sendAction, startAnimation]);
 
   return {
     clearSelection,
