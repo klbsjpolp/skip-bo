@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.0.7](https://github.com/klbsjpolp/skip-bo/compare/v1.0.6...v1.0.7) (2026-04-05)
+
+
+### Bug Fixes
+
+* **web:** update debugStrip layout and add growth spacer ([eca8d3d](https://github.com/klbsjpolp/skip-bo/commit/eca8d3d7cd78907dcda51641e4a774f8c5c818bc))
+
+
+
 ## [1.0.6](https://github.com/klbsjpolp/skip-bo/compare/v1.0.5...v1.0.6) (2026-04-05)
 
 
