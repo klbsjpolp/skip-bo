@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# 1.3.0 (2026-04-06)
+
+
+### Features
+
+* **monitoring:** add alarms for Lambda, DynamoDB, and API Gateway ([8265987](https://github.com/klbsjpolp/skip-bo/commit/8265987822caf5202d541680c6402253fb3bae87))
+
+
+
 ## 1.2.2 (2026-04-06)
 
 
