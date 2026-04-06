@@ -123,10 +123,10 @@ jobs:
         run: pnpm --filter @skipbo/realtime-api build
 
       - name: Write backend config
-        run: |
-          cat <<'EOF' > infra/terraform/envs/prod/backend.hcl
-          ${{ secrets.TOFU_BACKEND_CONFIG_HCL }}
-          EOF
+        shell: bash
+        env:
+          TOFU_CONFIG: ${{ secrets.TOFU_BACKEND_CONFIG_HCL }}
+        run: printf '%s\n' "$TOFU_CONFIG" > infra/terraform/envs/prod/backend.hcl
 
       - name: Initialize OpenTofu with remote state
         run: tofu -chdir=infra/terraform/envs/prod init -backend-config=backend.hcl
@@ -176,12 +176,12 @@ jobs:
       - name: Resolve API URL
         id: resolve
         shell: bash
+        env:
+          TOFU_CONFIG: ${{ secrets.TOFU_BACKEND_CONFIG_HCL }}
         run: |
           URL="${{ needs.deploy-backend.outputs.api_url }}"
           if [ -z "$URL" ]; then
-            cat <<'EOF' > infra/terraform/envs/prod/backend.hcl
-            ${{ secrets.TOFU_BACKEND_CONFIG_HCL }}
-            EOF
+            printf '%s\n' "$TOFU_CONFIG" > infra/terraform/envs/prod/backend.hcl
             tofu -chdir=infra/terraform/envs/prod init -backend-config=backend.hcl
             URL=$(tofu -chdir=infra/terraform/envs/prod output -raw http_api_url)
           fi
