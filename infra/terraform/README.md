@@ -7,7 +7,7 @@ This directory manages the AWS multiplayer backend for Skip-Bo with OpenTofu.
 - `modules/dynamodb`: room and connection tables
 - `modules/iam`: Lambda execution role and data-plane policies
 - `modules/realtime_api`: Lambda functions plus HTTP and WebSocket API Gateway resources
-- `modules/monitoring`: minimal CloudWatch alarms
+- `modules/monitoring`: CloudWatch alarms for Lambda, DynamoDB, and API Gateway (integrates with Sentry via SNS).
 - `envs/prod`: the production environment wiring those modules together
 
 ## Bootstrap
@@ -52,5 +52,7 @@ VITE_SKIPBO_API_URL=https://<http-api-id>.execute-api.ca-central-1.amazonaws.com
 The Lambda functions receive their room table, connection table, and WebSocket endpoint settings directly from OpenTofu.
 
 Backend Sentry monitoring is optional. You can enable it by passing `sentry_dsn`, plus optional `sentry_release` and `sentry_traces_sample_rate`, through `terraform.tfvars`, `-var`, or `TF_VAR_...` environment variables.
+
+See [Sentry AWS Integration](../../docs/monitoring/SENTRY_AWS_INTEGRATION.md) for more details on connecting AWS resources to Sentry.
 
 The production HTTP API defaults to `allowed_origins = ["*"]` because the multiplayer endpoints do not use cookies or browser credentials, and local Vite dev ports can vary between runs.

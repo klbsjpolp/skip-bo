@@ -114,7 +114,7 @@ The online stack is intentionally small:
 - Lambda for create, join, connect, disconnect, and message handling
 - DynamoDB for room state and active WebSocket connections
 - CloudWatch logs and minimal Lambda error alarms
-- Optional Sentry monitoring for browser and realtime Lambda errors
+- Sentry monitoring for browser, realtime Lambda, DynamoDB, and API Gateway.
 
 The server is authoritative for online rooms. It shuffles, deals, validates actions, and sends a redacted snapshot to each player after every accepted action.
 

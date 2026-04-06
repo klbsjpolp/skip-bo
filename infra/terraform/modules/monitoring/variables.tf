@@ -15,6 +15,24 @@ variable "lambda_function_names" {
   type        = list(string)
 }
 
+variable "dynamodb_table_names" {
+  description = "DynamoDB table names to monitor."
+  type        = list(string)
+  default     = []
+}
+
+variable "api_gateway_http_ids" {
+  description = "HTTP API Gateway IDs to monitor."
+  type        = list(string)
+  default     = []
+}
+
+variable "api_gateway_websocket_ids" {
+  description = "WebSocket API Gateway IDs to monitor."
+  type        = list(string)
+  default     = []
+}
+
 variable "tags" {
   description = "Tags applied to all alarms in this module."
   type        = map(string)

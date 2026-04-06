@@ -58,9 +58,12 @@ module "realtime_api" {
 }
 
 module "monitoring" {
-  source                = "../../modules/monitoring"
-  alarm_topic_arn       = var.alarm_topic_arn
-  app_name              = local.app_name
-  lambda_function_names = values(module.realtime_api.lambda_function_names)
-  tags                  = local.common_tags
+  source                    = "../../modules/monitoring"
+  alarm_topic_arn           = var.alarm_topic_arn
+  app_name                  = local.app_name
+  lambda_function_names     = values(module.realtime_api.lambda_function_names)
+  dynamodb_table_names      = [module.dynamodb.rooms_table_name, module.dynamodb.connections_table_name]
+  api_gateway_http_ids      = [module.realtime_api.http_api_id]
+  api_gateway_websocket_ids = [module.realtime_api.websocket_api_id]
+  tags                      = local.common_tags
 }

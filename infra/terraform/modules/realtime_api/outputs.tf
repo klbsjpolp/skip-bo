@@ -17,3 +17,13 @@ output "websocket_url" {
   description = "Public WebSocket URL for clients."
   value       = local.websocket_url
 }
+
+output "http_api_id" {
+  description = "HTTP API Gateway ID."
+  value       = aws_apigatewayv2_api.http.id
+}
+
+output "websocket_api_id" {
+  description = "WebSocket API Gateway ID."
+  value       = aws_apigatewayv2_api.websocket.id
+}
