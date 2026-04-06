@@ -74,7 +74,7 @@ resource "aws_lambda_function" "this" {
   handler          = each.value.handler
   memory_size      = each.value.memory
   role             = var.lambda_role_arn
-  runtime          = "nodejs20.x"
+  runtime          = "nodejs22.x"
   source_code_hash = var.lambda_source_code_hash
   timeout          = each.value.timeout
 
