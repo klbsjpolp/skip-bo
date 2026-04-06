@@ -7,6 +7,7 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,} from '
 import {Input} from '@/components/ui/input';
 import {getStoredStockSize} from '@/state/initialGameState.ts';
 import {isValidRoomCode, normalizeRoomCode} from '@skipbo/multiplayer-protocol';
+import {Alert, AlertTitle} from "@/components/ui/alert.tsx";
 
 interface NewGameProps {
   onJoinOnlineGame: (roomCode: string) => Promise<void>;
@@ -209,6 +210,12 @@ function NewGame({
               </div>
             </div>
 
+            {errorMessage ? (
+                <Alert variant="destructive"
+                       className="bg-destructive/10 p-2 mt-2">
+                  <AlertTitle>{errorMessage}</AlertTitle>
+                </Alert>
+            ) : null}
             {selectedMode === 'join-online' ? (
               <>
                 <form
@@ -273,12 +280,6 @@ function NewGame({
               </Button>
             )}
           </section>
-
-          {errorMessage ? (
-            <p className="text-sm text-destructive" role="alert">
-              {errorMessage}
-            </p>
-          ) : null}
         </DialogContent>
       </Dialog>
     </div>
