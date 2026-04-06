@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# 1.4.0 (2026-04-06)
+
+
+### Features
+
+* **build:** update Node.js runtime to 22.x ([056d7a5](https://github.com/klbsjpolp/skip-bo/commit/056d7a5dc65a57ca5b23c4aefe0cd21647a59c0f))
+
+
+
 # 1.3.0 (2026-04-06)
 
 
