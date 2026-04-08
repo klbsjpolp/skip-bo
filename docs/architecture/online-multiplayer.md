@@ -1,51 +1,58 @@
 # Online Multiplayer Architecture
 
-## Product shape
+## Document Contract
 
-- The app still boots directly into a local game against AI.
-- There is no lobby route and no dedicated waiting-room screen.
-- `Nouvelle partie` opens a modal with three actions:
-  - `Local vs AI`
-  - `Start online`
-  - `Join online`
-- Online rooms are private, two-player matches joined by a 5-character Crockford base32 code.
-- `Rejouer` preserves the game type. For online games it immediately creates a new hosted room for the local player.
+- Purpose: describe how the online multiplayer system is partitioned and why the current architecture works the way it does.
+- Audience: contributors and agents changing realtime room lifecycle, view serialization, or the online client flow.
+- Source of truth: `apps/realtime-api/src/services/roomService.ts`, `packages/multiplayer-protocol/src/index.ts`, and `packages/multiplayer-protocol/src/views/index.ts`.
+- When to update: when authority boundaries, transport model, room flow, or major runtime components change.
 
-## Monorepo boundaries
+## Related Docs
 
-- `apps/web`: React application, AI, animation orchestration, modal flow, and online client runtime.
-- `apps/realtime-api`: AWS Lambda handlers for room creation, room join, WebSocket auth, and live action handling.
-- `packages/game-core`: shared reducer, validators, deck setup, initial state, and domain types.
-- `packages/multiplayer-protocol`: HTTP DTOs, WebSocket message contracts, room-code helpers, and redacted client-view serializers.
-- `infra/terraform`: production AWS infrastructure definition, applied with OpenTofu.
+- [source-of-truth.md](source-of-truth.md)
+- [runtime-invariants.md](runtime-invariants.md)
+- [decision-log.md](decision-log.md)
+- [../protocols/realtime-events.md](../protocols/realtime-events.md)
+- [../runbooks/opentofu-aws-realtime.md](../runbooks/opentofu-aws-realtime.md)
 
-## Online authority model
+## Boundaries
 
-Local AI games remain entirely browser-owned. Online games are server-authoritative:
+- `apps/web` owns the online client runtime, room creation and join flows, and client-side animation inferred from snapshots.
+- `apps/realtime-api` owns room lifecycle, turn validation, seat presence, and broadcasting.
+- `packages/game-core` owns gameplay rules reused by the backend.
+- `packages/multiplayer-protocol` owns HTTP DTOs, WebSocket message shapes, room-code helpers, and redacted client views.
+- `infra/terraform` owns the AWS infrastructure that hosts the realtime API.
 
-- The server creates the room, shuffles, deals, validates turns, and advances the canonical state.
-- Clients send intents such as `SELECT_CARD`, `PLAY_CARD`, `DISCARD_CARD`, `CLEAR_SELECTION`, and `END_TURN`.
-- After every accepted online action, the server broadcasts a fresh redacted snapshot to both seats.
-- No move replay or delta sync is used in v1.
+## Authority Model
 
-## View serialization
+Local AI games remain browser-owned. Online rooms are server-authoritative:
 
-The backend stores the full `GameState`. Clients never receive the full state for both players.
+- the server creates the room, shuffles, deals, validates actions, and advances canonical state
+- clients send intents such as `SELECT_CARD`, `PLAY_CARD`, `DISCARD_CARD`, `CLEAR_SELECTION`, and `END_TURN`
+- after each accepted action, the server broadcasts a fresh redacted snapshot
+- clients render from snapshots rather than from replayed deltas
 
-- Your own hand is sent with card faces.
-- The opponent hand is sent as fixed-length hidden slots.
-- Opponent hand selection is serialized as slot-level selection only.
+The underlying decision is recorded in [decision-log.md](decision-log.md).
+
+## Snapshot And Redaction Model
+
+- The backend stores full room state.
+- Each client receives a redacted view for its seat.
+- Your own hand is sent with faces; the opponent hand is sent as fixed-length hidden slots.
+- Opponent hand selection exposes only slot-level selection, not card identity.
 - Visible piles remain visible to both players.
-- The web client rotates the snapshot into the local viewer’s perspective so the existing board layout can stay stable.
+- The web client rotates the snapshot into the local viewer's perspective so the board layout can stay consistent.
 
-## AWS runtime
+The exact contract lives in [../protocols/realtime-events.md](../protocols/realtime-events.md).
 
-The multiplayer backend uses:
+## Runtime Topology
 
-- HTTP API Gateway for `POST /rooms` and `POST /rooms/join`
-- WebSocket API Gateway for live room updates
-- Lambda for the five handlers
-- DynamoDB for room state and connection tracking
-- CloudWatch Logs and basic Lambda error alarms
+The production stack is intentionally small:
 
-The stack is intentionally small because the expected concurrency is low, but it is reusable for other room-based games.
+- HTTP API Gateway for room creation and join
+- WebSocket API Gateway for live updates
+- Lambda handlers for create, join, connect, disconnect, and message handling
+- DynamoDB for room state and active connections
+- CloudWatch and Sentry for monitoring
+
+Operational bootstrap and deploy steps live in [../runbooks/opentofu-aws-realtime.md](../runbooks/opentofu-aws-realtime.md).

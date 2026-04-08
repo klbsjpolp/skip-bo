@@ -1,105 +1,94 @@
 # AGENTS.md
 
-Repo-local guidance for AI and coding agents working on this project.
+## Document Contract
 
-## Fast Commands
+- Purpose: give coding agents an executable workflow for making safe changes in this repo.
+- Audience: AI coding agents and automation operating inside the repository.
+- Source of truth: the code files and canonical docs linked from this file; if this file disagrees with code, verify the code first.
+- When to update: when architecture, source-of-truth ownership, validations, or contributor workflows change.
 
-- `pnpm dev`
-- `pnpm dev:api`
-- `pnpm build`
-- `pnpm commit`
-- `pnpm lint`
-- `pnpm release`
-- `pnpm release:dry-run`
-- `pnpm tofu:init`
-- `pnpm tofu:plan`
-- `pnpm tofu:apply`
-- `pnpm typecheck`
-- `pnpm test`
-- `pnpm test:e2e`
-- `pnpm test:e2e:ui`
-- `pnpm test:visual`
-- `pnpm test:visual:update`
+## Before Changing Code
 
-## Source of Truth
+1. Classify the change before editing anything: gameplay, turn flow, AI, UI/animation, realtime protocol, infra/deploy, or docs-only.
+2. Open [docs/architecture/source-of-truth.md](docs/architecture/source-of-truth.md) and inspect the owning code files for that domain.
+3. Read [docs/architecture/runtime-invariants.md](docs/architecture/runtime-invariants.md) before touching reducer flow, animations, AI sequencing, or online state handling.
+4. Use the change matrix below to decide which tests and docs must move with the code.
+5. If a detail appears in a section marked as likely to drift, re-check the code or workflow file instead of copying the doc text forward.
 
-- Shared game rules and state mutations live in [`packages/game-core/src/state/gameReducer.ts`](packages/game-core/src/state/gameReducer.ts).
-- Turn orchestration, start-of-turn draws, AI turns, and animation gating for local play live in [`apps/web/src/state/gameMachine.ts`](apps/web/src/state/gameMachine.ts).
-- Initial deck setup and stock-size configuration live in [`packages/game-core/src/state/initialGameState.ts`](packages/game-core/src/state/initialGameState.ts).
-- Card legality rules live in [`packages/game-core/src/lib/validators.ts`](packages/game-core/src/lib/validators.ts).
-- Local human-side interaction orchestration and human-triggered animations live in [`apps/web/src/hooks/useSkipBoGame.ts`](apps/web/src/hooks/useSkipBoGame.ts) and are re-exported by [`apps/web/src/hooks/useLocalSkipBoGame.ts`](apps/web/src/hooks/useLocalSkipBoGame.ts).
-- Online room lifecycle, turn validation, and broadcasting live in [`apps/realtime-api/src/services/roomService.ts`](apps/realtime-api/src/services/roomService.ts).
-- Online DTOs, room code handling, and redacted client views live in [`packages/multiplayer-protocol/src/index.ts`](packages/multiplayer-protocol/src/index.ts) and [`packages/multiplayer-protocol/src/views/index.ts`](packages/multiplayer-protocol/src/views/index.ts).
-- AI move selection starts in [`apps/web/src/ai/computeBestMove.ts`](apps/web/src/ai/computeBestMove.ts), with search in [`apps/web/src/ai/lookAheadStrategy.ts`](apps/web/src/ai/lookAheadStrategy.ts), discard heuristics in [`apps/web/src/ai/discardUtils.ts`](apps/web/src/ai/discardUtils.ts), and weights/delays in [`apps/web/src/ai/aiConfig.ts`](apps/web/src/ai/aiConfig.ts).
-- Dev-only static browser fixtures live in [`apps/web/src/testing/uiFixtures.ts`](apps/web/src/testing/uiFixtures.ts) and are wired in [`apps/web/src/App.tsx`](apps/web/src/App.tsx).
+## Durable Invariants To Preserve
 
-## Runtime Invariants
+Canonical wording lives in [docs/architecture/runtime-invariants.md](docs/architecture/runtime-invariants.md). Before you merge a change, confirm that you did not break these expectations:
 
-- In local AI mode, `players[0]` is the human player and `players[1]` is the AI player.
-- The UI renders the AI area first and the human area second. DOM order does not match state order, so animation code must translate between player index and rendered position.
-- Hands are fixed-length arrays. Empty slots are represented by `null`, and removing a hand card should set the slot to `null` instead of splicing the array.
-- Most card interactions are two-step: `SELECT_CARD`, then `PLAY_CARD` or `DISCARD_CARD`.
-- `selectedCard` can carry `plannedBuildPileIndex` and `plannedDiscardPileIndex`. The AI depends on those planned targets surviving between selection and resolution.
-- Skip-Bo cards can be played as wildcards but must never be discarded.
-- Completed build piles are moved into `completedBuildPiles` and reshuffled back into `deck` when more draw cards are needed.
-- Start-of-turn draws are owned by the local state machine `drawService`. `END_TURN` only flips `currentPlayerIndex`; do not add draw logic there.
-- Online rooms are always server-authoritative. The browser must treat incoming snapshots as canonical for the online mode.
-- User-visible status strings live in [`packages/game-core/src/lib/config.ts`](packages/game-core/src/lib/config.ts) and are currently French.
+- hands remain fixed-length arrays with `null` holes
+- card interactions still resolve through selection first, then play or discard
+- `selectedCard` keeps planned destinations long enough for AI resolution
+- `Skip-Bo` cards remain playable as wildcards and non-discardable
+- start-of-turn draws stay outside `END_TURN`
+- online play remains server-authoritative from the client perspective
+- local player order and rendered player order are not the same thing
 
-## Turn And Animation Model
+## Likely To Drift
 
-- The state machine drives turn flow through draw, animate, think, and resolve phases for both players.
-- Human play and discard animations are kicked off from [`apps/web/src/hooks/useSkipBoGame.ts`](apps/web/src/hooks/useSkipBoGame.ts) before dispatching the final action.
-- AI play, discard, and start-of-turn draw animations are triggered from [`apps/web/src/services/aiAnimationService.ts`](apps/web/src/services/aiAnimationService.ts) and [`apps/web/src/services/drawAnimationService.ts`](apps/web/src/services/drawAnimationService.ts).
-- [`apps/web/src/services/animationGate.ts`](apps/web/src/services/animationGate.ts) waits for both the minimum duration and the shared animation bridge, so timing changes can affect state progression as well as visuals.
-- Online opponent animations are inferred from snapshot-to-snapshot diffs inside [`apps/web/src/hooks/useOnlineSkipBoGame.ts`](apps/web/src/hooks/useOnlineSkipBoGame.ts). Do not assume network timing is the animation source of truth.
-- If you touch animation timing, DOM structure, or `.player-area` / `.center-area` assumptions, validate both human and AI turns in a real browser.
+Do not hardcode these from memory. Re-verify them in code or workflows when they matter:
 
-## AI Notes
+- exact GitHub workflow filenames, job names, and secret wiring
+- exact Node/OpenTofu version requirements
+- exact AI search depth, weights, and artificial delays
+- exact state-machine phase names
+- exact CSS selectors or DOM structure beyond the documented runtime invariants
 
-- There is no user-facing difficulty setting anymore. The app always uses the single advanced AI profile from [`apps/web/src/ai/aiConfig.ts`](apps/web/src/ai/aiConfig.ts).
-- `computeBestMove` first resolves an already selected card, using any planned destination stored on `selectedCard`.
-- If nothing is selected, `computeBestMove` runs `lookAheadEvaluation` to choose the next selection.
-- Despite the filename, [`apps/web/src/ai/lookAheadStrategy.ts`](apps/web/src/ai/lookAheadStrategy.ts) is not just a one-ply scorer. It performs a short recursive search across the AI's own turn, with a default depth of 4 from `aiConfig`.
-- The search simulates real reducer transitions via `gameReducer`, so rule changes often require corresponding AI test updates.
-- [`apps/web/src/ai/discardUtils.ts`](apps/web/src/ai/discardUtils.ts) scores both discard placement and discard-pile plays, including the value of the card revealed underneath.
-- [`apps/web/src/ai/discardStrategy.md`](apps/web/src/ai/discardStrategy.md) is design/backlog material, not runtime source of truth.
+## Change Matrix
 
-## Testing Guidance
+| Change type | Inspect first | Tests and validation | Docs to update |
+| --- | --- | --- | --- |
+| Gameplay rules or card legality | `packages/game-core/src/state/gameReducer.ts`, `packages/game-core/src/lib/validators.ts`, `packages/game-core/src/state/initialGameState.ts` | Update `packages/game-core/tests` first. If turn flow changes, also update `apps/web/src/state/__tests__`. | [docs/architecture/runtime-invariants.md](docs/architecture/runtime-invariants.md) if behavior changed, plus [docs/architecture/source-of-truth.md](docs/architecture/source-of-truth.md) if ownership moved. |
+| Local turn flow, draw flow, or animation gating | `apps/web/src/state/gameMachine.ts`, `apps/web/src/hooks/useSkipBoGame.ts`, `apps/web/src/hooks/useLocalSkipBoGame.ts`, animation services | Update `apps/web/src/state/__tests__`. Run browser validation if the board flow or animation timing changed. | [docs/architecture/runtime-invariants.md](docs/architecture/runtime-invariants.md) and [docs/runbooks/change-checklists.md](docs/runbooks/change-checklists.md). |
+| AI heuristics or search | `apps/web/src/ai/computeBestMove.ts`, `apps/web/src/ai/lookAheadStrategy.ts`, `apps/web/src/ai/discardUtils.ts`, `apps/web/src/ai/aiConfig.ts` | Update `apps/web/src/ai/__tests__`. Add state tests too if reducer assumptions changed. | [apps/web/src/ai/README.md](apps/web/src/ai/README.md). Update [docs/backlog/ai-discard-strategy.md](docs/backlog/ai-discard-strategy.md) only if roadmap or hypotheses changed. |
+| UI, fixtures, or animation presentation | Relevant components, `apps/web/src/testing/uiFixtures.ts`, animation hooks and services | Update component tests as needed. Run `pnpm test:e2e`. If fixture-visible layout changed, run `pnpm --filter @skipbo/web exec playwright test tests/ui/theme-contract.spec.ts --project=chromium-desktop`. If visuals changed intentionally, run `pnpm test:visual:update`. | [docs/runbooks/change-checklists.md](docs/runbooks/change-checklists.md) and [docs/architecture/runtime-invariants.md](docs/architecture/runtime-invariants.md) if player-order or animation assumptions changed. |
+| Realtime room lifecycle or protocol | `apps/realtime-api/src/services/roomService.ts`, `packages/multiplayer-protocol/src/index.ts`, `packages/multiplayer-protocol/src/views/index.ts` | Update `apps/realtime-api/tests` and `packages/multiplayer-protocol/tests`. Run a two-browser smoke test when behavior changed. | [docs/protocols/realtime-events.md](docs/protocols/realtime-events.md), [docs/architecture/online-multiplayer.md](docs/architecture/online-multiplayer.md), and the decision log if the architecture changed. |
+| Infra, deploy, or release flow | `infra/terraform/**`, `.github/workflows/*.yml`, `package.json`, `.versionrc.json` | Run `pnpm tofu:fmt`, `pnpm --dir infra/terraform validate:offline:prod`, and rebuild the realtime API if packaging changed. | [docs/runbooks/opentofu-aws-realtime.md](docs/runbooks/opentofu-aws-realtime.md), [infra/terraform/README.md](infra/terraform/README.md), and [docs/monitoring/SENTRY_AWS_INTEGRATION.md](docs/monitoring/SENTRY_AWS_INTEGRATION.md) if monitoring changed. |
+| Documentation structure or agent guidance | [docs/documentation-standards.md](docs/documentation-standards.md), [docs/README.md](docs/README.md), this file | Manually verify links and section roles. | Update the affected docs together; do not move one doc role without updating the index and standards doc. |
 
-- Shared rule changes should usually update tests under [`apps/web/src/state/__tests__`](apps/web/src/state/__tests__) and any package-level tests under [`packages/game-core/tests`](packages/game-core/tests) or [`packages/multiplayer-protocol/tests`](packages/multiplayer-protocol/tests).
-- AI heuristic or search changes should usually update tests under [`apps/web/src/ai/__tests__`](apps/web/src/ai/__tests__).
-- Card rendering and interaction changes should usually update tests under [`apps/web/src/components/__tests__`](apps/web/src/components/__tests__).
-- Backend room lifecycle changes should usually update tests under [`apps/realtime-api/tests`](apps/realtime-api/tests).
-- Theme, layout, and accessibility regressions should usually update Playwright coverage under [`apps/web/tests/ui`](apps/web/tests/ui).
-- [`apps/web/tests/ui/helpers.ts`](apps/web/tests/ui/helpers.ts) is the shared entrypoint for fixture navigation, theme seeding, overflow checks, and conditional screenshot assertions.
-- Desktop visual baselines are Chromium snapshots stored under `apps/web/tests/ui/*.spec.ts-snapshots/` and typically committed through Git LFS.
-- If you change shared board layout or fixture-visible UI (especially [`apps/web/src/components/CenterArea.tsx`](apps/web/src/components/CenterArea.tsx), [`apps/web/src/testing/uiFixtures.ts`](apps/web/src/testing/uiFixtures.ts), or anything that affects the `ready-human` fixture), run `pnpm --filter @skipbo/web exec playwright test tests/ui/theme-contract.spec.ts --project=chromium-desktop` before finishing.
-- If that theme-contract suite fails across many or all themes at once, inspect one generated diff under `apps/web/test-results/` before assuming a product bug. Broad, same-shape screenshot failures usually mean the committed baselines need to be refreshed for an intentional UI change.
-- When the visual change is intentional, update the committed Playwright baselines with `pnpm test:visual:update` and include the snapshot changes in the same task instead of leaving CI red.
-- Playwright projects collect tests by `@desktop` and `@mobile` tags so desktop-only cases are not materialized as skips on the mobile project.
-- Screenshot assertions intentionally return early when the baseline file is missing, so functional checks can still run on branches without snapshot payloads.
+## Mandatory Validations
 
-## Useful Debug Hooks
+Use this decision tree, not guesswork:
 
-- `?aiHand=` can force the AI hand in the live draw service for local debugging. Supported formats include `1,2,3,4,5`, `1-2-3-4-5`, and `[1,2,3,4,5]`.
-- `?fixture=` enables deterministic UI fixtures in development only. Supported values are `ready-human`, `selected-hand`, `ai-turn`, and `victory-human`.
-- Fixture mode swaps the app into a static shell in [`apps/web/src/App.tsx`](apps/web/src/App.tsx), so it is appropriate for UI review and Playwright, not for reducer or state-machine debugging.
-- Stock pile size is persisted in local storage under `skipbo_stock_size`. [`apps/web/src/components/StockPileSizeSwitcher.tsx`](apps/web/src/components/StockPileSizeSwitcher.tsx) updates it, and new games read it through [`packages/game-core/src/state/initialGameState.ts`](packages/game-core/src/state/initialGameState.ts).
+- If reducer legality changed, update `packages/game-core/tests` first.
+- If the change also affects turn progression, draw timing, or state-machine sequencing, update `apps/web/src/state/__tests__` too.
+- If AI scoring, search, or discard logic changed, update `apps/web/src/ai/__tests__`.
+- If any visible board behavior changed, run `pnpm test:e2e`.
+- If the change touches shared board layout, fixture-visible UI, `.player-area`, `.center-area`, or `ready-human`, run `pnpm --filter @skipbo/web exec playwright test tests/ui/theme-contract.spec.ts --project=chromium-desktop`.
+- If the UI change is intentional and broad screenshot diffs are expected, refresh the baselines with `pnpm test:visual:update` in the same change.
+- If DTOs, redaction rules, room codes, or WebSocket message shapes changed, update `packages/multiplayer-protocol/tests` and `apps/realtime-api/tests`.
+- If infra or workflow behavior changed, run `pnpm tofu:fmt` and `pnpm --dir infra/terraform validate:offline:prod`.
+- For zone-specific checklists, use [docs/runbooks/change-checklists.md](docs/runbooks/change-checklists.md).
 
-## Documentation Maintenance
+## Do Not Change Without Updating
 
-- Keep [`README.md`](README.md), [`apps/web/src/ai/README.md`](apps/web/src/ai/README.md), [`AGENTS.md`](AGENTS.md), and the `docs/` multiplayer notes aligned when architecture changes.
-- When gameplay rules change, update the source-of-truth code first, then update docs and tests together.
-- Avoid documenting removed features as if they still exist. In particular, do not reintroduce difficulty-mode language unless the runtime feature returns.
-- Avoid listing dependencies or features in the README unless they are actually used by gameplay or the app shell.
+- Do not change runtime invariants without updating [docs/architecture/runtime-invariants.md](docs/architecture/runtime-invariants.md).
+- Do not change source ownership or responsibility boundaries without updating [docs/architecture/source-of-truth.md](docs/architecture/source-of-truth.md).
+- Do not change realtime contracts without updating [docs/protocols/realtime-events.md](docs/protocols/realtime-events.md).
+- Do not change multiplayer architecture assumptions without updating [docs/architecture/online-multiplayer.md](docs/architecture/online-multiplayer.md) and [docs/architecture/decision-log.md](docs/architecture/decision-log.md) when the decision itself changed.
+- Do not change infra or deploy workflows without updating [docs/runbooks/opentofu-aws-realtime.md](docs/runbooks/opentofu-aws-realtime.md) and [infra/terraform/README.md](infra/terraform/README.md).
+- Do not treat backlog notes as runtime truth. Exploratory material belongs under [docs/backlog/README.md](docs/backlog/README.md).
 
-## Commit And Release Workflow
+## Common Traps
 
-- Commit messages use the Angular conventional-commit format and are validated by the Husky `commit-msg` hook through [`commitlint.config.cjs`](commitlint.config.cjs).
-- Keep the full commit header (`type(scope): subject`) at 72 characters or fewer to satisfy the enforced `header-max-length` rule.
-- Use `pnpm commit` for the interactive Commitizen prompt when hand-writing the message is slower or error-prone.
-- Semver releases are cut with `pnpm release`, which uses the Angular preset from [`.versionrc.json`](.versionrc.json) to update `package.json`, generate `CHANGELOG.md`, create a release commit, and create a `v<version>` tag.
-- `feat:` maps to a minor bump, `fix:` maps to a patch bump, and `!` or `BREAKING CHANGE:` maps to a major bump.
-- Pushes to `main` also trigger the release flow in [`.github/workflows/deploy-web.yml`](.github/workflows/deploy-web.yml), which creates the release commit and tag, publishes the GitHub Release, and deploys GitHub Pages from that release commit.
-- Use `pnpm release:first` for the first tagged release in this repo and `pnpm release:dry-run` to preview the next computed version.
+- `players[0]` and `players[1]` are state order; the rendered board order is different.
+- `END_TURN` is not the place to add start-of-turn draw logic.
+- Removing a hand card means writing `null`, not splicing.
+- The browser must treat online snapshots as canonical.
+- `apps/web/src/ai/README.md` is stable module guidance; `docs/backlog/*` is non-normative.
+- If a doc sounds descriptive but you need an implementation detail, check the owning code file before acting.
+
+## Definition Of Done For Agents
+
+Before finishing, confirm all of the following:
+
+- You inspected the source-of-truth files for the changed domain.
+- You preserved the runtime invariants or updated their canonical doc.
+- You ran every validation required by the change matrix or explicitly reported what you could not run.
+- You updated contracts, runbooks, or backlog docs when the change affected them.
+- You did not copy likely-to-drift details into a stable doc without re-verifying them.
+- You checked moved or renamed Markdown links after editing.
+- You left the repo in a state where another agent can find the current truth quickly.

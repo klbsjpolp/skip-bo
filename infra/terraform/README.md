@@ -1,32 +1,26 @@
 # OpenTofu Infrastructure
 
-This directory manages the AWS multiplayer backend for Skip-Bo with OpenTofu.
+## Document Contract
+
+- Purpose: orient contributors inside the OpenTofu directory and point to the operational runbook.
+- Audience: contributors and agents changing AWS infrastructure or deployment wiring.
+- Source of truth: `infra/terraform/**`, especially `envs/prod` and `modules/*`.
+- When to update: when directory layout, day-to-day commands, or infra ownership changes.
+
+This directory owns the production AWS infrastructure for the realtime backend. Use the runbook for step-by-step operations and this file for directory-level orientation.
 
 ## Layout
 
 - `modules/dynamodb`: room and connection tables
 - `modules/iam`: Lambda execution role and data-plane policies
 - `modules/realtime_api`: Lambda functions plus HTTP and WebSocket API Gateway resources
-- `modules/monitoring`: CloudWatch alarms for Lambda, DynamoDB, and API Gateway (integrates with Sentry via SNS).
-- `envs/prod`: the production environment wiring those modules together
+- `modules/monitoring`: CloudWatch alarms and monitoring wiring
+- `envs/prod`: production environment composition
+- `scripts/validate-offline-prod.sh`: offline validation wrapper used by CI and local checks
 
-## Bootstrap
+## Daily Commands
 
-The production environment expects a pre-created remote-state bucket and lock table. The backend is intentionally left as an empty `s3` block so credentials and state names can be injected per environment.
-
-Example init command:
-
-```bash
-tofu -chdir=infra/terraform/envs/prod init \
-  -backend-config="bucket=skipbo-opentofu-state" \
-  -backend-config="key=prod/opentofu.tfstate" \
-  -backend-config="region=ca-central-1" \
-  -backend-config="dynamodb_table=skipbo-opentofu-locks"
-```
-
-## Day-to-day commands
-
-Build the backend bundle first, because OpenTofu packages `apps/realtime-api/dist` into the Lambda zip artifact:
+Build the realtime API bundle first when Lambda packaging inputs changed:
 
 ```bash
 pnpm --filter @skipbo/realtime-api build
@@ -41,18 +35,8 @@ Apply after reviewing the plan:
 pnpm tofu:apply
 ```
 
-## Environment variables
+## Related Docs
 
-The web app needs the deployed HTTP API base URL at build time:
-
-```bash
-VITE_SKIPBO_API_URL=https://<http-api-id>.execute-api.ca-central-1.amazonaws.com
-```
-
-The Lambda functions receive their room table, connection table, and WebSocket endpoint settings directly from OpenTofu.
-
-Backend Sentry monitoring is optional. You can enable it by passing `sentry_dsn`, plus optional `sentry_release` and `sentry_traces_sample_rate`, through `terraform.tfvars`, `-var`, or `TF_VAR_...` environment variables.
-
-See [Sentry AWS Integration](../../docs/monitoring/SENTRY_AWS_INTEGRATION.md) for more details on connecting AWS resources to Sentry.
-
-The production HTTP API defaults to `allowed_origins = ["*"]` because the multiplayer endpoints do not use cookies or browser credentials, and local Vite dev ports can vary between runs.
+- [../../docs/runbooks/opentofu-aws-realtime.md](../../docs/runbooks/opentofu-aws-realtime.md)
+- [../../docs/architecture/source-of-truth.md](../../docs/architecture/source-of-truth.md)
+- [../../docs/monitoring/SENTRY_AWS_INTEGRATION.md](../../docs/monitoring/SENTRY_AWS_INTEGRATION.md)

@@ -1,6 +1,19 @@
 # Realtime Event Protocol
 
-## Room codes
+## Document Contract
+
+- Purpose: define the current HTTP and WebSocket contracts for online rooms.
+- Audience: contributors and agents changing online DTOs, room codes, or client/server message handling.
+- Source of truth: `packages/multiplayer-protocol/src/index.ts`, `packages/multiplayer-protocol/src/views/index.ts`, and backend enforcement in `apps/realtime-api/src/services/roomService.ts`.
+- When to update: when any request shape, response shape, room-code rule, WebSocket message, or redaction rule changes.
+
+## Related Docs
+
+- [../architecture/online-multiplayer.md](../architecture/online-multiplayer.md)
+- [../architecture/source-of-truth.md](../architecture/source-of-truth.md)
+- [../runbooks/opentofu-aws-realtime.md](../runbooks/opentofu-aws-realtime.md)
+
+## Room Codes
 
 - Length: `5`
 - Alphabet: Crockford base32
@@ -10,7 +23,7 @@
   - `O/o -> 0`
   - `I/i/L/l -> 1`
 
-## HTTP endpoints
+## HTTP Endpoints
 
 ### `POST /rooms`
 
@@ -40,7 +53,7 @@ Request:
 
 Response matches the create payload, with `seatIndex` equal to `1`.
 
-## WebSocket client messages
+## WebSocket Client Messages
 
 ### `auth`
 
@@ -76,7 +89,7 @@ Sent first after opening the socket.
 }
 ```
 
-## WebSocket server messages
+## WebSocket Server Messages
 
 ### `snapshot`
 
@@ -126,7 +139,7 @@ Used for seat-connect and seat-disconnect updates.
 }
 ```
 
-## Redaction rules
+## Redaction Rules
 
 - Opponent hand cards are never serialized.
 - Opponent selection from hand exposes only the selected slot.

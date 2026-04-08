@@ -1,14 +1,45 @@
 # OpenTofu AWS Realtime Runbook
 
-## One-time bootstrap
+## Document Contract
 
-Create the remote-state infrastructure once outside this stack:
+- Purpose: describe how to bootstrap, validate, and deploy the AWS realtime backend with OpenTofu.
+- Audience: contributors and agents operating the Skip-Bo realtime backend.
+- Source of truth: `infra/terraform/**`, `.github/workflows/ci.yml`, and `.github/workflows/deploy.yml`.
+- When to update: when backend infrastructure, deployment workflows, secrets, or validation steps change.
+
+## Related Docs
+
+- [../architecture/online-multiplayer.md](../architecture/online-multiplayer.md)
+- [../protocols/realtime-events.md](../protocols/realtime-events.md)
+- [../../infra/terraform/README.md](../../infra/terraform/README.md)
+- [../monitoring/SENTRY_AWS_INTEGRATION.md](../monitoring/SENTRY_AWS_INTEGRATION.md)
+
+## Preconditions
+
+- `pnpm install` has been run at the repo root.
+- OpenTofu is installed locally if you are planning or applying from your machine.
+- AWS credentials or an assumable role are available for the target account.
+- The realtime API bundle can be built locally.
+
+## Inputs
+
+- remote-state backend settings for `infra/terraform/envs/prod/backend.hcl`
+- `AWS_OPENTOFU_ROLE_ARN` or `AWS_DEPLOY_ROLE_ARN` for GitHub Actions
+- `VITE_SKIPBO_API_URL` for frontend deployment after backend rollout
+- optional `VITE_SENTRY_DSN`
+- optional `TF_VAR_sentry_dsn` and `TF_VAR_sentry_release` for local plan or apply
+
+## Steps
+
+### One-Time Bootstrap
+
+Create the remote-state infrastructure outside this stack:
 
 - S3 bucket for OpenTofu state
 - DynamoDB table for state locking
-- An IAM role GitHub Actions can assume with OpenTofu permissions
+- an IAM role that GitHub Actions can assume for OpenTofu operations
 
-Store the backend configuration as a GitHub secret named `TOFU_BACKEND_CONFIG_HCL`. Example payload:
+Store the backend configuration as the GitHub secret `TOFU_BACKEND_CONFIG_HCL`. Example payload:
 
 ```hcl
 bucket         = "skipbo-opentofu-state"
@@ -20,9 +51,7 @@ encrypt        = true
 
 Store the deployment role ARN as `AWS_OPENTOFU_ROLE_ARN`.
 
-To enable backend Sentry in the production apply workflow, make sure `VITE_SENTRY_DSN` is available to that workflow too. The workflow will attach `v<package.json version>` as the Sentry release automatically.
-
-## Local plan flow
+### Local Plan
 
 ```bash
 pnpm install
@@ -37,7 +66,7 @@ TF_VAR_sentry_release=v$(node -p 'require("./package.json").version') \
 pnpm tofu:plan
 ```
 
-## Local apply flow
+### Local Apply
 
 ```bash
 pnpm --filter @skipbo/realtime-api build
@@ -46,19 +75,30 @@ TF_VAR_sentry_release=v$(node -p 'require("./package.json").version') \
 pnpm tofu:apply
 ```
 
-## GitHub Actions flow
+### GitHub Actions Deploy
 
-- `ci.yml` runs offline OpenTofu format, validate, and plan checks.
-- `deploy-aws.yml` reruns those checks for backend changes.
-- Manual production apply happens through `deploy-aws.yml` with `apply=true`.
-- Protect the `aws-prod` environment with required reviewers if you want GitHub to enforce manual approval before apply.
+- `ci.yml` runs workspace checks and offline OpenTofu validation.
+- `deploy.yml` creates the release commit and tag, deploys the backend when needed, rebuilds the frontend with runtime config, deploys GitHub Pages, and publishes the GitHub release.
+- Backend deploy uses `TOFU_BACKEND_CONFIG_HCL` plus `AWS_OPENTOFU_ROLE_ARN` or `AWS_DEPLOY_ROLE_ARN`.
 
-## After deployment
+## Validation
 
-1. Copy the `http_api_url` OpenTofu output into the `VITE_SKIPBO_API_URL` GitHub secret used by the web deployment workflow.
-2. Redeploy the web app so the workflow rewrites `apps/web/public/runtime-config.json` with the live backend URL.
-3. Open two browsers, create a room, join it with the second browser, and confirm:
-   - room code display
-   - live selection sync
-   - hidden opponent hand
-   - replay creating a fresh online room
+1. Read the OpenTofu outputs and capture `http_api_url`.
+2. Ensure the repository secret `VITE_SKIPBO_API_URL` points at that URL before rebuilding or redeploying the frontend.
+3. Open two browser sessions.
+4. Create a room in one browser and join it from the other.
+5. Confirm room-code display, live selection sync, hidden opponent hand, and replay creating a fresh online room.
+
+## Rollback
+
+- If a bad infra change has not been applied yet, stop at plan review and fix the configuration.
+- If a bad apply has already happened, revert the infra change in git, rebuild the realtime API if packaging inputs changed, and run a fresh plan and apply.
+- If the backend URL changed unexpectedly, update `VITE_SKIPBO_API_URL` and redeploy the frontend so `apps/web/public/runtime-config.json` is regenerated from the current value.
+
+## Failure Modes
+
+- Missing or incorrect `backend.hcl` settings prevent OpenTofu from initializing remote state.
+- Skipping the realtime API build can package stale Lambda artifacts.
+- Missing AWS role secrets break GitHub Actions deployment.
+- Forgetting to refresh `VITE_SKIPBO_API_URL` leaves the frontend pointed at the wrong backend.
+- Missing Sentry variables disables backend release tagging and monitoring integration.
