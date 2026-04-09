@@ -182,14 +182,12 @@
         var(--card-front-color);
 
       .card-corner-number {
-        top: 10px;
-        left: 10px;
+        @apply top-1 left-1 text-xs md:text-sm md:top-1.5 md:left-1.5;
       }
 
       /* Panel seams for number cards (avoid Skip-Bo frame which has its own mask) */
       .card-inner-2::before {
-        content: "";
-        position: absolute;
+        @apply absolute content-[''] pointer-events-none z-0;
         inset: 6% 5%;
         border-radius: calc(var(--card-radius) - 4px);
         /* cross seams */
@@ -197,24 +195,17 @@
           inset 0 0 0 2px rgba(107,86,64,0.45),
           inset 0 10px 18px rgba(0,0,0,0.12),
           inset 0 -10px 18px rgba(0,0,0,0.15);
-        pointer-events: none;
-        z-index: 0;
       }
 
       /* Rivets on corners (and mid-seam points) for all card fronts */
       .card-inner::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
+        @apply absolute content-[''] pointer-events-none z-0 inset-0 rounded-[inherit];
         /* small domed rivet */
         --riv: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.75) 22%, rgba(0,0,0,0.55) 23%, rgba(0,0,0,0.55) 60%, transparent 61%);
         background:
           /* midpoints along seams if present */
           var(--riv) 50% 12px / 10px 10px no-repeat,
           var(--riv) 50% calc(100% - 12px) / 10px 10px no-repeat;
-        pointer-events: none;
-        z-index: 0; /* stays below text (which is z=1 in .card-inner) */
       }
 
       /* Subtle compass rose behind numbers (from snippet idea) */
