@@ -92,6 +92,7 @@ const CardComponent: React.FC<CardProps> = ({
     isRevealed ? <>
       <div className='card-inner'></div>
       <div className='card-inner-2'></div>
+      <span className='card-corner-inset' aria-hidden='true'></span>
       <span className='card-corner-number'>{value}</span>
       <span>{value}</span>
     </> : <div className='back'></div>

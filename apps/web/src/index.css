@@ -701,13 +701,30 @@
   background: var(--card-back-bg, var(--card-back-color));
 }
 
+@utility normal-card {
+  @apply isolate;
+
+  .card-inner,
+  .card-inner-2 {
+    @apply z-1;
+  }
+
+  > span:not(.card-corner-number):not(.card-corner-inset) {
+    @apply relative z-2;
+  }
+}
+
 @utility placeholder {
   @apply cursor-pointer w-(--card-width) card-height rounded-(--card-radius) text-(--card-border-color)
     flex items-center justify-center border-[2px_dashed_var(--card-border-color)];
 }
 
 @utility card-corner-number {
-  @apply absolute top-0.5 lg:top-1 left-1 lg:left-1.5 text-xs font-bold invisible lg:visible;
+  @apply absolute top-0.5 lg:top-1 left-1 lg:left-1.5 text-xs font-bold invisible lg:visible z-4;
+}
+
+@utility card-corner-inset {
+  @apply absolute top-0 left-0 z-2;
 }
 
 .discard-pile-stack .card:not(:last-child) .card-corner-number {
