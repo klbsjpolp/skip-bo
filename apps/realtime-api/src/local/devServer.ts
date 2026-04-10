@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import type { AddressInfo } from 'node:net';
 
 import { ZodError } from 'zod';
 import type { RawData } from 'ws';
@@ -59,9 +58,10 @@ export interface LocalRealtimeDevServer {
 
 const readJsonBody = async (request: IncomingMessage): Promise<unknown> => {
   const chunks: Buffer[] = [];
+  const requestStream = request as AsyncIterable<Buffer | string>;
 
-  for await (const chunk of request) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  for await (const chunk of requestStream) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk, 'utf8') : chunk);
   }
 
   if (chunks.length === 0) {
@@ -88,8 +88,24 @@ const sendNoContent = (response: ServerResponse): void => {
   response.end();
 };
 
+const rawDataToString = (data: RawData): string => {
+  if (typeof data === 'string') {
+    return data;
+  }
+
+  if (Buffer.isBuffer(data)) {
+    return data.toString('utf8');
+  }
+
+  if (Array.isArray(data)) {
+    return Buffer.concat(data).toString('utf8');
+  }
+
+  return Buffer.from(data).toString('utf8');
+};
+
 const parseClientMessage = (data: RawData): ClientMessage => {
-  const body = typeof data === 'string' ? data : data.toString();
+  const body = rawDataToString(data);
   return clientMessageSchema.parse(JSON.parse(body));
 };
 
@@ -115,69 +131,71 @@ export const startLocalRealtimeDevServer = async (
     websocketUrl: overrideWebsocketUrl ?? websocketUrl,
   });
 
-  const httpServer = createServer(async (request, response) => {
-    if (!request.url) {
-      sendJson(response, 400, { message: 'Missing request URL' });
-      return;
-    }
+  const httpServer = createServer((request, response) => {
+    void (async () => {
+      if (!request.url) {
+        sendJson(response, 400, { message: 'Missing request URL' });
+        return;
+      }
 
-    if (request.method === 'OPTIONS') {
-      sendNoContent(response);
-      return;
-    }
+      if (request.method === 'OPTIONS') {
+        sendNoContent(response);
+        return;
+      }
 
-    const requestUrl = new URL(request.url, `http://${request.headers.host ?? `${publicHost}:${resolvedPort}`}`);
+      const requestUrl = new URL(request.url, `http://${request.headers.host ?? `${publicHost}:${resolvedPort}`}`);
 
-    try {
-      if (request.method === 'GET' && requestUrl.pathname === '/health') {
-        sendJson(response, 200, {
-          status: 'ok',
-          wsUrl: websocketUrl,
+      try {
+        if (request.method === 'GET' && requestUrl.pathname === '/health') {
+          sendJson(response, 200, {
+            status: 'ok',
+            wsUrl: websocketUrl,
+          });
+          return;
+        }
+
+        if (request.method === 'POST' && requestUrl.pathname === '/rooms') {
+          const body = createRoomRequestSchema.parse(await readJsonBody(request));
+          const requestWsUrl = `ws://${request.headers.host ?? `${publicHost}:${resolvedPort}`}${WS_PATH}`;
+          const room = await createRoom(createDependencies(requestWsUrl), body);
+          sendJson(response, 201, room);
+          return;
+        }
+
+        if (request.method === 'POST' && requestUrl.pathname === '/rooms/join') {
+          const body = joinRoomRequestSchema.parse(await readJsonBody(request));
+          const requestWsUrl = `ws://${request.headers.host ?? `${publicHost}:${resolvedPort}`}${WS_PATH}`;
+          const room = await joinRoom(createDependencies(requestWsUrl), body);
+          sendJson(response, 200, room);
+          return;
+        }
+
+        sendJson(response, 404, { message: 'Not found' });
+      } catch (error) {
+        if (error instanceof SyntaxError) {
+          sendJson(response, 400, { message: 'Invalid JSON body' });
+          return;
+        }
+
+        if (error instanceof ZodError) {
+          sendJson(response, 400, { message: error.message });
+          return;
+        }
+
+        if (isClientError(error)) {
+          sendJson(response, error.statusCode, { message: error.message });
+          return;
+        }
+
+        captureBackendException(error, {
+          handler: 'local-dev-http',
+          route: `${request.method ?? 'UNKNOWN'} ${requestUrl.pathname}`,
+          transport: 'http',
         });
-        return;
+
+        sendJson(response, 500, { message: error instanceof Error ? error.message : 'Unknown error' });
       }
-
-      if (request.method === 'POST' && requestUrl.pathname === '/rooms') {
-        const body = createRoomRequestSchema.parse(await readJsonBody(request));
-        const requestWsUrl = `ws://${request.headers.host ?? `${publicHost}:${resolvedPort}`}${WS_PATH}`;
-        const room = await createRoom(createDependencies(requestWsUrl), body);
-        sendJson(response, 201, room);
-        return;
-      }
-
-      if (request.method === 'POST' && requestUrl.pathname === '/rooms/join') {
-        const body = joinRoomRequestSchema.parse(await readJsonBody(request));
-        const requestWsUrl = `ws://${request.headers.host ?? `${publicHost}:${resolvedPort}`}${WS_PATH}`;
-        const room = await joinRoom(createDependencies(requestWsUrl), body);
-        sendJson(response, 200, room);
-        return;
-      }
-
-      sendJson(response, 404, { message: 'Not found' });
-    } catch (error) {
-      if (error instanceof SyntaxError) {
-        sendJson(response, 400, { message: 'Invalid JSON body' });
-        return;
-      }
-
-      if (error instanceof ZodError) {
-        sendJson(response, 400, { message: error.message });
-        return;
-      }
-
-      if (isClientError(error)) {
-        sendJson(response, error.statusCode, { message: error.message });
-        return;
-      }
-
-      captureBackendException(error, {
-        handler: 'local-dev-http',
-        route: `${request.method ?? 'UNKNOWN'} ${requestUrl.pathname}`,
-        transport: 'http',
-      });
-
-      sendJson(response, 500, { message: error instanceof Error ? error.message : 'Unknown error' });
-    }
+    })();
   });
 
   const websocketServer = new WebSocketServer({ noServer: true });
@@ -276,7 +294,7 @@ export const startLocalRealtimeDevServer = async (
     throw new Error('Failed to resolve local dev server address');
   }
 
-  resolvedPort = (address as AddressInfo).port;
+  resolvedPort = address.port;
   websocketUrl = `ws://${publicHost}:${resolvedPort}${WS_PATH}`;
   const httpUrl = `http://${publicHost}:${resolvedPort}`;
 
