@@ -117,6 +117,19 @@ const buildUpdatedRoom = (room: RoomRecord, overrides: Partial<RoomRecord>): Roo
   };
 };
 
+const isStaleConnectionError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const candidate = error as {
+    $metadata?: { httpStatusCode?: number };
+    name?: string;
+  };
+
+  return candidate.name === 'GoneException' || candidate.$metadata?.httpStatusCode === 410;
+};
+
 const getAuthenticatedConnection = async (
   dependencies: RoomServiceDependencies,
   connectionId: string,
@@ -311,9 +324,17 @@ export const rejectAction = async (
   connectionId: string,
   message: string,
 ): Promise<void> => {
-  await dependencies.broadcaster.send(connectionId, {
-    code: 'invalid_action',
-    reason: message,
-    type: 'actionRejected',
-  });
+  try {
+    await dependencies.broadcaster.send(connectionId, {
+      code: 'invalid_action',
+      reason: message,
+      type: 'actionRejected',
+    });
+  } catch (error) {
+    if (!isStaleConnectionError(error)) {
+      throw error;
+    }
+
+    await dependencies.connectionRepository.delete(connectionId);
+  }
 };

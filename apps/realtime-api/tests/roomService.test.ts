@@ -4,7 +4,7 @@ import type { ServerMessage } from '@skipbo/multiplayer-protocol';
 
 import type { ConnectionRecord, ConnectionRepository, RoomRecord, RoomRepository } from '../src/repositories/types.js';
 import type { RealtimeBroadcaster } from '../src/services/broadcaster.js';
-import { authenticateConnection, createRoom, handleAction, joinRoom } from '../src/services/roomService.js';
+import { authenticateConnection, createRoom, handleAction, joinRoom, rejectAction } from '../src/services/roomService.js';
 
 class InMemoryRoomRepository implements RoomRepository {
   readonly rooms = new Map<string, RoomRecord>();
@@ -71,8 +71,15 @@ class EventuallyConsistentConnectionRepository extends InMemoryConnectionReposit
 
 class FakeBroadcaster implements RealtimeBroadcaster {
   readonly sent: Array<{ connectionId: string; message: ServerMessage }> = [];
+  readonly failureByConnectionId = new Map<string, unknown>();
 
   async send(connectionId: string, message: ServerMessage): Promise<void> {
+    const failure = this.failureByConnectionId.get(connectionId);
+
+    if (failure !== undefined) {
+      throw failure;
+    }
+
     this.sent.push({ connectionId, message });
   }
 }
@@ -168,5 +175,31 @@ describe('roomService', () => {
     expect(room?.status).toBe('ACTIVE');
     expect(room?.authenticatedSeats).toEqual([0, 1]);
     expect(room?.state.selectedCard?.source).toBe('hand');
+  });
+
+  it('drops a stale connection when rejecting an action to a closed socket', async () => {
+    const dependencies = createDependencies();
+    await dependencies.connectionRepository.put({
+      connectedAt: new Date('2026-04-08T22:25:45.000Z').toISOString(),
+      connectionId: 'gone-connection',
+      roomCode: 'ABCDE',
+      seatIndex: 0,
+      updatedAt: new Date('2026-04-08T22:25:45.000Z').toISOString(),
+    });
+
+    dependencies.broadcaster.failureByConnectionId.set('gone-connection', {
+      $metadata: { httpStatusCode: 410 },
+      name: 'GoneException',
+    });
+
+    await expect(rejectAction(dependencies, 'gone-connection', 'Invalid action')).resolves.toBeUndefined();
+    await expect(dependencies.connectionRepository.get('gone-connection')).resolves.toBeNull();
+  });
+
+  it('still surfaces non-stale broadcaster failures while rejecting an action', async () => {
+    const dependencies = createDependencies();
+    dependencies.broadcaster.failureByConnectionId.set('c-1', new Error('transport offline'));
+
+    await expect(rejectAction(dependencies, 'c-1', 'Invalid action')).rejects.toThrow('transport offline');
   });
 });
