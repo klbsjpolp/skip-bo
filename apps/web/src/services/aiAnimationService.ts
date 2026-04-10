@@ -1,6 +1,7 @@
 import type { GameState, Card } from '@/types';
 import type { GameAction } from '@/state/gameActions';
 import {
+  getDiscardTopCardPosition,
   getHandCardPosition,
   getStockCardPosition,
   getBuildPilePosition,
@@ -94,7 +95,7 @@ export const triggerAIAnimation = async (
       } else if (gameState.selectedCard.source === 'discard') {
         const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
         if (discardContainer && gameState.selectedCard.discardPileIndex !== undefined) {
-          startPosition = getNextDiscardCardPosition(discardContainer, gameState.selectedCard.discardPileIndex);
+          startPosition = getDiscardTopCardPosition(discardContainer, gameState.selectedCard.discardPileIndex);
         }
       }
 

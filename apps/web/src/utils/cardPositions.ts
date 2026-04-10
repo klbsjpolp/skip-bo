@@ -26,6 +26,13 @@ export const getHandCardPosition = (
   handContainer: HTMLElement,
   cardIndex: number,
 ): CardPosition => {
+  const holderElement = handContainer.querySelector<HTMLElement>(`[data-card-index="${cardIndex}"]`);
+  const cardElement = holderElement?.querySelector<HTMLElement>('.card.selected, .card');
+
+  if (cardElement) {
+    return getElementCenter(cardElement);
+  }
+
   const rect = handContainer.getBoundingClientRect();
   const offset = [4, -3, -5, -3, 4][cardIndex];
 
@@ -125,6 +132,29 @@ export const getHandCardAngle = (
 };
 
 /**
+ * Get the top card center for a discard pile.
+ */
+export const getDiscardTopCardPosition = (
+  discardContainer: HTMLElement,
+  pileIndex: number
+): CardPosition => {
+  const pileElement = discardContainer.querySelector<HTMLElement>(`[data-pile-index="${pileIndex}"]`);
+  if (!pileElement) {
+    return getElementCenter(discardContainer);
+  }
+
+  const allCards = Array.from(pileElement.querySelectorAll<HTMLElement>('.card'));
+  const realCards = allCards.filter((el) => !el.classList.contains('opacity-50'));
+
+  if (realCards.length === 0) {
+    const placeholder = allCards[0];
+    return placeholder ? getElementCenter(placeholder) : getElementCenter(pileElement);
+  }
+
+  return getElementCenter(realCards[realCards.length - 1]);
+};
+
+/**
  * Get the position where the next card should land on a discard pile (accounts for stacked offset)
  */
 export const getNextDiscardCardPosition = (
@@ -148,8 +178,7 @@ export const getNextDiscardCardPosition = (
     return placeholder ? getElementCenter(placeholder) : getElementCenter(pileElement);
   }
 
-  const topCard = realCards[realCards.length - 1];
-  const topCenter = getElementCenter(topCard);
+  const topCenter = getElementCenter(realCards[realCards.length - 1]);
   const styles = window.getComputedStyle(pileElement);
   const diffStr = styles.getPropertyValue('--stack-diff');
   const stackDiff = parseFloat(diffStr.replace('px', '').trim());

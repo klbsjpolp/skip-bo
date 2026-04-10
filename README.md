@@ -36,11 +36,21 @@ pnpm dev
 ```
 
 Open [http://localhost:5173](http://localhost:5173).
+This starts the frontend only.
 
 ### Run the realtime API locally
 
 ```bash
 pnpm dev:api
+```
+
+The local API listens on `http://127.0.0.1:8787` by default and exposes WebSocket upgrades on `/ws`.
+Use `SKIPBO_LOCAL_API_HOST`, `SKIPBO_LOCAL_API_PORT`, and `SKIPBO_LOCAL_API_PUBLIC_HOST` to override the bind or advertised address.
+
+To exercise online play against the local backend, run the web app in a second terminal with:
+
+```bash
+VITE_SKIPBO_API_URL=http://127.0.0.1:8787 pnpm dev
 ```
 
 ## Common Commands
@@ -58,6 +68,12 @@ pnpm dev:api
 ## Environment Notes
 
 The web app only needs backend configuration when you want to exercise online play locally:
+
+```bash
+VITE_SKIPBO_API_URL=http://127.0.0.1:8787
+```
+
+For a deployed backend, set it to your HTTP API base URL instead:
 
 ```bash
 VITE_SKIPBO_API_URL=https://<http-api-id>.execute-api.ca-central-1.amazonaws.com

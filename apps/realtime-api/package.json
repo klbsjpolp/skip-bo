@@ -18,10 +18,12 @@
     "@sentry/aws-serverless": "^10.47.0",
     "@skipbo/game-core": "workspace:*",
     "@skipbo/multiplayer-protocol": "workspace:*",
+    "ws": "^8.20.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.153",
+    "@types/ws": "^8.18.1",
     "esbuild": "^0.25.9",
     "tsx": "^4.20.5",
     "vite": "^7.3.1",

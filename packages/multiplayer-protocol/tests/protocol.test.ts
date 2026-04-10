@@ -29,6 +29,38 @@ describe('serializeClientGameView', () => {
     expect(view.players[0].hand[0]).toEqual(state.players[0].hand[0]);
     expect(view.players[1].hand[0]).toEqual(HIDDEN_CARD);
   });
+
+  it('keeps the full local stock pile visible while redacting opponent stock cards', () => {
+    const state = initialGameState();
+    state.players[1].isAI = false;
+    state.players[0].stockPile = [
+      { value: 3, isSkipBo: false },
+      { value: 4, isSkipBo: false },
+      { value: 5, isSkipBo: false },
+    ];
+    state.players[1].stockPile = [
+      { value: 8, isSkipBo: false },
+      { value: 9, isSkipBo: false },
+      { value: 10, isSkipBo: false },
+    ];
+
+    const view = serializeClientGameView({
+      connectedSeats: [0, 1],
+      expiresAt: new Date('2026-04-04T12:00:00.000Z').toISOString(),
+      gameState: state,
+      roomCode: 'ABCDE',
+      status: 'ACTIVE',
+      version: 1,
+      viewerSeatIndex: 0,
+    });
+
+    expect(view.players[0].stockPile).toEqual(state.players[0].stockPile);
+    expect(view.players[1].stockPile).toEqual([
+      HIDDEN_CARD,
+      HIDDEN_CARD,
+      state.players[1].stockPile[2],
+    ]);
+  });
 });
 
 describe('createRoomRequestSchema', () => {

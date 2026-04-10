@@ -6,7 +6,9 @@
       <script value="dev" />
     </scripts>
     <node-interpreter value="project" />
-    <envs />
+    <envs>
+      <env name="VITE_SKIPBO_API_URL" value="http://127.0.0.1:8787" />
+    </envs>
     <method v="2" />
   </configuration>
 </component>

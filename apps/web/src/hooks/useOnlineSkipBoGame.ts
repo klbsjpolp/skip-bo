@@ -18,6 +18,7 @@ import { setGlobalAnimationContext, triggerAIAnimation } from '@/services/aiAnim
 import {
   calculateAnimationDuration,
   getBuildPilePosition,
+  getDiscardTopCardPosition,
   getHandCardAngle,
   getHandCardPosition,
   getNextDiscardCardPosition,
@@ -678,7 +679,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         } else if (currentState.selectedCard.source === 'discard') {
           const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
           if (discardContainer && currentState.selectedCard.discardPileIndex !== undefined) {
-            startPosition = getNextDiscardCardPosition(discardContainer, currentState.selectedCard.discardPileIndex);
+            startPosition = getDiscardTopCardPosition(discardContainer, currentState.selectedCard.discardPileIndex);
           }
         }
 

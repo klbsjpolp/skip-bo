@@ -49,17 +49,22 @@ export const HIDDEN_CARD: Card = {
   isSkipBo: false,
 };
 
+const OPPONENT_VISIBLE_STOCK_CARDS = 1;
+
 const cloneCard = (card: Card): Card => ({ ...card });
 
 const redactDeck = (deck: Card[]): Card[] => deck.map(() => ({ ...HIDDEN_CARD }));
 
-const redactStockPile = (stockPile: Card[]): Card[] => {
+const revealStockPile = (stockPile: Card[]): Card[] =>
+  stockPile.map(cloneCard);
+
+const redactStockPile = (stockPile: Card[], visibleCount: number): Card[] => {
   if (stockPile.length === 0) {
     return [];
   }
 
   return stockPile.map((card, index) =>
-    index === stockPile.length - 1 ? cloneCard(card) : { ...HIDDEN_CARD },
+    index >= stockPile.length - visibleCount ? cloneCard(card) : { ...HIDDEN_CARD },
   );
 };
 
@@ -154,7 +159,9 @@ export const serializeClientGameView = ({
       isAI: role === 'opponent',
       kind: 'human',
       role,
-      stockPile: redactStockPile(player.stockPile),
+      stockPile: role === 'local'
+        ? revealStockPile(player.stockPile)
+        : redactStockPile(player.stockPile, OPPONENT_VISIBLE_STOCK_CARDS),
     };
   });
 
