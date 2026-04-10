@@ -9,12 +9,14 @@ interface OnlineStatusStripProps {
   connectionStatus: 'connected' | 'connecting' | 'disconnected';
   roomCode: string;
   roomStatus: 'ACTIVE' | 'FINISHED' | 'WAITING';
+  seatCapacity?: number;
 }
 
 const getStatusLabel = (
   connectionStatus: OnlineStatusStripProps['connectionStatus'],
   roomStatus: OnlineStatusStripProps['roomStatus'],
   connectedSeats: number[],
+  seatCapacity: number,
 ): string => {
   if (roomStatus === 'FINISHED') {
     return 'Partie terminée';
@@ -24,11 +26,11 @@ const getStatusLabel = (
     return 'Connexion en cours';
   }
 
-  if (connectedSeats.length < 2) {
-    return 'En attente de votre adversaire';
+  if (connectedSeats.length < seatCapacity) {
+    return `En attente de joueurs (${connectedSeats.length}/${seatCapacity})`;
   }
 
-  return 'Adversaire connecté';
+  return `Tous les joueurs sont connectés (${connectedSeats.length}/${seatCapacity})`;
 };
 
 export function OnlineStatusStrip({
@@ -36,9 +38,11 @@ export function OnlineStatusStrip({
   connectionStatus,
   roomCode,
   roomStatus,
+  seatCapacity = 2,
 }: OnlineStatusStripProps) {
   const [copied, setCopied] = useState(false);
-  const statusLabel = getStatusLabel(connectionStatus, roomStatus, connectedSeats);
+  const connectedSeatCount = connectedSeats.length;
+  const statusLabel = getStatusLabel(connectionStatus, roomStatus, connectedSeats, seatCapacity);
 
   const handleCopy = async () => {
     try {
@@ -64,6 +68,12 @@ export function OnlineStatusStrip({
         {roomStatus === 'FINISHED' && (<Flag className="text-muted-foreground"/>)}
       </span>
       {roomStatus === 'WAITING' && (<>
+            <div
+                className="flex flex-row rounded-xl border gap-1 py-0.5 px-2 bg-secondary text-secondary-foreground items-center"
+                data-testid="online-seat-count"
+            >
+              <p className="text-sm font-medium tabular-nums">{connectedSeatCount}/{seatCapacity} joueurs</p>
+            </div>
             <div
                 className="flex flex-row rounded-xl border gap-1 py-0.5 px-2 bg-secondary text-secondary-foreground items-center">
               <p className="text-sm font-medium font-mono tracking-[0.2em]">{roomCode}</p>

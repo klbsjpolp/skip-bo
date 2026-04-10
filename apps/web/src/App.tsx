@@ -7,7 +7,8 @@ import {useOnlineSkipBoGame} from '@/hooks/useOnlineSkipBoGame';
 import type {GameType} from '@/app/types';
 import {OnlineStatusStrip} from '@/components/OnlineStatusStrip';
 import {ThemeSwitcher} from '@/components/ThemeSwitcher';
-import {GameBoard} from '@/components/GameBoard';
+import {LocalGameBoard} from '@/components/LocalGameBoard';
+import {OnlineGameBoard} from '@/components/OnlineGameBoard';
 import {Button} from '@/components/ui/button';
 import NewGame from '@/components/NewGame';
 import {useCardAnimation} from '@/contexts/useCardAnimation';
@@ -17,38 +18,31 @@ import {canPlayCard} from '@/lib/validators';
 import {createOnlineRoom, joinOnlineRoom} from '@/online/api';
 import {getStoredStockSize} from '@/state/initialGameState';
 import {getRequestedUiFixtureName, getUiFixture, type UiFixtureName} from '@/testing/uiFixtures';
-import type {GameState} from '@/types';
 import {DebugStrip} from "@/components/DebugStrip";
 
 const fixtureActionResult = Promise.resolve({ success: true, message: 'Fixture mode' });
 
 interface AppShellProps {
-  clearSelection: () => void;
   debugStrip?: ReactNode;
-  discardCard: (discardPileIndex: number) => Promise<{ success: boolean; message: string }>;
   fixtureName?: UiFixtureName;
-  gameState: GameState;
+  gameBoard: ReactNode;
+  isGameOver: boolean;
   onJoinOnlineGame: (roomCode: string) => Promise<void>;
   onReplay: () => Promise<void> | void;
   onStartLocalGame: () => void;
   onStartOnlineGame: (stockSize?: number) => Promise<void>;
-  playCard: (buildPileIndex: number) => Promise<{ success: boolean; message: string }>;
-  selectCard: (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void;
   statusStrip?: ReactNode;
 }
 
 function AppShell({
-  clearSelection,
   debugStrip,
-  discardCard,
   fixtureName,
-  gameState,
+  gameBoard,
+  isGameOver,
   onJoinOnlineGame,
   onReplay,
   onStartLocalGame,
   onStartOnlineGame,
-  playCard,
-  selectCard,
   statusStrip,
 }: AppShellProps) {
   return (
@@ -76,15 +70,8 @@ function AppShell({
           </div>
           <ThemeSwitcher/>
         </div>
-        <GameBoard
-            gameState={gameState}
-            selectCard={selectCard}
-            playCard={playCard}
-            discardCard={discardCard}
-            clearSelection={clearSelection}
-            canPlayCard={canPlayCard}
-        />
-        {gameState.gameIsOver && (
+        {gameBoard}
+        {isGameOver && (
             <div className="mt-5 text-center">
               <Button onClick={() => void onReplay()} size="lg" data-testid="replay-button">
                 Rejouer
@@ -108,19 +95,26 @@ function AppShell({
 
 function FixtureApp({ fixtureName }: { fixtureName: UiFixtureName }) {
   const gameState = getUiFixture(fixtureName);
+  const gameBoard = (
+    <LocalGameBoard
+      gameState={gameState}
+      selectCard={() => undefined}
+      playCard={() => fixtureActionResult}
+      discardCard={() => fixtureActionResult}
+      clearSelection={() => undefined}
+      canPlayCard={canPlayCard}
+    />
+  );
 
   return (
     <AppShell
-      clearSelection={() => undefined}
-      discardCard={() => fixtureActionResult}
       fixtureName={fixtureName}
-      gameState={gameState}
+      gameBoard={gameBoard}
+      isGameOver={gameState.gameIsOver}
       onJoinOnlineGame={async () => undefined}
       onReplay={() => undefined}
       onStartLocalGame={() => undefined}
       onStartOnlineGame={async () => undefined}
-      playCard={() => fixtureActionResult}
-      selectCard={() => undefined}
     />
   );
 }
@@ -147,22 +141,29 @@ function LocalGameScreen({
     playCard,
     selectCard,
   } = useLocalSkipBoGame();
+  const gameBoard = (
+    <LocalGameBoard
+      gameState={gameState}
+      selectCard={selectCard}
+      playCard={playCard}
+      discardCard={discardCard}
+      clearSelection={clearSelection}
+      canPlayCard={canPlayCard}
+    />
+  );
 
   return (
     <AppShell
-      clearSelection={clearSelection}
       debugStrip={<DebugStrip
           debugFillBuildPile={() => debugFillBuildPile(0)}
           debugWin={debugWin}
       />}
-      discardCard={discardCard}
-      gameState={gameState}
+      gameBoard={gameBoard}
+      isGameOver={gameState.gameIsOver}
       onJoinOnlineGame={onJoinOnlineGame}
       onReplay={onReplay}
       onStartLocalGame={onStartLocalGame}
       onStartOnlineGame={onStartOnlineGame}
-      playCard={playCard}
-      selectCard={selectCard}
     />
   );
 }
@@ -189,24 +190,32 @@ function OnlineGameScreen({
     roomStatus,
     selectCard,
   } = useOnlineSkipBoGame(session);
+  const gameBoard = (
+    <OnlineGameBoard
+      gameState={gameState}
+      selectCard={selectCard}
+      playCard={playCard}
+      discardCard={discardCard}
+      clearSelection={clearSelection}
+      canPlayCard={canPlayCard}
+    />
+  );
 
   return (
     <AppShell
-      clearSelection={clearSelection}
-      discardCard={discardCard}
-      gameState={gameState}
+      gameBoard={gameBoard}
+      isGameOver={gameState.gameIsOver}
       onJoinOnlineGame={onJoinOnlineGame}
       onReplay={onReplay}
       onStartLocalGame={onStartLocalGame}
       onStartOnlineGame={onStartOnlineGame}
-      playCard={playCard}
-      selectCard={selectCard}
       statusStrip={
         <OnlineStatusStrip
           connectedSeats={connectedSeats}
           connectionStatus={connectionStatus}
           roomCode={roomCode}
           roomStatus={roomStatus}
+          seatCapacity={2}
         />
       }
     />

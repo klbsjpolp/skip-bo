@@ -3,7 +3,7 @@ import { PlayerArea } from '@/components/PlayerArea';
 import { CenterArea } from '@/components/CenterArea';
 import { cn } from '@/lib/utils';
 
-interface GameBoardProps {
+export interface GameBoardProps {
   gameState: GameState;
   selectCard: (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void;
   playCard: (buildPileIndex: number) => Promise<{ success: boolean; message: string }>;
