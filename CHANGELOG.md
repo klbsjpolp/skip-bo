@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 1.4.2 (2026-04-10)
+
+
+### Bug Fixes
+
+* **api:** fix linting issues ([69d3bbb](https://github.com/klbsjpolp/skip-bo/commit/69d3bbb54feaac6b53a9ef3614927bbee169d19c))
+
+
+
 ## 1.4.1 (2026-04-10)
 
 
