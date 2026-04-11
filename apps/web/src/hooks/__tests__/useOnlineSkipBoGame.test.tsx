@@ -298,6 +298,11 @@ class MockWebSocket {
   }
 }
 
+const getActionMessages = (socket: MockWebSocket) =>
+  socket.sent
+    .map((message) => JSON.parse(message) as { type: string; action?: { type: string } })
+    .filter((message) => message.type === 'action');
+
 describe('useOnlineSkipBoGame', () => {
   const originalWebSocket = globalThis.WebSocket;
 
@@ -482,6 +487,92 @@ describe('useOnlineSkipBoGame', () => {
     expect(animation.endPosition).toEqual({
       x: 460,
       y: 180,
+    });
+  });
+
+  it('ignores new selections while a discard play is still resolving online', async () => {
+    const session: CreateRoomResponse = {
+      expiresAt: '2026-04-05T12:00:00.000Z',
+      roomCode: 'ABCDE',
+      seatIndex: 0,
+      seatToken: 'seat-token',
+      wsUrl: 'ws://example.test/game',
+    };
+
+    mountOnlineDiscardAnimationDom();
+
+    const initialState = createSelectedDiscardCardState();
+    initialState.players[0].hand = [card(9), null, null, null, null];
+    const initialView = createOnlineView(initialState, 1);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    expect(socket).toBeDefined();
+
+    await act(async () => {
+      socket.open();
+      socket.emitMessage({ type: 'snapshot', view: initialView });
+      await Promise.resolve();
+    });
+
+    let resolveAnimations: (() => void) | null = null;
+    waitForAnimations.mockImplementationOnce(() => new Promise<undefined>((resolve) => {
+      resolveAnimations = () => resolve(undefined);
+    }));
+
+    const playPromise = result.current.playCard(0);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => {
+      result.current.selectCard('hand', 0);
+    });
+
+    expect(result.current.gameState.selectedCard?.source).toBe('discard');
+    expect(getActionMessages(socket)).toEqual([]);
+
+    await act(async () => {
+      resolveAnimations?.();
+      const moveResult = await playPromise;
+      expect(moveResult).toEqual({ success: true, message: 'Carte jouée' });
+    });
+
+    expect(getActionMessages(socket)).toContainEqual({
+      type: 'action',
+      action: { type: 'PLAY_CARD', buildPile: 0 },
+      clientVersion: 1,
+    });
+    expect(getActionMessages(socket).some((message) => message.action?.type === 'SELECT_CARD')).toBe(false);
+
+    await act(async () => {
+      socket.emitMessage({
+        type: 'actionRejected',
+        code: 'invalid_action',
+        reason: 'Action refusée',
+      });
+      await Promise.resolve();
+    });
+
+    act(() => {
+      result.current.selectCard('hand', 0);
+    });
+
+    expect(result.current.gameState.selectedCard?.source).toBe('hand');
+    expect(getActionMessages(socket)).toContainEqual({
+      type: 'action',
+      action: {
+        type: 'SELECT_CARD',
+        source: 'hand',
+        index: 0,
+      },
+      clientVersion: 1,
     });
   });
 

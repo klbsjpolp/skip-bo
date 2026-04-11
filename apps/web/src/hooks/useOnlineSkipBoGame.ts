@@ -263,12 +263,16 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const [lastError, setLastError] = useState<string | null>(null);
   const [turnPresentationOverride, setTurnPresentationOverride] = useState<TurnPresentationOverride | null>(null);
   const authoritativeViewRef = useRef<ClientGameView | null>(null);
+  const interactionLockRef = useRef(false);
   const viewRef = useRef<ClientGameView | null>(null);
   const websocketRef = useRef<WebSocket | null>(null);
   const pingIntervalRef = useRef<number | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const turnPresentationTimeoutRef = useRef<number | null>(null);
   const { removeAnimation, startAnimation, waitForAnimations } = useCardAnimation();
+  const setInteractionLocked = useCallback((locked: boolean) => {
+    interactionLockRef.current = locked;
+  }, []);
   const commitView = useCallback((nextView: ClientGameView | null) => {
     viewRef.current = nextView;
     setView(nextView);
@@ -307,6 +311,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     };
 
     if (!session) {
+      setInteractionLocked(false);
       clearReconnectTimeout();
       clearPingInterval();
       clearTurnPresentationTimeout();
@@ -387,6 +392,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
 
           switch (message.type) {
             case 'snapshot': {
+              setInteractionLocked(false);
               setConnectionStatus('connected');
               setLastError(null);
               authoritativeViewRef.current = message.view;
@@ -470,10 +476,12 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
               );
               break;
             case 'actionRejected':
+              setInteractionLocked(false);
               setLastError(message.reason);
               commitView(authoritativeViewRef.current ?? viewRef.current);
               break;
             case 'roomClosed':
+              setInteractionLocked(false);
               authoritativeViewRef.current = authoritativeViewRef.current
                 ? {
                     ...authoritativeViewRef.current,
@@ -507,6 +515,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         }
 
         websocketRef.current = null;
+        setInteractionLocked(false);
         clearPingInterval();
 
         if (isCancelled) {
@@ -542,11 +551,13 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         websocketRef.current = null;
       }
 
+      setInteractionLocked(false);
+
       if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
         socket.close();
       }
     };
-  }, [commitView, session, updateView]);
+  }, [commitView, session, setInteractionLocked, updateView]);
 
   const gameState = useMemo(
     () => {
@@ -583,7 +594,12 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     const currentState = gameState;
     const player = currentState.players[currentState.currentPlayerIndex];
 
-    if (currentState.currentPlayerIndex !== 0 || !player || connectionStatus !== 'connected') {
+    if (
+      currentState.currentPlayerIndex !== 0 ||
+      !player ||
+      connectionStatus !== 'connected' ||
+      interactionLockRef.current
+    ) {
       return;
     }
 
@@ -619,6 +635,10 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   }, [connectionStatus, gameState, sendAction, updateView]);
 
   const clearSelection = useCallback(() => {
+    if (interactionLockRef.current) {
+      return;
+    }
+
     updateView((previousView) =>
       previousView
         ? {
@@ -636,6 +656,10 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     const currentState = gameState;
     const completedBuildPileCards = getCompletedBuildPileCards(currentState, buildPile);
 
+    if (interactionLockRef.current) {
+      return { success: false, message: 'Action en cours' };
+    }
+
     if (!currentState.selectedCard) {
       return { success: false, message: 'Aucune carte sélectionnée' };
     }
@@ -643,6 +667,8 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     if (!canPlayCard(currentState.selectedCard.card, buildPile, currentState)) {
       return { success: false, message: 'Vous ne pouvez pas jouer cette carte' };
     }
+
+    setInteractionLocked(true);
 
     const willEmptyHand = willPlayCardEmptyHand(currentState);
     let optimisticViewCommitted = false;
@@ -730,10 +756,15 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     }
     sendAction({ type: 'PLAY_CARD', buildPile });
     return { success: true, message: 'Carte jouée' };
-  }, [commitView, gameState, sendAction, startAnimation, waitForAnimations]);
+  }, [commitView, gameState, sendAction, setInteractionLocked, startAnimation, waitForAnimations]);
 
   const discardCard = useCallback((discardPile: number): Promise<MoveResult> => new Promise((resolve) => {
     const currentState = gameState;
+
+    if (interactionLockRef.current) {
+      resolve({ success: false, message: 'Action en cours' });
+      return;
+    }
 
     if (!currentState.selectedCard) {
       resolve({ success: false, message: 'Aucune carte sélectionnée' });
@@ -749,6 +780,8 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       resolve({ success: false, message: 'Vous ne pouvez pas défausser une carte Skip-Bo' });
       return;
     }
+
+    setInteractionLocked(true);
 
     let animationDuration = 0;
     let optimisticViewCommitted = false;
@@ -814,7 +847,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       sendAction({ type: 'DISCARD_CARD', discardPile });
       resolve({ success: true, message: 'Carte défaussée' });
     }
-  }), [commitView, gameState, sendAction, startAnimation]);
+  }), [commitView, gameState, sendAction, setInteractionLocked, startAnimation]);
 
   return {
     clearSelection,
