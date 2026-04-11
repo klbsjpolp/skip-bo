@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## 1.6.1 (2026-04-11)
+
+
+### Bug Fixes
+
+* **web:** sequence retreat pile completion animation ([4d28dba](https://github.com/klbsjpolp/skip-bo/commit/4d28dba39ab9638ba6630836083eb47a04e99e25))
+
+
+
 # 1.6.0 (2026-04-11)
 
 
