@@ -44,11 +44,17 @@ export function useSkipBoGame() {
   const state = snapshot.context.G;
   const dispatch = send;                     // alias pour préserver la suite du code
   const stateRef = useRef<GameState>(state);
-  const { startAnimation, removeAnimation, waitForAnimations } = useCardAnimation();
+  const interactionLockRef = useRef(false);
+  const { activeAnimations, startAnimation, removeAnimation, waitForAnimations } = useCardAnimation();
+  const activeAnimationCountRef = useRef(activeAnimations.length);
 
   React.useLayoutEffect(() => {
     stateRef.current = state;
   }, [state]);
+
+  React.useEffect(() => {
+    activeAnimationCountRef.current = activeAnimations.length;
+  }, [activeAnimations.length]);
 
   // Set up global animation context for AI animations and draw animations
   React.useEffect(() => {
@@ -70,13 +76,25 @@ export function useSkipBoGame() {
     dispatch({ type: 'DEBUG_WIN' });
   }, [dispatch]);
 
+  const isInteractionBlocked = useCallback(() => (
+    interactionLockRef.current || activeAnimationCountRef.current > 0
+  ), []);
+
   const selectCard = useCallback((source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => {
+    if (isInteractionBlocked()) {
+      return;
+    }
+
     dispatch({ type: 'SELECT_CARD', source, index, discardPileIndex });
-  }, [dispatch]);
+  }, [dispatch, isInteractionBlocked]);
 
   const playCard = useCallback(async (buildPile: number): Promise<MoveResult> => {
     const currentState = stateRef.current;
     const completedBuildPileCards = getCompletedBuildPileCards(currentState, buildPile);
+
+    if (isInteractionBlocked()) {
+      return { success: false, message: 'Action en cours' };
+    }
     
     // Validate before dispatching
     if (!currentState.selectedCard) {
@@ -105,6 +123,8 @@ export function useSkipBoGame() {
       refillCards = refillPlan.cards;
       refillHandIndices = refillPlan.handIndices;
     }
+
+    interactionLockRef.current = true;
     
     // Trigger play animation first
     try {
@@ -215,12 +235,18 @@ export function useSkipBoGame() {
         console.warn('Draw animation failed, continuing with game logic:', error);
       });
     }
+    interactionLockRef.current = false;
     return { success: true, message: 'Carte jouée' };
-  }, [dispatch, startAnimation, waitForAnimations]);
+  }, [dispatch, isInteractionBlocked, startAnimation, waitForAnimations]);
 
   const discardCard = useCallback((discardPile: number): Promise<MoveResult> => {
     return new Promise((resolve) => {
       const currentState = stateRef.current;
+
+      if (isInteractionBlocked()) {
+        resolve({ success: false, message: 'Action en cours' });
+        return;
+      }
       
       // Validate before dispatching
       if (!currentState.selectedCard) {
@@ -237,6 +263,8 @@ export function useSkipBoGame() {
         resolve({ success: false, message: 'Vous ne pouvez pas défausser une carte Skip-Bo' });
         return;
       }
+
+      interactionLockRef.current = true;
 
       let animationDuration = 0;
 
@@ -294,14 +322,19 @@ export function useSkipBoGame() {
       // Wait for animation to complete before dispatching state change
       setTimeout(() => {
         dispatch({ type: 'DISCARD_CARD', discardPile });
+        interactionLockRef.current = false;
         resolve({ success: true, message: 'Carte défaussée' });
       }, animationDuration);
     });
-  }, [dispatch, startAnimation]);
+  }, [dispatch, isInteractionBlocked, startAnimation]);
 
   const clearSelection = useCallback(() => {
+    if (isInteractionBlocked()) {
+      return;
+    }
+
     dispatch({ type: 'CLEAR_SELECTION' });
-  }, [dispatch]);
+  }, [dispatch, isInteractionBlocked]);
 
   const canPlayCardWrapper = useCallback((card: Card, buildPileIndex: number, gameState: GameState) => {
     return canPlayCard(card, buildPileIndex, gameState);

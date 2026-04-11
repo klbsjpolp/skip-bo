@@ -7,12 +7,16 @@ import { serializeClientGameView, type ClientGameView, type CreateRoomResponse, 
 import { useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
 
 const {
+  activeAnimationsState,
   calculateMultipleDrawAnimationDuration,
   removeAnimation,
   startAnimation,
   triggerMultipleDrawAnimations,
   waitForAnimations,
 } = vi.hoisted(() => ({
+  activeAnimationsState: {
+    current: [] as Array<Record<string, unknown>>,
+  },
   calculateMultipleDrawAnimationDuration: vi.fn(() => 0),
   removeAnimation: vi.fn(),
   startAnimation: vi.fn(),
@@ -22,6 +26,7 @@ const {
 
 vi.mock('@/contexts/useCardAnimation', () => ({
   useCardAnimation: () => ({
+    activeAnimations: activeAnimationsState.current,
     removeAnimation,
     startAnimation,
     waitForAnimations,
@@ -112,6 +117,17 @@ const createSelectedDiscardCardState = (): GameState => {
     discardPileIndex: 1,
   };
   state.message = 'Sélectionnez une destination';
+
+  return state;
+};
+
+const createInteractiveOnlineState = (): GameState => {
+  const state = initialGameState();
+
+  state.currentPlayerIndex = 0;
+  state.players[1].isAI = false;
+  state.selectedCard = null;
+  state.message = "C'est votre tour";
 
   return state;
 };
@@ -310,6 +326,7 @@ describe('useOnlineSkipBoGame', () => {
     vi.useFakeTimers();
     MockWebSocket.instances = [];
     document.body.innerHTML = '';
+    activeAnimationsState.current = [];
     removeAnimation.mockClear();
     startAnimation.mockClear();
     triggerMultipleDrawAnimations.mockClear();
@@ -622,5 +639,54 @@ describe('useOnlineSkipBoGame', () => {
       x: 460,
       y: 180,
     });
+  });
+
+  it('ignores new selections while snapshot-driven animations are still active online', async () => {
+    const session: CreateRoomResponse = {
+      expiresAt: '2026-04-05T12:00:00.000Z',
+      roomCode: 'ABCDE',
+      seatIndex: 0,
+      seatToken: 'seat-token',
+      wsUrl: 'ws://example.test/game',
+    };
+
+    activeAnimationsState.current = [{
+      animationType: 'play',
+      duration: 200,
+      endPosition: { x: 0, y: 0 },
+      id: 'active-animation',
+      initialDelay: 0,
+      sourceInfo: {
+        index: 0,
+        playerIndex: 0,
+        source: 'hand',
+      },
+      sourceRevealed: true,
+      startPosition: { x: 0, y: 0 },
+      targetRevealed: true,
+    }];
+
+    const initialView = createOnlineView(createInteractiveOnlineState(), 1);
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    expect(socket).toBeDefined();
+
+    await act(async () => {
+      socket.open();
+      socket.emitMessage({ type: 'snapshot', view: initialView });
+      await Promise.resolve();
+    });
+
+    act(() => {
+      result.current.selectCard('hand', 0);
+    });
+
+    expect(result.current.gameState.selectedCard).toBeNull();
+    expect(getActionMessages(socket)).toEqual([]);
   });
 });

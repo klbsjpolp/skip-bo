@@ -269,10 +269,14 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const pingIntervalRef = useRef<number | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const turnPresentationTimeoutRef = useRef<number | null>(null);
-  const { removeAnimation, startAnimation, waitForAnimations } = useCardAnimation();
+  const { activeAnimations, removeAnimation, startAnimation, waitForAnimations } = useCardAnimation();
+  const activeAnimationCountRef = useRef(activeAnimations.length);
   const setInteractionLocked = useCallback((locked: boolean) => {
     interactionLockRef.current = locked;
   }, []);
+  const isInteractionBlocked = useCallback(() => (
+    interactionLockRef.current || activeAnimationCountRef.current > 0
+  ), []);
   const commitView = useCallback((nextView: ClientGameView | null) => {
     viewRef.current = nextView;
     setView(nextView);
@@ -288,6 +292,10 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     setGlobalDrawAnimationContext({ startAnimation, removeAnimation });
     setGlobalCompletedPileAnimationContext({ startAnimation });
   }, [removeAnimation, startAnimation, waitForAnimations]);
+
+  useEffect(() => {
+    activeAnimationCountRef.current = activeAnimations.length;
+  }, [activeAnimations.length]);
 
   useEffect(() => {
     const clearPingInterval = () => {
@@ -598,7 +606,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       currentState.currentPlayerIndex !== 0 ||
       !player ||
       connectionStatus !== 'connected' ||
-      interactionLockRef.current
+      isInteractionBlocked()
     ) {
       return;
     }
@@ -632,10 +640,10 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     );
 
     sendAction({ type: 'SELECT_CARD', source, index, discardPileIndex });
-  }, [connectionStatus, gameState, sendAction, updateView]);
+  }, [connectionStatus, gameState, isInteractionBlocked, sendAction, updateView]);
 
   const clearSelection = useCallback(() => {
-    if (interactionLockRef.current) {
+    if (isInteractionBlocked()) {
       return;
     }
 
@@ -650,13 +658,13 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     );
 
     sendAction({ type: 'CLEAR_SELECTION' });
-  }, [sendAction, updateView]);
+  }, [isInteractionBlocked, sendAction, updateView]);
 
   const playCard = useCallback(async (buildPile: number): Promise<MoveResult> => {
     const currentState = gameState;
     const completedBuildPileCards = getCompletedBuildPileCards(currentState, buildPile);
 
-    if (interactionLockRef.current) {
+    if (isInteractionBlocked()) {
       return { success: false, message: 'Action en cours' };
     }
 
@@ -756,12 +764,12 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     }
     sendAction({ type: 'PLAY_CARD', buildPile });
     return { success: true, message: 'Carte jouée' };
-  }, [commitView, gameState, sendAction, setInteractionLocked, startAnimation, waitForAnimations]);
+  }, [commitView, gameState, isInteractionBlocked, sendAction, setInteractionLocked, startAnimation, waitForAnimations]);
 
   const discardCard = useCallback((discardPile: number): Promise<MoveResult> => new Promise((resolve) => {
     const currentState = gameState;
 
-    if (interactionLockRef.current) {
+    if (isInteractionBlocked()) {
       resolve({ success: false, message: 'Action en cours' });
       return;
     }
@@ -847,7 +855,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       sendAction({ type: 'DISCARD_CARD', discardPile });
       resolve({ success: true, message: 'Carte défaussée' });
     }
-  }), [commitView, gameState, sendAction, setInteractionLocked, startAnimation]);
+  }), [commitView, gameState, isInteractionBlocked, sendAction, setInteractionLocked, startAnimation]);
 
   return {
     clearSelection,

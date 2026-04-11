@@ -254,6 +254,40 @@ describe('gameMachine', () => {
     expect(actor.getSnapshot().context.G).toBeDefined();
   });
 
+  it('should ignore selection changes while a human action animation is running', async () => {
+    const actor = createActor(gameMachine);
+    actor.start();
+
+    await waitFor(actor, (state) => state.matches('humanTurn.ready'));
+
+    actor.send({
+      type: 'SELECT_CARD',
+      source: 'hand',
+      index: 0,
+    });
+
+    const selectedBeforeAnimation = actor.getSnapshot().context.G.selectedCard;
+    expect(selectedBeforeAnimation).toBeDefined();
+
+    actor.send({
+      type: 'PLAY_CARD',
+      buildPile: 0,
+      animationDuration: 50,
+    });
+
+    await waitFor(actor, (state) => state.matches('humanTurn.humanActionAnimating'));
+
+    actor.send({
+      type: 'SELECT_CARD',
+      source: 'stock',
+      index: 0,
+    });
+
+    expect(actor.getSnapshot().context.G.selectedCard).toBe(selectedBeforeAnimation);
+
+    await waitFor(actor, (state) => state.matches('humanTurn.ready'));
+  });
+
   it('should draw cards for AI player at beginning of turn when hand has empty slots', async () => {
     // Test the core drawing logic directly with the game reducer
     const initialState = initialGameState();
