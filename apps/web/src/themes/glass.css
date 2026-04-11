@@ -60,6 +60,10 @@
 
   --skipbo-bg: black;
 
+  .app-version-badge {
+    @apply bg-secondary rounded text-secondary-foreground pl-1 pt-0.5 pr-1 pb-0.5;
+  }
+
   .skipbo-text {
     .card-inner::before {
       content: "";
