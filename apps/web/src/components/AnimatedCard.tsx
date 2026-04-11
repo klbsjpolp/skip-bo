@@ -11,6 +11,7 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
   animation
 }) => {
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isVisible, setIsVisible] = useState(animation.initialDelay === 0);
   const [isRevealed, setIsRevealed] = useState<boolean>(animation.sourceRevealed);
   const needsFlip = animation.sourceRevealed !== animation.targetRevealed;
 
@@ -19,6 +20,8 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
     let flipTimer: NodeJS.Timeout | undefined;
 
     const startedTimeout = setTimeout(() => {
+      setIsVisible(true);
+
       // Start animation on next frame to ensure initial position is set
       startTimer = requestAnimationFrame(() => {
         setIsAnimating(true);
@@ -37,6 +40,10 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({
       if (flipTimer) clearTimeout(flipTimer);
     };
   }, [animation.id, animation.duration, animation.animationType, animation.card.value, animation.initialDelay, needsFlip, animation.targetRevealed]);
+
+  if (!isVisible) {
+    return null;
+  }
 
   const currentAngleZ = isAnimating ? (animation.endAngleDeg ?? 0) : (animation.startAngleDeg ?? 0);
 

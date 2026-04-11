@@ -45,7 +45,10 @@ export const triggerCompletedBuildPileAnimation = (
     const duration = calculateAnimationDuration(startPosition, endPosition);
 
     return cards.reduce((maxDuration, card, index) => {
-      const initialDelay = index * staggerDelay;
+      // Keep completed-pile cards moving one at a time so deck themes with
+      // heavy shadows or glass effects do not stack twelve animated cards at
+      // the same origin.
+      const initialDelay = index * (duration + staggerDelay);
 
       animationContext.startAnimation({
         card,
