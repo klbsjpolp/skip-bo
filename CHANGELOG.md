@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# 1.5.0 (2026-04-11)
+
+
+### Features
+
+* **web:** add interaction lock for online gameplay actions ([d926876](https://github.com/klbsjpolp/skip-bo/commit/d926876e31ff0526368ab91af0a446d45a9695d6))
+
+
+
 ## 1.4.2 (2026-04-10)
 
 
