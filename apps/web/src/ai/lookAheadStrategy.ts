@@ -234,6 +234,108 @@ const generateDiscardMoves = (gameState: GameState): MoveEvaluation[] => {
   return moves;
 };
 
+const countPlayableTopDiscards = (gameState: GameState, playerIndex: number): number => {
+  const player = getAIPlayer(gameState, playerIndex);
+
+  return player.discardPiles.reduce((count, pile) => {
+    const topCard = pile[pile.length - 1];
+
+    if (!topCard) {
+      return count;
+    }
+
+    return count + (getPlayableBuildPiles(topCard, gameState).length > 0 ? 1 : 0);
+  }, 0);
+};
+
+const simulateOpponentStockPlay = (
+  gameState: GameState,
+  playerIndex: number,
+  buildPileIndex: number
+): GameState => {
+  const opponent = getAIPlayer(gameState, playerIndex);
+  const stockIndex = opponent.stockPile.length - 1;
+  const simulationState = {
+    ...gameState,
+    currentPlayerIndex: playerIndex,
+    selectedCard: null,
+  };
+
+  const selectedState = gameReducer(simulationState, {
+    type: 'SELECT_CARD',
+    source: 'stock',
+    index: stockIndex,
+    plannedBuildPileIndex: buildPileIndex,
+  });
+
+  return gameReducer(selectedState, {
+    type: 'PLAY_CARD',
+    buildPile: buildPileIndex,
+  });
+};
+
+const getOpponentFollowUpThreat = (
+  gameState: GameState,
+  playerIndex: number,
+  weights: ReturnType<typeof getWeights>
+): number => {
+  const opponent = getAIPlayer(gameState, playerIndex);
+  const stockCard = getTopStockCard(opponent);
+
+  if (!stockCard) {
+    return 0;
+  }
+
+  const playableBuildPiles = getPlayableBuildPiles(stockCard, gameState);
+  if (playableBuildPiles.length === 0) {
+    return 0;
+  }
+
+  return playableBuildPiles.reduce((bestThreat, buildPileIndex) => {
+    const simulatedState = simulateOpponentStockPlay(gameState, playerIndex, buildPileIndex);
+    const simulatedOpponent = getAIPlayer(simulatedState, playerIndex);
+    const nextStockCard = getTopStockCard(simulatedOpponent);
+
+    let threat = countPlayableTopDiscards(simulatedState, playerIndex) * weights.opponentPlayableDiscardPenalty;
+
+    if (nextStockCard && getPlayableBuildPiles(nextStockCard, simulatedState).length > 0) {
+      threat += weights.opponentStockFollowUpPenalty;
+    }
+
+    return Math.max(bestThreat, threat);
+  }, 0);
+};
+
+const getOpponentThreatPenalty = (
+  gameState: GameState,
+  aiPlayerIndex: number = gameState.currentPlayerIndex
+): number => {
+  const weights = getWeights();
+
+  return gameState.players.reduce((penalty, player, playerIndex) => {
+    if (playerIndex === aiPlayerIndex) {
+      return penalty;
+    }
+
+    let playerPenalty = countPlayableTopDiscards(gameState, playerIndex) * weights.opponentPlayableDiscardPenalty;
+
+    if (player.stockPile.length === 0) {
+      return penalty + STOCK_WIN_BONUS;
+    }
+
+    const stockGap = getClosestGapToStock(gameState, playerIndex);
+
+    if (stockGap === 0) {
+      playerPenalty += weights.opponentStockPlayablePenalty;
+      playerPenalty += getOpponentFollowUpThreat(gameState, playerIndex, weights);
+    } else if (stockGap !== null && stockGap <= 2) {
+      playerPenalty += (3 - stockGap) * weights.opponentNearStockPenalty;
+    }
+
+    return penalty + playerPenalty;
+  }, 0);
+};
+
 const evaluateState = (
   gameState: GameState,
   aiPlayerIndex: number = gameState.currentPlayerIndex
@@ -283,6 +385,8 @@ const evaluateState = (
     const closestOpponentStock = Math.min(...opponents.map((player) => player.stockPile.length));
     score -= Math.max(0, 6 - closestOpponentStock) * weights.opponentPressurePenalty;
   }
+
+  score -= getOpponentThreatPenalty(gameState, aiPlayerIndex);
 
   return score;
 };
@@ -349,6 +453,12 @@ const evaluateMove = (
     if (beforeGap !== null && afterGap !== null && afterGap < beforeGap) {
       score += (beforeGap - afterGap) * weights.stockGapPenalty * 2;
     }
+
+    const beforeOpponentThreat = getOpponentThreatPenalty(gameState, aiPlayerIndex);
+    const afterOpponentThreat = getOpponentThreatPenalty(nextState, aiPlayerIndex);
+    if (afterOpponentThreat < beforeOpponentThreat) {
+      score += beforeOpponentThreat - afterOpponentThreat;
+    }
   }
 
   if (move.action === 'discard' && card && move.discardPileIndex !== undefined) {
@@ -370,15 +480,6 @@ const searchTurn = (
   const playMoves = generatePlayMoves(gameState);
   const discardMoves = generateDiscardMoves(gameState);
 
-  const hasNonSkipBoPlay = playMoves.some((move) => {
-    if (move.source === 'stock') {
-      return true;
-    }
-
-    const card = getCardForMove(gameState, move);
-    return !!card && !card.isSkipBo;
-  });
-
   const rankedDiscardMoves = discardMoves
     .map((move) => {
       const card = getCardForMove(gameState, move);
@@ -394,10 +495,7 @@ const searchTurn = (
     .slice(0, 6)
     .map(({ move }) => move);
 
-  const candidateMoves =
-    hasNonSkipBoPlay || playMoves.some((move) => move.source === 'stock')
-      ? playMoves
-      : [...playMoves, ...rankedDiscardMoves];
+  const candidateMoves = [...playMoves, ...rankedDiscardMoves];
 
   if (candidateMoves.length === 0) {
     return {

@@ -34,7 +34,7 @@
 ## Current Limits
 
 - The search models the AI's own turn, not a full minimax opponent tree.
-- Opponent awareness is limited to pressure signals such as stock-pile size.
+- Opponent awareness focuses on immediate visible threats such as opening an opponent stock card or a top-discard follow-up, not a full hidden-information opponent plan.
 - Search depth is intentionally short enough to stay responsive in the browser.
 
 ## Related Docs

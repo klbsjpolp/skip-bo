@@ -3,6 +3,10 @@ export interface AIWeights {
   stockGapPenalty: number;
   skipBoRetentionBonus: number;
   opponentPressurePenalty: number;
+  opponentStockPlayablePenalty: number;
+  opponentNearStockPenalty: number;
+  opponentPlayableDiscardPenalty: number;
+  opponentStockFollowUpPenalty: number;
   playableTopDiscardBonus: number;
   discardOrganizationBonus: number;
   duplicateDiscardBonus: number;
@@ -47,6 +51,10 @@ const config: AIConfig = {
     stockGapPenalty: 5,
     skipBoRetentionBonus: 7,
     opponentPressurePenalty: 14,
+    opponentStockPlayablePenalty: 26,
+    opponentNearStockPenalty: 6,
+    opponentPlayableDiscardPenalty: 8,
+    opponentStockFollowUpPenalty: 12,
     playableTopDiscardBonus: 4,
     discardOrganizationBonus: 2,
     duplicateDiscardBonus: 6,
