@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# 1.8.0 (2026-04-12)
+
+
+### Features
+
+* **ai:** improve AI opponent awareness and threat evaluation ([b447fee](https://github.com/klbsjpolp/skip-bo/commit/b447fee81074108a3b6cbb1545fa25c0ae065ba2))
+
+
+
 # 1.7.0 (2026-04-12)
 
 
