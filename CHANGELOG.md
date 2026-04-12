@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# 1.7.0 (2026-04-12)
+
+
+### Features
+
+* **monitoring:** refine Sentry trace propagation and configuration ([1d2a22c](https://github.com/klbsjpolp/skip-bo/commit/1d2a22cc272d488e5716e8ae23161857b69419e7))
+
+
+
 ## 1.6.1 (2026-04-11)
 
 
