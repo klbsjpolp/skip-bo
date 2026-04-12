@@ -27,10 +27,10 @@ interface AppShellProps {
   fixtureName?: UiFixtureName;
   gameBoard: ReactNode;
   isGameOver: boolean;
-  onJoinOnlineGame: (roomCode: string) => Promise<void>;
+  onJoinOnlineGame: (roomCode: string, playerName?: string) => Promise<void>;
   onReplay: () => Promise<void> | void;
   onStartLocalGame: () => void;
-  onStartOnlineGame: (stockSize?: number) => Promise<void>;
+  onStartOnlineGame: (stockSize?: number, playerName?: string) => Promise<void>;
   statusStrip?: ReactNode;
 }
 
@@ -120,10 +120,10 @@ function FixtureApp({ fixtureName }: { fixtureName: UiFixtureName }) {
 }
 
 interface SessionScreenProps {
-  onJoinOnlineGame: (roomCode: string) => Promise<void>;
+  onJoinOnlineGame: (roomCode: string, playerName?: string) => Promise<void>;
   onReplay: () => Promise<void>;
   onStartLocalGame: () => void;
-  onStartOnlineGame: (stockSize?: number) => Promise<void>;
+  onStartOnlineGame: (stockSize?: number, playerName?: string) => Promise<void>;
 }
 
 function LocalGameScreen({
@@ -180,15 +180,19 @@ function OnlineGameScreen({
   session,
 }: OnlineGameScreenProps) {
   const {
+    canStartGame,
     clearSelection,
     connectedSeats,
     connectionStatus,
     discardCard,
     gameState,
+    isLocalHost,
     playCard,
     roomCode,
     roomStatus,
+    seatCapacity,
     selectCard,
+    startGame,
   } = useOnlineSkipBoGame(session);
   const gameBoard = (
     <OnlineGameBoard
@@ -211,11 +215,14 @@ function OnlineGameScreen({
       onStartOnlineGame={onStartOnlineGame}
       statusStrip={
         <OnlineStatusStrip
+          canStartGame={canStartGame}
           connectedSeats={connectedSeats}
           connectionStatus={connectionStatus}
+          isHost={isLocalHost}
+          onStartGame={startGame}
           roomCode={roomCode}
           roomStatus={roomStatus}
-          seatCapacity={2}
+          seatCapacity={seatCapacity}
         />
       }
     />
@@ -237,14 +244,14 @@ function LiveApp() {
     setLocalSessionVersion((currentValue) => currentValue + 1);
   };
 
-  const startOnlineGame = async (stockSize = getStoredStockSize()) => {
-    const session = await createOnlineRoom(stockSize);
+  const startOnlineGame = async (stockSize = getStoredStockSize(), playerName?: string) => {
+    const session = await createOnlineRoom(stockSize, playerName);
     setOnlineSession(session);
     setCurrentGameType('online-human');
   };
 
-  const joinGame = async (roomCode: string) => {
-    const session = await joinOnlineRoom(roomCode);
+  const joinGame = async (roomCode: string, playerName?: string) => {
+    const session = await joinOnlineRoom(roomCode, playerName);
     setOnlineSession(session);
     setCurrentGameType('online-human');
   };

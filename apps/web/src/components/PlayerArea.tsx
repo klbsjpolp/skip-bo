@@ -1,13 +1,13 @@
-import type {Player, GameState, Card as CardType} from '@/types';
+import type {Card as CardType, GameState, Player} from '@/types';
 import {Card} from '@/components/Card';
 import {cn} from '@/lib/utils';
 import {EmptyCard} from "@/components/EmptyCard.tsx";
-import type { MouseEventHandler} from "react";
+import type {MouseEventHandler} from "react";
 import {Fragment} from "react";
 import {useCardAnimation} from "@/contexts/useCardAnimation.ts";
 import {VictoryEffects} from '@/components/VictoryEffects';
 
-interface PlayerAreaProps {
+export interface PlayerAreaProps {
   player: Player;
   playerIndex: number;
   isCurrentPlayer: boolean;
@@ -43,6 +43,7 @@ export function PlayerArea({
       <div className="bg-layer"/>
       {isWinner && <VictoryEffects />}
       <div className="content-layer flex items-center gap-2 lg:gap-4 h-full flex-wrap">
+        {player.name && <div className="vertical-text border-l border-primary">{player.name}</div>}
         <StockPile player={player} playerIndex={playerIndex} isCurrentPlayer={isCurrentPlayer} gameState={gameState}
                    selectCard={selectCard} clearSelection={clearSelection}/>
         <HandSection player={player} playerIndex={playerIndex} isCurrentPlayer={isCurrentPlayer} gameState={gameState}
@@ -185,7 +186,7 @@ interface DiscardPilesProps {
   clearSelection: () => void;
 }
 
-function DiscardPiles({
+export function DiscardPiles({
                         player,
                         playerIndex,
                         isCurrentPlayer,
@@ -220,7 +221,14 @@ interface StockPileProps {
 const isHiddenMultiplayerCard = (card: CardType | null | undefined): card is CardType =>
   card !== null && card !== undefined && card.value === 0 && !card.isSkipBo;
 
-function StockPile({player, playerIndex, isCurrentPlayer, gameState, selectCard, clearSelection}: StockPileProps) {
+export function StockPile({
+                            player,
+                            playerIndex,
+                            isCurrentPlayer,
+                            gameState,
+                            selectCard,
+                            clearSelection
+                          }: StockPileProps) {
   const {isCardBeingAnimated} = useCardAnimation();
   const isHuman = !player.isAI;
   const stockProgressHeight = `${(player.stockPile.length / gameState.config.STOCK_SIZE) * 100}%`;
@@ -301,7 +309,14 @@ interface HandSectionProps {
   clearSelection: () => void;
 }
 
-function HandSection({player, playerIndex, isCurrentPlayer, gameState, selectCard, clearSelection}: HandSectionProps) {
+export function HandSection({
+                              player,
+                              playerIndex,
+                              isCurrentPlayer,
+                              gameState,
+                              selectCard,
+                              clearSelection
+                            }: HandSectionProps) {
   const {isCardBeingAnimated} = useCardAnimation();
   const isHuman = !player.isAI;
   const handOverlaps = player.hand.length > 4;

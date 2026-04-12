@@ -38,11 +38,11 @@ Dates below are record dates for the log, not guaranteed original implementation
 
 ## D-004: Private Room-Code Join, No Lobby Or Matchmaking
 
-- Status: accepted
+- Status: superseded
 - Recorded: 2026-04-06
-- Decision: online games are private two-player rooms joined by room code rather than a public lobby or matchmaking system.
-- Why: it keeps scope and operating complexity small while still enabling real-time multiplayer.
-- Implications: product docs should not describe lobby routes or waiting-room pages that do not exist.
+- Decision: online games were originally private two-player rooms joined by room code rather than a public lobby or matchmaking system.
+- Why: it kept scope and operating complexity small while still enabling real-time multiplayer.
+- Implications: kept for historical context only. See D-006 for the current room model.
 - Related docs: [../../README.md](../../README.md), [online-multiplayer.md](online-multiplayer.md)
 
 ## D-005: Single Advanced AI Profile
@@ -53,3 +53,12 @@ Dates below are record dates for the log, not guaranteed original implementation
 - Why: one maintained profile simplifies testing, tuning, and documentation.
 - Implications: docs should not reintroduce difficulty-mode language unless the runtime feature returns.
 - Related docs: [../../apps/web/src/ai/README.md](../../apps/web/src/ai/README.md), [../backlog/ai-discard-strategy.md](../backlog/ai-discard-strategy.md)
+
+## D-006: Four-Seat Rooms With In-Screen Waiting State
+
+- Status: accepted
+- Recorded: 2026-04-10
+- Decision: online rooms now open as private four-seat waiting rooms joined by room code, with host-controlled start from the main play screen.
+- Why: it keeps the product free of a separate lobby route while allowing 2, 3, or 4 human players to share the same room flow.
+- Implications: room creation no longer implies an immediate active game, the status strip is the waiting-room control surface, and the server must lock active seats when the host starts.
+- Related docs: [../../README.md](../../README.md), [online-multiplayer.md](online-multiplayer.md), [../protocols/realtime-events.md](../protocols/realtime-events.md)

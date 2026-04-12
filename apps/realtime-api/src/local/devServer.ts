@@ -21,6 +21,7 @@ import {
   handleDisconnect,
   joinRoom,
   rejectAction,
+  startGame,
 } from '../services/roomService.js';
 import { InMemoryConnectionRepository, InMemoryRoomRepository } from './inMemoryRepositories.js';
 import { LocalRealtimeBroadcaster } from './localBroadcaster.js';
@@ -222,6 +223,11 @@ export const startLocalRealtimeDevServer = async (
             case 'action':
               await handleAction(dependencies, {
                 action: message.action,
+                connectionId,
+              });
+              break;
+            case 'startGame':
+              await startGame(dependencies, {
                 connectionId,
               });
               break;

@@ -1,7 +1,7 @@
 import type { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 
-import type { RoomRecord, RoomRepository } from './types.js';
+import { RoomVersionConflictError, type RoomRecord, type RoomRepository } from './types.js';
 
 export class DynamoRoomRepository implements RoomRepository {
   private readonly client: DynamoDBDocumentClient;
@@ -34,10 +34,32 @@ export class DynamoRoomRepository implements RoomRepository {
     return (result.Item as RoomRecord | undefined) ?? null;
   }
 
-  async update(room: RoomRecord): Promise<void> {
-    await this.client.send(new PutCommand({
-      TableName: this.tableName,
-      Item: room,
-    }));
+  async update(room: RoomRecord, expectedVersion?: number): Promise<void> {
+    try {
+      await this.client.send(new PutCommand({
+        TableName: this.tableName,
+        Item: room,
+        ...(expectedVersion === undefined
+          ? {}
+          : {
+              ConditionExpression: 'version = :expectedVersion',
+              ExpressionAttributeValues: {
+                ':expectedVersion': expectedVersion,
+              },
+            }),
+      }));
+    } catch (error) {
+      if (
+        expectedVersion !== undefined &&
+        error &&
+        typeof error === 'object' &&
+        'name' in error &&
+        error.name === 'ConditionalCheckFailedException'
+      ) {
+        throw new RoomVersionConflictError(room.roomCode);
+      }
+
+      throw error;
+    }
   }
 }

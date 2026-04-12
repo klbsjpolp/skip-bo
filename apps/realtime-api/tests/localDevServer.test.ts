@@ -134,6 +134,14 @@ describe('local realtime dev server', () => {
 
     await Promise.all([waitForOpen(socket0), waitForOpen(socket1)]);
 
+    const waitingSnapshot0 = waitForMessage(
+      socket0,
+      (message) => message.type === 'snapshot' && message.view.room.status === 'WAITING' && message.view.room.connectedSeats.length === 2,
+    );
+    const waitingSnapshot1 = waitForMessage(
+      socket1,
+      (message) => message.type === 'snapshot' && message.view.room.status === 'WAITING' && message.view.room.connectedSeats.length === 2,
+    );
     const activeSnapshot0 = waitForMessage(
       socket0,
       (message) => message.type === 'snapshot' && message.view.room.status === 'ACTIVE',
@@ -154,6 +162,30 @@ describe('local realtime dev server', () => {
       seatIndex: joined.seatIndex,
       seatToken: joined.seatToken,
       type: 'auth',
+    }));
+
+    await expect(waitingSnapshot0).resolves.toMatchObject({
+      type: 'snapshot',
+      view: {
+        room: {
+          connectedSeats: [0, 1],
+          status: 'WAITING',
+        },
+      },
+    });
+    await expect(waitingSnapshot1).resolves.toMatchObject({
+      type: 'snapshot',
+      view: {
+        room: {
+          connectedSeats: [0, 1],
+          status: 'WAITING',
+        },
+      },
+    });
+
+    socket0.send(JSON.stringify({
+      type: 'startGame',
+      clientVersion: 3,
     }));
 
     await expect(activeSnapshot0).resolves.toMatchObject({

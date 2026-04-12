@@ -50,16 +50,19 @@ Only private information should collapse:
 ## Proposed Phases
 
 1. Non-destructive groundwork
+   - status: landed
    - split local and online board shells
    - make the online status strip seat-count aware
-   - preserve current two-player behavior
 2. Room and protocol changes
+   - status: landed
    - support four joinable seats
    - add a host-triggered start action
    - keep waiting/start authority on the server
 3. Online board layout
+   - status: next
    - compact public seat summaries for all players
    - sticky local public piles on mobile
    - fold only the local hand
 4. Online animations
+   - status: next
    - replace single-opponent assumptions with viewer-relative seat animation routing

@@ -18,6 +18,8 @@
 - Completed build piles move into `completedBuildPiles` and are reshuffled back into `deck` when more draw cards are needed.
 - Start-of-turn draws belong to the local state machine draw service. `END_TURN` only flips `currentPlayerIndex`.
 - Online rooms are server-authoritative. The browser treats incoming snapshots as canonical in online mode.
+- Online client views are viewer-relative. In online mode the receiving player is rendered at index `0` even though backend seat order is preserved separately.
+- Online active turn order is locked from the connected seats present when the host starts the room.
 
 ## Current Implementation Details
 

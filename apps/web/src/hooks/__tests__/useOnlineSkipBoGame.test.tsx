@@ -65,6 +65,48 @@ const createOnlineView = (
     viewerSeatIndex: 0,
   });
 
+const createWaitingView = (
+  connectedSeats: number[],
+  version: number,
+): ClientGameView => {
+  const state = initialGameState({ playerCount: 4 });
+
+  state.deck = [];
+  state.buildPiles = state.buildPiles.map(() => []);
+  state.completedBuildPiles = [];
+  state.players = state.players.map((player, playerIndex) => ({
+    ...player,
+    discardPiles: player.discardPiles.map(() => []),
+    isAI: playerIndex !== 0,
+    kind: 'human',
+    seatIndex: playerIndex,
+    stockPile: [],
+  }));
+  state.message = 'En attente d’au moins un autre joueur';
+
+  return serializeClientGameView({
+    connectedSeats,
+    expiresAt: '2026-04-05T12:00:00.000Z',
+    gameState: state,
+    hostSeatIndex: 0,
+    roomCode: 'ABCDE',
+    seatCapacity: 4,
+    status: 'WAITING',
+    version,
+    viewerSeatIndex: 0,
+  });
+};
+
+const createSession = (): CreateRoomResponse => ({
+  expiresAt: '2026-04-05T12:00:00.000Z',
+  hostSeatIndex: 0,
+  roomCode: 'ABCDE',
+  seatCapacity: 4,
+  seatIndex: 0,
+  seatToken: 'seat-token',
+  wsUrl: 'ws://example.test/game',
+});
+
 const createSelectedLastCardState = (): GameState => {
   const state = initialGameState();
 
@@ -163,9 +205,11 @@ const setElementRect = (
 const mountOnlineAnimationDom = (): void => {
   const firstPlayerArea = document.createElement('div');
   firstPlayerArea.className = 'player-area';
+  firstPlayerArea.dataset.playerIndex = '1';
 
   const activePlayerArea = document.createElement('div');
   activePlayerArea.className = 'player-area';
+  activePlayerArea.dataset.playerIndex = '0';
 
   const stockPile = document.createElement('div');
   stockPile.className = 'stock-pile';
@@ -192,9 +236,11 @@ const mountOnlineAnimationDom = (): void => {
 const mountOnlineHandAnimationDom = (): void => {
   const firstPlayerArea = document.createElement('div');
   firstPlayerArea.className = 'player-area';
+  firstPlayerArea.dataset.playerIndex = '1';
 
   const activePlayerArea = document.createElement('div');
   activePlayerArea.className = 'player-area';
+  activePlayerArea.dataset.playerIndex = '0';
 
   const handArea = document.createElement('div');
   handArea.className = 'hand-area';
@@ -228,9 +274,11 @@ const mountOnlineHandAnimationDom = (): void => {
 const mountOnlineDiscardAnimationDom = (): void => {
   const firstPlayerArea = document.createElement('div');
   firstPlayerArea.className = 'player-area';
+  firstPlayerArea.dataset.playerIndex = '1';
 
   const activePlayerArea = document.createElement('div');
   activePlayerArea.className = 'player-area';
+  activePlayerArea.dataset.playerIndex = '0';
 
   const discardPiles = document.createElement('div');
   discardPiles.className = 'discard-piles';
@@ -342,13 +390,7 @@ describe('useOnlineSkipBoGame', () => {
   });
 
   it('waits for the authoritative snapshot before animating a hand refill online', async () => {
-    const session: CreateRoomResponse = {
-      expiresAt: '2026-04-05T12:00:00.000Z',
-      roomCode: 'ABCDE',
-      seatIndex: 0,
-      seatToken: 'seat-token',
-      wsUrl: 'ws://example.test/game',
-    };
+    const session = createSession();
 
     const initialState = createSelectedLastCardState();
     const nextState = gameReducer(initialState, { type: 'PLAY_CARD', buildPile: 0 });
@@ -410,13 +452,7 @@ describe('useOnlineSkipBoGame', () => {
   });
 
   it('lifts stock-source play animations so the next stock card is visible immediately online', async () => {
-    const session: CreateRoomResponse = {
-      expiresAt: '2026-04-05T12:00:00.000Z',
-      roomCode: 'ABCDE',
-      seatIndex: 0,
-      seatToken: 'seat-token',
-      wsUrl: 'ws://example.test/game',
-    };
+    const session = createSession();
 
     mountOnlineAnimationDom();
 
@@ -460,13 +496,7 @@ describe('useOnlineSkipBoGame', () => {
   });
 
   it('starts discard-source play animations from the top discard card online', async () => {
-    const session: CreateRoomResponse = {
-      expiresAt: '2026-04-05T12:00:00.000Z',
-      roomCode: 'ABCDE',
-      seatIndex: 0,
-      seatToken: 'seat-token',
-      wsUrl: 'ws://example.test/game',
-    };
+    const session = createSession();
 
     mountOnlineDiscardAnimationDom();
 
@@ -508,13 +538,7 @@ describe('useOnlineSkipBoGame', () => {
   });
 
   it('ignores new selections while a discard play is still resolving online', async () => {
-    const session: CreateRoomResponse = {
-      expiresAt: '2026-04-05T12:00:00.000Z',
-      roomCode: 'ABCDE',
-      seatIndex: 0,
-      seatToken: 'seat-token',
-      wsUrl: 'ws://example.test/game',
-    };
+    const session = createSession();
 
     mountOnlineDiscardAnimationDom();
 
@@ -594,13 +618,7 @@ describe('useOnlineSkipBoGame', () => {
   });
 
   it('starts hand-source play animations from the selected card rendered position online', async () => {
-    const session: CreateRoomResponse = {
-      expiresAt: '2026-04-05T12:00:00.000Z',
-      roomCode: 'ABCDE',
-      seatIndex: 0,
-      seatToken: 'seat-token',
-      wsUrl: 'ws://example.test/game',
-    };
+    const session = createSession();
 
     mountOnlineHandAnimationDom();
 
@@ -667,6 +685,7 @@ describe('useOnlineSkipBoGame', () => {
     }];
 
     const initialView = createOnlineView(createInteractiveOnlineState(), 1);
+
     const { result } = renderHook(() => useOnlineSkipBoGame(session));
 
     await act(async () => {
@@ -688,5 +707,74 @@ describe('useOnlineSkipBoGame', () => {
 
     expect(result.current.gameState.selectedCard).toBeNull();
     expect(getActionMessages(socket)).toEqual([]);
+  });
+
+  it('allows the host to start a waiting room as soon as a second player is connected', async () => {
+    const session = createSession();
+    const waitingForHostOnly = createWaitingView([0], 1);
+    const waitingForTwoPlayers = createWaitingView([0, 1], 2);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    expect(socket).toBeDefined();
+
+    await act(async () => {
+      socket.open();
+      socket.emitMessage({ type: 'snapshot', view: waitingForHostOnly });
+      await Promise.resolve();
+    });
+
+    expect(result.current.seatCapacity).toBe(4);
+    expect(result.current.connectedSeats).toEqual([0]);
+    expect(result.current.canStartGame).toBe(false);
+
+    await act(async () => {
+      socket.emitMessage({
+        type: 'presence',
+        room: waitingForTwoPlayers.room,
+      });
+      await Promise.resolve();
+    });
+
+    expect(result.current.connectedSeats).toEqual([0, 1]);
+    expect(result.current.canStartGame).toBe(true);
+
+    act(() => {
+      result.current.startGame();
+    });
+
+    expect(socket.sent.some((message) => {
+      const parsed = JSON.parse(message) as { type: string; clientVersion?: number };
+
+      return parsed.type === 'startGame' && parsed.clientVersion === 2;
+    })).toBe(true);
+  });
+
+  it('keeps the local waiting-room hand visible before the game starts', async () => {
+    const session = createSession();
+    const waitingView = createWaitingView([0, 1], 1);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    expect(socket).toBeDefined();
+
+    await act(async () => {
+      socket.open();
+      socket.emitMessage({ type: 'snapshot', view: waitingView });
+      await Promise.resolve();
+    });
+
+    expect(result.current.roomStatus).toBe('WAITING');
+    expect(result.current.gameState.players[0].hand.filter((card) => card !== null)).toHaveLength(5);
   });
 });

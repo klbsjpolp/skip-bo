@@ -13,7 +13,7 @@ Skip-Bo is a `pnpm` monorepo with three main concerns:
 - shared gameplay and multiplayer packages
 - an AWS/OpenTofu stack for the realtime backend
 
-The default experience is local play against the built-in AI. The same web app can also create or join private online rooms backed by the realtime API.
+The default experience is local play against the built-in AI. The same web app can also create or join private online rooms for two to four human players, backed by the realtime API.
 
 ## Quick Start
 

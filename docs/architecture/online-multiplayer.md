@@ -27,23 +27,45 @@
 
 Local AI games remain browser-owned. Online rooms are server-authoritative:
 
-- the server creates the room, shuffles, deals, validates actions, and advances canonical state
+- the server creates waiting rooms, shuffles and deals active games, validates actions, and advances canonical state
 - clients send intents such as `SELECT_CARD`, `PLAY_CARD`, `DISCARD_CARD`, `CLEAR_SELECTION`, and `END_TURN`
+- the host can also send `startGame` once at least one other authenticated player is connected
 - after each accepted action, the server broadcasts a fresh redacted snapshot
 - clients render from snapshots rather than from replayed deltas
 
 The underlying decision is recorded in [decision-log.md](decision-log.md).
 
+## Room Lifecycle
+
+- Room creation opens a four-seat private room in `WAITING` state.
+- Seat `0` is the host seat.
+- Each reserved seat carries a resolved player name, using the caller-provided name when present or a seat-based `Joueur #` fallback otherwise.
+- Joining reserves the first open seat while the room is still `WAITING`.
+- Presence broadcasts track which reserved seats currently have authenticated WebSocket connections.
+- The game starts only when the host sends `startGame`.
+- Start locks the active seat list to the seats connected at that moment, so active games can be 2, 3, or 4 players.
+- Once active, turn order follows that locked active-seat list until the game finishes.
+
 ## Snapshot And Redaction Model
 
 - The backend stores full room state.
 - Each client receives a redacted view for its seat.
-- Your own hand is sent with faces; the opponent hand is sent as fixed-length hidden slots.
+- Your own hand is sent with faces; opponent hands are sent as fixed-length hidden slots.
 - Opponent hand selection exposes only slot-level selection, not card identity.
-- Visible piles remain visible to both players.
-- The web client rotates the snapshot into the local viewer's perspective so the board layout can stay consistent.
+- Opponent stock piles expose only their visible top card.
+- Public discard and build piles remain visible to every seat.
+- The web client rotates snapshots into viewer-relative order so the receiving player is always rendered at `players[0]`.
+- Player names live in `state.players[*].name`, so they survive the `WAITING` to `ACTIVE` transition and can be reused by UI surfaces without a separate roster mapping.
+- Waiting-room snapshots can preserve the local private hand while keeping waiting public piles as placeholders. Active-game snapshots contain only the locked active seats.
 
 The exact contract lives in [../protocols/realtime-events.md](../protocols/realtime-events.md).
+
+## Client Composition
+
+- `LocalGameBoard` preserves the browser-owned human-vs-AI board shell.
+- `OnlineGameBoard` owns the viewer-relative online presentation and room-aware status controls.
+- `OnlineStatusStrip` is the waiting-room control surface on the play screen. There is no separate lobby route or screen.
+- Online animations are still inferred from snapshot diffs in the browser, but room status and legal state progression remain server-owned.
 
 ## Runtime Topology
 

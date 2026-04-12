@@ -1,4 +1,9 @@
-import type { CreateRoomRequest, CreateRoomResponse, JoinRoomResponse } from '@skipbo/multiplayer-protocol';
+import {
+  normalizePlayerName,
+  type CreateRoomRequest,
+  type CreateRoomResponse,
+  type JoinRoomResponse,
+} from '@skipbo/multiplayer-protocol';
 
 interface RuntimeConfig {
   apiBaseUrl?: string;
@@ -69,8 +74,14 @@ const parseJsonResponse = async <T>(response: Response): Promise<T> => {
   return payload as T;
 };
 
-export const createOnlineRoom = async (stockSize: number): Promise<CreateRoomResponse> => {
-  const request: CreateRoomRequest = { stockSize };
+export const createOnlineRoom = async (
+  stockSize: number,
+  playerName?: string,
+): Promise<CreateRoomResponse> => {
+  const request: CreateRoomRequest = {
+    playerName: normalizePlayerName(playerName),
+    stockSize,
+  };
   const apiBaseUrl = await getApiBaseUrl();
   const response = await fetch(`${apiBaseUrl}/rooms`, {
     method: 'POST',
@@ -83,14 +94,17 @@ export const createOnlineRoom = async (stockSize: number): Promise<CreateRoomRes
   return parseJsonResponse<CreateRoomResponse>(response);
 };
 
-export const joinOnlineRoom = async (roomCode: string): Promise<JoinRoomResponse> => {
+export const joinOnlineRoom = async (roomCode: string, playerName?: string): Promise<JoinRoomResponse> => {
   const apiBaseUrl = await getApiBaseUrl();
   const response = await fetch(`${apiBaseUrl}/rooms/join`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ roomCode }),
+    body: JSON.stringify({
+      playerName: normalizePlayerName(playerName),
+      roomCode,
+    }),
   });
 
   return parseJsonResponse<JoinRoomResponse>(response);

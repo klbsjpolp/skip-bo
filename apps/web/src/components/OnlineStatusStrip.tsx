@@ -5,8 +5,11 @@ import {Button} from '@/components/ui/button';
 import {cn} from '@/lib/utils';
 
 interface OnlineStatusStripProps {
+  canStartGame?: boolean;
   connectedSeats: number[];
   connectionStatus: 'connected' | 'connecting' | 'disconnected';
+  isHost?: boolean;
+  onStartGame?: () => void;
   roomCode: string;
   roomStatus: 'ACTIVE' | 'FINISHED' | 'WAITING';
   seatCapacity?: number;
@@ -26,6 +29,10 @@ const getStatusLabel = (
     return 'Connexion en cours';
   }
 
+  if (roomStatus === 'ACTIVE') {
+    return 'Partie en cours';
+  }
+
   if (connectedSeats.length < seatCapacity) {
     return `En attente de joueurs (${connectedSeats.length}/${seatCapacity})`;
   }
@@ -34,8 +41,11 @@ const getStatusLabel = (
 };
 
 export function OnlineStatusStrip({
+  canStartGame = false,
   connectedSeats,
   connectionStatus,
+  isHost = false,
+  onStartGame,
   roomCode,
   roomStatus,
   seatCapacity = 2,
@@ -67,19 +77,38 @@ export function OnlineStatusStrip({
         {roomStatus === 'ACTIVE' && (<CircleCheck className="text-success" />)}
         {roomStatus === 'FINISHED' && (<Flag className="text-muted-foreground"/>)}
       </span>
+      {roomStatus === 'WAITING' ? (
+        <div
+          className="flex flex-row rounded-xl border gap-1 py-0.5 px-2 bg-secondary text-secondary-foreground items-center"
+          data-testid="online-seat-count"
+        >
+          <p className="text-sm font-medium tabular-nums">{connectedSeatCount}/{seatCapacity} joueurs</p>
+        </div>
+      ) : null}
       {roomStatus === 'WAITING' && (<>
-            <div
-                className="flex flex-row rounded-xl border gap-1 py-0.5 px-2 bg-secondary text-secondary-foreground items-center"
-                data-testid="online-seat-count"
-            >
-              <p className="text-sm font-medium tabular-nums">{connectedSeatCount}/{seatCapacity} joueurs</p>
-            </div>
-            <div
-                className="flex flex-row rounded-xl border gap-1 py-0.5 px-2 bg-secondary text-secondary-foreground items-center">
-              <p className="text-sm font-medium font-mono tracking-[0.2em]">{roomCode}</p>
-              <Button type="button" size="icon-xs" variant="ghost" onClick={() => void handleCopy()}>
+          <div
+            className="flex flex-row rounded-xl border gap-1 py-0.5 px-2 bg-secondary text-secondary-foreground items-center"
+            data-testid="online-room-controls"
+          >
+            <p className="text-sm font-medium font-mono tracking-[0.2em]">{roomCode}</p>
+            <Button type="button" size="icon-xs" variant="ghost" onClick={() => void handleCopy()}>
               {copied ? <Check data-icon="inline-start" /> : connectionStatus === 'connecting' ? null : <Copy data-icon="inline-start" />}
             </Button>
+            {isHost ? (
+              <>
+                <div className="mx-1 h-4 w-px bg-border/70" aria-hidden="true" />
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="ghost"
+                  className="font-medium"
+                  onClick={onStartGame}
+                  disabled={!canStartGame}
+                >
+                  Démarrer
+                </Button>
+              </>
+            ) : null}
           </div>
         </>
       )}

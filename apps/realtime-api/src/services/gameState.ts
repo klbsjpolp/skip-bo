@@ -1,4 +1,5 @@
 import { canPlayCard, gameReducer, initialGameState, type Card, type GameAction, type GameState, type Player, type SelectedCard } from '@skipbo/game-core';
+import { resolvePlayerName } from '@skipbo/multiplayer-protocol';
 
 const cardsMatch = (candidate: Card | null | undefined, selectedCard: Card): boolean =>
   !!candidate &&
@@ -64,16 +65,55 @@ const isSupportedOnlineAction = (action: GameAction): boolean =>
   action.type !== 'DEBUG_FILL_BUILD_PILE' &&
   action.type !== 'DEBUG_WIN';
 
-export const createOnlineInitialGameState = (stockSize?: number): GameState => {
-  const state = initialGameState({ stockSize });
+interface OnlineInitialGameStateOptions {
+  playerCount?: number;
+  playerNames?: Array<string | undefined>;
+  seatIndices?: number[];
+  stockSize?: number;
+}
 
-  state.players = state.players.map((player, seatIndex) => ({
+const assignOnlinePlayerMetadata = (
+  state: GameState,
+  seatIndices?: number[],
+  playerNames?: Array<string | undefined>,
+): GameState => {
+  state.players = state.players.map((player, playerIndex) => ({
     ...player,
     isAI: false,
     kind: 'human',
-    seatIndex,
+    name: resolvePlayerName(playerNames?.[playerIndex], seatIndices?.[playerIndex] ?? playerIndex),
+    seatIndex: seatIndices?.[playerIndex] ?? playerIndex,
   }));
-  state.message = 'En attente d’un autre joueur';
+
+  return state;
+};
+
+export const createWaitingRoomState = (stockSize?: number, seatCapacity: number = 4): GameState => {
+  const state = assignOnlinePlayerMetadata(initialGameState({ playerCount: seatCapacity, stockSize }));
+
+  state.deck = [];
+  state.buildPiles = state.buildPiles.map(() => []);
+  state.completedBuildPiles = [];
+  state.players = state.players.map((player) => ({
+    ...player,
+    discardPiles: player.discardPiles.map(() => []),
+    stockPile: [],
+  }));
+  state.message = 'En attente d’au moins un autre joueur';
+
+  return state;
+};
+
+export const createOnlineInitialGameState = ({
+  playerCount = 2,
+  playerNames,
+  seatIndices,
+  stockSize,
+}: OnlineInitialGameStateOptions = {}): GameState => {
+  const state = initialGameState({ playerCount, stockSize });
+
+  assignOnlinePlayerMetadata(state, seatIndices, playerNames);
+  state.message = "C'est votre tour";
 
   return state;
 };
