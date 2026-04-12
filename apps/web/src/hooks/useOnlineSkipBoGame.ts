@@ -48,12 +48,21 @@ const cloneGameStateFromView = (view: ClientGameView): GameState => ({
   winnerIndex: view.winnerIndex,
 });
 
-const createPlaceholderGameState = (roomCode: string): GameState => {
-  const state = initialGameState();
+const createPlaceholderGameState = (roomCode: string, seatCapacity: number): GameState => {
+  const state = initialGameState({ playerCount: seatCapacity });
 
-  state.players[1].isAI = true;
-  state.players[1].kind = 'human';
-  state.players[0].kind = 'human';
+  state.deck = [];
+  state.buildPiles = state.buildPiles.map(() => []);
+  state.completedBuildPiles = [];
+  state.players = state.players.map((player, playerIndex) => ({
+    ...player,
+    discardPiles: player.discardPiles.map(() => []),
+    hand: player.hand.map(() => null),
+    isAI: playerIndex !== 0,
+    kind: 'human',
+    seatIndex: playerIndex,
+    stockPile: [],
+  }));
   state.message = `Connexion à la partie ${roomCode}`;
 
   return state;
@@ -95,7 +104,9 @@ const serializeLocalView = (gameState: GameState, currentView: ClientGameView): 
     connectedSeats: currentView.room.connectedSeats,
     expiresAt: currentView.room.expiresAt,
     gameState,
+    hostSeatIndex: currentView.room.hostSeatIndex,
     roomCode: currentView.room.roomCode,
+    seatCapacity: currentView.room.seatCapacity,
     status: currentView.room.status,
     version: currentView.room.version,
     viewerSeatIndex: 0,
@@ -143,8 +154,12 @@ const applyOptimisticDiscardView = (
 const collectDrawTransitions = (
   previousState: GameState,
   nextState: GameState,
-): DrawTransition[] =>
-  [0, 1].flatMap((playerIndex) => {
+): DrawTransition[] => {
+  if (previousState.players.length !== nextState.players.length) {
+    return [];
+  }
+
+  return previousState.players.flatMap((_, playerIndex) => {
     const cards: Card[] = [];
     const handIndices: number[] = [];
 
@@ -163,26 +178,32 @@ const collectDrawTransitions = (
         }]
       : [];
   });
+};
 
 const inferOpponentTransition = (
   previousState: GameState,
   nextState: GameState,
 ): OpponentTransition | null => {
-  if (previousState.currentPlayerIndex !== 1 || !previousState.selectedCard || nextState.selectedCard) {
+  if (previousState.players.length !== nextState.players.length) {
     return null;
   }
 
+  if (previousState.currentPlayerIndex === 0 || !previousState.selectedCard || nextState.selectedCard) {
+    return null;
+  }
+
+  const opponentPlayerIndex = previousState.currentPlayerIndex;
   const sourceRevealed = previousState.selectedCard.source !== 'hand';
   const previousCompletedCount = previousState.completedBuildPiles.length;
   const completedCards = nextState.completedBuildPiles
     .slice(previousCompletedCount)
     .map((card) => ({ ...card }));
 
-  const discardPile = nextState.players[1].discardPiles.findIndex(
-    (pile, index) => pile.length === previousState.players[1].discardPiles[index].length + 1,
+  const discardPile = nextState.players[opponentPlayerIndex].discardPiles.findIndex(
+    (pile, index) => pile.length === previousState.players[opponentPlayerIndex].discardPiles[index].length + 1,
   );
   if (discardPile >= 0) {
-    const animationCard = nextState.players[1].discardPiles[discardPile].at(-1);
+    const animationCard = nextState.players[opponentPlayerIndex].discardPiles[discardPile].at(-1);
 
     return animationCard
       ? {
@@ -571,7 +592,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     () => {
       const baseState = view
         ? cloneGameStateFromView(view)
-        : createPlaceholderGameState(session?.roomCode ?? '');
+        : createPlaceholderGameState(session?.roomCode ?? '', session?.seatCapacity ?? 4);
 
       if (!turnPresentationOverride) {
         return baseState;
@@ -583,7 +604,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         message: turnPresentationOverride.message,
       };
     },
-    [session?.roomCode, turnPresentationOverride, view],
+    [session?.roomCode, session?.seatCapacity, turnPresentationOverride, view],
   );
 
   const sendAction = useCallback((action: GameAction): void => {
@@ -594,6 +615,17 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     websocketRef.current.send(JSON.stringify({
       type: 'action',
       action,
+      clientVersion: viewRef.current?.room.version,
+    }));
+  }, []);
+
+  const startGame = useCallback(() => {
+    if (!websocketRef.current || websocketRef.current.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    websocketRef.current.send(JSON.stringify({
+      type: 'startGame',
       clientVersion: viewRef.current?.room.version,
     }));
   }, []);
@@ -690,9 +722,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     };
 
     try {
-      const playerAreas = document.querySelectorAll('.player-area');
-      const domIndex = currentState.currentPlayerIndex === 0 ? 1 : 0;
-      const playerAreaElement = playerAreas[domIndex] as HTMLElement;
+      const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
       const centerAreaElement = document.querySelector('.center-area') as HTMLElement;
       let startAngleDeg: number | undefined;
 
@@ -803,9 +833,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     };
 
     try {
-      const playerAreas = document.querySelectorAll('.player-area');
-      const domIndex = currentState.currentPlayerIndex === 0 ? 1 : 0;
-      const playerAreaElement = playerAreas[domIndex] as HTMLElement;
+      const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
 
       if (playerAreaElement) {
         const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
@@ -857,16 +885,32 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     }
   }), [commitView, gameState, isInteractionBlocked, sendAction, setInteractionLocked, startAnimation]);
 
+  const seatCapacity = view?.room.seatCapacity ?? session?.seatCapacity ?? 4;
+  const hostSeatIndex = view?.room.hostSeatIndex ?? session?.hostSeatIndex ?? 0;
+  const connectedSeats = view?.room.connectedSeats ?? [];
+  const roomStatus = view?.room.status ?? 'WAITING';
+  const isLocalHost = session?.seatIndex === hostSeatIndex;
+  const canStartGame = Boolean(
+    isLocalHost &&
+    roomStatus === 'WAITING' &&
+    connectedSeats.length >= 2,
+  );
+
   return {
+    canStartGame,
     clearSelection,
-    connectedSeats: view?.room.connectedSeats ?? [],
+    connectedSeats,
     connectionStatus,
     gameState,
+    hostSeatIndex,
+    isLocalHost,
     lastError,
     playCard,
     roomCode: view?.room.roomCode ?? session?.roomCode ?? '',
-    roomStatus: view?.room.status ?? 'WAITING',
+    roomStatus,
+    seatCapacity,
     selectCard,
+    startGame,
     discardCard,
     canPlayCard,
   };

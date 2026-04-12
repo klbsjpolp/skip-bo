@@ -4,6 +4,7 @@ export interface Card {
 }
 
 export interface Player {
+  name?: string;
   isAI: boolean;
   kind?: 'human' | 'ai';
   seatIndex?: number;

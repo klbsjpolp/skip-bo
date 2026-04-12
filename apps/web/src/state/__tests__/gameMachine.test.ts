@@ -1,10 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
-import { createActor, waitFor } from 'xstate';
-import { gameMachine } from '@/state/gameMachine';
-import { gameReducer } from '@/state/gameReducer';
-import type { GameAction } from '@/state/gameActions';
-import { initialGameState } from '@/state/initialGameState';
+import {describe, expect, it, vi} from 'vitest';
+import {createActor, waitFor} from 'xstate';
+import {gameMachine} from '@/state/gameMachine';
+import {gameReducer} from '@/state/gameReducer';
+import type {GameAction} from '@/state/gameActions';
 import * as initialGameStateModule from '@/state/initialGameState';
+import {initialGameState} from '@/state/initialGameState';
+import {act} from "@testing-library/react";
 
 // Mock the AI module
 vi.mock('@/ai/computeBestMove', () => ({
@@ -17,7 +18,7 @@ vi.mock('@/services/aiAnimationService', () => ({
 }));
 
 vi.mock('@/services/drawAnimationService', () => ({
-  triggerMultipleDrawAnimations: vi.fn(() => Promise.resolve(0))
+  triggerMultipleDrawAnimations: vi.fn(async () => 0)
 }));
 
 describe('gameMachine', () => {
@@ -260,6 +261,11 @@ describe('gameMachine', () => {
 
     await waitFor(actor, (state) => state.matches('humanTurn.ready'));
 
+    await act(async () => {
+      await Promise.resolve(); // laisse drawService se terminer
+      await Promise.resolve(); // laisse animationGate se terminer
+    });
+    
     actor.send({
       type: 'SELECT_CARD',
       source: 'hand',

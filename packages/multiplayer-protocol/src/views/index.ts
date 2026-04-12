@@ -1,10 +1,13 @@
 import type { Card, GameConfig, GameState, Player, SelectedCard } from '@skipbo/game-core';
 
+import { getDefaultPlayerName, normalizePlayerName } from '../playerName.js';
+
 export type RoomStatus = 'WAITING' | 'ACTIVE' | 'FINISHED';
 
 export interface PlayerView extends Player {
   displayName: string;
   isHandVisible: boolean;
+  relativeSeatIndex: number;
   role: 'local' | 'opponent';
 }
 
@@ -15,7 +18,9 @@ export interface SelectedCardView extends SelectedCard {
 export interface RoomSummary {
   connectedSeats: number[];
   expiresAt: string;
+  hostSeatIndex: number;
   roomCode: string;
+  seatCapacity: number;
   status: RoomStatus;
   version: number;
 }
@@ -38,7 +43,9 @@ export interface SerializeClientGameViewInput {
   connectedSeats: number[];
   expiresAt: string;
   gameState: GameState;
+  hostSeatIndex?: number;
   roomCode: string;
+  seatCapacity?: number;
   status: RoomStatus;
   version: number;
   viewerSeatIndex: number;
@@ -77,16 +84,37 @@ const redactHand = (hand: (Card | null)[], isVisible: boolean): (Card | null)[] 
     return isVisible ? cloneCard(card) : { ...HIDDEN_CARD };
   });
 
-const rotateIndex = (index: number | null, viewerSeatIndex: number): number | null => {
+const rotateIndex = (index: number | null, viewerSeatIndex: number, playerCount: number): number | null => {
   if (index === null) {
     return null;
   }
 
-  return viewerSeatIndex === 0 ? index : 1 - index;
+  return ((index - viewerSeatIndex) + playerCount) % playerCount;
 };
 
-const getPlayerDisplayName = (role: 'local' | 'opponent'): string =>
-  role === 'local' ? 'Vous' : 'Adversaire';
+const getPlayerDisplayName = (
+  player: Player,
+  role: 'local' | 'opponent',
+  relativeSeatIndex: number,
+  seatIndex: number | undefined,
+  playerCount: number,
+): string => {
+  const explicitName = normalizePlayerName(player.name);
+
+  if (explicitName) {
+    return explicitName;
+  }
+
+  if (seatIndex !== undefined) {
+    return getDefaultPlayerName(seatIndex);
+  }
+
+  if (role === 'local') {
+    return 'Vous';
+  }
+
+  return playerCount === 2 ? 'Adversaire' : `Adversaire ${relativeSeatIndex}`;
+};
 
 const getViewMessage = (
   gameState: GameState,
@@ -94,34 +122,38 @@ const getViewMessage = (
   status: RoomStatus,
   connectedSeats: number[],
 ): string => {
-  const rotatedWinnerIndex = rotateIndex(gameState.winnerIndex, viewerSeatIndex);
-  const rotatedCurrentPlayerIndex = rotateIndex(gameState.currentPlayerIndex, viewerSeatIndex) ?? 0;
+  const playerCount = gameState.players.length;
+  const rotatedWinnerIndex = rotateIndex(gameState.winnerIndex, viewerSeatIndex, playerCount);
+  const rotatedCurrentPlayerIndex = rotateIndex(gameState.currentPlayerIndex, viewerSeatIndex, playerCount) ?? 0;
 
-  if (status === 'WAITING' || connectedSeats.length < 2) {
-    return 'En attente d’un autre joueur';
+  if (status === 'WAITING') {
+    return connectedSeats.length < 2
+      ? 'En attente d’au moins un autre joueur'
+      : 'En attente du démarrage';
   }
 
   if (gameState.gameIsOver) {
-    return rotatedWinnerIndex === 0 ? 'Vous avez gagné !' : 'Votre adversaire a gagné.';
+    return rotatedWinnerIndex === 0 ? 'Vous avez gagné !' : 'Un adversaire a gagné.';
   }
 
   if (rotatedCurrentPlayerIndex === 0) {
     return gameState.selectedCard ? 'Sélectionnez une destination' : "C'est votre tour";
   }
 
-  return "Tour de l'adversaire";
+  return "Tour d'un adversaire";
 };
 
 const toSelectedCardView = (
   selectedCard: SelectedCard | null,
   viewerSeatIndex: number,
   currentPlayerIndex: number,
+  playerCount: number,
 ): SelectedCardView | null => {
   if (!selectedCard) {
     return null;
   }
 
-  const rotatedCurrentPlayerIndex = rotateIndex(currentPlayerIndex, viewerSeatIndex) ?? 0;
+  const rotatedCurrentPlayerIndex = rotateIndex(currentPlayerIndex, viewerSeatIndex, playerCount) ?? 0;
   const isLocalSelection = rotatedCurrentPlayerIndex === 0;
   const card =
     isLocalSelection || selectedCard.source !== 'hand'
@@ -139,25 +171,31 @@ export const serializeClientGameView = ({
   connectedSeats,
   expiresAt,
   gameState,
+  hostSeatIndex = 0,
   roomCode,
+  seatCapacity = gameState.players.length,
   status,
   version,
   viewerSeatIndex,
 }: SerializeClientGameViewInput): ClientGameView => {
-  const sourcePlayers =
-    viewerSeatIndex === 0
-      ? gameState.players
-      : [gameState.players[1], gameState.players[0]];
-  const players: PlayerView[] = sourcePlayers.map((player, index) => {
-    const role = index === 0 ? 'local' : 'opponent';
+  const playerCount = gameState.players.length;
+  const sourcePlayers = gameState.players
+    .map((player, index) => ({
+      player,
+      relativeSeatIndex: rotateIndex(index, viewerSeatIndex, playerCount) ?? 0,
+    }))
+    .sort((left, right) => left.relativeSeatIndex - right.relativeSeatIndex);
+  const players: PlayerView[] = sourcePlayers.map(({ player, relativeSeatIndex }) => {
+    const role = relativeSeatIndex === 0 ? 'local' : 'opponent';
 
     return {
       ...player,
-      displayName: getPlayerDisplayName(role),
+      displayName: getPlayerDisplayName(player, role, relativeSeatIndex, player.seatIndex, playerCount),
       hand: redactHand(player.hand, role === 'local'),
       isHandVisible: role === 'local',
       isAI: role === 'opponent',
       kind: 'human',
+      relativeSeatIndex,
       role,
       stockPile: role === 'local'
         ? revealStockPile(player.stockPile)
@@ -169,7 +207,7 @@ export const serializeClientGameView = ({
     buildPiles: gameState.buildPiles.map((pile) => pile.map(cloneCard)),
     completedBuildPiles: gameState.completedBuildPiles.map(cloneCard),
     config: gameState.config,
-    currentPlayerIndex: rotateIndex(gameState.currentPlayerIndex, viewerSeatIndex) ?? 0,
+    currentPlayerIndex: rotateIndex(gameState.currentPlayerIndex, viewerSeatIndex, playerCount) ?? 0,
     deck: redactDeck(gameState.deck),
     gameIsOver: gameState.gameIsOver,
     message: getViewMessage(gameState, viewerSeatIndex, status, connectedSeats),
@@ -177,11 +215,13 @@ export const serializeClientGameView = ({
     room: {
       connectedSeats,
       expiresAt,
+      hostSeatIndex,
       roomCode,
+      seatCapacity,
       status,
       version,
     },
-    selectedCard: toSelectedCardView(gameState.selectedCard, viewerSeatIndex, gameState.currentPlayerIndex),
-    winnerIndex: rotateIndex(gameState.winnerIndex, viewerSeatIndex),
+    selectedCard: toSelectedCardView(gameState.selectedCard, viewerSeatIndex, gameState.currentPlayerIndex, playerCount),
+    winnerIndex: rotateIndex(gameState.winnerIndex, viewerSeatIndex, playerCount),
   };
 };

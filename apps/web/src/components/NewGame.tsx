@@ -6,13 +6,18 @@ import {Button} from '@/components/ui/button.tsx';
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,} from '@/components/ui/dialog';
 import {Input} from '@/components/ui/input';
 import {getStoredStockSize} from '@/state/initialGameState.ts';
-import {isValidRoomCode, normalizeRoomCode} from '@skipbo/multiplayer-protocol';
+import {
+  isValidRoomCode,
+  MAX_PLAYER_NAME_LENGTH,
+  normalizePlayerName,
+  normalizeRoomCode,
+} from '@skipbo/multiplayer-protocol';
 import {Alert, AlertTitle} from "@/components/ui/alert.tsx";
 
 interface NewGameProps {
-  onJoinOnlineGame: (roomCode: string) => Promise<void>;
+  onJoinOnlineGame: (roomCode: string, playerName?: string) => Promise<void>;
   onStartLocalGame: () => void;
-  onStartOnlineGame: (stockSize: number) => Promise<void>;
+  onStartOnlineGame: (stockSize: number, playerName?: string) => Promise<void>;
 }
 
 type NewGameMode = 'local' | 'create-online' | 'join-online';
@@ -57,6 +62,7 @@ function NewGame({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<'create-online' | 'join-online' | null>(null);
+  const [playerName, setPlayerName] = useState('');
   const [queuedLocalStart, setQueuedLocalStart] = useState(false);
   const [roomCode, setRoomCode] = useState('');
   const [selectedMode, setSelectedMode] = useState<NewGameMode>('local');
@@ -73,6 +79,7 @@ function NewGame({
   const resetDialogState = () => {
     setErrorMessage(null);
     setPendingAction(null);
+    setPlayerName('');
     setRoomCode('');
     setSelectedMode('local');
   };
@@ -98,7 +105,7 @@ function NewGame({
     setPendingAction('create-online');
 
     try {
-      await onStartOnlineGame(stockSize);
+      await onStartOnlineGame(stockSize, normalizePlayerName(playerName));
       setIsOpen(false);
       resetDialogState();
     } catch (error) {
@@ -119,7 +126,7 @@ function NewGame({
     setPendingAction('join-online');
 
     try {
-      await onJoinOnlineGame(normalizedRoomCode);
+      await onJoinOnlineGame(normalizedRoomCode, normalizePlayerName(playerName));
       setIsOpen(false);
       resetDialogState();
     } catch (error) {
@@ -152,7 +159,9 @@ function NewGame({
         <DialogTrigger asChild>
           <Button size="sm">Nouvelle partie</Button>
         </DialogTrigger>
-        <DialogContent className="w-[min(32rem,calc(100vw-1rem))] max-h-[calc(100svh-1rem)] gap-3 overflow-y-auto p-3 sm:p-4">
+        <DialogContent
+            className="w-[min(32rem,calc(100vw-1rem))] max-h-[calc(100svh-1rem)] gap-3 overflow-y-auto p-3 sm:p-4"
+            aria-description="new-game">
           <DialogHeader className="pr-10">
             <DialogTitle className="text-xl sm:text-2xl">Nouvelle partie</DialogTitle>
           </DialogHeader>
@@ -216,6 +225,28 @@ function NewGame({
                   <AlertTitle>{errorMessage}</AlertTitle>
                 </Alert>
             ) : null}
+            {selectedMode !== 'local' ? (
+              <div className="mt-3">
+                <label htmlFor="new-game-player-name" className="text-sm font-medium">
+                  Nom
+                </label>
+                <Input
+                  id="new-game-player-name"
+                  value={playerName}
+                  onChange={(event) => {
+                    setPlayerName(event.target.value);
+                    setErrorMessage(null);
+                  }}
+                  placeholder="Nom du joueur"
+                  maxLength={MAX_PLAYER_NAME_LENGTH}
+                  autoComplete="nickname"
+                  className="mt-1 h-11 text-base sm:text-sm"
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Optionnel, {MAX_PLAYER_NAME_LENGTH} caractères max. Sinon un nom automatique sera attribué.
+                </p>
+              </div>
+            ) : null}
             {selectedMode === 'join-online' ? (
               <>
                 <form
@@ -225,7 +256,11 @@ function NewGame({
                     void handleJoinOnline();
                   }}
                 >
+                  <label htmlFor="new-game-room-code" className="sr-only">
+                    Code de partie
+                  </label>
                   <Input
+                    id="new-game-room-code"
                     value={roomCode}
                     onChange={(event) => {
                       setRoomCode(normalizeRoomCode(event.target.value));

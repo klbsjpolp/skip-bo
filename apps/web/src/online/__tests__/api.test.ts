@@ -24,10 +24,11 @@ describe('online api configuration', () => {
 
     const {createOnlineRoom} = await import('../api.ts');
 
-    await createOnlineRoom(30);
+    await createOnlineRoom(30, 'Alice');
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith('https://api.example.com/rooms', expect.objectContaining({
+      body: JSON.stringify({ playerName: 'Alice', stockSize: 30 }),
       method: 'POST',
     }));
   });
@@ -43,12 +44,13 @@ describe('online api configuration', () => {
 
     const {createOnlineRoom} = await import('../api.ts');
 
-    await createOnlineRoom(30);
+    await createOnlineRoom(30, 'Bob');
 
     expect(fetchMock).toHaveBeenNthCalledWith(1, '/runtime-config.json', expect.objectContaining({
       cache: 'no-store',
     }));
     expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://runtime.example.com/rooms', expect.objectContaining({
+      body: JSON.stringify({ playerName: 'Bob', stockSize: 30 }),
       method: 'POST',
     }));
   });
@@ -64,5 +66,23 @@ describe('online api configuration', () => {
     const {joinOnlineRoom} = await import('../api.ts');
 
     await expect(joinOnlineRoom('ABCDE')).rejects.toThrow('Le jeu en ligne n’est pas configuré pour cette installation.');
+  });
+
+  it('normalizes a blank player name out of join requests', async () => {
+    vi.resetModules();
+    vi.stubEnv('VITE_SKIPBO_API_URL', 'https://api.example.com');
+
+    const fetchMock = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(makeJsonResponse({ roomCode: 'ABCDE', seatToken: 'seat-token' }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { joinOnlineRoom } = await import('../api.ts');
+
+    await joinOnlineRoom('ABCDE', '   ');
+
+    expect(fetchMock).toHaveBeenCalledWith('https://api.example.com/rooms/join', expect.objectContaining({
+      body: JSON.stringify({ roomCode: 'ABCDE' }),
+      method: 'POST',
+    }));
   });
 });

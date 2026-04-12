@@ -44,11 +44,7 @@ export const triggerAIAnimation = async (
   }
 
   try {
-    // Get the correct player area based on current player index
-    // Note: DOM order is AI (index 0), Human (index 1), but playerIndex is Human=0, AI=1
-    const playerAreas = document.querySelectorAll('.player-area');
-    const domIndex = gameState.currentPlayerIndex === 0 ? 1 : 0; // Human=1, AI=0 in DOM
-    const playerAreaElement = playerAreas[domIndex] as HTMLElement;
+    const playerAreaElement = document.querySelector<HTMLElement>(`.player-area[data-player-index="${gameState.currentPlayerIndex}"]`);
     const centerAreaElement = document.querySelector('.center-area') as HTMLElement;
 
     if (!playerAreaElement || !centerAreaElement) {

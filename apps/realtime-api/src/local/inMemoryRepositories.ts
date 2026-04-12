@@ -1,3 +1,6 @@
+import {
+  RoomVersionConflictError,
+} from '../repositories/types.js';
 import type {
   ConnectionRecord,
   ConnectionRepository,
@@ -20,7 +23,13 @@ export class InMemoryRoomRepository implements RoomRepository {
     return this.rooms.get(roomCode) ?? null;
   }
 
-  async update(room: RoomRecord): Promise<void> {
+  async update(room: RoomRecord, expectedVersion?: number): Promise<void> {
+    const currentRoom = this.rooms.get(room.roomCode);
+
+    if (expectedVersion !== undefined && currentRoom && currentRoom.version !== expectedVersion) {
+      throw new RoomVersionConflictError(room.roomCode);
+    }
+
     this.rooms.set(room.roomCode, room);
   }
 }

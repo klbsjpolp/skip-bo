@@ -18,4 +18,14 @@ describe('initialGameState', () => {
     expect(state.players[0].stockPile).toHaveLength(DEFAULT_STOCK_SIZE);
     expect(state.players[1].stockPile).toHaveLength(DEFAULT_STOCK_SIZE);
   });
+
+  it('supports creating multiplayer states with up to four players', () => {
+    const state = initialGameState({ playerCount: 4, stockSize: 20 });
+
+    expect(state.players).toHaveLength(4);
+    expect(state.players[0].isAI).toBe(false);
+    expect(state.players[1].isAI).toBe(true);
+    expect(state.players[2].stockPile).toHaveLength(20);
+    expect(state.players[3].hand).toHaveLength(5);
+  });
 });

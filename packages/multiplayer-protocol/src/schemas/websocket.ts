@@ -45,7 +45,7 @@ export const gameActionSchema = z.discriminatedUnion('type', [
 
 export const authClientMessageSchema = z.object({
   roomCode: z.string().min(1),
-  seatIndex: z.number().int().min(0).max(1),
+  seatIndex: z.number().int().min(0).max(3),
   seatToken: z.string().min(1),
   type: z.literal('auth'),
 });
@@ -60,8 +60,14 @@ export const pingClientMessageSchema = z.object({
   type: z.literal('ping'),
 });
 
+export const startGameClientMessageSchema = z.object({
+  clientVersion: z.number().int().min(0).optional(),
+  type: z.literal('startGame'),
+});
+
 export const clientMessageSchema = z.discriminatedUnion('type', [
   authClientMessageSchema,
   actionClientMessageSchema,
+  startGameClientMessageSchema,
   pingClientMessageSchema,
 ]);

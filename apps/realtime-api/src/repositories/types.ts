@@ -1,17 +1,27 @@
 import type { GameState } from '@skipbo/game-core';
 import type { RoomStatus } from '@skipbo/multiplayer-protocol';
 
+export class RoomVersionConflictError extends Error {
+  constructor(roomCode: string) {
+    super(`Room version conflict for ${roomCode}`);
+    this.name = 'RoomVersionConflictError';
+  }
+}
+
 export interface RoomSummaryRecord {
   finishedAt: string;
   winnerIndex: number | null;
 }
 
 export interface RoomRecord {
+  activeSeatIndices?: number[];
   authenticatedSeats?: number[];
   createdAt: string;
   expiresAt: number;
+  hostSeatIndex: number;
   roomCode: string;
-  seatTokenHashes: [string, string | null];
+  seatCapacity: number;
+  seatTokenHashes: Array<string | null>;
   state: GameState;
   status: RoomStatus;
   summary: RoomSummaryRecord | null;
@@ -30,7 +40,7 @@ export interface ConnectionRecord {
 export interface RoomRepository {
   create(room: RoomRecord): Promise<void>;
   get(roomCode: string): Promise<RoomRecord | null>;
-  update(room: RoomRecord): Promise<void>;
+  update(room: RoomRecord, expectedVersion?: number): Promise<void>;
 }
 
 export interface ConnectionRepository {

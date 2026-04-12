@@ -5,7 +5,7 @@ import { clientMessageSchema } from '@skipbo/multiplayer-protocol';
 
 import { isClientError } from '../../errors/clientError.js';
 import { captureBackendException, withSentry } from '../../monitoring/sentry.js';
-import { authenticateConnection, handleAction, rejectAction } from '../../services/roomService.js';
+import { authenticateConnection, handleAction, rejectAction, startGame } from '../../services/roomService.js';
 import { broadcaster, connectionRepository, roomRepository, websocketUrl } from '../shared.js';
 
 const messageHandler: APIGatewayProxyWebsocketHandlerV2 = async (event) => {
@@ -37,6 +37,11 @@ const messageHandler: APIGatewayProxyWebsocketHandlerV2 = async (event) => {
       case 'action':
         await handleAction(dependencies, {
           action: message.action,
+          connectionId,
+        });
+        break;
+      case 'startGame':
+        await startGame(dependencies, {
           connectionId,
         });
         break;

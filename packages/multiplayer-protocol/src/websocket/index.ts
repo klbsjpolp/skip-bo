@@ -15,11 +15,16 @@ export interface ActionClientMessage {
   type: 'action';
 }
 
+export interface StartGameClientMessage {
+  clientVersion?: number;
+  type: 'startGame';
+}
+
 export interface PingClientMessage {
   type: 'ping';
 }
 
-export type ClientMessage = AuthClientMessage | ActionClientMessage | PingClientMessage;
+export type ClientMessage = AuthClientMessage | ActionClientMessage | StartGameClientMessage | PingClientMessage;
 
 export interface SnapshotServerMessage {
   type: 'snapshot';

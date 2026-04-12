@@ -339,6 +339,25 @@ describe('gameReducer', () => {
 
       expect(result.currentPlayerIndex).toBe(0);
     });
+
+    it('should wrap across all players in a multiplayer state', () => {
+      const multiplayerState = initialGameState({ playerCount: 4 });
+      const stateWithThirdPlayerTurn = {
+        ...multiplayerState,
+        currentPlayerIndex: 2,
+      };
+
+      const result = gameReducer(stateWithThirdPlayerTurn, { type: 'END_TURN' });
+
+      expect(result.currentPlayerIndex).toBe(3);
+
+      const wrappedResult = gameReducer({
+        ...multiplayerState,
+        currentPlayerIndex: 3,
+      }, { type: 'END_TURN' });
+
+      expect(wrappedResult.currentPlayerIndex).toBe(0);
+    });
   });
 
   describe('RESET action', () => {

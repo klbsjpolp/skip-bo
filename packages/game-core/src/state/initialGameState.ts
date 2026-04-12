@@ -6,8 +6,19 @@ export const STOCK_SIZE_OPTIONS = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] as con
 export const DEFAULT_STOCK_SIZE = 30;
 
 interface InitialGameStateOptions {
+  playerCount?: number;
   stockSize?: number;
 }
+
+const SUPPORTED_PLAYER_COUNTS = [2, 3, 4] as const;
+
+const parsePlayerCount = (value: unknown): number | null => {
+  if (typeof value === 'number' && Number.isInteger(value) && SUPPORTED_PLAYER_COUNTS.includes(value as typeof SUPPORTED_PLAYER_COUNTS[number])) {
+    return value;
+  }
+
+  return null;
+};
 
 const parseStockSize = (value: unknown): number | null => {
   if (typeof value === 'number' && STOCK_SIZE_OPTIONS.includes(value as typeof STOCK_SIZE_OPTIONS[number])) {
@@ -67,10 +78,13 @@ function getGameConfig(options: InitialGameStateOptions = {}):GameConfig {
 export const initialGameState = (options: InitialGameStateOptions = {}): GameState => {
   const config = getGameConfig(options);
   const deck = createDeck(config);
-  const players = [
-    { isAI: false, stockPile: [] as Card[], hand: [] as (Card | null)[], discardPiles: Array.from({ length: config.DISCARD_PILES_COUNT }, () => [] as Card[]) },
-    { isAI: true,  stockPile: [] as Card[], hand: [] as (Card | null)[], discardPiles: Array.from({ length: config.DISCARD_PILES_COUNT }, () => [] as Card[]) }
-  ];
+  const playerCount = parsePlayerCount(options.playerCount) ?? 2;
+  const players = Array.from({ length: playerCount }, (_, index) => ({
+    isAI: index !== 0,
+    stockPile: [] as Card[],
+    hand: [] as (Card | null)[],
+    discardPiles: Array.from({ length: config.DISCARD_PILES_COUNT }, () => [] as Card[]),
+  }));
 
   // Deal stock piles
   players.forEach(player => {

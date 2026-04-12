@@ -10,6 +10,14 @@ const cardsMatch = (candidate: Card | null | undefined, selectedCard: Card): boo
   candidate.value === selectedCard.value &&
   candidate.isSkipBo === selectedCard.isSkipBo;
 
+const getNextPlayerIndex = (currentPlayerIndex: number, playerCount: number): number => {
+  if (playerCount <= 0) {
+    return 0;
+  }
+
+  return (currentPlayerIndex + 1) % playerCount;
+};
+
 const hasValidDiscardPileIndex = (player: Player, discardPileIndex: number): boolean =>
   discardPileIndex >= 0 && discardPileIndex < player.discardPiles.length;
 
@@ -336,11 +344,13 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       // Remove card from hand (set to null instead of removing)
       player.hand[selectedCard.index] = null;
 
+      const previousPlayerIndex = draft.currentPlayerIndex;
+
       // End turn after discarding
-      draft.currentPlayerIndex = 1 - draft.currentPlayerIndex;
+      draft.currentPlayerIndex = getNextPlayerIndex(draft.currentPlayerIndex, draft.players.length);
 
       // Set message
-      const currentPlayer = draft.players[1 - draft.currentPlayerIndex]; // Previous player
+      const currentPlayer = draft.players[previousPlayerIndex];
       const nextPlayer = draft.players[draft.currentPlayerIndex]; // New current player
       draft.message = `${currentPlayer.isAI ? "Tour de l'IA terminé" : "Votre tour est terminé"}. ${nextPlayer.isAI ? "L'IA joue" : "C'est votre tour"}`;
 
@@ -350,7 +360,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
     }
 
     case 'END_TURN':
-      draft.currentPlayerIndex = draft.currentPlayerIndex === 0 ? 1 : 0;
+      draft.currentPlayerIndex = getNextPlayerIndex(draft.currentPlayerIndex, draft.players.length);
       draft.selectedCard = null;
 
       // Don't draw cards here - let the state machine handle drawing
