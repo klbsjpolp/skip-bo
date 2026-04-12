@@ -1,9 +1,9 @@
-import { act, renderHook } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {act, renderHook} from '@testing-library/react';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
-import { initialGameState, type Card, type GameState } from '@skipbo/game-core';
+import {type Card, type GameState, initialGameState} from '@skipbo/game-core';
 
-import { useSkipBoGame } from '@/hooks/useSkipBoGame';
+import {useSkipBoGame} from '@/hooks/useSkipBoGame';
 
 const {
   activeAnimationsState,
@@ -163,9 +163,11 @@ const setElementRect = (
 const appendPlayerAreas = (): HTMLElement => {
   const firstPlayerArea = document.createElement('div');
   firstPlayerArea.className = 'player-area';
+  firstPlayerArea.setAttribute('data-player-index', '1');
 
   const activePlayerArea = document.createElement('div');
   activePlayerArea.className = 'player-area';
+  activePlayerArea.setAttribute('data-player-index', '0');
 
   document.body.append(firstPlayerArea, activePlayerArea);
 
