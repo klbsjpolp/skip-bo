@@ -70,7 +70,7 @@ variable "sentry_release" {
 }
 
 variable "sentry_traces_sample_rate" {
-  description = "Optional traces sample rate for backend Sentry performance monitoring."
+  description = "Optional override for backend Sentry traces sample rate. Defaults to 1.0 when backend Sentry is enabled."
   type        = number
   default     = null
   nullable    = true

@@ -85,7 +85,8 @@ Browser Sentry is optional:
 VITE_SENTRY_DSN=your_browser_dsn
 ```
 
-Backend deployment uses `TF_VAR_sentry_dsn` and `TF_VAR_sentry_release` when Sentry is enabled. The exact deploy flow lives in [docs/runbooks/opentofu-aws-realtime.md](docs/runbooks/opentofu-aws-realtime.md).
+Backend deployment uses `TF_VAR_sentry_dsn` and `TF_VAR_sentry_release` when Sentry is enabled. GitHub Actions prefers `BACKEND_SENTRY_DSN`, then `SENTRY_DSN`, then falls back to `VITE_SENTRY_DSN`. The exact deploy flow lives in [docs/runbooks/opentofu-aws-realtime.md](docs/runbooks/opentofu-aws-realtime.md).
+Backend tracing defaults to `1.0` when `TF_VAR_sentry_dsn` is set; override it with `TF_VAR_sentry_traces_sample_rate` if you want a lower sample rate.
 
 ## Workspace Layout
 

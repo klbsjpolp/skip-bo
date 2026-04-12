@@ -44,10 +44,13 @@ These alarms publish to an SNS topic when `var.alarm_topic_arn` is provided.
 
 - The realtime Lambda functions use `@sentry/aws-serverless`.
 - Set `SENTRY_DSN` through OpenTofu when backend monitoring is enabled.
+- `infra/terraform/envs/prod/main.tf` defaults `SENTRY_TRACES_SAMPLE_RATE` to `1.0` whenever backend Sentry is enabled, unless `sentry_traces_sample_rate` overrides it.
 - The `withSentry` wrapper in `apps/realtime-api/src/monitoring/sentry.ts` captures handler errors and traces.
+- The HTTP API CORS allowlist must include `sentry-trace` and `baggage` so browser requests can propagate traces to Lambda.
 
 ## Web App Monitoring
 
 - The React web app uses `@sentry/react`.
 - Set `VITE_SENTRY_DSN` during the frontend build when browser monitoring is enabled.
+- `apps/web/src/monitoring/tracePropagation.ts` matches local dev URLs, API Gateway URLs, and any explicit build-time API origin so browser requests carry `sentry-trace` and `baggage` to the backend.
 - Performance monitoring and session replay remain controlled by the web app integration code.

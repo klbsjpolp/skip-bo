@@ -134,13 +134,13 @@ jobs:
       - name: Create production plan
         run: tofu -chdir=infra/terraform/envs/prod plan -input=false -out=tfplan
         env:
-          TF_VAR_sentry_dsn: ${{ secrets.VITE_SENTRY_DSN }}
+          TF_VAR_sentry_dsn: ${{ secrets.BACKEND_SENTRY_DSN || secrets.SENTRY_DSN || secrets.VITE_SENTRY_DSN }}
           TF_VAR_sentry_release: ${{ needs.release.outputs.release_tag }}
 
       - name: Apply production plan
         run: tofu -chdir=infra/terraform/envs/prod apply -input=false tfplan
         env:
-          TF_VAR_sentry_dsn: ${{ secrets.VITE_SENTRY_DSN }}
+          TF_VAR_sentry_dsn: ${{ secrets.BACKEND_SENTRY_DSN || secrets.SENTRY_DSN || secrets.VITE_SENTRY_DSN }}
           TF_VAR_sentry_release: ${{ needs.release.outputs.release_tag }}
 
       - name: Get API URL from OpenTofu output

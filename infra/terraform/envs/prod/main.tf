@@ -6,17 +6,18 @@ locals {
     Project     = "skip-bo"
     Service     = "realtime-api"
   }, var.extra_tags)
-  sentry_dsn_value     = var.sentry_dsn == null ? "" : trimspace(var.sentry_dsn)
-  sentry_release_value = var.sentry_release == null ? "" : trimspace(var.sentry_release)
-  sentry_enabled       = local.sentry_dsn_value != ""
-  sentry_environment_variables = local.sentry_enabled ? merge({
-    SENTRY_DSN         = local.sentry_dsn_value
-    SENTRY_ENVIRONMENT = var.environment
-    }, local.sentry_release_value != "" ? {
+  sentry_dsn_value                = var.sentry_dsn == null ? "" : trimspace(var.sentry_dsn)
+  sentry_release_value            = var.sentry_release == null ? "" : trimspace(var.sentry_release)
+  sentry_enabled                  = local.sentry_dsn_value != ""
+  sentry_traces_sample_rate_value = var.sentry_traces_sample_rate == null ? 1 : var.sentry_traces_sample_rate
+  sentry_release_environment_variables = local.sentry_release_value != "" ? {
     SENTRY_RELEASE = local.sentry_release_value
-    } : {}, var.sentry_traces_sample_rate == null ? {} : {
-    SENTRY_TRACES_SAMPLE_RATE = tostring(var.sentry_traces_sample_rate)
-  }) : {}
+  } : {}
+  sentry_environment_variables = local.sentry_enabled ? merge({
+    SENTRY_DSN                = local.sentry_dsn_value
+    SENTRY_ENVIRONMENT        = var.environment
+    SENTRY_TRACES_SAMPLE_RATE = tostring(local.sentry_traces_sample_rate_value)
+  }, local.sentry_release_environment_variables) : {}
 }
 
 data "archive_file" "realtime_api" {

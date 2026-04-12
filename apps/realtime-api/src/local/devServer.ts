@@ -30,7 +30,7 @@ const DEFAULT_PORT = 8787;
 const WS_PATH = '/ws';
 
 const CORS_HEADERS = {
-  'access-control-allow-headers': 'content-type',
+  'access-control-allow-headers': 'baggage, content-type, sentry-trace',
   'access-control-allow-methods': 'GET,POST,OPTIONS',
   'access-control-allow-origin': '*',
 };

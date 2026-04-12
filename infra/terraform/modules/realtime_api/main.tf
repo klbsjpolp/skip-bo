@@ -43,7 +43,7 @@ resource "aws_apigatewayv2_api" "http" {
   protocol_type = "HTTP"
 
   cors_configuration {
-    allow_headers  = ["content-type"]
+    allow_headers  = ["baggage", "content-type", "sentry-trace"]
     allow_methods  = ["OPTIONS", "POST"]
     allow_origins  = var.http_allowed_origins
     expose_headers = ["content-type"]

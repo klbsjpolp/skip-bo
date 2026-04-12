@@ -27,7 +27,8 @@
 - `AWS_OPENTOFU_ROLE_ARN` or `AWS_DEPLOY_ROLE_ARN` for GitHub Actions
 - `VITE_SKIPBO_API_URL` for frontend deployment after backend rollout
 - optional `VITE_SENTRY_DSN`
-- optional `TF_VAR_sentry_dsn` and `TF_VAR_sentry_release` for local plan or apply
+- optional `BACKEND_SENTRY_DSN` or `SENTRY_DSN` GitHub secret if the backend should report to a different Sentry project than the browser
+- optional `TF_VAR_sentry_dsn`, `TF_VAR_sentry_release`, and `TF_VAR_sentry_traces_sample_rate` for local plan or apply
 
 ## Steps
 
@@ -80,6 +81,7 @@ pnpm tofu:apply
 - `ci.yml` runs workspace checks and offline OpenTofu validation.
 - `deploy.yml` creates the release commit and tag, deploys the backend when needed, rebuilds the frontend with runtime config, deploys GitHub Pages, and publishes the GitHub release.
 - Backend deploy uses `TOFU_BACKEND_CONFIG_HCL` plus `AWS_OPENTOFU_ROLE_ARN` or `AWS_DEPLOY_ROLE_ARN`.
+- Backend deploy resolves the Sentry DSN from `BACKEND_SENTRY_DSN`, then `SENTRY_DSN`, then `VITE_SENTRY_DSN`.
 
 ## Validation
 
@@ -102,3 +104,4 @@ pnpm tofu:apply
 - Missing AWS role secrets break GitHub Actions deployment.
 - Forgetting to refresh `VITE_SKIPBO_API_URL` leaves the frontend pointed at the wrong backend.
 - Missing Sentry variables disables backend release tagging and monitoring integration.
+- When `TF_VAR_sentry_dsn` is set, backend tracing defaults to a `1.0` sample rate unless `TF_VAR_sentry_traces_sample_rate` overrides it.
