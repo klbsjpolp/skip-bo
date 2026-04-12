@@ -660,13 +660,7 @@ describe('useOnlineSkipBoGame', () => {
   });
 
   it('ignores new selections while snapshot-driven animations are still active online', async () => {
-    const session: CreateRoomResponse = {
-      expiresAt: '2026-04-05T12:00:00.000Z',
-      roomCode: 'ABCDE',
-      seatIndex: 0,
-      seatToken: 'seat-token',
-      wsUrl: 'ws://example.test/game',
-    };
+    const session = createSession();
 
     activeAnimationsState.current = [{
       animationType: 'play',
