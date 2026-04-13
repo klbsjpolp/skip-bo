@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.9.0](https://github.com/klbsjpolp/skip-bo/compare/v1.8.3...v1.9.0) (2026-04-13)
+
+
+### Bug Fixes
+
+* **web:** avoid useEffectEvent lint violation ([15390d6](https://github.com/klbsjpolp/skip-bo/commit/15390d6d2c514733dc71fb18fe8a21d2df96cfab))
+
+
+### Features
+
+* **web:** add PWA update gating and runtime version checks ([e78662d](https://github.com/klbsjpolp/skip-bo/commit/e78662d4ecfe086f65262acde65d49c9ae720eca))
+
+
+
 ## [1.8.3](https://github.com/klbsjpolp/skip-bo/compare/v1.8.2...v1.8.3) (2026-04-13)
 
 
