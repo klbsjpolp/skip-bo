@@ -56,7 +56,7 @@ export const usePwaVersionGate = (): PwaVersionGateState => {
     });
   });
 
-  const reloadToUpdate = useEffectEvent(async () => {
+  const runReloadToUpdate = async () => {
     if (isApplyingUpdateRef.current) {
       return;
     }
@@ -75,6 +75,10 @@ export const usePwaVersionGate = (): PwaVersionGateState => {
       isApplyingUpdateRef.current = false;
       setIsApplyingUpdate(false);
     }
+  };
+
+  const reloadToUpdate = useEffectEvent(() => {
+    void runReloadToUpdate();
   });
 
   useEffect(() => {
@@ -152,7 +156,7 @@ export const usePwaVersionGate = (): PwaVersionGateState => {
       }
     },
     reloadToUpdate: () => {
-      void reloadToUpdate();
+      void runReloadToUpdate();
     },
     shouldShowSoftUpdate,
   };
