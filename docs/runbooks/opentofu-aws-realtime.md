@@ -80,6 +80,7 @@ pnpm tofu:apply
 
 - `ci.yml` runs workspace checks and offline OpenTofu validation.
 - `deploy.yml` creates the release commit and tag, deploys the backend when needed, rebuilds the frontend with runtime config, deploys GitHub Pages, and publishes the GitHub release.
+- The release job checks out `main` with full git history so `commit-and-tag-version` can inspect commits since the previous tag and produce the correct SemVer bump.
 - Backend deploy uses `TOFU_BACKEND_CONFIG_HCL` plus `AWS_OPENTOFU_ROLE_ARN` or `AWS_DEPLOY_ROLE_ARN`.
 - Backend deploy resolves the Sentry DSN from `BACKEND_SENTRY_DSN`, then `SENTRY_DSN`, then `VITE_SENTRY_DSN`.
 

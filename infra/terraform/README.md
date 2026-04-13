@@ -9,6 +9,8 @@
 
 This directory owns the production AWS infrastructure for the realtime backend. Use the runbook for step-by-step operations and this file for directory-level orientation.
 
+The production deploy workflow also owns release creation in `.github/workflows/deploy.yml`. Keep its checkout unshallowed so release versioning can read the full conventional-commit history between tags.
+
 ## Layout
 
 - `modules/dynamodb`: room and connection tables

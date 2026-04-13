@@ -67,6 +67,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: main # Garantir qu'on est sur main pour la release
+          fetch-depth: 0 # Full history is required for conventional-commit version calculation
       - uses: ./.github/actions/setup-node
 
       - name: Configure git author
