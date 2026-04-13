@@ -180,7 +180,7 @@
     overflow: hidden;
     isolation: isolate;
 
-    > span:not(.card-corner-number) {
+    .card-number {
       letter-spacing: 0.02em;
       text-shadow:
         0 1px 0 rgb(255 255 255 / 0.34),
@@ -279,11 +279,11 @@
         0 10px 22px rgb(0 0 0 / 0.38),
         0 0 0 1px rgb(127 212 215 / 0.14);
 
-      > span.card-corner-number {
+      .card-corner-number {
         visibility: hidden;
       }
 
-      > span:not(.card-corner-number) {
+      .card-number {
         position: absolute;
         bottom: 13%;
         left: 50%;

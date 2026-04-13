@@ -709,7 +709,7 @@
     @apply z-1;
   }
 
-  > span:not(.card-corner-number):not(.card-corner-inset) {
+  > .card-number {
     @apply relative z-2;
   }
 }

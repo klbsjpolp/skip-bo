@@ -105,7 +105,7 @@
           opacity: 0.65;
         }
 
-        span:not(.card-corner-number) {
+          .card-number {
           position: relative;
           z-index: 1; /* au-dessus des gradients */
         }

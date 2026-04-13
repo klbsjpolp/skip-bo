@@ -1,7 +1,7 @@
 import type {Card as CardType} from '@/types';
 import {cn} from '@/lib/utils';
-import type {MouseEventHandler, CSSProperties, KeyboardEventHandler, HTMLAttributes} from "react";
-import React, { memo, useState, useLayoutEffect} from "react";
+import type {CSSProperties, HTMLAttributes, KeyboardEventHandler, MouseEventHandler} from "react";
+import React, {memo, useLayoutEffect, useState} from "react";
 
 interface CardProps {
   card: CardType | null,
@@ -94,7 +94,7 @@ const CardComponent: React.FC<CardProps> = ({
       <div className='card-inner-2'></div>
       <span className='card-corner-inset' aria-hidden='true'></span>
       <span className='card-corner-number'>{value}</span>
-      <span>{value}</span>
+      <span className="card-number">{value}</span>
     </> : <div className='back'></div>
   );
 

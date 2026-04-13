@@ -119,7 +119,8 @@
       span.card-corner-number { visibility: hidden; }
 
       /* Simple title: no back plate, smaller single-line text */
-      > span:not(.card-corner-number) {
+
+      .card-number {
         position: absolute;
         top: 10%;
         left: 50%;

@@ -70,7 +70,8 @@
             );
           }
         }
-        span:not(.card-corner-number) {
+
+          .card-number {
           @apply relative z-0
             before:absolute before:z-[-1] before:content-['Skip-Bo']
             after:absolute  after:z-[-1]  after:content-['Skip-Bo']
