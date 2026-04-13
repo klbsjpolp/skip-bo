@@ -4,43 +4,14 @@ import {
   type CreateRoomResponse,
   type JoinRoomResponse,
 } from '@skipbo/multiplayer-protocol';
-
-interface RuntimeConfig {
-  apiBaseUrl?: string;
-}
+import {clearRuntimeConfigCache, fetchRuntimeConfig} from '@/lib/runtimeConfig';
 
 const ONLINE_CONFIGURATION_ERROR =
   'Le jeu en ligne n’est pas configuré pour cette installation.';
 
-let runtimeConfigPromise: Promise<RuntimeConfig> | null = null;
-
 const normalizeApiBaseUrl = (apiBaseUrl: string | undefined | null): string | null => {
   const normalizedValue = apiBaseUrl?.trim();
   return normalizedValue ? normalizedValue.replace(/\/$/, '') : null;
-};
-
-const loadRuntimeConfig = async (): Promise<RuntimeConfig> => {
-  if (!runtimeConfigPromise) {
-    runtimeConfigPromise = fetch(`${import.meta.env.BASE_URL}runtime-config.json`, {
-      cache: 'no-store',
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          return {};
-        }
-
-        return (await response.json()) as RuntimeConfig;
-      })
-      .catch(() => ({}));
-  }
-
-  const runtimeConfig = await runtimeConfigPromise;
-
-  if (!normalizeApiBaseUrl(runtimeConfig.apiBaseUrl)) {
-    runtimeConfigPromise = null;
-  }
-
-  return runtimeConfig;
 };
 
 const getApiBaseUrl = async (): Promise<string> => {
@@ -50,12 +21,14 @@ const getApiBaseUrl = async (): Promise<string> => {
     return envApiBaseUrl;
   }
 
-  const runtimeConfig = await loadRuntimeConfig();
+  const runtimeConfig = await fetchRuntimeConfig();
   const runtimeApiBaseUrl = normalizeApiBaseUrl(runtimeConfig.apiBaseUrl);
 
   if (runtimeApiBaseUrl) {
     return runtimeApiBaseUrl;
   }
+
+  clearRuntimeConfigCache();
 
   throw new Error(ONLINE_CONFIGURATION_ERROR);
 };

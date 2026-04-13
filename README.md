@@ -87,6 +87,7 @@ VITE_SENTRY_DSN=your_browser_dsn
 
 Backend deployment uses `TF_VAR_sentry_dsn` and `TF_VAR_sentry_release` when Sentry is enabled. GitHub Actions prefers `BACKEND_SENTRY_DSN`, then `SENTRY_DSN`, then falls back to `VITE_SENTRY_DSN`. The exact deploy flow lives in [docs/runbooks/opentofu-aws-realtime.md](docs/runbooks/opentofu-aws-realtime.md).
 Backend tracing defaults to `1.0` when `TF_VAR_sentry_dsn` is set; override it with `TF_VAR_sentry_traces_sample_rate` if you want a lower sample rate.
+Frontend deploy also regenerates `apps/web/public/runtime-config.json` with the current app version. Leave `PWA_MINIMUM_SUPPORTED_VERSION` empty for soft update prompts, or set it to a release tag like `v1.4.0` before redeploying when installed PWAs must hard-reload onto a newer build.
 
 ## Workspace Layout
 

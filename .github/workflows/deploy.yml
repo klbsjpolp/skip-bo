@@ -15,6 +15,11 @@ on:
         description: 'Force frontend deployment'
         type: boolean
         default: false
+      minimum_supported_version:
+        description: 'Optional minimum supported web version for installed PWAs'
+        type: string
+        required: false
+        default: ''
 
 concurrency:
   group: deploy-production
@@ -214,9 +219,22 @@ jobs:
 
       - name: Generate runtime config
         shell: bash
+        env:
+          API_BASE_URL: ${{ needs.get-api-url.outputs.api_url }}
+          APP_VERSION: ${{ needs.release.outputs.release_tag }}
+          MINIMUM_SUPPORTED_VERSION: ${{ inputs.minimum_supported_version || vars.PWA_MINIMUM_SUPPORTED_VERSION }}
         run: |
-          echo "{\"apiBaseUrl\":\"${{ needs.get-api-url.outputs.api_url }}\"}" \
-            > apps/web/public/runtime-config.json
+          node <<'EOF'
+          const fs = require('node:fs');
+
+          const payload = {
+            apiBaseUrl: process.env.API_BASE_URL ?? '',
+            appVersion: process.env.APP_VERSION ?? '',
+            minimumSupportedVersion: process.env.MINIMUM_SUPPORTED_VERSION ?? '',
+          };
+
+          fs.writeFileSync('apps/web/public/runtime-config.json', `${JSON.stringify(payload)}\n`);
+          EOF
 
       - name: Build web app
         run: pnpm --filter @skipbo/web build

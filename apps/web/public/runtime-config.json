@@ -1,3 +1,5 @@
 {
-  "apiBaseUrl": ""
+  "apiBaseUrl": "",
+  "appVersion": "",
+  "minimumSupportedVersion": ""
 }

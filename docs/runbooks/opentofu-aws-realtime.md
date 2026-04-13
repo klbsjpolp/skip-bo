@@ -26,6 +26,7 @@
 - remote-state backend settings for `infra/terraform/envs/prod/backend.hcl`
 - `AWS_OPENTOFU_ROLE_ARN` or `AWS_DEPLOY_ROLE_ARN` for GitHub Actions
 - `VITE_SKIPBO_API_URL` for frontend deployment after backend rollout
+- optional `PWA_MINIMUM_SUPPORTED_VERSION` GitHub repository variable, or the manual deploy input of the same meaning, when installed PWAs must be forced off an older build
 - optional `VITE_SENTRY_DSN`
 - optional `BACKEND_SENTRY_DSN` or `SENTRY_DSN` GitHub secret if the backend should report to a different Sentry project than the browser
 - optional `TF_VAR_sentry_dsn`, `TF_VAR_sentry_release`, and `TF_VAR_sentry_traces_sample_rate` for local plan or apply
@@ -83,6 +84,8 @@ pnpm tofu:apply
 - The release job checks out `main` with full git history so `commit-and-tag-version` can inspect commits since the previous tag and produce the correct SemVer bump.
 - Backend deploy uses `TOFU_BACKEND_CONFIG_HCL` plus `AWS_OPENTOFU_ROLE_ARN` or `AWS_DEPLOY_ROLE_ARN`.
 - Backend deploy resolves the Sentry DSN from `BACKEND_SENTRY_DSN`, then `SENTRY_DSN`, then `VITE_SENTRY_DSN`.
+- Frontend deploy writes `apps/web/public/runtime-config.json` with `apiBaseUrl`, the current release tag as `appVersion`, and an optional `minimumSupportedVersion` sourced from the workflow-dispatch input or the `PWA_MINIMUM_SUPPORTED_VERSION` repository variable.
+- Leave `PWA_MINIMUM_SUPPORTED_VERSION` empty for normal soft-update behavior. Set it to a release tag such as `v1.4.0` only when older installed PWAs must block and reload before continuing.
 
 ## Validation
 
@@ -97,6 +100,7 @@ pnpm tofu:apply
 - If a bad infra change has not been applied yet, stop at plan review and fix the configuration.
 - If a bad apply has already happened, revert the infra change in git, rebuild the realtime API if packaging inputs changed, and run a fresh plan and apply.
 - If the backend URL changed unexpectedly, update `VITE_SKIPBO_API_URL` and redeploy the frontend so `apps/web/public/runtime-config.json` is regenerated from the current value.
+- If installed clients are being forced to reload unexpectedly, clear or lower `PWA_MINIMUM_SUPPORTED_VERSION` and redeploy the frontend so the runtime config stops hard-blocking older builds.
 
 ## Failure Modes
 
@@ -104,5 +108,6 @@ pnpm tofu:apply
 - Skipping the realtime API build can package stale Lambda artifacts.
 - Missing AWS role secrets break GitHub Actions deployment.
 - Forgetting to refresh `VITE_SKIPBO_API_URL` leaves the frontend pointed at the wrong backend.
+- Setting `PWA_MINIMUM_SUPPORTED_VERSION` too high can block otherwise healthy installed PWAs until they reload onto a newer release.
 - Missing Sentry variables disables backend release tagging and monitoring integration.
 - When `TF_VAR_sentry_dsn` is set, backend tracing defaults to a `1.0` sample rate unless `TF_VAR_sentry_traces_sample_rate` overrides it.

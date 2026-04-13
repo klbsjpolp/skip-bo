@@ -9,7 +9,7 @@
 
 This directory owns the production AWS infrastructure for the realtime backend. Use the runbook for step-by-step operations and this file for directory-level orientation.
 
-The production deploy workflow also owns release creation in `.github/workflows/deploy.yml`. Keep its checkout unshallowed so release versioning can read the full conventional-commit history between tags.
+The production deploy workflow also owns release creation in `.github/workflows/deploy.yml`. Keep its checkout unshallowed so release versioning can read the full conventional-commit history between tags. That same workflow writes the GitHub Pages runtime config, including the optional `minimumSupportedVersion` gate used to force installed PWAs off an older build.
 
 ## Layout
 

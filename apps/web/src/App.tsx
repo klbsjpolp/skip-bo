@@ -5,6 +5,8 @@ import type {CreateRoomResponse} from '@skipbo/multiplayer-protocol';
 import {useLocalSkipBoGame} from '@/hooks/useLocalSkipBoGame';
 import {useOnlineSkipBoGame} from '@/hooks/useOnlineSkipBoGame';
 import type {GameType} from '@/app/types';
+import {AppUpdateBanner} from '@/components/AppUpdateBanner';
+import {ForcedUpdateOverlay} from '@/components/ForcedUpdateOverlay';
 import {OnlineStatusStrip} from '@/components/OnlineStatusStrip';
 import {ThemeSwitcher} from '@/components/ThemeSwitcher';
 import {LocalGameBoard} from '@/components/LocalGameBoard';
@@ -19,6 +21,7 @@ import {createOnlineRoom, joinOnlineRoom} from '@/online/api';
 import {getStoredStockSize} from '@/state/initialGameState';
 import {getRequestedUiFixtureName, getUiFixture, type UiFixtureName} from '@/testing/uiFixtures';
 import {DebugStrip} from "@/components/DebugStrip";
+import {usePwaVersionGate} from '@/hooks/usePwaVersionGate';
 
 const fixtureActionResult = Promise.resolve({ success: true, message: 'Fixture mode' });
 
@@ -32,6 +35,7 @@ interface AppShellProps {
   onStartLocalGame: () => void;
   onStartOnlineGame: (stockSize?: number, playerName?: string) => Promise<void>;
   statusStrip?: ReactNode;
+  updateNotice?: ReactNode;
 }
 
 function AppShell({
@@ -44,6 +48,7 @@ function AppShell({
   onStartLocalGame,
   onStartOnlineGame,
   statusStrip,
+  updateNotice,
 }: AppShellProps) {
   return (
     <main
@@ -70,6 +75,7 @@ function AppShell({
           </div>
           <ThemeSwitcher/>
         </div>
+        {updateNotice ? <div className="mb-3">{updateNotice}</div> : null}
         {gameBoard}
         {isGameOver && (
             <div className="mt-5 text-center">
@@ -124,6 +130,7 @@ interface SessionScreenProps {
   onReplay: () => Promise<void>;
   onStartLocalGame: () => void;
   onStartOnlineGame: (stockSize?: number, playerName?: string) => Promise<void>;
+  updateNotice?: ReactNode;
 }
 
 function LocalGameScreen({
@@ -131,6 +138,7 @@ function LocalGameScreen({
   onReplay,
   onStartLocalGame,
   onStartOnlineGame,
+  updateNotice,
 }: SessionScreenProps) {
   const {
     clearSelection,
@@ -164,6 +172,7 @@ function LocalGameScreen({
       onReplay={onReplay}
       onStartLocalGame={onStartLocalGame}
       onStartOnlineGame={onStartOnlineGame}
+      updateNotice={updateNotice}
     />
   );
 }
@@ -178,6 +187,7 @@ function OnlineGameScreen({
   onStartLocalGame,
   onStartOnlineGame,
   session,
+  updateNotice,
 }: OnlineGameScreenProps) {
   const {
     canStartGame,
@@ -225,6 +235,7 @@ function OnlineGameScreen({
           seatCapacity={seatCapacity}
         />
       }
+      updateNotice={updateNotice}
     />
   );
 }
@@ -234,6 +245,17 @@ function LiveApp() {
   const [currentGameType, setCurrentGameType] = useState<GameType>('local-ai');
   const [localSessionVersion, setLocalSessionVersion] = useState(0);
   const [onlineSession, setOnlineSession] = useState<CreateRoomResponse | null>(null);
+  const {
+    currentAppVersion,
+    dismissSoftUpdate,
+    hasPendingServiceWorkerUpdate,
+    isApplyingUpdate,
+    isHardUpdateRequired,
+    latestAppVersion,
+    minimumSupportedVersion,
+    reloadToUpdate,
+    shouldShowSoftUpdate,
+  } = usePwaVersionGate();
 
   useEffect(() => {
     animationServiceBridge.waitForAnimations = waitForAnimations;
@@ -265,27 +287,51 @@ function LiveApp() {
     await startOnlineGame();
   };
 
-  if (currentGameType === 'online-human' && onlineSession) {
-    return (
-      <OnlineGameScreen
-        key={`${onlineSession.roomCode}-${onlineSession.seatToken}`}
-        onJoinOnlineGame={joinGame}
-        onReplay={replayCurrentGame}
-        onStartLocalGame={startLocalGame}
-        onStartOnlineGame={startOnlineGame}
-        session={onlineSession}
-      />
-    );
-  }
+  const updateNotice = shouldShowSoftUpdate ? (
+    <AppUpdateBanner
+      currentVersion={currentAppVersion}
+      hasPendingServiceWorkerUpdate={hasPendingServiceWorkerUpdate}
+      isReloading={isApplyingUpdate}
+      latestVersion={latestAppVersion}
+      onDismiss={dismissSoftUpdate}
+      onReload={reloadToUpdate}
+    />
+  ) : null;
 
-  return (
+  const screen = currentGameType === 'online-human' && onlineSession ? (
+    <OnlineGameScreen
+      key={`${onlineSession.roomCode}-${onlineSession.seatToken}`}
+      onJoinOnlineGame={joinGame}
+      onReplay={replayCurrentGame}
+      onStartLocalGame={startLocalGame}
+      onStartOnlineGame={startOnlineGame}
+      session={onlineSession}
+      updateNotice={updateNotice}
+    />
+  ) : (
     <LocalGameScreen
       key={`local-${localSessionVersion}`}
       onJoinOnlineGame={joinGame}
       onReplay={replayCurrentGame}
       onStartLocalGame={startLocalGame}
       onStartOnlineGame={startOnlineGame}
+      updateNotice={updateNotice}
     />
+  );
+
+  return (
+    <>
+      {screen}
+      {isHardUpdateRequired && minimumSupportedVersion ? (
+        <ForcedUpdateOverlay
+          currentVersion={currentAppVersion}
+          isReloading={isApplyingUpdate}
+          latestVersion={latestAppVersion}
+          minimumSupportedVersion={minimumSupportedVersion}
+          onReload={reloadToUpdate}
+        />
+      ) : null}
+    </>
   );
 }
 
