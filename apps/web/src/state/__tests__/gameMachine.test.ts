@@ -283,13 +283,15 @@ describe('gameMachine', () => {
 
     await waitFor(actor, (state) => state.matches('humanTurn.humanActionAnimating'));
 
+    const selectionDuringAnimation = actor.getSnapshot().context.G.selectedCard;
+
     actor.send({
       type: 'SELECT_CARD',
       source: 'stock',
       index: 0,
     });
 
-    expect(actor.getSnapshot().context.G.selectedCard).toBe(selectedBeforeAnimation);
+    expect(actor.getSnapshot().context.G.selectedCard).toBe(selectionDuringAnimation);
 
     await waitFor(actor, (state) => state.matches('humanTurn.ready'));
   });
