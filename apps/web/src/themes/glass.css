@@ -134,7 +134,7 @@
     @apply after:absolute  after:inset-0  after:rounded-[inherit]  after:backdrop-blur-xl;
     @apply before:absolute before:inset-0 before:rounded-[inherit] before:bg-linear-to-b before:from-white/15 before:to-transparent;
   }
-
+  
   .card .back::after {
     @apply z-10 content-[""] absolute inset-0 pointer-events-none rounded-[inherit] mix-blend-screen;
 

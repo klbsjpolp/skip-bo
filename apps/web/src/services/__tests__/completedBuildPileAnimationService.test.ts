@@ -103,7 +103,7 @@ describe('completedBuildPileAnimationService', () => {
     setGlobalCompletedPileAnimationContext(null);
   });
 
-  it('schedules completed build pile cards sequentially instead of overlapping them', () => {
+  it('staggers completed build pile cards 100ms apart so only one is visible at the departure point at a time', () => {
     const totalDuration = triggerCompletedBuildPileAnimation(
       createGameState(),
       0,
@@ -113,7 +113,10 @@ describe('completedBuildPileAnimationService', () => {
 
     expect(startAnimation).toHaveBeenCalledTimes(3);
 
-    expect(startAnimation.mock.calls.map(([animation]) => animation.initialDelay)).toEqual([0, 500, 1000]);
-    expect(totalDuration).toBe(1400);
+    // duration for this test geometry is 400ms; default staggerDelay is 100ms.
+    // AnimatedCard renders null until initialDelay fires, so only the next card
+    // to depart is visible at the start position — no shadow stacking.
+    expect(startAnimation.mock.calls.map(([animation]) => animation.initialDelay)).toEqual([0, 100, 200]);
+    expect(totalDuration).toBe(600);
   });
 });

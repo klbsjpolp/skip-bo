@@ -45,10 +45,11 @@ export const triggerCompletedBuildPileAnimation = (
     const duration = calculateAnimationDuration(startPosition, endPosition);
 
     return cards.reduce((maxDuration, card, index) => {
-      // Keep completed-pile cards moving one at a time so deck themes with
-      // heavy shadows or glass effects do not stack twelve animated cards at
-      // the same origin.
-      const initialDelay = index * (duration + staggerDelay);
+      // Stagger each card by staggerDelay ms (default 100ms).
+      // AnimatedCard hides each card (returns null) until its initialDelay fires,
+      // so at most one card is visible at the departure point at a time.
+      // Multiple cards may be in flight simultaneously — that's fine.
+      const initialDelay = index * staggerDelay;
 
       animationContext.startAnimation({
         card,
