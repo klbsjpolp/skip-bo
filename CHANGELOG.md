@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.9.1](https://github.com/klbsjpolp/skip-bo/compare/v1.9.0...v1.9.1) (2026-04-15)
+
+
+### Bug Fixes
+
+* **web:** refine build pile animation staggering logic ([13e5ddc](https://github.com/klbsjpolp/skip-bo/commit/13e5ddcf776c2130bb2961101e4544a7eb9b05b1))
+
+
+
 # [1.9.0](https://github.com/klbsjpolp/skip-bo/compare/v1.8.3...v1.9.0) (2026-04-13)
 
 
