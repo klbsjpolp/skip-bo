@@ -194,6 +194,8 @@ function OnlineGameScreen({
     clearSelection,
     connectedSeats,
     connectionStatus,
+    debugFillBuildPile,
+    debugWin,
     discardCard,
     gameState,
     isLocalHost,
@@ -217,6 +219,10 @@ function OnlineGameScreen({
 
   return (
     <AppShell
+      debugStrip={<DebugStrip
+          debugFillBuildPile={() => debugFillBuildPile(0)}
+          debugWin={debugWin}
+      />}
       gameBoard={gameBoard}
       isGameOver={gameState.gameIsOver}
       onJoinOnlineGame={onJoinOnlineGame}

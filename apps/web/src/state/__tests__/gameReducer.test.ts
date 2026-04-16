@@ -127,7 +127,7 @@ describe('gameReducer', () => {
   });
 
   describe('DEBUG_WIN action', () => {
-    it('should force a human victory state', () => {
+    it('should force a victory for the current player', () => {
       const stateWithAiTurn = {
         ...initialState,
         currentPlayerIndex: 1,
@@ -140,12 +140,10 @@ describe('gameReducer', () => {
 
       const result = gameReducer(stateWithAiTurn, { type: 'DEBUG_WIN' });
 
-      expect(result.players[0].stockPile).toHaveLength(0);
-      expect(result.currentPlayerIndex).toBe(0);
+      expect(result.players[1].stockPile).toHaveLength(0);
       expect(result.gameIsOver).toBe(true);
-      expect(result.winnerIndex).toBe(0);
+      expect(result.winnerIndex).toBe(1);
       expect(result.selectedCard).toBeNull();
-      expect(result.message).toBe('La partie est gagnée par le joueur !');
     });
   });
 

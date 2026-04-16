@@ -619,6 +619,14 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     }));
   }, []);
 
+  const debugFillBuildPile = useCallback((buildPile: number): void => {
+    sendAction({ type: 'DEBUG_FILL_BUILD_PILE', buildPile });
+  }, [sendAction]);
+
+  const debugWin = useCallback((): void => {
+    sendAction({ type: 'DEBUG_WIN' });
+  }, [sendAction]);
+
   const startGame = useCallback(() => {
     if (!websocketRef.current || websocketRef.current.readyState !== WebSocket.OPEN) {
       return;
@@ -901,6 +909,8 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     clearSelection,
     connectedSeats,
     connectionStatus,
+    debugFillBuildPile,
+    debugWin,
     gameState,
     hostSeatIndex,
     isLocalHost,

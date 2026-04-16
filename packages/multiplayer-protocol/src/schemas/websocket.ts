@@ -41,6 +41,7 @@ export const gameActionSchema = z.discriminatedUnion('type', [
     type: z.literal('DEBUG_FILL_BUILD_PILE'),
     buildPile: z.number().int().min(0),
   }),
+  z.object({ type: z.literal('DEBUG_WIN') }),
 ]);
 
 export const authClientMessageSchema = z.object({

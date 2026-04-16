@@ -11,7 +11,7 @@ import { normalizeRoomCode, resolvePlayerName, serializeClientGameView } from '@
 import { RoomVersionConflictError, type ConnectionRecord, type ConnectionRepository, type RoomRecord, type RoomRepository } from '../repositories/types.js';
 import {ClientError} from '../errors/clientError.js';
 import type {RealtimeBroadcaster} from './broadcaster.js';
-import {applyOnlineAction, createOnlineInitialGameState, createWaitingRoomState, validateOnlineAction} from './gameState.js';
+import {applyOnlineAction, createOnlineInitialGameState, createWaitingRoomState, isDebugAction, validateOnlineAction} from './gameState.js';
 import {createRoomCode} from './roomCode.js';
 import {createSeatToken, hashSeatToken} from './tokens.js';
 
@@ -427,7 +427,7 @@ export const handleAction = async (
       throw new ClientError('Seat is not active in this room', 409);
     }
 
-    if (room.state.currentPlayerIndex !== playerIndex) {
+    if (room.state.currentPlayerIndex !== playerIndex && !isDebugAction(input.action)) {
       throw new ClientError('It is not your turn', 409);
     }
 

@@ -2,6 +2,7 @@ import { CenterArea } from '@/components/CenterArea';
 import { GameBoard } from '@/components/GameBoard';
 import { DiscardPiles, HandSection, PlayerArea, StockPile } from '@/components/PlayerArea';
 import type { GameBoardProps } from '@/components/GameBoard';
+import { VictoryEffects } from '@/components/VictoryEffects';
 import { cn } from '@/lib/utils';
 
 type OnlineGameBoardProps = GameBoardProps;
@@ -39,6 +40,7 @@ function RemoteSeat({
       data-player-state={isWinner ? 'winner' : isCurrentPlayer ? 'active' : 'idle'}
     >
       <div className="bg-layer" />
+      {isWinner && <VictoryEffects />}
       <div
         className={cn(
           'content-layer flex h-full flex-wrap items-center gap-2 lg:gap-4',
@@ -72,14 +74,6 @@ function RemoteSeat({
         </div>
 
         <div className="grow xl:hidden" />
-
-        <div className="flex items-center gap-1 xl:self-start">
-          {isWinner ? (
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-              Gagnant
-            </span>
-          ) : null}
-        </div>
 
         <div className="xl:col-span-3 xl:row-start-2">
           <DiscardPiles

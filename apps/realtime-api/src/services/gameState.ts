@@ -56,14 +56,22 @@ const isCardSelectable = (gameState: GameState, action: Extract<GameAction, { ty
   return false;
 };
 
-const isSupportedOnlineAction = (action: GameAction): boolean =>
-  action.type !== 'INIT' &&
-  action.type !== 'DRAW' &&
-  action.type !== 'DRAW_SINGLE_CARD' &&
-  action.type !== 'RESET' &&
-  action.type !== 'DEBUG_SET_AI_HAND' &&
-  action.type !== 'DEBUG_FILL_BUILD_PILE' &&
-  action.type !== 'DEBUG_WIN';
+export const isDebugAction = (action: GameAction): boolean =>
+  action.type === 'DEBUG_SET_AI_HAND' ||
+  action.type === 'DEBUG_FILL_BUILD_PILE' ||
+  action.type === 'DEBUG_WIN';
+
+const isSupportedOnlineAction = (action: GameAction): boolean => {
+  if (action.type === 'INIT' || action.type === 'DRAW' || action.type === 'DRAW_SINGLE_CARD' || action.type === 'RESET') {
+    return false;
+  }
+
+  if (isDebugAction(action)) {
+    return process.env['NODE_ENV'] !== 'production';
+  }
+
+  return true;
+};
 
 interface OnlineInitialGameStateOptions {
   playerCount?: number;
@@ -172,10 +180,11 @@ export const validateOnlineAction = (gameState: GameState, action: GameAction): 
     case 'DRAW':
     case 'DRAW_SINGLE_CARD':
     case 'RESET':
+      return 'Cette action n’est pas autorisée en multijoueur';
     case 'DEBUG_SET_AI_HAND':
     case 'DEBUG_FILL_BUILD_PILE':
     case 'DEBUG_WIN':
-      return 'Cette action n’est pas autorisée en multijoueur';
+      return null;
   }
 };
 
