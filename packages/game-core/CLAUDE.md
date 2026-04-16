@@ -14,7 +14,8 @@ Pure game logic package shared by all apps. No UI, no network dependencies.
 - Card interactions are two-step: `SELECT_CARD` → `PLAY_CARD` or `DISCARD_CARD`
 - Skip-Bo cards are wildcards and are **non-discardable**
 - Start-of-turn draws happen **outside** `END_TURN`
-- `players[0]`/`players[1]` are state-array order, **not** render order
+- `players[0]`/`players[1]` are state-array order, **not** render order; in online mode the protocol layer rotates the array so the viewer is always `players[0]`
+- `DEBUG_WIN` sets the winner to `currentPlayerIndex`, not a hardcoded seat — intentional
 
 Full invariant wording: `docs/architecture/runtime-invariants.md`
 

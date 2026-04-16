@@ -25,6 +25,10 @@ Animation services live in `src/services/`.
 | Local | `useLocalSkipBoGame.ts` | client drives full loop |
 | Online | `useOnlineSkipBoGame.ts` | server snapshots are canonical; browser never mutates state |
 
+`useLocalSkipBoGame` is a thin re-export of `useSkipBoGame`.
+
+`useOnlineSkipBoGame` applies **optimistic updates** for `PLAY_CARD` and `DISCARD_CARD` — the view is updated locally before the server confirms, then reconciled on the next snapshot.
+
 ## AI
 
 Entry point: `src/ai/computeBestMove.ts`  
@@ -32,6 +36,22 @@ Strategy: short lookahead via `lookAheadStrategy.ts` — intentionally no minima
 **Read `src/ai/README.md` before changing AI logic.**
 
 When AI logic changes: update `src/ai/__tests__` and `src/ai/README.md`.
+
+## UI Fixtures
+
+`src/testing/uiFixtures.ts` exports named game-state snapshots. Load one via query param:
+
+```
+http://localhost:5173/?fixture=<name>
+```
+
+This bypasses the game loop entirely — useful for isolated layout/visual work without playing to a specific state.
+
+## Debug Buttons
+
+`DebugStrip` renders in `DEV` mode only, in both local and online game screens:
+- **Fill build pile** — fills build pile 0 to one card before completion
+- **Win** — ends the game immediately for the current player
 
 ## Tests
 

@@ -4,12 +4,17 @@ Shared DTO and message-shape package. No runtime dependencies — consumed by bo
 
 ## Key Files
 
-- `src/index.ts` — HTTP DTOs (room create/join) and WebSocket message shapes
-- `src/views/index.ts` — Zod-validated redacted client views
+- `src/schemas/websocket.ts` — `gameActionSchema` (Zod): every WebSocket action is validated here before reaching the server
+- `src/views/index.ts` — Zod-validated redacted client views; this is where viewer-relative player rotation and hand redaction are enforced
+- `src/index.ts` — re-exports for consumers
+
+## Critical Gotcha
+
+**Any new `GameAction` type added to `game-core` must also be added to `gameActionSchema` in `src/schemas/websocket.ts`.** The server calls `clientMessageSchema.parse()` on every incoming WebSocket message; unknown action types throw a `ZodError` and the message is silently dropped as an `actionRejected` response.
 
 ## Design Rules
 
-- The online client always renders as `players[0]` (viewer-relative rotation)
+- The online client always renders as `players[0]` (viewer-relative rotation, applied in `src/views/index.ts`)
 - Opponent hands are redacted to slot counts only — never expose card values to the opponent
 
 ## Tests

@@ -23,7 +23,17 @@ pnpm test:e2e    # Playwright E2E tests
 pnpm test:visual # Visual regression tests (chromium-desktop)
 ```
 
+Run `pnpm dev` **and** `pnpm dev:api` together to develop online multiplayer locally.
+
 See each app/package CLAUDE.md for scoped test commands.
+
+## Debug Buttons
+
+`DebugStrip` renders only when `import.meta.env.DEV` is true and is wired into both the local and online game screens. Two actions:
+- **Fill build pile** — fills build pile 0 to one card before completion
+- **Win** — immediately ends the game; the winner is whichever player's turn it currently is
+
+In online mode, debug actions are allowed by the server only when `NODE_ENV !== 'production'`.
 
 ## Change Guidance
 
