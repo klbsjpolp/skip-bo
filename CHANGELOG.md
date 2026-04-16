@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.10.0](https://github.com/klbsjpolp/skip-bo/compare/v1.9.1...v1.10.0) (2026-04-16)
+
+
+### Bug Fixes
+
+* **web:** consolidate normal-card utility and optimize styles ([f5337de](https://github.com/klbsjpolp/skip-bo/commit/f5337dec6c5ee5f88ed22d29572cfdde6421a88f))
+
+
+### Features
+
+* **debug:** add DEBUG_WIN action and support for test scenarios ([0ad2244](https://github.com/klbsjpolp/skip-bo/commit/0ad2244b95d15f5765a1d245baa9b0babab338e5))
+
+
+
 ## [1.9.1](https://github.com/klbsjpolp/skip-bo/compare/v1.9.0...v1.9.1) (2026-04-15)
 
 
