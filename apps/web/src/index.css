@@ -647,7 +647,7 @@
 
 @utility card {
   @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer card-height
-  lg:not-[.skipbo-text]:text-2xl not-[.skipbo-text]:text-xl text-shadow-sm shadow-(--card-shadow)
+  lg:text-2xl text-xl text-shadow-sm shadow-(--card-shadow)
   text-(--card-color) bg-(--card-front-color) rounded-(--card-radius) w-(--card-width) border border-(--card-border-color)
   select-none will-change-auto before:will-change-auto after:will-change-auto;
   transform-origin: bottom center;
@@ -675,6 +675,19 @@
     @apply border-(--selected-border-color) shadow-(--selected-shadow);
     --card-translate-y: -5px;
   }
+
+  &.normal-card {
+    @apply isolate text-3xl;
+
+    .card-inner,
+    .card-inner-2 {
+      @apply z-1;
+    }
+
+    > .card-number {
+      @apply relative z-2;
+    }
+  }
 }
 
 @utility animated-card {
@@ -699,19 +712,6 @@
 
 @utility card-back {
   background: var(--card-back-bg, var(--card-back-color));
-}
-
-@utility normal-card {
-  @apply isolate;
-
-  .card-inner,
-  .card-inner-2 {
-    @apply z-1;
-  }
-
-  > .card-number {
-    @apply relative z-2;
-  }
 }
 
 @utility placeholder {
