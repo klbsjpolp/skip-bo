@@ -59,6 +59,7 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
 
     // Guard for environments without WAAPI (e.g. jsdom in unit tests)
     if (typeof el.animate !== 'function') {
+      markAnimationStarted(animation.id);
       const fallback = setTimeout(() => removeAnimation(animation.id), duration);
       return () => clearTimeout(fallback);
     }
@@ -109,6 +110,8 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
       firstHalfAnim?.cancel();
       secondHalfRef.current?.cancel();
     };
+    // animation and its derivatives are stable for the lifetime of this component:
+    // the parent always mounts a new AnimatedCard per animation.id.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisible]);
 

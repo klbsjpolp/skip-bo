@@ -27,6 +27,8 @@ function getTextAndColourForCard(card: CardType | null, overriddenDisplayValue: 
   return { colourClass, cardValue };
 }
 
+const MORPH_START_DELAY_MS = 50;
+
 const CardComponent: React.FC<CardProps> = ({
                                               card,
                                               isRevealed = true,
@@ -50,15 +52,13 @@ const CardComponent: React.FC<CardProps> = ({
     isMorphCandidate ? 'yes' : 'no'
   );
 
-  const morphingStartDelay = 50;
-
   useLayoutEffect(() => {
     if (!isMorphCandidate) return;
     // Transition to 'after' to start the crossfade, then stay there — the card is
     // remounted via `key` on each new play so there is no need to clean up state.
     // Switching back to 'no' (single-card branch) causes a DOM structure swap that
     // shifts the corner-number by 1-2 px due to absolute vs. static positioning.
-    const toAfter = setTimeout(() => setMorphing('after'), morphingStartDelay);
+    const toAfter = setTimeout(() => setMorphing('after'), MORPH_START_DELAY_MS);
     return () => clearTimeout(toAfter);
   }, [isMorphCandidate]);
 
