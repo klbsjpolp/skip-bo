@@ -35,12 +35,12 @@ describe('CardAnimationProvider', () => {
     );
 
     await waitFor(() => expect(context).toBeDefined());
-    vi.useFakeTimers();
 
     let resolved = false;
+    let animId: string | undefined;
 
     act(() => {
-      context!.startAnimation({
+      animId = context!.startAnimation({
         card: { value: 12, isSkipBo: false },
         startPosition: { x: 0, y: 0 },
         endPosition: { x: 40, y: 40 },
@@ -64,8 +64,9 @@ describe('CardAnimationProvider', () => {
     await Promise.resolve();
     expect(resolved).toBe(false);
 
-    await act(async () => {
-      vi.runAllTimers();
+    // Simulate AnimatedCard calling removeAnimation when its WAAPI animation finishes
+    act(() => {
+      context!.removeAnimation(animId!);
     });
 
     await waitPromise;

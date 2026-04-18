@@ -48,6 +48,7 @@ const createAnimationContext = (
   activeAnimations,
   startAnimation: vi.fn(),
   removeAnimation: vi.fn(),
+  markAnimationStarted: vi.fn(),
   isCardBeingAnimated: vi.fn(() => false),
   waitForAnimations: vi.fn(async () => undefined),
 });
@@ -165,5 +166,28 @@ describe('CenterArea', () => {
 
     expect(buildPile?.querySelector('.card[data-value="4"]')).not.toBeNull();
     expect(buildPile?.querySelector('.card[data-value="5"]')).toBeNull();
+  });
+
+  test('shows "12" backdrop while completion animations have not yet started', () => {
+    const gameState = createGameState([]);
+    // Build pile 0 is already cleared from state; animations are still in flight
+    const animations = createCompletionAnimations(3); // hasStarted is undefined (falsy)
+
+    const { container } = renderCenterArea(gameState, animations);
+    const buildPile = container.querySelector<HTMLElement>('[data-build-pile="0"]');
+
+    expect(buildPile?.querySelector('.card[data-value="12"]')).not.toBeNull();
+    expect(buildPile?.querySelector('.empty-card')).toBeNull();
+  });
+
+  test('hides "12" backdrop once all completion animations have started', () => {
+    const gameState = createGameState([]);
+    const animations = createCompletionAnimations(3).map((a) => ({ ...a, hasStarted: true }));
+
+    const { container } = renderCenterArea(gameState, animations);
+    const buildPile = container.querySelector<HTMLElement>('[data-build-pile="0"]');
+
+    expect(buildPile?.querySelector('.card[data-value="12"]')).toBeNull();
+    expect(buildPile?.querySelector('.empty-card')).not.toBeNull();
   });
 });

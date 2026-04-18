@@ -3,6 +3,7 @@ import { act } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AnimatedCard } from '@/components/AnimatedCard';
+import { CardAnimationProvider } from '@/contexts/CardAnimationContext';
 import type { CardAnimationData } from '@/contexts/CardAnimationContext';
 
 const createAnimation = (initialDelay: number): CardAnimationData => ({
@@ -30,7 +31,11 @@ describe('AnimatedCard', () => {
   it('stays hidden until its initial delay elapses', () => {
     vi.useFakeTimers();
 
-    const { container } = render(<AnimatedCard animation={createAnimation(200)} />);
+    const { container } = render(
+      <CardAnimationProvider>
+        <AnimatedCard animation={createAnimation(200)} />
+      </CardAnimationProvider>
+    );
 
     expect(container.querySelector('.animated-card')).toBeNull();
 

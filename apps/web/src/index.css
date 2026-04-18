@@ -647,7 +647,7 @@
 
 @utility card {
   @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer card-height
-  lg:text-2xl text-xl text-shadow-sm shadow-(--card-shadow)
+  text-3xl text-shadow-sm shadow-(--card-shadow)
   text-(--card-color) bg-(--card-front-color) rounded-(--card-radius) w-(--card-width) border border-(--card-border-color)
   select-none will-change-auto before:will-change-auto after:will-change-auto;
   transform-origin: bottom center;
@@ -664,7 +664,7 @@
   }
 
   .card-inner, .card-inner-2 {
-    @apply w-full h-full rounded-[inherit] overflow-hidden flex items-center justify-center absolute will-change-transform;
+    @apply z-1 w-full h-full rounded-[inherit] overflow-hidden flex items-center justify-center absolute will-change-transform;
 
     & > * {
       @apply relative z-1 will-change-transform;
@@ -677,16 +677,15 @@
   }
 
   &.normal-card {
-    @apply isolate text-3xl;
+    @apply isolate;
+  }
+  
+  &.empty-card {
+    @apply lg:text-2xl text-xl;
+  }
 
-    .card-inner,
-    .card-inner-2 {
-      @apply z-1;
-    }
-
-    > .card-number {
-      @apply relative z-2;
-    }
+  .card-number {
+    @apply relative z-2;
   }
 }
 

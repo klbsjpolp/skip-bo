@@ -19,6 +19,8 @@ export interface CardAnimationData {
   endAngleDeg?: number;
   // True when the authoritative UI state already contains the animated card at the target.
   targetSettledInState?: boolean;
+  // True once AnimatedCard has started the WAAPI travel (initialDelay elapsed).
+  hasStarted?: boolean;
   // Source information to identify which card should be hidden
   sourceInfo: {
     playerIndex: number;
@@ -38,6 +40,7 @@ export interface AnimationContextType {
   activeAnimations: CardAnimationData[];
   startAnimation: (animationData: Omit<CardAnimationData, 'id'>) => string;
   removeAnimation: (id:string) => void;
+  markAnimationStarted: (id: string) => void;
   isCardBeingAnimated: (
     playerIndex: number,
     source: 'hand' | 'stock' | 'discard' | 'deck' | 'build',
@@ -88,13 +91,8 @@ export const CardAnimationProvider: FC<CardAnimationProviderProps> = ({ children
       setActiveAnimations(prev => [...prev, newAnimation]);
     });
 
-    // Auto-remove animation after duration
-    setTimeout(() => {
-      removeAnimation(id);
-    }, animationData.duration + animationData.initialDelay);
-
     return id;
-  }, [removeAnimation]);
+  }, []);
 
   const waitForAnimations = useCallback(() => {
     return new Promise<void>((resolve) => {
@@ -103,6 +101,14 @@ export const CardAnimationProvider: FC<CardAnimationProviderProps> = ({ children
       } else {
         animationCompletionResolvers.current.push(resolve);
       }
+    });
+  }, []);
+
+  const markAnimationStarted = useCallback((id: string) => {
+    setActiveAnimations(prev => {
+      const target = prev.find(a => a.id === id);
+      if (!target || target.hasStarted) return prev; // already marked — return same ref, no re-render
+      return prev.map(anim => anim.id === id ? { ...anim, hasStarted: true } : anim);
     });
   }, []);
 
@@ -125,6 +131,7 @@ export const CardAnimationProvider: FC<CardAnimationProviderProps> = ({ children
     activeAnimations,
     startAnimation,
     removeAnimation,
+    markAnimationStarted,
     isCardBeingAnimated,
     waitForAnimations,
   };
