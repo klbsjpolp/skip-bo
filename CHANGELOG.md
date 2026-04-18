@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.12.0](https://github.com/klbsjpolp/skip-bo/compare/v1.11.1...v1.12.0) (2026-04-18)
+
+
+### Bug Fixes
+
+* **web:** address all review comments on WAAPI animation PR ([f537de7](https://github.com/klbsjpolp/skip-bo/commit/f537de72fea6d64307406e11f160cf3c50765c9f))
+
+
+### Features
+
+* **settings:** update permissions for Git and Bash commands ([4c3b040](https://github.com/klbsjpolp/skip-bo/commit/4c3b0406cebfba70a83d9e802d367d99ccdbf0bb))
+* **web:** replace CSS transitions with WAAPI, add Skip-Bo morph ([997c4ac](https://github.com/klbsjpolp/skip-bo/commit/997c4acd35f4f4c552500864f57c9515fae0f4b0))
+
+
+
 ## [1.11.1](https://github.com/klbsjpolp/skip-bo/compare/v1.11.0...v1.11.1) (2026-04-18)
 
 
