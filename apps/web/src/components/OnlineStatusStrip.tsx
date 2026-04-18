@@ -82,7 +82,7 @@ export function OnlineStatusStrip({
             className="flex flex-row rounded-xl border gap-1 py-0.5 px-2 bg-secondary text-secondary-foreground items-center"
             data-testid="online-room-controls"
           >
-            <p className="text-sm font-medium tabular-nums">{connectedSeatCount}/{seatCapacity} joueurs</p>
+            <p className="text-sm font-medium tabular-nums" data-testid="online-seat-count">{connectedSeatCount}/{seatCapacity} joueurs</p>
             <div className="mx-1 h-4 w-px bg-border/70" aria-hidden="true" />
             <p className="text-sm font-medium font-mono tracking-[0.2em]">{roomCode}</p>
             <Button type="button" size="icon-xs" variant="ghost" onClick={() => void handleCopy()}>

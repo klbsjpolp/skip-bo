@@ -101,7 +101,7 @@ importers:
         version: 7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3)
       vitest:
         specifier: ^4.1.2
-        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.0)(jsdom@29.0.1)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3))
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.0)(@vitest/ui@4.1.2)(jsdom@29.0.1)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3))
 
   apps/web:
     dependencies:
@@ -208,6 +208,9 @@ importers:
       '@vitejs/plugin-react-swc':
         specifier: ^4.3.0
         version: 4.3.0(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@vitest/ui':
+        specifier: 4.1.2
+        version: 4.1.2(vitest@4.1.2)
       jsdom:
         specifier: ^29.0.1
         version: 29.0.1
@@ -225,7 +228,7 @@ importers:
         version: 1.2.0(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3))(workbox-build@7.4.0(@types/babel__core@7.20.5))(workbox-window@7.4.0)
       vitest:
         specifier: ^4.1.2
-        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.0)(jsdom@29.0.1)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3))
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.0)(@vitest/ui@4.1.2)(jsdom@29.0.1)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3))
       workbox-build:
         specifier: ^7.4.0
         version: 7.4.0(@types/babel__core@7.20.5)
@@ -243,7 +246,7 @@ importers:
         version: 7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3)
       vitest:
         specifier: ^4.1.2
-        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.0)(jsdom@29.0.1)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3))
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.0)(@vitest/ui@4.1.2)(jsdom@29.0.1)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3))
 
   packages/multiplayer-protocol:
     dependencies:
@@ -259,7 +262,7 @@ importers:
         version: 7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3)
       vitest:
         specifier: ^4.1.2
-        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.0)(jsdom@29.0.1)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3))
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.0)(@vitest/ui@4.1.2)(jsdom@29.0.1)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3))
 
 packages:
 
@@ -1774,6 +1777,9 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+  '@polka/url@1.0.0-next.29':
+    resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
+
   '@prisma/instrumentation@7.6.0':
     resolution: {integrity: sha512-ZPW2gRiwpPzEfgeZgaekhqXrbW+Y2RJKHVqUmlhZhKzRNCcvR6DykzylDrynpArKKRQtLxoZy36fK7U0p3pdgQ==}
     peerDependencies:
@@ -2945,6 +2951,11 @@ packages:
   '@vitest/spy@4.1.2':
     resolution: {integrity: sha512-DU4fBnbVCJGNBwVA6xSToNXrkZNSiw59H8tcuUspVMsBDBST4nfvsPsEHDHGtWRRnqBERBQu7TrTKskmjqTXKA==}
 
+  '@vitest/ui@4.1.2':
+    resolution: {integrity: sha512-/irhyeAcKS2u6Zokagf9tqZJ0t8S6kMZq4ZG9BHZv7I+fkRrYfQX4w7geYeC2r6obThz39PDxvXQzZX+qXqGeg==}
+    peerDependencies:
+      vitest: 4.1.2
+
   '@vitest/utils@4.1.2':
     resolution: {integrity: sha512-xw2/TiX82lQHA06cgbqRKFb5lCAy3axQ4H4SoUFhUsg+wztiet+co86IAMDtF6Vm1hc7J6j09oh/rgDn+JdKIQ==}
 
@@ -3670,6 +3681,9 @@ packages:
       picomatch:
         optional: true
 
+  fflate@0.8.2:
+    resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
+
   figures@3.2.0:
     resolution: {integrity: sha512-yaduQFRKLXYOGgEn6AZau90j3ggSOyiqXU0F9JZfeXYhNa+Jk4X+s45A2zg5jns87GAFa34BBm2kXw4XpNcbdg==}
     engines: {node: '>=8'}
@@ -3717,6 +3731,9 @@ packages:
 
   flatted@3.3.3:
     resolution: {integrity: sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg==}
+
+  flatted@3.4.2:
+    resolution: {integrity: sha512-PjDse7RzhcPkIJwy5t7KPWQSZ9cAbzQXcafsetQoD7sOJRQlGikNbx7yZp2OotDnJyrDcbyRq3Ttb18iYOqkxA==}
 
   for-each@0.3.5:
     resolution: {integrity: sha512-dKx12eRCVIzqCxFGplyFKJMPvLEWgmNtUrpTiJIR5u97zEhRG8ySrtboPHZXx7daLxQVrl643cTzbab2tkQjxg==}
@@ -4494,6 +4511,10 @@ packages:
   module-details-from-path@1.0.4:
     resolution: {integrity: sha512-EGWKgxALGMgzvxYF1UyGTy0HXX/2vHLkw6+NvDKW2jypWbHpjQuj4UMcqQWXHERJhVGKikolT06G3bcKe4fi7w==}
 
+  mrmime@2.0.1:
+    resolution: {integrity: sha512-Y3wQdFg2Va6etvQ5I82yUhGdsKrcYox6p7FfL1LbK2J4V01F9TGlepTIhnK24t7koZibmg82KGglhA1XK5IsLQ==}
+    engines: {node: '>=10'}
+
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
@@ -5022,6 +5043,10 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
+  sirv@3.0.2:
+    resolution: {integrity: sha512-2wcC/oGxHis/BoHkkPwldgiPSYcpZK3JU28WoMVv55yHJgcZ8rlXvuG9iZggz+sU1d4bRgIGASwyWqjxu3FM0g==}
+    engines: {node: '>=18'}
+
   smob@1.5.0:
     resolution: {integrity: sha512-g6T+p7QO8npa+/hNx9ohv1E5pVCmWrVCUzUXJyLdMmftX6ER0oiWY/w9knEonLpnOp6b6FenKnMfR8gqwWdwig==}
 
@@ -5212,6 +5237,10 @@ packages:
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
+
+  totalist@3.0.1:
+    resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
+    engines: {node: '>=6'}
 
   tough-cookie@6.0.1:
     resolution: {integrity: sha512-LktZQb3IeoUWB9lqR5EWTHgW/VTITCXg4D21M+lvybRVdylLrRMnqaIONLVb5mav8vM19m44HIcGq4qASeu2Qw==}
@@ -7590,6 +7619,8 @@ snapshots:
     dependencies:
       playwright: 1.58.2
 
+  '@polka/url@1.0.0-next.29': {}
+
   '@prisma/instrumentation@7.6.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
@@ -8853,6 +8884,17 @@ snapshots:
 
   '@vitest/spy@4.1.2': {}
 
+  '@vitest/ui@4.1.2(vitest@4.1.2)':
+    dependencies:
+      '@vitest/utils': 4.1.2
+      fflate: 0.8.2
+      flatted: 3.4.2
+      pathe: 2.0.3
+      sirv: 3.0.2
+      tinyglobby: 0.2.15
+      tinyrainbow: 3.1.0
+      vitest: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.0)(@vitest/ui@4.1.2)(jsdom@29.0.1)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3))
+
   '@vitest/utils@4.1.2':
     dependencies:
       '@vitest/pretty-format': 4.1.2
@@ -9735,6 +9777,8 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.3
 
+  fflate@0.8.2: {}
+
   figures@3.2.0:
     dependencies:
       escape-string-regexp: 1.0.5
@@ -9789,6 +9833,8 @@ snapshots:
       keyv: 4.5.4
 
   flatted@3.3.3: {}
+
+  flatted@3.4.2: {}
 
   for-each@0.3.5:
     dependencies:
@@ -10531,6 +10577,8 @@ snapshots:
 
   module-details-from-path@1.0.4: {}
 
+  mrmime@2.0.1: {}
+
   ms@2.1.3: {}
 
   mute-stream@0.0.8: {}
@@ -11078,6 +11126,12 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
+  sirv@3.0.2:
+    dependencies:
+      '@polka/url': 1.0.0-next.29
+      mrmime: 2.0.1
+      totalist: 3.0.1
+
   smob@1.5.0: {}
 
   source-map-js@1.2.1: {}
@@ -11275,6 +11329,8 @@ snapshots:
     dependencies:
       is-number: 7.0.0
 
+  totalist@3.0.1: {}
+
   tough-cookie@6.0.1:
     dependencies:
       tldts: 7.0.27
@@ -11469,7 +11525,7 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.8.3
 
-  vitest@4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.0)(jsdom@29.0.1)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3)):
+  vitest@4.1.2(@opentelemetry/api@1.9.1)(@types/node@25.5.0)(@vitest/ui@4.1.2)(jsdom@29.0.1)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3)):
     dependencies:
       '@vitest/expect': 4.1.2
       '@vitest/mocker': 4.1.2(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.43.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -11494,6 +11550,7 @@ snapshots:
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
       '@types/node': 25.5.0
+      '@vitest/ui': 4.1.2(vitest@4.1.2)
       jsdom: 29.0.1
     transitivePeerDependencies:
       - msw
