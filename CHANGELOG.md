@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.11.0](https://github.com/klbsjpolp/skip-bo/compare/v1.10.0...v1.11.0) (2026-04-18)
+
+
+### Features
+
+* **protocol:** use player display names in game messages ([3b9bc03](https://github.com/klbsjpolp/skip-bo/commit/3b9bc03d36db45bec7637cc9ab6fd5e6dd663190))
+
+
+
 # [1.10.0](https://github.com/klbsjpolp/skip-bo/compare/v1.9.1...v1.10.0) (2026-04-16)
 
 
