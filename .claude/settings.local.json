@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(pnpm *)",
-      "Bash(xxd)"
+      "Bash(xxd)",
+      "Bash(gh run *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(grep -r \"transform\\\\|transition\\\\|animation\\\\|keyframe\" /Users/pierreluc/Development/skip-bo/apps/web/src/themes/*.css)"
     ]
   }
 }
