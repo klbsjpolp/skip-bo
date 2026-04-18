@@ -3,6 +3,9 @@ packages:
   - packages/*
   - infra/*
 
+ignoredBuiltDependencies:
+  - '@sentry/cli'
+
 onlyBuiltDependencies:
   - '@swc/core'
   - '@tailwindcss/oxide'

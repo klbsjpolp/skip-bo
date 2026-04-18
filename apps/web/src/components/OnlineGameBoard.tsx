@@ -44,11 +44,11 @@ function RemoteSeat({
       <div
         className={cn(
           'content-layer flex h-full flex-wrap items-center gap-2 lg:gap-4',
-          'xl:grid xl:grid-cols-[auto_minmax(0,1fr)_auto] xl:items-start xl:gap-x-4 xl:gap-y-3',
+          'xl:grid xl:grid-cols-[auto_auto_auto_1fr] xl:items-start xl:gap-x-4 xl:gap-y-3',
         )}
       >
         {player.name ? (
-          <div className="vertical-text border-l border-primary xl:row-span-2">
+          <div className="vertical-text self-center border-l border-primary xl:row-span-2">
             {player.name}
           </div>
         ) : null}
@@ -73,9 +73,9 @@ function RemoteSeat({
           />
         </div>
 
-        <div className="grow xl:hidden" />
+        <div className="grow" />
 
-        <div className="xl:col-span-3 xl:row-start-2">
+        <div className="xl:col-span-3">
           <DiscardPiles
             player={player}
             playerIndex={playerIndex}
