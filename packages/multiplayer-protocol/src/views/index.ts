@@ -121,6 +121,7 @@ const getViewMessage = (
   viewerSeatIndex: number,
   status: RoomStatus,
   connectedSeats: number[],
+  players: PlayerView[],
 ): string => {
   const playerCount = gameState.players.length;
   const rotatedWinnerIndex = rotateIndex(gameState.winnerIndex, viewerSeatIndex, playerCount);
@@ -133,14 +134,17 @@ const getViewMessage = (
   }
 
   if (gameState.gameIsOver) {
-    return rotatedWinnerIndex === 0 ? 'Vous avez gagné !' : 'Un adversaire a gagné.';
+    if (rotatedWinnerIndex === 0) return 'Vous avez gagné !';
+    const winnerName = rotatedWinnerIndex !== null ? players[rotatedWinnerIndex]?.displayName : undefined;
+    return winnerName ? `${winnerName} a gagné.` : 'Un adversaire a gagné.';
   }
 
   if (rotatedCurrentPlayerIndex === 0) {
-    return gameState.selectedCard ? 'Sélectionnez une destination' : "C'est votre tour";
+    return gameState.selectedCard ? 'Sélectionnez une destination' : "C’est votre tour";
   }
 
-  return "Tour d'un adversaire";
+  const currentPlayerName = players[rotatedCurrentPlayerIndex]?.displayName;
+  return currentPlayerName ? `Tour de ${currentPlayerName}` : "Tour d’un adversaire";
 };
 
 const toSelectedCardView = (
@@ -210,7 +214,7 @@ export const serializeClientGameView = ({
     currentPlayerIndex: rotateIndex(gameState.currentPlayerIndex, viewerSeatIndex, playerCount) ?? 0,
     deck: redactDeck(gameState.deck),
     gameIsOver: gameState.gameIsOver,
-    message: getViewMessage(gameState, viewerSeatIndex, status, connectedSeats),
+    message: getViewMessage(gameState, viewerSeatIndex, status, connectedSeats, players),
     players,
     room: {
       connectedSeats,
