@@ -39,26 +39,28 @@ const CardComponent: React.FC<CardProps> = ({
                                               displayValue: overriddenDisplayValue,
                                               hint,
                                             }) => {
-  const [morphing, setMorphing] = useState<'no' | 'yes' | 'after'>('no');
+  // When a Skip-Bo card is rendered with a displayValue (e.g. settled on a build
+  // pile), morph from the Skip-Bo face to the numeric value. Start in 'yes' via
+  // the useState initializer so the first painted frame shows Skip-Bo — otherwise
+  // the user sees the numeric value flash before the morph begins. Callers must
+  // give the Card a key derived from card identity so a new play remounts this
+  // component and the initializer re-runs.
+  const isMorphCandidate = Boolean(card?.isSkipBo && overriddenDisplayValue !== undefined);
+  const [morphing, setMorphing] = useState<'no' | 'yes' | 'after'>(
+    isMorphCandidate ? 'yes' : 'no'
+  );
 
-  const morphingDelay = 100;
-  const morphingAfterDelay = 700;
+  const morphingStartDelay = 50;
 
   useLayoutEffect(() => {
-    let startTimer: ReturnType<typeof setTimeout> | undefined;
-    let timer1: ReturnType<typeof setTimeout> | undefined;
-    let timer2: ReturnType<typeof setTimeout> | undefined;
-    if (card && card.isSkipBo) {
-      startTimer = setTimeout(() => setMorphing('yes'), 0);
-      timer1 = setTimeout(() => setMorphing('after'), morphingDelay);
-      timer2 = setTimeout(() => setMorphing('no'), morphingDelay + morphingAfterDelay);
-    }
-    return () =>  {
-      clearTimeout(startTimer);
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    }
-  }, [card, card?.isSkipBo]);
+    if (!isMorphCandidate) return;
+    // Transition to 'after' to start the crossfade, then stay there — the card is
+    // remounted via `key` on each new play so there is no need to clean up state.
+    // Switching back to 'no' (single-card branch) causes a DOM structure swap that
+    // shifts the corner-number by 1-2 px due to absolute vs. static positioning.
+    const toAfter = setTimeout(() => setMorphing('after'), morphingStartDelay);
+    return () => clearTimeout(toAfter);
+  }, [isMorphCandidate]);
 
   // Determine whether we should render a morphing overlay
   const shouldMorph = Boolean(
@@ -98,24 +100,23 @@ const CardComponent: React.FC<CardProps> = ({
     </> : <div className='back'></div>
   );
 
-  if (card && shouldMorph) {
-    const interactiveProps: HTMLAttributes<HTMLDivElement> = onClick ? {
-      onClick,
-      role: 'button',
-      tabIndex: 0,
-      'aria-label': hint ?? cardValue,
-      'aria-pressed': isSelected ? true : undefined,
-      onKeyDown: ((event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          onClick(event as unknown as Parameters<NonNullable<CardProps['onClick']>>[0]);
-        }
-      }) as KeyboardEventHandler<HTMLDivElement>,
-    } : {};
+  const interactiveProps: HTMLAttributes<HTMLDivElement> = onClick ? {
+    onClick,
+    role: 'button',
+    tabIndex: 0,
+    'aria-label': hint ?? cardValue,
+    'aria-pressed': isSelected ? true : undefined,
+    onKeyDown: ((event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        onClick(event as unknown as Parameters<NonNullable<CardProps['onClick']>>[0]);
+      }
+    }) as KeyboardEventHandler<HTMLDivElement>,
+  } : {};
 
-    // During morphing: outer card acts as a transparent wrapper to preserve layout/hover positions.
-    const fromOpacity = morphing === 'yes' ? 1 : 0; // fade out after delay
-    const toOpacity = morphing === 'yes' ? 0 : 1;   // fade in after delay
+  if (card && shouldMorph) {
+    const fromOpacity = morphing === 'yes' ? 1 : 0;
+    const toOpacity = morphing === 'yes' ? 0 : 1;
 
     return (
       <div
@@ -151,27 +152,13 @@ const CardComponent: React.FC<CardProps> = ({
     );
   }
 
-  // Default: render single card as before
   const content = renderContent(cardValue);
-  const interactiveProps: HTMLAttributes<HTMLDivElement> = onClick ? {
-    onClick,
-    role: 'button',
-    tabIndex: 0,
-    'aria-label': hint ?? cardValue,
-    'aria-pressed': isSelected ? true : undefined,
-    onKeyDown: ((event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        onClick(event as unknown as Parameters<NonNullable<CardProps['onClick']>>[0]);
-      }
-    }) as KeyboardEventHandler<HTMLDivElement>,
-  } : {};
 
   return (card ?
       <div
         className={cn(
           'card',
-          (card && isRevealed) && (card.isSkipBo ? 'skip-bo' : 'normal-card'), 
+          (card && isRevealed) && (cardValue === 'Skip-Bo' ? 'skip-bo' : 'normal-card'),
           colourClass,
           morphing === 'after' && `transition duration-800`,
           isSelected && 'selected',

@@ -47,6 +47,7 @@ const createAnimationContext = (
   activeAnimations,
   startAnimation: vi.fn(),
   removeAnimation: vi.fn(),
+  markAnimationStarted: vi.fn(),
   isCardBeingAnimated: vi.fn(() => false),
   waitForAnimations: vi.fn(async () => undefined),
 });
@@ -123,6 +124,7 @@ const createStockAnimationContext = (
   activeAnimations: [],
   startAnimation: vi.fn(),
   removeAnimation: vi.fn(),
+  markAnimationStarted: vi.fn(),
   isCardBeingAnimated: vi.fn((candidatePlayerIndex, source, index) =>
     candidatePlayerIndex === playerIndex &&
     source === 'stock' &&

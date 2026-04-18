@@ -235,90 +235,78 @@ export function useSkipBoGame() {
     return { success: true, message: 'Carte jouée' };
   }, [dispatch, isInteractionBlocked, startAnimation, waitForAnimations]);
 
-  const discardCard = useCallback((discardPile: number): Promise<MoveResult> => {
-    return new Promise((resolve) => {
-      const currentState = stateRef.current;
+  const discardCard = useCallback(async (discardPile: number): Promise<MoveResult> => {
+    const currentState = stateRef.current;
 
-      if (isInteractionBlocked()) {
-        resolve({ success: false, message: 'Action en cours' });
-        return;
-      }
-      
-      // Validate before dispatching
-      if (!currentState.selectedCard) {
-        resolve({ success: false, message: 'Aucune carte sélectionnée' });
-        return;
-      }
+    if (isInteractionBlocked()) {
+      return { success: false, message: 'Action en cours' };
+    }
 
-      if (currentState.selectedCard.source !== 'hand') {
-        resolve({ success: false, message: 'Vous devez défausser une carte de votre main' });
-        return;
-      }
+    if (!currentState.selectedCard) {
+      return { success: false, message: 'Aucune carte sélectionnée' };
+    }
 
-      if (currentState.selectedCard.card.isSkipBo) {
-        resolve({ success: false, message: 'Vous ne pouvez pas défausser une carte Skip-Bo' });
-        return;
-      }
+    if (currentState.selectedCard.source !== 'hand') {
+      return { success: false, message: 'Vous devez défausser une carte de votre main' };
+    }
 
-      interactionLockRef.current = true;
+    if (currentState.selectedCard.card.isSkipBo) {
+      return { success: false, message: 'Vous ne pouvez pas défausser une carte Skip-Bo' };
+    }
 
-      let animationDuration = 0;
+    interactionLockRef.current = true;
 
-      // Trigger animation before state change
-      try {
-        const playerAreaElement = document.querySelector<HTMLElement>(`.player-area[data-player-index="${currentState.currentPlayerIndex}"]`);
-        
-        if (playerAreaElement) {
-          // Calculate start position (hand card)
-          const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
-          if (handContainer) {
-            const startPosition = getHandCardPosition(handContainer, currentState.selectedCard.index);
-            
-            // Calculate end position (discard pile)
-            const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
-            if (discardContainer) {
-              const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
-              
-              const duration = calculateAnimationDuration(startPosition, endPosition);
-              animationDuration = duration;
-              startAnimation({
-                card: currentState.selectedCard.card,
-                startPosition,
-                endPosition,
-                animationType: 'discard',
-                sourceRevealed: true,
-                targetRevealed: true,
-                initialDelay: 0,
-                duration,
-                startAngleDeg: getHandCardAngle(handContainer, currentState.selectedCard.index),
-                sourceInfo: {
-                  playerIndex: currentState.currentPlayerIndex,
-                  source: currentState.selectedCard.source,
-                  index: currentState.selectedCard.index,
-                  discardPileIndex: currentState.selectedCard.discardPileIndex,
-                },
-                targetInfo: {
-                  playerIndex: currentState.currentPlayerIndex,
-                  source: 'discard',
-                  index: discardPile,
-                  discardPileIndex: discardPile,
-                },
-              });
-            }
+    // Trigger animation before state change
+    try {
+      const playerAreaElement = document.querySelector<HTMLElement>(`.player-area[data-player-index="${currentState.currentPlayerIndex}"]`);
+
+      if (playerAreaElement) {
+        const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
+        if (handContainer) {
+          const startPosition = getHandCardPosition(handContainer, currentState.selectedCard.index);
+          const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
+          if (discardContainer) {
+            const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
+            const duration = calculateAnimationDuration(startPosition, endPosition);
+            startAnimation({
+              card: currentState.selectedCard.card,
+              startPosition,
+              endPosition,
+              animationType: 'discard',
+              sourceRevealed: true,
+              targetRevealed: true,
+              initialDelay: 0,
+              duration,
+              startAngleDeg: getHandCardAngle(handContainer, currentState.selectedCard.index),
+              sourceInfo: {
+                playerIndex: currentState.currentPlayerIndex,
+                source: currentState.selectedCard.source,
+                index: currentState.selectedCard.index,
+                discardPileIndex: currentState.selectedCard.discardPileIndex,
+              },
+              targetInfo: {
+                playerIndex: currentState.currentPlayerIndex,
+                source: 'discard',
+                index: discardPile,
+                discardPileIndex: discardPile,
+              },
+            });
+
+            // Await in the same microtask chain as removeAnimation so the dispatch
+            // happens before the browser can paint the gap between card removal and
+            // state update (fixes the arrival flicker).
+            await waitForAnimations();
           }
         }
-      } catch (error) {
-        console.warn('Animation failed, continuing with game logic:', error);
       }
+    } catch (error) {
+      console.warn('Animation failed, continuing with game logic:', error);
+    }
 
-      // Wait for animation to complete before dispatching state change
-      setTimeout(() => {
-        dispatch({ type: 'DISCARD_CARD', discardPile });
-        interactionLockRef.current = false;
-        resolve({ success: true, message: 'Carte défaussée' });
-      }, animationDuration);
-    });
-  }, [dispatch, isInteractionBlocked, startAnimation]);
+    dispatch({ type: 'DISCARD_CARD', discardPile });
+    interactionLockRef.current = false;
+    return { success: true, message: 'Carte défaussée' };
+  }, [dispatch, isInteractionBlocked, startAnimation, waitForAnimations]);
 
   const clearSelection = useCallback(() => {
     if (isInteractionBlocked()) {

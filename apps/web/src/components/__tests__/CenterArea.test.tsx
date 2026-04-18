@@ -48,6 +48,7 @@ const createAnimationContext = (
   activeAnimations,
   startAnimation: vi.fn(),
   removeAnimation: vi.fn(),
+  markAnimationStarted: vi.fn(),
   isCardBeingAnimated: vi.fn(() => false),
   waitForAnimations: vi.fn(async () => undefined),
 });

@@ -73,10 +73,13 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                   animation.targetInfo?.source === 'build' &&
                   animation.targetInfo.index === index,
               );
+              // True while at least one card is still waiting to depart (in its initialDelay).
+              // Becomes false once the last card has left the pile position.
               const buildPileIsCompleting = activeAnimations.some(
                 (animation) =>
                   animation.sourceInfo.source === 'build' &&
-                  animation.sourceInfo.index === index,
+                  animation.sourceInfo.index === index &&
+                  !animation.hasStarted,
               );
               const shouldMaskIncomingPlay = Boolean(incomingPlayAnimation);
               const visiblePileLength = shouldMaskIncomingPlay
@@ -120,16 +123,24 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                 >
                   {visibleTopCard && !buildPileIsCompleting ? (
                     <Card
+                      key={`build-top-${index}-${visiblePileLength}`}
                       hint={`Construction pile ${index + 1}`}
-                      card={{
-                        ...visibleTopCard,
-                        isSkipBo: false,
-                      }}
+                      card={visibleTopCard}
                       isRevealed={true}
                       canBeGrabbed={false}
                       displayValue={visiblePileLength.toString()}
                     />
-                  ) : shouldMaskIncomingPlay && pile.length === 0 && !buildPileIsCompleting ? (
+                  ) : buildPileIsCompleting ? (
+                    // Pile cleared in state before animation runs — keep showing the
+                    // completed "12" card as a static backdrop while cards fly off.
+                    <Card
+                      hint={`Construction pile ${index + 1}`}
+                      card={{ value: gameState.config.CARD_VALUES_MAX, isSkipBo: false }}
+                      isRevealed={true}
+                      canBeGrabbed={false}
+                      displayValue={gameState.config.CARD_VALUES_MAX.toString()}
+                    />
+                  ) : shouldMaskIncomingPlay && pile.length === 0 ? (
                     <Card
                       hint={`Construction pile ${index + 1}`}
                       card={{

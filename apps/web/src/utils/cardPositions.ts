@@ -33,14 +33,26 @@ export const getHandCardPosition = (
     return getElementCenter(cardElement);
   }
 
-  const rect = handContainer.getBoundingClientRect();
-  const offset = [4, -3, -5, -3, 4][cardIndex];
+  // Slot is empty (e.g. draw animation targeting an unfilled slot).
+  // Card.tsx always applies overlapIndex offsets (handOverlaps is always true for a
+  // 5-card hand) and the .hand-area holders are narrow, so we compute the final
+  // card position from the hand container's rect + the same offsets Card.tsx uses.
+  const handRect = handContainer.getBoundingClientRect();
+  const handStyle = getComputedStyle(handContainer);
+  const cardW = parseFloat(handStyle.getPropertyValue('--card-width')) || 0;
+  const cardH = parseFloat(handStyle.getPropertyValue('--card-height')) || 0;
+  if (cardW > 0 && cardH > 0) {
+    // Mirrors Card.tsx: left = overlapIndex * (cardWidth - 10), top = yOffsets[overlapIndex]
+    const yOffsets = [4, -3, -5, -3, 4];
+    const yOff = yOffsets[cardIndex] ?? 0;
+    return {
+      x: handRect.left + cardIndex * (cardW - 10) + cardW / 2,
+      y: handRect.top + yOff + cardH / 2,
+    };
+  }
 
-  //Calc from css: `calc(${overlapIndex} * (var(--card-width) - 10px))`,
-  const cardWidth = parseInt(getComputedStyle(handContainer).getPropertyValue('--card-width'), 10);
-  const cardHeight = parseInt(getComputedStyle(handContainer).getPropertyValue('--card-height'), 10);
-  const overlapOffset = 10;
-  return { x: rect.x + (cardIndex * (cardWidth - overlapOffset)) + cardWidth / 2, y: rect.y + offset + cardHeight / 2};
+  console.warn(`[cardPositions] hand dimensions unavailable for index ${cardIndex}, falling back to container center`);
+  return getElementCenter(handContainer);
 };
 
 /**
@@ -80,12 +92,8 @@ export const getDeckPosition = (centerContainer: HTMLElement): CardPosition => {
   if (deckElement) {
     return getElementCenter(deckElement);
   }
-  // Fallback to left side of center container
-  const baseRect = centerContainer.getBoundingClientRect();
-  return {
-    x: baseRect.left + 40,
-    y: baseRect.top + baseRect.height / 2,
-  };
+  console.warn('[cardPositions] deck element not found, falling back to container center');
+  return getElementCenter(centerContainer);
 };
 
 /**
