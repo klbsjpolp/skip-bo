@@ -11,6 +11,7 @@ const {
   calculateMultipleDrawAnimationDuration,
   removeAnimation,
   startAnimation,
+  triggerAIAnimation,
   triggerMultipleDrawAnimations,
   waitForAnimations,
 } = vi.hoisted(() => ({
@@ -20,6 +21,7 @@ const {
   calculateMultipleDrawAnimationDuration: vi.fn(() => 0),
   removeAnimation: vi.fn(),
   startAnimation: vi.fn(),
+  triggerAIAnimation: vi.fn(async () => 0),
   triggerMultipleDrawAnimations: vi.fn(async () => 0),
   waitForAnimations: vi.fn(async () => undefined),
 }));
@@ -46,7 +48,7 @@ vi.mock('@/services/completedBuildPileAnimationService', () => ({
 
 vi.mock('@/services/aiAnimationService', () => ({
   setGlobalAnimationContext: vi.fn(),
-  triggerAIAnimation: vi.fn(async () => 0),
+  triggerAIAnimation,
 }));
 
 const card = (value: number, isSkipBo = false): Card => ({ value, isSkipBo });
@@ -56,7 +58,7 @@ const createOnlineView = (
   version: number,
 ): ClientGameView =>
   serializeClientGameView({
-    connectedSeats: [0, 1],
+    connectedSeats: gameState.players.map((_, index) => index),
     expiresAt: '2026-04-05T12:00:00.000Z',
     gameState,
     roomCode: 'ABCDE',
@@ -172,6 +174,30 @@ const createInteractiveOnlineState = (): GameState => {
   state.message = "C'est votre tour";
 
   return state;
+};
+
+const createOpponentDiscardHandoffStates = (): { previousState: GameState; nextState: GameState } => {
+  const previousState = initialGameState({ playerCount: 3 });
+
+  previousState.currentPlayerIndex = 1;
+  previousState.deck = [card(1), card(2)];
+  previousState.buildPiles = [[], [], [], []];
+  previousState.completedBuildPiles = [];
+  previousState.players[1].hand = [card(7), card(8), card(9), card(10), card(11)];
+  previousState.players[2].hand = [null, null, card(4), card(5), card(6)];
+  previousState.selectedCard = {
+    card: card(7),
+    source: 'hand',
+    index: 0,
+  };
+
+  const afterDiscardState = gameReducer(previousState, {
+    type: 'DISCARD_CARD',
+    discardPile: 0,
+  });
+  const nextState = gameReducer(afterDiscardState, { type: 'DRAW' });
+
+  return { previousState, nextState };
 };
 
 const createRect = (
@@ -377,6 +403,7 @@ describe('useOnlineSkipBoGame', () => {
     activeAnimationsState.current = [];
     removeAnimation.mockClear();
     startAnimation.mockClear();
+    triggerAIAnimation.mockClear();
     triggerMultipleDrawAnimations.mockClear();
     calculateMultipleDrawAnimationDuration.mockClear();
     waitForAnimations.mockClear();
@@ -701,6 +728,64 @@ describe('useOnlineSkipBoGame', () => {
 
     expect(result.current.gameState.selectedCard).toBeNull();
     expect(getActionMessages(socket)).toEqual([]);
+  });
+
+  it('keeps the previous opponent message while a discard handoff animation is pending online', async () => {
+    const session = createSession();
+    const { previousState, nextState } = createOpponentDiscardHandoffStates();
+    const previousView = createOnlineView(previousState, 1);
+    const nextView = createOnlineView(nextState, 2);
+    let resolveOpponentAnimation: (() => void) | null = null;
+
+    triggerAIAnimation.mockImplementationOnce(() => new Promise<number>((resolve) => {
+      resolveOpponentAnimation = () => resolve(200);
+    }));
+    calculateMultipleDrawAnimationDuration.mockReturnValueOnce(700);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    expect(socket).toBeDefined();
+
+    await act(async () => {
+      socket.open();
+      socket.emitMessage({ type: 'snapshot', view: previousView });
+      await Promise.resolve();
+    });
+
+    expect(result.current.gameState.message).toBe(previousView.message);
+
+    await act(async () => {
+      socket.emitMessage({ type: 'snapshot', view: nextView });
+    });
+
+    expect(result.current.gameState.message).toBe(previousView.message);
+    expect(result.current.gameState.currentPlayerIndex).toBe(previousView.currentPlayerIndex);
+
+    await act(async () => {
+      resolveOpponentAnimation?.();
+      await Promise.resolve();
+    });
+
+    expect(triggerMultipleDrawAnimations).toHaveBeenCalledTimes(1);
+    expect(result.current.gameState.message).toBe(previousView.message);
+
+    await act(async () => {
+      vi.advanceTimersByTime(699);
+    });
+
+    expect(result.current.gameState.message).toBe(previousView.message);
+
+    await act(async () => {
+      vi.advanceTimersByTime(1);
+    });
+
+    expect(result.current.gameState.message).toBe(nextView.message);
+    expect(result.current.gameState.currentPlayerIndex).toBe(nextView.currentPlayerIndex);
   });
 
   it('allows the host to start a waiting room as soon as a second player is connected', async () => {
