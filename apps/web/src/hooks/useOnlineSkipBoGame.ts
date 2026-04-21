@@ -433,10 +433,8 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                 const drawTransitions = collectDrawTransitions(previousState, nextState);
                 const opponentTransition = inferOpponentTransition(previousState, nextState);
                 const turnChanged = previousView.currentPlayerIndex !== message.view.currentPlayerIndex;
-                const applyTurnPresentationDelay = (duration: number) => {
-                  if (!turnChanged || duration <= 0) {
-                    clearTurnPresentationTimeout();
-                    setTurnPresentationOverride(null);
+                const holdPreviousTurnPresentation = () => {
+                  if (!turnChanged) {
                     return;
                   }
 
@@ -445,6 +443,15 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                     currentPlayerIndex: previousView.currentPlayerIndex,
                     message: previousView.message,
                   });
+                };
+                const applyTurnPresentationDelay = (duration: number) => {
+                  if (!turnChanged || duration <= 0) {
+                    clearTurnPresentationTimeout();
+                    setTurnPresentationOverride(null);
+                    return;
+                  }
+
+                  clearTurnPresentationTimeout();
                   turnPresentationTimeoutRef.current = window.setTimeout(() => {
                     turnPresentationTimeoutRef.current = null;
                     setTurnPresentationOverride(null);
@@ -452,6 +459,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                 };
 
                 if (opponentTransition) {
+                  holdPreviousTurnPresentation();
                   void triggerAIAnimation(previousState, opponentTransition.action, {
                     cardOverride: opponentTransition.animationCard,
                     sourceRevealedOverride: opponentTransition.sourceRevealed,
@@ -479,8 +487,12 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                     ));
                   });
                 } else {
+                  const drawAnimationDuration = getMaxDrawAnimationDuration(drawTransitions);
+                  if (drawAnimationDuration > 0) {
+                    holdPreviousTurnPresentation();
+                  }
                   scheduleDrawAnimations(drawTransitions);
-                  applyTurnPresentationDelay(getMaxDrawAnimationDuration(drawTransitions));
+                  applyTurnPresentationDelay(drawAnimationDuration);
                 }
               }
 
