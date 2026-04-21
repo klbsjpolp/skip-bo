@@ -25,6 +25,9 @@ concurrency:
   group: deploy-production
   cancel-in-progress: false
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 permissions:
   contents: write
   pages: write
@@ -50,6 +53,7 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          base: ${{ github.event.workflow_run.head_branch || github.ref }}
           filters: |
             backend:
               - 'apps/realtime-api/**'
