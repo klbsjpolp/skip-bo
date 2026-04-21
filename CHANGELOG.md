@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.13.1](https://github.com/klbsjpolp/skip-bo/compare/v1.13.0...v1.13.1) (2026-04-21)
+
+
+### Bug Fixes
+
+* **ci:** opt into Node.js 24 for actions and fix paths-filter base ref ([0d056bd](https://github.com/klbsjpolp/skip-bo/commit/0d056bd73b3167a151ddd369c0ced32f5bd3cf21))
+
+
+
 # [1.13.0](https://github.com/klbsjpolp/skip-bo/compare/v1.12.1...v1.13.0) (2026-04-21)
 
 
