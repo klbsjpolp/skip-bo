@@ -92,6 +92,7 @@ interface OpponentTransition {
   completedBuildPileIndex?: number;
   completedCards?: Card[];
   sourceRevealed: boolean;
+  targetPileLength: number;
 }
 
 interface TurnPresentationOverride {
@@ -204,12 +205,14 @@ const inferOpponentTransition = (
   );
   if (discardPile >= 0) {
     const animationCard = nextState.players[opponentPlayerIndex].discardPiles[discardPile].at(-1);
+    const targetPileLength = nextState.players[opponentPlayerIndex].discardPiles[discardPile].length;
 
     return animationCard
       ? {
           action: { type: 'DISCARD_CARD', discardPile },
           animationCard: { ...animationCard },
           sourceRevealed,
+          targetPileLength,
         }
       : null;
   }
@@ -242,6 +245,7 @@ const inferOpponentTransition = (
     completedBuildPileIndex: completedCards.length > 0 ? buildPile : undefined,
     completedCards: completedCards.length > 0 ? completedCards : undefined,
     sourceRevealed,
+    targetPileLength: nextState.buildPiles[buildPile].length,
   };
 };
 
@@ -456,6 +460,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                     cardOverride: opponentTransition.animationCard,
                     sourceRevealedOverride: opponentTransition.sourceRevealed,
                     targetSettledInStateOverride: true,
+                    targetPileLengthOverride: opponentTransition.targetPileLength,
                     targetRevealedOverride: true,
                   }).then((opponentAnimationDuration) => {
                     if (

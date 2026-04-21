@@ -11,6 +11,7 @@ const {
   calculateMultipleDrawAnimationDuration,
   removeAnimation,
   startAnimation,
+  triggerAIAnimation,
   triggerMultipleDrawAnimations,
   waitForAnimations,
 } = vi.hoisted(() => ({
@@ -20,6 +21,7 @@ const {
   calculateMultipleDrawAnimationDuration: vi.fn(() => 0),
   removeAnimation: vi.fn(),
   startAnimation: vi.fn(),
+  triggerAIAnimation: vi.fn(async () => 0),
   triggerMultipleDrawAnimations: vi.fn(async () => 0),
   waitForAnimations: vi.fn(async () => undefined),
 }));
@@ -46,7 +48,7 @@ vi.mock('@/services/completedBuildPileAnimationService', () => ({
 
 vi.mock('@/services/aiAnimationService', () => ({
   setGlobalAnimationContext: vi.fn(),
-  triggerAIAnimation: vi.fn(async () => 0),
+  triggerAIAnimation,
 }));
 
 const card = (value: number, isSkipBo = false): Card => ({ value, isSkipBo });
@@ -377,6 +379,7 @@ describe('useOnlineSkipBoGame', () => {
     activeAnimationsState.current = [];
     removeAnimation.mockClear();
     startAnimation.mockClear();
+    triggerAIAnimation.mockClear();
     triggerMultipleDrawAnimations.mockClear();
     calculateMultipleDrawAnimationDuration.mockClear();
     waitForAnimations.mockClear();
@@ -493,6 +496,54 @@ describe('useOnlineSkipBoGame', () => {
       x: 460,
       y: 180,
     });
+  });
+
+  it('tags snapshot-driven opponent build animations with the settled pile length', async () => {
+    const session = createSession();
+
+    const previousState = initialGameState();
+    previousState.currentPlayerIndex = 1;
+    previousState.buildPiles = [[card(1), card(0, true)], [], [], []];
+    previousState.completedBuildPiles = [];
+    previousState.players[1].hand = [card(3), null, null, null, null];
+    previousState.selectedCard = {
+      card: card(3),
+      source: 'hand',
+      index: 0,
+    };
+    previousState.message = 'Sélectionnez une destination';
+    const nextState = gameReducer(previousState, { type: 'PLAY_CARD', buildPile: 0 });
+    const previousView = createOnlineView(previousState, 1);
+    const nextView = createOnlineView(nextState, 2);
+
+    renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    expect(socket).toBeDefined();
+
+    await act(async () => {
+      socket.open();
+      socket.emitMessage({ type: 'snapshot', view: previousView });
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      socket.emitMessage({ type: 'snapshot', view: nextView });
+      await Promise.resolve();
+    });
+
+    expect(triggerAIAnimation).toHaveBeenCalledWith(
+      expect.anything(),
+      { type: 'PLAY_CARD', buildPile: 0 },
+      expect.objectContaining({
+        targetPileLengthOverride: 3,
+        targetSettledInStateOverride: true,
+      }),
+    );
   });
 
   it('starts discard-source play animations from the top discard card online', async () => {

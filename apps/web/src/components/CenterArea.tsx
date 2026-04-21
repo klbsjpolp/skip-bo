@@ -73,6 +73,11 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                   animation.targetInfo?.source === 'build' &&
                   animation.targetInfo.index === index,
               );
+              const incomingPlayHasSettledInRenderedPile = Boolean(
+                incomingPlayAnimation &&
+                incomingPlayAnimation.targetPileLength !== undefined &&
+                pile.length === incomingPlayAnimation.targetPileLength,
+              );
               // True while at least one card is still waiting to depart (in its initialDelay).
               // Becomes false once the last card has left the pile position.
               const buildPileIsCompleting = activeAnimations.some(
@@ -81,7 +86,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                   animation.sourceInfo.index === index &&
                   !animation.hasStarted,
               );
-              const shouldMaskIncomingPlay = Boolean(incomingPlayAnimation);
+              const shouldMaskIncomingPlay = incomingPlayHasSettledInRenderedPile;
               const visiblePileLength = shouldMaskIncomingPlay
                 ? Math.max(pile.length - 1, 0)
                 : pile.length;

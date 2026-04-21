@@ -93,10 +93,14 @@ const createIncomingBuildAnimation = (buildPileIndex: number): CardAnimationData
   },
 });
 
-const createSettledIncomingBuildAnimation = (buildPileIndex: number): CardAnimationData => ({
+const createSettledIncomingBuildAnimation = (
+  buildPileIndex: number,
+  targetPileLength: number,
+): CardAnimationData => ({
   ...createIncomingBuildAnimation(buildPileIndex),
   id: `settled-build-${buildPileIndex}`,
   targetSettledInState: true,
+  targetPileLength,
 });
 
 const renderCenterArea = (
@@ -161,7 +165,7 @@ describe('CenterArea', () => {
     const gameState = createGameState([]);
     gameState.buildPiles[0] = [card(1), card(2), card(3), card(4), card(5)];
 
-    const { container } = renderCenterArea(gameState, [createSettledIncomingBuildAnimation(0)]);
+    const { container } = renderCenterArea(gameState, [createSettledIncomingBuildAnimation(0, 5)]);
     const buildPile = container.querySelector<HTMLElement>('[data-build-pile="0"]');
 
     expect(buildPile?.querySelector('.card[data-value="4"]')).not.toBeNull();
