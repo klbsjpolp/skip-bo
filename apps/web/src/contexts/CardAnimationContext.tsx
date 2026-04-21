@@ -19,6 +19,9 @@ export interface CardAnimationData {
   endAngleDeg?: number;
   // True when the authoritative UI state already contains the animated card at the target.
   targetSettledInState?: boolean;
+  // Required for target-settled stack animations before the static target card
+  // can be masked.
+  targetPileLength?: number;
   // True once AnimatedCard has started the WAAPI travel (initialDelay elapsed).
   hasStarted?: boolean;
   // Source information to identify which card should be hidden

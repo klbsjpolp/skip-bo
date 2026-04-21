@@ -13,6 +13,7 @@ interface TriggerAIAnimationOptions {
   cardOverride?: Card;
   sourceRevealedOverride?: boolean;
   targetSettledInStateOverride?: boolean;
+  targetPileLengthOverride?: number;
   targetRevealedOverride?: boolean;
 }
 
@@ -138,6 +139,7 @@ export const triggerAIAnimation = async (
         animationType,
         sourceRevealed: options.sourceRevealedOverride ?? ((animationType === 'play' && gameState.selectedCard?.source !== 'hand') || (animationType === 'discard' && false)), // Hand cards are revealed, stock/discard are not
         targetSettledInState: options.targetSettledInStateOverride ?? false,
+        targetPileLength: options.targetPileLengthOverride,
         targetRevealed: options.targetRevealedOverride ?? true, // Cards played or discarded by AI are revealed to human
         initialDelay: 0,
         duration,

@@ -88,7 +88,9 @@ function DiscardPile({
       animation.targetSettledInState &&
       animation.targetInfo?.source === 'discard' &&
       animation.targetInfo.playerIndex === playerIndex &&
-      animation.targetInfo.discardPileIndex === pileIndex,
+      animation.targetInfo.discardPileIndex === pileIndex &&
+      animation.targetPileLength !== undefined &&
+      pile.length === animation.targetPileLength,
   );
 
   const computedPiles = pile.map((card, cardIdx) => {

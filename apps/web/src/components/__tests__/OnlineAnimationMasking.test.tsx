@@ -74,21 +74,27 @@ const createIncomingBuildAnimation = (buildPileIndex: number): CardAnimationData
   },
 });
 
-const createSettledIncomingBuildAnimation = (buildPileIndex: number): CardAnimationData => ({
+const createSettledIncomingBuildAnimation = (
+  buildPileIndex: number,
+  targetPileLength?: number,
+): CardAnimationData => ({
   ...createIncomingBuildAnimation(buildPileIndex),
   id: `settled-build-${buildPileIndex}`,
   card: card(8),
   targetSettledInState: true,
+  targetPileLength,
 });
 
 const createSettledIncomingDiscardAnimation = (
   playerIndex: number,
   discardPileIndex: number,
+  targetPileLength?: number,
 ): CardAnimationData => ({
   ...createIncomingDiscardAnimation(playerIndex, discardPileIndex),
   id: `settled-discard-${playerIndex}-${discardPileIndex}`,
   card: card(8),
   targetSettledInState: true,
+  targetPileLength,
 });
 
 const createIncomingDiscardAnimation = (
@@ -139,7 +145,7 @@ describe('Online animation masking', () => {
     gameState.buildPiles[0] = [card(6), card(7), card(8)];
 
     render(
-      <CardAnimationContext.Provider value={createAnimationContext([createSettledIncomingBuildAnimation(0)])}>
+      <CardAnimationContext.Provider value={createAnimationContext([createSettledIncomingBuildAnimation(0, 3)])}>
         <CenterArea
           gameState={gameState}
           playCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
@@ -155,12 +161,59 @@ describe('Online animation masking', () => {
     expect(buildPile.querySelector('.card[data-value="8"]')).toBeNull();
   });
 
+  test('does not hide the current build pile top before the settled online play reaches rendered state', () => {
+    const gameState = createGameState();
+    gameState.buildPiles[0] = [card(6), card(0, true)];
+
+    render(
+      <CardAnimationContext.Provider value={createAnimationContext([createSettledIncomingBuildAnimation(0, 3)])}>
+        <CenterArea
+          gameState={gameState}
+          playCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
+          canPlayCard={vi.fn(() => false)}
+        />
+      </CardAnimationContext.Provider>,
+    );
+
+    const buildPile = screen.getByLabelText('Pile de construction 1');
+
+    expect(buildPile.querySelector('.card[data-value="2"]')).not.toBeNull();
+    expect(buildPile.querySelector('.card[data-value="1"]')).toBeNull();
+  });
+
   test('shows the previous discard pile top card when an incoming online discard is already present in state', () => {
     const gameState = createGameState();
     gameState.players[1].discardPiles[0] = [card(3), card(7), card(8)];
 
     render(
-      <CardAnimationContext.Provider value={createAnimationContext([createSettledIncomingDiscardAnimation(1, 0)])}>
+      <CardAnimationContext.Provider value={createAnimationContext([createSettledIncomingDiscardAnimation(1, 0, 3)])}>
+        <PlayerArea
+          player={gameState.players[1]}
+          playerIndex={1}
+          isCurrentPlayer={false}
+          isWinner={false}
+          gameState={gameState}
+          selectCard={vi.fn()}
+          discardCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
+          clearSelection={vi.fn()}
+        />
+      </CardAnimationContext.Provider>,
+    );
+
+    const discardPile = screen.getByLabelText('Défausse 1');
+    const visibleCardValues = Array.from(
+      discardPile.querySelectorAll<HTMLElement>('.card[data-value]'),
+    ).map((element) => element.dataset.value);
+
+    expect(visibleCardValues).toEqual(['3', '7']);
+  });
+
+  test('does not hide the current discard pile top before the settled online discard reaches rendered state', () => {
+    const gameState = createGameState();
+    gameState.players[1].discardPiles[0] = [card(3), card(7)];
+
+    render(
+      <CardAnimationContext.Provider value={createAnimationContext([createSettledIncomingDiscardAnimation(1, 0, 3)])}>
         <PlayerArea
           player={gameState.players[1]}
           playerIndex={1}
