@@ -4,10 +4,15 @@
       "Bash(pnpm *)",
       "Bash(xxd)",
       "Bash(gh run *)",
-      "Bash(git add *)",
-      "Bash(git commit *)",
-      "Bash(git push *)",
-      "Bash(grep -r \"transform\\\\|transition\\\\|animation\\\\|keyframe\" /Users/pierreluc/Development/skip-bo/apps/web/src/themes/*.css)"
+      "Bash(grep *)",
+      "Bash(git *)",
+      "Bash(python3 *)",
+      "Bash(lsof *)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "Bash(gh pr *)"
     ]
   }
 }
