@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.14.0](https://github.com/klbsjpolp/skip-bo/compare/v1.13.1...v1.14.0) (2026-04-22)
+
+
+### Bug Fixes
+
+* **web:** add `normal-card` class for consistent card styling ([19d5a5c](https://github.com/klbsjpolp/skip-bo/commit/19d5a5c67a10cd9e14687c35d19634b166c25dec))
+
+
+### Features
+
+* **web:** add active turn styling for player area in Minecraft theme ([bbf7e19](https://github.com/klbsjpolp/skip-bo/commit/bbf7e199bfbb1e0e6eb0ac5a7e89e21b62a74528))
+
+
+
 ## [1.13.1](https://github.com/klbsjpolp/skip-bo/compare/v1.13.0...v1.13.1) (2026-04-21)
 
 
