@@ -62,6 +62,37 @@
     background-repeat: repeat;
   }
 
+  .player-area.active-turn {
+    --minecraft-active-border-tile-size: 10px;
+    --minecraft-active-border-width: 10px;
+    --tw-ring-color: transparent;
+    --tw-ring-shadow: 0 0 #0000;
+  }
+
+  .player-area.active-turn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    box-sizing: border-box;
+    pointer-events: none;
+    border: var(--minecraft-active-border-width) solid transparent;
+    background-image:
+      url("./textures/grass.webp"),
+      url("./textures/netherite.webp");
+    background-origin: border-box, border-box;
+    background-clip: padding-box, border-box;
+    background-repeat: repeat, repeat;
+    background-size:
+      80px 80px,
+      var(--minecraft-active-border-tile-size)
+      var(--minecraft-active-border-tile-size);
+    image-rendering: pixelated;
+    box-shadow:
+      inset 0 0 0 2px rgba(0, 0, 0, 0.55),
+      5px 5px 0 rgba(0, 0, 0, 0.28);
+  }
+
   /* Empty spots — wood plank texture */
   .card.empty-card {
     background-image: url("./textures/wood.webp");
