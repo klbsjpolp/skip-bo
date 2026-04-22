@@ -122,9 +122,10 @@ class ConcurrentAuthRoomRepository extends InMemoryRoomRepository {
 class FakeBroadcaster implements RealtimeBroadcaster {
   readonly sent: Array<{ connectionId: string; message: ServerMessage }> = [];
   readonly failureByConnectionId = new Map<string, unknown>();
+  readonly disconnected: string[] = [];
 
-  async disconnect(_connectionId: string): Promise<void> {
-    /* no-op in tests */
+  async disconnect(connectionId: string): Promise<void> {
+    this.disconnected.push(connectionId);
   }
 
   async send(connectionId: string, message: ServerMessage): Promise<void> {
