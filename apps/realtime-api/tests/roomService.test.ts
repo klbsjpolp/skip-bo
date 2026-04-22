@@ -4,7 +4,7 @@ import type { ServerMessage } from '@skipbo/multiplayer-protocol';
 
 import { RoomVersionConflictError, type ConnectionRecord, type ConnectionRepository, type RoomRecord, type RoomRepository } from '../src/repositories/types.js';
 import type { RealtimeBroadcaster } from '../src/services/broadcaster.js';
-import { authenticateConnection, createRoom, handleAction, handleDisconnect, joinRoom, rejectAction, startGame } from '../src/services/roomService.js';
+import { authenticateConnection, createRoom, handleAction, handleDisconnect, handleSetReady, joinRoom, rejectAction, startGame } from '../src/services/roomService.js';
 
 class InMemoryRoomRepository implements RoomRepository {
   readonly rooms = new Map<string, RoomRecord>();
@@ -123,6 +123,10 @@ class FakeBroadcaster implements RealtimeBroadcaster {
   readonly sent: Array<{ connectionId: string; message: ServerMessage }> = [];
   readonly failureByConnectionId = new Map<string, unknown>();
 
+  async disconnect(_connectionId: string): Promise<void> {
+    /* no-op in tests */
+  }
+
   async send(connectionId: string, message: ServerMessage): Promise<void> {
     const failure = this.failureByConnectionId.get(connectionId);
 
@@ -165,7 +169,7 @@ const createConcurrentAuthDependencies = () => ({
 describe('roomService', () => {
   it('creates a room with the requested stock size', async () => {
     const dependencies = createDependencies();
-    const created = await createRoom(dependencies, { playerName: 'Alice', stockSize: 35 });
+    const created = await createRoom(dependencies, { stockSize: 35 });
     const room = await dependencies.roomRepository.get(created.roomCode);
 
     expect(room?.state.config.STOCK_SIZE).toBe(35);
@@ -175,8 +179,7 @@ describe('roomService', () => {
     expect(created.seatCapacity).toBe(4);
     expect(created.hostSeatIndex).toBe(0);
     expect(room?.state.players).toHaveLength(4);
-    expect(room?.state.players[0].name).toBe('Alice');
-    expect(room?.state.players[1].name).toBe('Joueur 2');
+    expect(room?.lobbyPlayers?.[0]).toEqual({ seatIndex: 0, readyState: 'never-ready', playerName: null });
     expect(room?.state.players[0].stockPile).toHaveLength(0);
     expect(room?.state.players[0].hand.filter((card) => card !== null)).toHaveLength(5);
   });
@@ -184,7 +187,7 @@ describe('roomService', () => {
   it('creates and joins a room until all four seats are reserved', async () => {
     const dependencies = createDependencies();
     const created = await createRoom(dependencies);
-    const joined = await joinRoom(dependencies, { playerName: 'Bob', roomCode: created.roomCode.toLowerCase() });
+    const joined = await joinRoom(dependencies, { roomCode: created.roomCode.toLowerCase() });
     const joinedThird = await joinRoom(dependencies, { roomCode: created.roomCode });
     const joinedFourth = await joinRoom(dependencies, { roomCode: created.roomCode });
     const room = await dependencies.roomRepository.get(created.roomCode);
@@ -194,8 +197,7 @@ describe('roomService', () => {
     expect(joined.seatIndex).toBe(1);
     expect(joinedThird.seatIndex).toBe(2);
     expect(joinedFourth.seatIndex).toBe(3);
-    expect(room?.state.players[1].name).toBe('Bob');
-    expect(room?.state.players[2].name).toBe('Joueur 3');
+    expect(room?.lobbyPlayers?.find((p) => p.seatIndex === 1)).toEqual({ seatIndex: 1, readyState: 'never-ready', playerName: null });
     await expect(joinRoom(dependencies, { roomCode: created.roomCode })).rejects.toThrow('Room is full');
   });
 
@@ -221,6 +223,9 @@ describe('roomService', () => {
     expect(room?.status).toBe('WAITING');
     expect(room?.authenticatedSeats).toEqual([0, 1]);
 
+    await handleSetReady(dependencies, { connectionId: 'c-1', playerName: 'Alice' });
+    await handleSetReady(dependencies, { connectionId: 'c-2' });
+
     await startGame(dependencies, {
       connectionId: 'c-1',
     });
@@ -234,7 +239,7 @@ describe('roomService', () => {
     expect(room?.status).toBe('ACTIVE');
     expect(room?.activeSeatIndices).toEqual([0, 1]);
     expect(room?.authenticatedSeats).toEqual([0, 1]);
-    expect(room?.state.players[0].name).toBe('Joueur 1');
+    expect(room?.state.players[0].name).toBe('Alice');
     expect(room?.state.players[1].name).toBe('Joueur 2');
     expect(room?.state.selectedCard?.source).toBe('hand');
     expect(room?.state.players).toHaveLength(2);
@@ -257,6 +262,9 @@ describe('roomService', () => {
       seatIndex: joined.seatIndex,
       seatToken: joined.seatToken,
     });
+
+    await handleSetReady(dependencies, { connectionId: 'c-1' });
+    await handleSetReady(dependencies, { connectionId: 'c-2' });
 
     await startGame(dependencies, {
       connectionId: 'c-1',
@@ -291,6 +299,9 @@ describe('roomService', () => {
       seatIndex: joined.seatIndex,
       seatToken: joined.seatToken,
     });
+
+    await handleSetReady(dependencies, { connectionId: 'c-1' });
+    await handleSetReady(dependencies, { connectionId: 'c-2' });
 
     await startGame(dependencies, {
       connectionId: 'c-1',
@@ -341,7 +352,7 @@ describe('roomService', () => {
 
     await expect(startGame(dependencies, {
       connectionId: 'c-1',
-    })).rejects.toThrow('At least two connected players are required to start');
+    })).rejects.toThrow('Tous les joueurs doivent être prêts pour démarrer');
 
     const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
     await authenticateConnection(dependencies, {
@@ -350,6 +361,9 @@ describe('roomService', () => {
       seatIndex: joined.seatIndex,
       seatToken: joined.seatToken,
     });
+
+    await handleSetReady(dependencies, { connectionId: 'c-1' });
+    await handleSetReady(dependencies, { connectionId: 'c-2' });
 
     await expect(startGame(dependencies, {
       connectionId: 'c-2',

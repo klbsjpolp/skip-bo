@@ -7,6 +7,7 @@ import {useOnlineSkipBoGame} from '@/hooks/useOnlineSkipBoGame';
 import type {GameType} from '@/app/types';
 import {AppUpdateBanner} from '@/components/AppUpdateBanner';
 import {ForcedUpdateOverlay} from '@/components/ForcedUpdateOverlay';
+import {LobbyDialog, LobbyRemovedDialog} from '@/components/LobbyDialog';
 import {OnlineStatusStrip} from '@/components/OnlineStatusStrip';
 import {ThemeSwitcher} from '@/components/ThemeSwitcher';
 import {LocalGameBoard} from '@/components/LocalGameBoard';
@@ -30,10 +31,10 @@ interface AppShellProps {
   fixtureName?: UiFixtureName;
   gameBoard: ReactNode;
   isGameOver: boolean;
-  onJoinOnlineGame: (roomCode: string, playerName?: string) => Promise<void>;
+  onJoinOnlineGame: (roomCode: string) => Promise<void>;
   onReplay: () => Promise<void> | void;
   onStartLocalGame: () => void;
-  onStartOnlineGame: (stockSize?: number, playerName?: string) => Promise<void>;
+  onStartOnlineGame: (stockSize?: number) => Promise<void>;
   statusStrip?: ReactNode;
   updateNotice?: ReactNode;
 }
@@ -117,19 +118,19 @@ function FixtureApp({ fixtureName }: { fixtureName: UiFixtureName }) {
       fixtureName={fixtureName}
       gameBoard={gameBoard}
       isGameOver={gameState.gameIsOver}
-      onJoinOnlineGame={async () => undefined}
+      onJoinOnlineGame={() => Promise.resolve()}
       onReplay={() => undefined}
       onStartLocalGame={() => undefined}
-      onStartOnlineGame={async () => undefined}
+      onStartOnlineGame={() => Promise.resolve()}
     />
   );
 }
 
 interface SessionScreenProps {
-  onJoinOnlineGame: (roomCode: string, playerName?: string) => Promise<void>;
+  onJoinOnlineGame: (roomCode: string) => Promise<void>;
   onReplay: () => Promise<void>;
   onStartLocalGame: () => void;
-  onStartOnlineGame: (stockSize?: number, playerName?: string) => Promise<void>;
+  onStartOnlineGame: (stockSize?: number) => Promise<void>;
   updateNotice?: ReactNode;
 }
 
@@ -178,11 +179,13 @@ function LocalGameScreen({
 }
 
 interface OnlineGameScreenProps extends SessionScreenProps {
+  onLeaveSession: () => void;
   session: CreateRoomResponse;
 }
 
 function OnlineGameScreen({
   onJoinOnlineGame,
+  onLeaveSession,
   onReplay,
   onStartLocalGame,
   onStartOnlineGame,
@@ -199,13 +202,26 @@ function OnlineGameScreen({
     discardCard,
     gameState,
     isLocalHost,
+    kickSeat,
+    leaveLobby,
+    lobbySeats,
+    myReadyState,
     playCard,
     roomCode,
     roomStatus,
     seatCapacity,
     selectCard,
+    sendSetReady,
+    sendSetUnready,
     startGame,
+    lobbyRemovalReason,
   } = useOnlineSkipBoGame(session);
+
+  const handleLeave = () => {
+    leaveLobby();
+    onLeaveSession();
+  };
+
   const gameBoard = (
     <OnlineGameBoard
       gameState={gameState}
@@ -218,31 +234,50 @@ function OnlineGameScreen({
   );
 
   return (
-    <AppShell
-      debugStrip={<DebugStrip
-          debugFillBuildPile={() => debugFillBuildPile(0)}
-          debugWin={debugWin}
-      />}
-      gameBoard={gameBoard}
-      isGameOver={gameState.gameIsOver}
-      onJoinOnlineGame={onJoinOnlineGame}
-      onReplay={onReplay}
-      onStartLocalGame={onStartLocalGame}
-      onStartOnlineGame={onStartOnlineGame}
-      statusStrip={
-        <OnlineStatusStrip
-          canStartGame={canStartGame}
-          connectedSeats={connectedSeats}
-          connectionStatus={connectionStatus}
-          isHost={isLocalHost}
-          onStartGame={startGame}
-          roomCode={roomCode}
-          roomStatus={roomStatus}
-          seatCapacity={seatCapacity}
-        />
-      }
-      updateNotice={updateNotice}
-    />
+    <>
+      <LobbyRemovedDialog reason={lobbyRemovalReason} onDismiss={onLeaveSession} />
+      <LobbyDialog
+        canStartGame={canStartGame}
+        connectedSeats={connectedSeats}
+        isHost={isLocalHost}
+        kickSeat={kickSeat}
+        lobbySeats={lobbySeats}
+        mySeatIndex={session.seatIndex}
+        myReadyState={myReadyState}
+        onLeave={handleLeave}
+        onReady={sendSetReady}
+        onStartGame={startGame}
+        onUnready={sendSetUnready}
+        open={roomStatus === 'WAITING' && lobbyRemovalReason === null}
+        roomCode={roomCode}
+        seatCapacity={seatCapacity}
+      />
+      <AppShell
+        debugStrip={<DebugStrip
+            debugFillBuildPile={() => debugFillBuildPile(0)}
+            debugWin={debugWin}
+        />}
+        gameBoard={gameBoard}
+        isGameOver={gameState.gameIsOver}
+        onJoinOnlineGame={onJoinOnlineGame}
+        onReplay={onReplay}
+        onStartLocalGame={onStartLocalGame}
+        onStartOnlineGame={onStartOnlineGame}
+        statusStrip={
+          <OnlineStatusStrip
+            canStartGame={canStartGame}
+            connectedSeats={connectedSeats}
+            connectionStatus={connectionStatus}
+            isHost={isLocalHost}
+            onStartGame={startGame}
+            roomCode={roomCode}
+            roomStatus={roomStatus}
+            seatCapacity={seatCapacity}
+          />
+        }
+        updateNotice={updateNotice}
+      />
+    </>
   );
 }
 
@@ -272,16 +307,21 @@ function LiveApp() {
     setLocalSessionVersion((currentValue) => currentValue + 1);
   };
 
-  const startOnlineGame = async (stockSize = getStoredStockSize(), playerName?: string) => {
-    const session = await createOnlineRoom(stockSize, playerName);
+  const startOnlineGame = async (stockSize = getStoredStockSize()) => {
+    const session = await createOnlineRoom(stockSize);
     setOnlineSession(session);
     setCurrentGameType('online-human');
   };
 
-  const joinGame = async (roomCode: string, playerName?: string) => {
-    const session = await joinOnlineRoom(roomCode, playerName);
+  const joinGame = async (roomCode: string) => {
+    const session = await joinOnlineRoom(roomCode);
     setOnlineSession(session);
     setCurrentGameType('online-human');
+  };
+
+  const leaveOnlineSession = () => {
+    setOnlineSession(null);
+    setCurrentGameType('local-ai');
   };
 
   const replayCurrentGame = async () => {
@@ -308,6 +348,7 @@ function LiveApp() {
     <OnlineGameScreen
       key={`${onlineSession.roomCode}-${onlineSession.seatToken}`}
       onJoinOnlineGame={joinGame}
+      onLeaveSession={leaveOnlineSession}
       onReplay={replayCurrentGame}
       onStartLocalGame={startLocalGame}
       onStartOnlineGame={startOnlineGame}

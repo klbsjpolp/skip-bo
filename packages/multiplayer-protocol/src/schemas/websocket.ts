@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { MAX_PLAYER_NAME_LENGTH } from '../playerName.js';
+
 const cardSchema = z.object({
   value: z.number().int().min(0).max(12),
   isSkipBo: z.boolean(),
@@ -66,9 +68,31 @@ export const startGameClientMessageSchema = z.object({
   type: z.literal('startGame'),
 });
 
+export const setReadyClientMessageSchema = z.object({
+  type: z.literal('setReady'),
+  playerName: z.string().trim().max(MAX_PLAYER_NAME_LENGTH).optional(),
+});
+
+export const setUnreadyClientMessageSchema = z.object({
+  type: z.literal('setUnready'),
+});
+
+export const kickSeatClientMessageSchema = z.object({
+  type: z.literal('kickSeat'),
+  targetSeatIndex: z.number().int().min(0).max(3),
+});
+
+export const leaveLobbyClientMessageSchema = z.object({
+  type: z.literal('leaveLobby'),
+});
+
 export const clientMessageSchema = z.discriminatedUnion('type', [
   authClientMessageSchema,
   actionClientMessageSchema,
   startGameClientMessageSchema,
   pingClientMessageSchema,
+  setReadyClientMessageSchema,
+  setUnreadyClientMessageSchema,
+  kickSeatClientMessageSchema,
+  leaveLobbyClientMessageSchema,
 ]);

@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gameReducer, initialGameState, type Card, type GameState } from '@skipbo/game-core';
-import { serializeClientGameView, type ClientGameView, type CreateRoomResponse, type ServerMessage } from '@skipbo/multiplayer-protocol';
+import { serializeClientGameView, type ClientGameView, type CreateRoomResponse, type LobbySeatInfo, type ServerMessage } from '@skipbo/multiplayer-protocol';
 
 import { useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
 
@@ -70,6 +70,7 @@ const createOnlineView = (
 const createWaitingView = (
   connectedSeats: number[],
   version: number,
+  lobbySeats?: LobbySeatInfo[],
 ): ClientGameView => {
   const state = initialGameState({ playerCount: 4 });
 
@@ -91,6 +92,7 @@ const createWaitingView = (
     expiresAt: '2026-04-05T12:00:00.000Z',
     gameState: state,
     hostSeatIndex: 0,
+    lobbySeats,
     roomCode: 'ABCDE',
     seatCapacity: 4,
     status: 'WAITING',
@@ -836,10 +838,14 @@ describe('useOnlineSkipBoGame', () => {
     expect(result.current.gameState.currentPlayerIndex).toBe(nextView.currentPlayerIndex);
   });
 
-  it('allows the host to start a waiting room as soon as a second player is connected', async () => {
+  it('allows the host to start a waiting room as soon as all connected players are ready', async () => {
     const session = createSession();
     const waitingForHostOnly = createWaitingView([0], 1);
-    const waitingForTwoPlayers = createWaitingView([0, 1], 2);
+    const allReadyLobbySeats: LobbySeatInfo[] = [
+      { seatIndex: 0, readyState: 'ready', displayName: 'Alice' },
+      { seatIndex: 1, readyState: 'ready', displayName: 'Bob' },
+    ];
+    const waitingForTwoPlayers = createWaitingView([0, 1], 2, allReadyLobbySeats);
 
     const { result } = renderHook(() => useOnlineSkipBoGame(session));
 
@@ -903,5 +909,161 @@ describe('useOnlineSkipBoGame', () => {
 
     expect(result.current.roomStatus).toBe('WAITING');
     expect(result.current.gameState.players[0].hand.filter((card) => card !== null)).toHaveLength(5);
+  });
+
+  it('sends the correct message for each lobby action', async () => {
+    const session = createSession();
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      await Promise.resolve();
+    });
+
+    act(() => { result.current.sendSetReady('Alice'); });
+    expect(JSON.parse(socket.sent.at(-1) ?? '{}')).toEqual({ type: 'setReady', playerName: 'Alice' });
+
+    act(() => { result.current.sendSetReady(); });
+    expect(JSON.parse(socket.sent.at(-1) ?? '{}')).toMatchObject({ type: 'setReady' });
+
+    act(() => { result.current.sendSetUnready(); });
+    expect(JSON.parse(socket.sent.at(-1) ?? '{}')).toEqual({ type: 'setUnready' });
+
+    act(() => { result.current.kickSeat(2); });
+    expect(JSON.parse(socket.sent.at(-1) ?? '{}')).toEqual({ type: 'kickSeat', targetSeatIndex: 2 });
+
+    act(() => { result.current.leaveLobby(); });
+    expect(JSON.parse(socket.sent.at(-1) ?? '{}')).toEqual({ type: 'leaveLobby' });
+  });
+
+  it('does not reconnect after leaveLobby closes the socket', async () => {
+    const session = createSession();
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      await Promise.resolve();
+    });
+
+    act(() => { result.current.leaveLobby(); });
+    await act(async () => {
+      socket.close();
+      await Promise.resolve();
+    });
+
+    expect(MockWebSocket.instances.length).toBe(1);
+  });
+
+  it('exposes lobbySeats and myReadyState from a waiting snapshot', async () => {
+    const session = createSession();
+    const lobbySeats: LobbySeatInfo[] = [
+      { seatIndex: 0, readyState: 'ready', displayName: 'Alice' },
+      { seatIndex: 1, readyState: 'never-ready', displayName: null },
+    ];
+    const waitingView = createWaitingView([0, 1], 1, lobbySeats);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      socket.emitMessage({ type: 'snapshot', view: waitingView });
+      await Promise.resolve();
+    });
+
+    expect(result.current.lobbySeats).toEqual(lobbySeats);
+    expect(result.current.myReadyState).toBe('ready');
+  });
+
+  it('sets lobbyRemovalReason to host-left on roomClosed during WAITING', async () => {
+    const session = createSession();
+    const waitingView = createWaitingView([0, 1], 1);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      socket.emitMessage({ type: 'snapshot', view: waitingView });
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      socket.emitMessage({ type: 'roomClosed', status: 'WAITING', roomCode: 'ABCDE' });
+      await Promise.resolve();
+    });
+
+    expect(result.current.lobbyRemovalReason).toBe('host-left');
+  });
+
+  it('sets lobbyRemovalReason to kicked on actionRejected during WAITING and prevents reconnect', async () => {
+    const session = createSession();
+    const waitingView = createWaitingView([0, 1], 1);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      socket.emitMessage({ type: 'snapshot', view: waitingView });
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      socket.emitMessage({ type: 'actionRejected', code: 'invalid_action', reason: 'Not authorized' });
+      await Promise.resolve();
+    });
+
+    expect(result.current.lobbyRemovalReason).toBe('kicked');
+    expect(socket.readyState).toBe(MockWebSocket.CLOSED);
+    expect(MockWebSocket.instances.length).toBe(1);
+  });
+
+  it('does not set lobbyRemovalReason on actionRejected during an ACTIVE game', async () => {
+    const session = createSession();
+    const activeView = createOnlineView(createInteractiveOnlineState(), 1);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      socket.emitMessage({ type: 'snapshot', view: activeView });
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      socket.emitMessage({ type: 'actionRejected', code: 'invalid_action', reason: 'Invalid move' });
+      await Promise.resolve();
+    });
+
+    expect(result.current.lobbyRemovalReason).toBeNull();
+    expect(result.current.lastError).toBe('Invalid move');
   });
 });

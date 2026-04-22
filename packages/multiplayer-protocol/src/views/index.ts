@@ -4,6 +4,14 @@ import { getDefaultPlayerName, normalizePlayerName } from '../playerName.js';
 
 export type RoomStatus = 'WAITING' | 'ACTIVE' | 'FINISHED';
 
+export type LobbyReadyState = 'never-ready' | 'ready' | 'unready';
+
+export interface LobbySeatInfo {
+  seatIndex: number;
+  readyState: LobbyReadyState;
+  displayName: string | null;
+}
+
 export interface PlayerView extends Player {
   displayName: string;
   isHandVisible: boolean;
@@ -19,6 +27,7 @@ export interface RoomSummary {
   connectedSeats: number[];
   expiresAt: string;
   hostSeatIndex: number;
+  lobbySeats: LobbySeatInfo[];
   roomCode: string;
   seatCapacity: number;
   status: RoomStatus;
@@ -44,6 +53,7 @@ export interface SerializeClientGameViewInput {
   expiresAt: string;
   gameState: GameState;
   hostSeatIndex?: number;
+  lobbySeats?: LobbySeatInfo[];
   roomCode: string;
   seatCapacity?: number;
   status: RoomStatus;
@@ -176,6 +186,7 @@ export const serializeClientGameView = ({
   expiresAt,
   gameState,
   hostSeatIndex = 0,
+  lobbySeats = [],
   roomCode,
   seatCapacity = gameState.players.length,
   status,
@@ -220,6 +231,7 @@ export const serializeClientGameView = ({
       connectedSeats,
       expiresAt,
       hostSeatIndex,
+      lobbySeats,
       roomCode,
       seatCapacity,
       status,

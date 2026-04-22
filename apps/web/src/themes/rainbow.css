@@ -5,6 +5,7 @@
     --secondary-foreground: #333333;
     --success: #4caf50;
     --success-foreground: hsl(0 0% 100%);
+    --border: hsl(0 82% 76%);
 
     --background: #87ceeb; /* Sky Blue */
     --text-color: #333333;

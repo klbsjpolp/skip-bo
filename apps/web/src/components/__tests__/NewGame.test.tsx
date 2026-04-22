@@ -44,7 +44,7 @@ describe('NewGame', () => {
 
       fireEvent.click(within(dialog).getByRole('button', { name: 'Créer la partie' }));
 
-      expect(onStartOnlineGame).toHaveBeenCalledWith(35, undefined);
+      expect(onStartOnlineGame).toHaveBeenCalledWith(35);
     } finally {
       Object.defineProperty(globalThis, 'localStorage', {
         configurable: true,
@@ -77,48 +77,7 @@ describe('NewGame', () => {
     const joinButtons = within(dialog).getAllByRole('button', { name: 'Rejoindre' });
     fireEvent.click(joinButtons[joinButtons.length - 1]);
 
-    expect(onJoinOnlineGame).toHaveBeenCalledWith('ABCDE', undefined);
-  });
-
-  test('passes a normalized multiplayer name and enforces the character cap in the dialog', async () => {
-    const onJoinOnlineGame = vi.fn(async () => undefined);
-    const onStartOnlineGame = vi.fn(async () => undefined);
-
-    render(
-      <NewGame
-        onJoinOnlineGame={onJoinOnlineGame}
-        onStartLocalGame={vi.fn()}
-        onStartOnlineGame={onStartOnlineGame}
-      />,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'Nouvelle partie' }));
-
-    const dialog = await screen.findByRole('dialog', { name: 'Nouvelle partie' });
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Créer' }));
-
-    fireEvent.change(within(dialog).getByRole('textbox', { name: 'Nom' }), {
-      target: { value: '  LongPlayerName  ' },
-    });
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Créer la partie' }));
-
-    expect(onStartOnlineGame).toHaveBeenCalledWith(30, 'LongPlayer');
-    await waitFor(() => {
-      expect(screen.queryByRole('dialog', { name: 'Nouvelle partie' })).toBeNull();
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: 'Nouvelle partie' }));
-    const joinDialog = await screen.findByRole('dialog', { name: 'Nouvelle partie' });
-    fireEvent.click(within(joinDialog).getByRole('button', { name: 'Rejoindre' }));
-    fireEvent.change(within(joinDialog).getByRole('textbox', { name: 'Nom' }), {
-      target: { value: '  Zoe  ' },
-    });
-    fireEvent.change(within(joinDialog).getByRole('textbox', { name: 'Code de partie' }), {
-      target: { value: 'abcde' },
-    });
-    fireEvent.click(within(joinDialog).getAllByRole('button', { name: 'Rejoindre' }).at(-1) as HTMLElement);
-
-    expect(onJoinOnlineGame).toHaveBeenCalledWith('ABCDE', 'Zoe');
+    expect(onJoinOnlineGame).toHaveBeenCalledWith('ABCDE');
   });
 
   test('starts a local game only after the dialog begins closing', async () => {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { canPlayCard, gameReducer, getCompletedBuildPileCards, initialGameState, type Card, type GameState, type MoveResult } from '@skipbo/game-core';
-import { serializeClientGameView, type ClientGameView, type CreateRoomResponse, type ServerMessage } from '@skipbo/multiplayer-protocol';
+import { serializeClientGameView, type ClientGameView, type CreateRoomResponse, type LobbySeatInfo, type LobbyReadyState, type ServerMessage } from '@skipbo/multiplayer-protocol';
 
 import type { GameAction } from '@/state/gameActions';
 import { useCardAnimation } from '@/contexts/useCardAnimation';
@@ -106,6 +106,7 @@ const serializeLocalView = (gameState: GameState, currentView: ClientGameView): 
     expiresAt: currentView.room.expiresAt,
     gameState,
     hostSeatIndex: currentView.room.hostSeatIndex,
+    lobbySeats: currentView.room.lobbySeats,
     roomCode: currentView.room.roomCode,
     seatCapacity: currentView.room.seatCapacity,
     status: currentView.room.status,
@@ -287,8 +288,10 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
   const [lastError, setLastError] = useState<string | null>(null);
   const [turnPresentationOverride, setTurnPresentationOverride] = useState<TurnPresentationOverride | null>(null);
+  const [lobbyRemovalReason, setLobbyRemovalReason] = useState<'host-left' | 'kicked' | null>(null);
   const authoritativeViewRef = useRef<ClientGameView | null>(null);
   const interactionLockRef = useRef(false);
+  const intentionalLeaveRef = useRef(false);
   const viewRef = useRef<ClientGameView | null>(null);
   const websocketRef = useRef<WebSocket | null>(null);
   const pingIntervalRef = useRef<number | null>(null);
@@ -357,6 +360,8 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
 
     authoritativeViewRef.current = null;
     viewRef.current = null;
+    intentionalLeaveRef.current = false;
+    setLobbyRemovalReason(null);
 
     let socket: WebSocket | null = null;
     let isCancelled = false;
@@ -523,11 +528,20 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
               break;
             case 'actionRejected':
               setInteractionLocked(false);
-              setLastError(message.reason);
-              commitView(authoritativeViewRef.current ?? viewRef.current);
+              if (authoritativeViewRef.current?.room.status === 'WAITING') {
+                intentionalLeaveRef.current = true;
+                currentSocket.close();
+                setLobbyRemovalReason('kicked');
+              } else {
+                setLastError(message.reason);
+                commitView(authoritativeViewRef.current ?? viewRef.current);
+              }
               break;
             case 'roomClosed':
               setInteractionLocked(false);
+              if (message.status === 'WAITING' || (authoritativeViewRef.current?.room.status === 'WAITING')) {
+                setLobbyRemovalReason('host-left');
+              }
               authoritativeViewRef.current = authoritativeViewRef.current
                 ? {
                     ...authoritativeViewRef.current,
@@ -564,7 +578,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         setInteractionLocked(false);
         clearPingInterval();
 
-        if (isCancelled) {
+        if (isCancelled || intentionalLeaveRef.current) {
           setConnectionStatus('disconnected');
           return;
         }
@@ -910,15 +924,52 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     }
   }), [commitView, gameState, isInteractionBlocked, sendAction, setInteractionLocked, startAnimation]);
 
+  const sendSetReady = useCallback((playerName?: string): void => {
+    if (!websocketRef.current || websocketRef.current.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    websocketRef.current.send(JSON.stringify({ type: 'setReady', playerName }));
+  }, []);
+
+  const sendSetUnready = useCallback((): void => {
+    if (!websocketRef.current || websocketRef.current.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    websocketRef.current.send(JSON.stringify({ type: 'setUnready' }));
+  }, []);
+
+  const kickSeat = useCallback((targetSeatIndex: number): void => {
+    if (!websocketRef.current || websocketRef.current.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    websocketRef.current.send(JSON.stringify({ type: 'kickSeat', targetSeatIndex }));
+  }, []);
+
+  const leaveLobby = useCallback((): void => {
+    intentionalLeaveRef.current = true;
+
+    if (websocketRef.current?.readyState === WebSocket.OPEN) {
+      websocketRef.current.send(JSON.stringify({ type: 'leaveLobby' }));
+    }
+  }, []);
+
   const seatCapacity = view?.room.seatCapacity ?? session?.seatCapacity ?? 4;
   const hostSeatIndex = view?.room.hostSeatIndex ?? session?.hostSeatIndex ?? 0;
   const connectedSeats = view?.room.connectedSeats ?? [];
+  const lobbySeats: LobbySeatInfo[] = view?.room.lobbySeats ?? [];
   const roomStatus = view?.room.status ?? 'WAITING';
   const isLocalHost = session?.seatIndex === hostSeatIndex;
+  const myReadyState: LobbyReadyState = lobbySeats.find((s) => s.seatIndex === session?.seatIndex)?.readyState ?? 'never-ready';
   const canStartGame = Boolean(
     isLocalHost &&
     roomStatus === 'WAITING' &&
-    connectedSeats.length >= 2,
+    connectedSeats.length >= 2 &&
+    connectedSeats.every((seatIndex) =>
+      lobbySeats.find((s) => s.seatIndex === seatIndex)?.readyState === 'ready'
+    ),
   );
 
   return {
@@ -931,14 +982,21 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     gameState,
     hostSeatIndex,
     isLocalHost,
+    kickSeat,
     lastError,
+    leaveLobby,
+    lobbySeats,
+    myReadyState,
     playCard,
     roomCode: view?.room.roomCode ?? session?.roomCode ?? '',
     roomStatus,
     seatCapacity,
     selectCard,
+    sendSetReady,
+    sendSetUnready,
     startGame,
     discardCard,
     canPlayCard,
+    lobbyRemovalReason,
   };
 }

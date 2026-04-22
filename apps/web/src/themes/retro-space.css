@@ -6,6 +6,9 @@
   --success: #7fd4d7;
   --success-foreground: #07111d;
   --background: #07111d;
+  --foreground: #e8decd;
+  --popover: #122134;
+  --popover-foreground: #e8decd;
 
   --zone-bg-color: #122134;
   --text-color: #e8decd;

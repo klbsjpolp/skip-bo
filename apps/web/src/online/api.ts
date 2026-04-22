@@ -1,5 +1,4 @@
 import {
-  normalizePlayerName,
   type CreateRoomRequest,
   type CreateRoomResponse,
   type JoinRoomResponse,
@@ -47,14 +46,8 @@ const parseJsonResponse = async <T>(response: Response): Promise<T> => {
   return payload as T;
 };
 
-export const createOnlineRoom = async (
-  stockSize: number,
-  playerName?: string,
-): Promise<CreateRoomResponse> => {
-  const request: CreateRoomRequest = {
-    playerName: normalizePlayerName(playerName),
-    stockSize,
-  };
+export const createOnlineRoom = async (stockSize: number): Promise<CreateRoomResponse> => {
+  const request: CreateRoomRequest = { stockSize };
   const apiBaseUrl = await getApiBaseUrl();
   const response = await fetch(`${apiBaseUrl}/rooms`, {
     method: 'POST',
@@ -67,17 +60,14 @@ export const createOnlineRoom = async (
   return parseJsonResponse<CreateRoomResponse>(response);
 };
 
-export const joinOnlineRoom = async (roomCode: string, playerName?: string): Promise<JoinRoomResponse> => {
+export const joinOnlineRoom = async (roomCode: string): Promise<JoinRoomResponse> => {
   const apiBaseUrl = await getApiBaseUrl();
   const response = await fetch(`${apiBaseUrl}/rooms/join`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
     },
-    body: JSON.stringify({
-      playerName: normalizePlayerName(playerName),
-      roomCode,
-    }),
+    body: JSON.stringify({ roomCode }),
   });
 
   return parseJsonResponse<JoinRoomResponse>(response);

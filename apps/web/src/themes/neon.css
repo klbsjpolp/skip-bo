@@ -6,7 +6,13 @@
   --success: #00ff88;
   --success-foreground: hsl(0 0% 0%);
 
+  --muted: #161616;
+  --muted-foreground: hsl(0 0% 38%);
+
   --background: #0a0a0a;
+  --foreground: hsl(0 0% 90%);
+  --popover: #1a1a1a;
+  --popover-foreground: hsl(0 0% 90%);
   --text-color: #00ff88;
   --title-color: #ff0099;
   --card-front-color: #1a1a1a;

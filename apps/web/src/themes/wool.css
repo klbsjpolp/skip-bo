@@ -5,7 +5,10 @@
   --secondary-foreground: #333333;
   --success: hsl(152 33% 60%);
   --success-foreground: hsl(210 24% 16%);
-  --muted-foreground: hsl(0 0% 90%);
+  --muted: hsl(206 12% 43%);
+  --muted-foreground: hsl(206 15% 32%);
+  --destructive: hsl(0 49% 49%);
+  --destructive-foreground: #c9c9c9;
 
   --background: hsl(206 13% 51%);
   --text-color: #333333;
