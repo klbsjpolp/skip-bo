@@ -20,10 +20,10 @@ function getTextAndColourForCard(card: CardType | null, overriddenDisplayValue: 
   if (!card || !isRevealed) return { colourClass: '', cardValue: '' };
   const cardValue = (overriddenDisplayValue === undefined) ? (card.isSkipBo ? 'Skip-Bo' : card.value?.toString() ?? '') : overriddenDisplayValue;
   const colourClass =
-    (cardValue === 'Skip-Bo') ? 'skipbo-text' :
-      (Number(cardValue) <= 4) ? 'card-range-1' :
-        (Number(cardValue) <= 8) ? 'card-range-2' :
-          (Number(cardValue) <= 12) ? 'card-range-3' : '';
+    (cardValue === 'Skip-Bo') ? 'skipbo-text normal-card' :
+      (Number(cardValue) <= 4) ? 'card-range-1 normal-card' :
+        (Number(cardValue) <= 8) ? 'card-range-2 normal-card' :
+          (Number(cardValue) <= 12) ? 'card-range-3 normal-card' : '';
   return { colourClass, cardValue };
 }
 
