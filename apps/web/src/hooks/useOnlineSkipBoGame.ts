@@ -361,7 +361,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     authoritativeViewRef.current = null;
     viewRef.current = null;
     intentionalLeaveRef.current = false;
-    setLobbyRemovalReason(null);
 
     let socket: WebSocket | null = null;
     let isCancelled = false;
