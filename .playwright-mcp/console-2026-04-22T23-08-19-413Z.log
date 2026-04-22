@@ -1,0 +1,2 @@
+[     127ms] [INFO] [sentry] disabled: VITE_SENTRY_DSN is not set @ http://localhost:5173/src/instrument.ts:25
+[     128ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1e6a995c:20102

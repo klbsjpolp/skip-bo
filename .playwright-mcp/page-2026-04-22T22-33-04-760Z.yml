@@ -1,0 +1,100 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - button "Nouvelle partie" [ref=e8]
+      - generic [ref=e9]:
+        - combobox "Thème" [ref=e10]:
+          - generic [ref=e11]:
+            - img [ref=e12]
+            - text: Clair
+          - img [ref=e18]
+        - button "Thème aléatoire" [ref=e20]:
+          - img [ref=e21]
+    - generic [ref=e27]:
+      - generic "Zone du joueur IA" [ref=e28]:
+        - generic [ref=e29]:
+          - generic [ref=e30]:
+            - generic [ref=e31]: Talon (30)
+            - button "Top card in stock (hidden)" [ref=e33]:
+              - generic [ref=e36]: "11"
+              - generic [ref=e37]: "11"
+          - generic [ref=e40]:
+            - generic [ref=e41]: Main
+            - generic [ref=e42]:
+              - button "Hand card 1" [ref=e44]
+              - button "Hand card 2" [ref=e47]
+              - button "Hand card 3" [ref=e50]
+              - button "Hand card 4" [ref=e53]
+              - button "Hand card 5" [ref=e56]
+          - generic [ref=e58]:
+            - generic [ref=e59]: Défausses
+            - generic [ref=e60]:
+              - generic "Défausse 1" [ref=e61]:
+                - generic [ref=e62]: Vide
+              - generic "Défausse 2" [ref=e63]:
+                - generic [ref=e64]: Vide
+              - generic "Défausse 3" [ref=e65]:
+                - generic [ref=e66]: Vide
+              - generic "Défausse 4" [ref=e67]:
+                - generic [ref=e68]: Vide
+      - generic [ref=e70]:
+        - generic [ref=e72]: Pioche (92)
+        - generic [ref=e76]:
+          - generic [ref=e77]:
+            - text: Piles de
+            - text: construction
+          - generic [ref=e78]:
+            - generic "Pile de construction 1" [ref=e79]:
+              - generic [ref=e80]: Vide
+            - generic "Pile de construction 2" [ref=e81]:
+              - generic [ref=e82]: Vide
+            - generic "Pile de construction 3" [ref=e83]:
+              - generic [ref=e84]: Vide
+            - generic "Pile de construction 4" [ref=e85]:
+              - generic [ref=e86]: Vide
+        - generic [ref=e87]:
+          - generic [ref=e88]: Retrait (0)
+          - generic "Pile de retrait (0)" [ref=e89]:
+            - generic [ref=e90]: Vide
+      - heading "Nouvelle partie commencée !" [level=1] [ref=e91]
+      - generic "Zone du joueur humain" [ref=e92]:
+        - generic [ref=e93]:
+          - generic [ref=e94]:
+            - generic [ref=e95]: Talon (30)
+            - button "Top card in stock (hidden)" [ref=e97] [cursor=pointer]:
+              - generic [ref=e100]: "3"
+              - generic [ref=e101]: "3"
+          - generic [ref=e104]:
+            - generic [ref=e105]: Main
+            - generic [ref=e106]:
+              - button "Hand card 1" [ref=e108] [cursor=pointer]:
+                - generic [ref=e111]: "11"
+                - generic [ref=e112]: "11"
+              - button "Hand card 2" [ref=e114] [cursor=pointer]:
+                - generic [ref=e117]: "3"
+                - generic [ref=e118]: "3"
+              - button "Hand card 3" [ref=e120] [cursor=pointer]:
+                - generic [ref=e123]: "8"
+                - generic [ref=e124]: "8"
+              - button "Hand card 4" [ref=e126] [cursor=pointer]:
+                - generic [ref=e129]: "4"
+                - generic [ref=e130]: "4"
+              - button "Hand card 5" [ref=e132] [cursor=pointer]:
+                - generic [ref=e135]: "9"
+                - generic [ref=e136]: "9"
+          - generic [ref=e137]:
+            - generic [ref=e138]: Défausses
+            - generic [ref=e139]:
+              - button "Défausse 1" [ref=e140]:
+                - generic [ref=e141]: Vide
+              - button "Défausse 2" [ref=e142]:
+                - generic [ref=e143]: Vide
+              - button "Défausse 3" [ref=e144]:
+                - generic [ref=e145]: Vide
+              - button "Défausse 4" [ref=e146]:
+                - generic [ref=e147]: Vide
+    - generic [ref=e148]:
+      - generic [ref=e149]:
+        - button "Fill build pile" [ref=e150]
+        - button "Win" [ref=e151]
+      - paragraph [ref=e152]: Version v0.1.0
