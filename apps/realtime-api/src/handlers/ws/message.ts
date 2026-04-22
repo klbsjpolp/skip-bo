@@ -5,7 +5,7 @@ import { clientMessageSchema } from '@skipbo/multiplayer-protocol';
 
 import { isClientError } from '../../errors/clientError.js';
 import { captureBackendException, withSentry } from '../../monitoring/sentry.js';
-import { authenticateConnection, handleAction, rejectAction, startGame } from '../../services/roomService.js';
+import { authenticateConnection, handleAction, handleKickSeat, handleLeaveLobby, handleSetReady, handleSetUnready, rejectAction, startGame } from '../../services/roomService.js';
 import { broadcaster, connectionRepository, roomRepository, websocketUrl } from '../shared.js';
 
 const messageHandler: APIGatewayProxyWebsocketHandlerV2 = async (event) => {
@@ -46,6 +46,18 @@ const messageHandler: APIGatewayProxyWebsocketHandlerV2 = async (event) => {
         });
         break;
       case 'ping':
+        break;
+      case 'setReady':
+        await handleSetReady(dependencies, { connectionId, playerName: message.playerName });
+        break;
+      case 'setUnready':
+        await handleSetUnready(dependencies, { connectionId });
+        break;
+      case 'kickSeat':
+        await handleKickSeat(dependencies, { connectionId, targetSeatIndex: message.targetSeatIndex });
+        break;
+      case 'leaveLobby':
+        await handleLeaveLobby(dependencies, { connectionId });
         break;
     }
 

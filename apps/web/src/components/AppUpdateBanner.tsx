@@ -21,7 +21,7 @@ export function AppUpdateBanner({
   const title = hasPendingServiceWorkerUpdate ? 'Mise à jour prête' : 'Nouvelle version disponible';
   const description = latestVersion
     ? `La version ${latestVersion} est disponible. Vous utilisez ${currentVersion}.`
-    : 'Une nouvelle version est disponible. Rechargez l’application pour utiliser le build le plus récent.';
+    : 'Une nouvelle version est disponible. Rechargez l’application pour utiliser la version la plus récente.';
 
   return (
     <Alert className="border-primary/30 bg-background/95 shadow-sm">

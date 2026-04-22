@@ -7,6 +7,9 @@
   --success-foreground: hsl(0 0% 100%);
 
   --background: #1d1d1d;
+  --foreground: hsl(0 0% 90%);
+  --popover: #2d2d2d;
+  --popover-foreground: hsl(0 0% 90%);
   --text-color: #ffffff;
   --title-color: #ffffff;
   --card-front-color: #3c3c3c;

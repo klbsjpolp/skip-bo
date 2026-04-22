@@ -24,7 +24,33 @@ export interface PingClientMessage {
   type: 'ping';
 }
 
-export type ClientMessage = AuthClientMessage | ActionClientMessage | StartGameClientMessage | PingClientMessage;
+export interface SetReadyClientMessage {
+  type: 'setReady';
+  playerName?: string;
+}
+
+export interface SetUnreadyClientMessage {
+  type: 'setUnready';
+}
+
+export interface KickSeatClientMessage {
+  type: 'kickSeat';
+  targetSeatIndex: number;
+}
+
+export interface LeaveLobbyClientMessage {
+  type: 'leaveLobby';
+}
+
+export type ClientMessage =
+  | AuthClientMessage
+  | ActionClientMessage
+  | StartGameClientMessage
+  | PingClientMessage
+  | SetReadyClientMessage
+  | SetUnreadyClientMessage
+  | KickSeatClientMessage
+  | LeaveLobbyClientMessage;
 
 export interface SnapshotServerMessage {
   type: 'snapshot';

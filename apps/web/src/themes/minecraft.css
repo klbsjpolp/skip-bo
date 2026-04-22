@@ -15,7 +15,12 @@
   --secondary-foreground: hsl(0 0% 100%);
   --success: #9adf5a;
   --success-foreground: #1a1a1a;
-  --muted-foreground: #ccc;
+  --foreground: #e6e6e6;
+  --card-foreground: #e6e6e6;
+  --popover: #3d2e1e;
+  --popover-foreground: #e6e6e6;
+  --muted: hsl(30 12% 18%);
+  --muted-foreground: hsl(0 0% 52%);
 
   --background: #2f2418;                 /* base around dirt */
   --text-color: #e6e6e6;

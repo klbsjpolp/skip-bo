@@ -4,11 +4,13 @@ import type {
   CreateRoomResponse,
   JoinRoomRequest,
   JoinRoomResponse,
+  LobbySeatInfo,
+  LobbyReadyState,
   ServerMessage
 } from '@skipbo/multiplayer-protocol';
-import { normalizeRoomCode, resolvePlayerName, serializeClientGameView } from '@skipbo/multiplayer-protocol';
+import { normalizePlayerName, normalizeRoomCode, serializeClientGameView } from '@skipbo/multiplayer-protocol';
 
-import { RoomVersionConflictError, type ConnectionRecord, type ConnectionRepository, type RoomRecord, type RoomRepository } from '../repositories/types.js';
+import { RoomVersionConflictError, type ConnectionRecord, type ConnectionRepository, type LobbyPlayerRecord, type RoomRecord, type RoomRepository } from '../repositories/types.js';
 import {ClientError} from '../errors/clientError.js';
 import type {RealtimeBroadcaster} from './broadcaster.js';
 import {applyOnlineAction, createOnlineInitialGameState, createWaitingRoomState, isDebugAction, validateOnlineAction} from './gameState.js';
@@ -80,6 +82,7 @@ const broadcastPresence = async (
       connectedSeats,
       expiresAt: new Date(room.expiresAt * 1000).toISOString(),
       hostSeatIndex: room.hostSeatIndex,
+      lobbySeats: buildLobbySeats(room),
       roomCode: room.roomCode,
       seatCapacity: room.seatCapacity,
       status: room.status,
@@ -115,6 +118,7 @@ const broadcastSnapshots = async (
         expiresAt: new Date(room.expiresAt * 1000).toISOString(),
         gameState: room.state,
         hostSeatIndex: room.hostSeatIndex,
+        lobbySeats: buildLobbySeats(room),
         roomCode: room.roomCode,
         seatCapacity: room.seatCapacity,
         status: room.status,
@@ -158,6 +162,29 @@ const isStaleConnectionError = (error: unknown): boolean => {
 const isRoomVersionConflictError = (error: unknown): error is RoomVersionConflictError =>
   error instanceof RoomVersionConflictError;
 
+const getLobbyPlayers = (room: RoomRecord): LobbyPlayerRecord[] => room.lobbyPlayers ?? [];
+
+const upsertLobbyPlayer = (room: RoomRecord, update: LobbyPlayerRecord): LobbyPlayerRecord[] => [
+  ...getLobbyPlayers(room).filter((p) => p.seatIndex !== update.seatIndex),
+  update,
+];
+
+const removeLobbyPlayer = (room: RoomRecord, seatIndex: number): LobbyPlayerRecord[] =>
+  getLobbyPlayers(room).filter((p) => p.seatIndex !== seatIndex);
+
+const buildLobbySeats = (room: RoomRecord): LobbySeatInfo[] =>
+  getLobbyPlayers(room).map((lp) => ({
+    seatIndex: lp.seatIndex,
+    readyState: lp.readyState as LobbyReadyState,
+    displayName: lp.readyState === 'never-ready' ? null : lp.playerName,
+  }));
+
+const allAuthenticatedSeatsReady = (room: RoomRecord): boolean => {
+  const seats = getAuthenticatedSeats(room);
+  if (seats.length < 2) return false;
+  return seats.every((s) => getLobbyPlayers(room).find((p) => p.seatIndex === s)?.readyState === 'ready');
+};
+
 const getAuthenticatedConnection = async (
   dependencies: RoomServiceDependencies,
   connectionId: string,
@@ -180,16 +207,13 @@ export const createRoom = async (
     const seatToken = createSeatToken();
     const createdAt = new Date().toISOString();
     const waitingRoomState = createWaitingRoomState(request.stockSize, DEFAULT_SEAT_CAPACITY);
-    waitingRoomState.players[DEFAULT_HOST_SEAT_INDEX] = {
-      ...waitingRoomState.players[DEFAULT_HOST_SEAT_INDEX],
-      name: resolvePlayerName(request.playerName, DEFAULT_HOST_SEAT_INDEX),
-    };
     const room: RoomRecord = {
       activeSeatIndices: undefined,
       authenticatedSeats: [],
       createdAt,
       expiresAt: createExpiryTimestamp(createdAt),
       hostSeatIndex: DEFAULT_HOST_SEAT_INDEX,
+      lobbyPlayers: [{ seatIndex: DEFAULT_HOST_SEAT_INDEX, readyState: 'never-ready', playerName: null }],
       roomCode,
       seatCapacity: DEFAULT_SEAT_CAPACITY,
       seatTokenHashes: [
@@ -242,20 +266,9 @@ export const joinRoom = async (
     const seatToken = createSeatToken();
     const seatTokenHashes = [...room.seatTokenHashes];
     seatTokenHashes[openSeatIndex] = hashSeatToken(seatToken);
-    const nextPlayers = room.state.players.map((player, playerIndex) => (
-      playerIndex === openSeatIndex
-        ? {
-            ...player,
-            name: resolvePlayerName(request.playerName, openSeatIndex),
-          }
-        : player
-    ));
     const updatedRoom = buildUpdatedRoom(room, {
+      lobbyPlayers: upsertLobbyPlayer(room, { seatIndex: openSeatIndex, readyState: 'never-ready', playerName: null }),
       seatTokenHashes,
-      state: {
-        ...room.state,
-        players: nextPlayers,
-      },
       version: room.version + 1,
     });
 
@@ -367,13 +380,15 @@ export const startGame = async (
 
     const connectedSeats = getAuthenticatedSeats(room);
 
-    if (connectedSeats.length < 2) {
-      throw new ClientError('At least two connected players are required to start', 409);
+    if (!allAuthenticatedSeatsReady(room)) {
+      throw new ClientError('Tous les joueurs doivent être prêts pour démarrer', 409);
     }
 
     const nextState = createOnlineInitialGameState({
       playerCount: connectedSeats.length,
-      playerNames: connectedSeats.map((seatIndex) => room.state.players[seatIndex]?.name),
+      playerNames: connectedSeats.map((seatIndex) =>
+        getLobbyPlayers(room).find((p) => p.seatIndex === seatIndex)?.playerName ?? undefined
+      ),
       seatIndices: connectedSeats,
       stockSize: room.state.config.STOCK_SIZE,
     });
@@ -480,6 +495,14 @@ export const handleDisconnect = async (
     return;
   }
 
+  if (room.status === 'WAITING' && connection.seatIndex === room.hostSeatIndex) {
+    const connections = await dependencies.connectionRepository.listByRoomCode(room.roomCode);
+    await Promise.allSettled(connections.map(async (c) => {
+      await dependencies.broadcaster.send(c.connectionId, toRoomClosedMessage(room));
+    }));
+    return;
+  }
+
   for (let attempt = 0; attempt < ROOM_UPDATE_MAX_ATTEMPTS; attempt += 1) {
     const currentRoom = await dependencies.roomRepository.get(connection.roomCode);
 
@@ -503,6 +526,162 @@ export const handleDisconnect = async (
       }
     }
   }
+};
+
+export const handleSetReady = async (
+  dependencies: RoomServiceDependencies,
+  input: { connectionId: string; playerName?: string },
+): Promise<void> => {
+  const connection = await getAuthenticatedConnection(dependencies, input.connectionId);
+
+  for (let attempt = 0; attempt < ROOM_UPDATE_MAX_ATTEMPTS; attempt += 1) {
+    const room = await dependencies.roomRepository.get(connection.roomCode);
+
+    if (!room) {
+      throw new ClientError('Room not found', 404);
+    }
+
+    if (room.status !== 'WAITING') {
+      throw new ClientError('Game already started', 409);
+    }
+
+    const existing = getLobbyPlayers(room).find((p) => p.seatIndex === connection.seatIndex);
+    const resolvedName = normalizePlayerName(input.playerName) ?? existing?.playerName ?? null;
+
+    const updatedRoom = buildUpdatedRoom(room, {
+      lobbyPlayers: upsertLobbyPlayer(room, {
+        seatIndex: connection.seatIndex,
+        readyState: 'ready',
+        playerName: resolvedName,
+      }),
+      version: room.version + 1,
+    });
+
+    try {
+      await dependencies.roomRepository.update(updatedRoom, room.version);
+      await broadcastPresence(dependencies, updatedRoom);
+      return;
+    } catch (error) {
+      if (!isRoomVersionConflictError(error) || attempt === ROOM_UPDATE_MAX_ATTEMPTS - 1) {
+        throw error;
+      }
+    }
+  }
+};
+
+export const handleSetUnready = async (
+  dependencies: RoomServiceDependencies,
+  input: { connectionId: string },
+): Promise<void> => {
+  const connection = await getAuthenticatedConnection(dependencies, input.connectionId);
+
+  for (let attempt = 0; attempt < ROOM_UPDATE_MAX_ATTEMPTS; attempt += 1) {
+    const room = await dependencies.roomRepository.get(connection.roomCode);
+
+    if (!room) {
+      throw new ClientError('Room not found', 404);
+    }
+
+    if (room.status !== 'WAITING') {
+      throw new ClientError('Game already started', 409);
+    }
+
+    const existing = getLobbyPlayers(room).find((p) => p.seatIndex === connection.seatIndex);
+
+    if (!existing || existing.readyState === 'never-ready') {
+      return;
+    }
+
+    const updatedRoom = buildUpdatedRoom(room, {
+      lobbyPlayers: upsertLobbyPlayer(room, {
+        seatIndex: connection.seatIndex,
+        readyState: 'unready',
+        playerName: existing.playerName,
+      }),
+      version: room.version + 1,
+    });
+
+    try {
+      await dependencies.roomRepository.update(updatedRoom, room.version);
+      await broadcastPresence(dependencies, updatedRoom);
+      return;
+    } catch (error) {
+      if (!isRoomVersionConflictError(error) || attempt === ROOM_UPDATE_MAX_ATTEMPTS - 1) {
+        throw error;
+      }
+    }
+  }
+};
+
+export const handleKickSeat = async (
+  dependencies: RoomServiceDependencies,
+  input: { connectionId: string; targetSeatIndex: number },
+): Promise<void> => {
+  const connection = await getAuthenticatedConnection(dependencies, input.connectionId);
+
+  for (let attempt = 0; attempt < ROOM_UPDATE_MAX_ATTEMPTS; attempt += 1) {
+    const room = await dependencies.roomRepository.get(connection.roomCode);
+
+    if (!room) {
+      throw new ClientError('Room not found', 404);
+    }
+
+    if (room.status !== 'WAITING') {
+      throw new ClientError('Game already started', 409);
+    }
+
+    if (connection.seatIndex !== room.hostSeatIndex) {
+      throw new ClientError('Only the host can kick players', 403);
+    }
+
+    if (input.targetSeatIndex === room.hostSeatIndex) {
+      throw new ClientError('Cannot kick yourself', 400);
+    }
+
+    const nextSeatTokenHashes = [...room.seatTokenHashes];
+    nextSeatTokenHashes[input.targetSeatIndex] = null;
+
+    const nextAuthenticatedSeats = getAuthenticatedSeats(room).filter((s) => s !== input.targetSeatIndex);
+
+    const updatedRoom = buildUpdatedRoom(room, {
+      authenticatedSeats: nextAuthenticatedSeats,
+      lobbyPlayers: removeLobbyPlayer(room, input.targetSeatIndex),
+      seatTokenHashes: nextSeatTokenHashes,
+      version: room.version + 1,
+    });
+
+    try {
+      await dependencies.roomRepository.update(updatedRoom, room.version);
+
+      const allConnections = await dependencies.connectionRepository.listByRoomCode(room.roomCode);
+      const targetConnections = allConnections.filter((c) => c.seatIndex === input.targetSeatIndex);
+
+      await Promise.allSettled(targetConnections.map(async (c) => {
+        try {
+          await dependencies.broadcaster.send(c.connectionId, toRoomClosedMessage(room));
+          await dependencies.broadcaster.disconnect(c.connectionId);
+        } catch { /* stale connection */ }
+        await dependencies.connectionRepository.delete(c.connectionId);
+      }));
+
+      await broadcastPresence(dependencies, updatedRoom);
+      return;
+    } catch (error) {
+      if (!isRoomVersionConflictError(error) || attempt === ROOM_UPDATE_MAX_ATTEMPTS - 1) {
+        throw error;
+      }
+    }
+  }
+};
+
+export const handleLeaveLobby = async (
+  dependencies: RoomServiceDependencies,
+  input: { connectionId: string },
+): Promise<void> => {
+  await handleDisconnect(dependencies, input.connectionId);
+  try {
+    await dependencies.broadcaster.disconnect(input.connectionId);
+  } catch { /* connection may already be gone */ }
 };
 
 export const rejectAction = async (

@@ -7,10 +7,14 @@
   --secondary-foreground: #e7d9b9;
   --success: hsl(165 32% 34%);
   --success-foreground: hsl(45 60% 92%);
-  --muted-foreground: hsl(42 0% 82%);
+  --muted: hsl(27 15% 18%);
+  --muted-foreground: hsl(42 20% 50%);
 
   /* Surfaces and text */
   --background: #1f1a14;                   /* workshop charcoal */
+  --foreground: hsl(42 49% 82%);
+  --popover: hsl(27 25% 18%);
+  --popover-foreground: hsl(42 49% 82%);
   --zone-bg-color: #2a241c;              /* dark wood */
   --text-color: hsl(42 49% 82%);                 /* parchment */
   --title-color: #f3e7c9;                /* brighter parchment */

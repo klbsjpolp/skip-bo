@@ -5,6 +5,9 @@
     --secondary-foreground: hsl(0 0% 20%);
     --success: #a5dda5;
     --success-foreground: #3d4a42;
+    --border: #ffd7e6;
+    --muted: hsl(50 55% 91%);
+    --muted-foreground: hsl(0 0% 62%);
 
     --background: #fbef8b;
     --text-color: #5a6270;

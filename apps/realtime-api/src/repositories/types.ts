@@ -13,12 +13,19 @@ export interface RoomSummaryRecord {
   winnerIndex: number | null;
 }
 
+export interface LobbyPlayerRecord {
+  seatIndex: number;
+  readyState: 'never-ready' | 'ready' | 'unready';
+  playerName: string | null;
+}
+
 export interface RoomRecord {
   activeSeatIndices?: number[];
   authenticatedSeats?: number[];
   createdAt: string;
   expiresAt: number;
   hostSeatIndex: number;
+  lobbyPlayers?: LobbyPlayerRecord[];
   roomCode: string;
   seatCapacity: number;
   seatTokenHashes: Array<string | null>;

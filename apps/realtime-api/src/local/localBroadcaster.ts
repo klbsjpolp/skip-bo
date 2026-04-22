@@ -23,6 +23,14 @@ export class LocalRealtimeBroadcaster implements RealtimeBroadcaster {
     this.sockets.delete(connectionId);
   }
 
+  async disconnect(connectionId: string): Promise<void> {
+    const socket = this.sockets.get(connectionId);
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.close();
+    }
+    this.sockets.delete(connectionId);
+  }
+
   async send(connectionId: string, message: ServerMessage): Promise<void> {
     const socket = this.sockets.get(connectionId);
 

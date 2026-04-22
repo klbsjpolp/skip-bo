@@ -183,6 +183,21 @@ describe('local realtime dev server', () => {
       },
     });
 
+    const readyPresence0 = waitForMessage(
+      socket0,
+      (message) => message.type === 'presence' &&
+        message.room.lobbySeats.length === 2 &&
+        message.room.lobbySeats.every((s: { readyState: string }) => s.readyState === 'ready'),
+    );
+
+    socket0.send(JSON.stringify({ type: 'setReady', playerName: 'Alice' }));
+    socket1.send(JSON.stringify({ type: 'setReady', playerName: 'Bob' }));
+
+    await expect(readyPresence0).resolves.toMatchObject({
+      type: 'presence',
+      room: { status: 'WAITING' },
+    });
+
     socket0.send(JSON.stringify({
       type: 'startGame',
       clientVersion: 3,

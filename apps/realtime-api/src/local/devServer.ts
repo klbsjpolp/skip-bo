@@ -19,6 +19,10 @@ import {
   createRoom,
   handleAction,
   handleDisconnect,
+  handleKickSeat,
+  handleLeaveLobby,
+  handleSetReady,
+  handleSetUnready,
   joinRoom,
   rejectAction,
   startGame,
@@ -230,6 +234,18 @@ export const startLocalRealtimeDevServer = async (
               await startGame(dependencies, {
                 connectionId,
               });
+              break;
+            case 'setReady':
+              await handleSetReady(dependencies, { connectionId, playerName: message.playerName });
+              break;
+            case 'setUnready':
+              await handleSetUnready(dependencies, { connectionId });
+              break;
+            case 'kickSeat':
+              await handleKickSeat(dependencies, { connectionId, targetSeatIndex: message.targetSeatIndex });
+              break;
+            case 'leaveLobby':
+              await handleLeaveLobby(dependencies, { connectionId });
               break;
             case 'ping':
               break;
