@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.15.2](https://github.com/klbsjpolp/skip-bo/compare/v1.15.1...v1.15.2) (2026-04-23)
+
+
+### Bug Fixes
+
+* **web:** refine player area styles in Minecraft theme ([fd9e17a](https://github.com/klbsjpolp/skip-bo/commit/fd9e17a2a4ca298c8ebec2ed4d10ebaf18978a2b))
+
+
+
 ## [1.15.1](https://github.com/klbsjpolp/skip-bo/compare/v1.15.0...v1.15.1) (2026-04-23)
 
 
