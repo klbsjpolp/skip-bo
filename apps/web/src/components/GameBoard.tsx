@@ -2,6 +2,7 @@ import type {GameState, Card as CardType} from '@/types';
 import { PlayerArea } from '@/components/PlayerArea';
 import { CenterArea } from '@/components/CenterArea';
 import { cn } from '@/lib/utils';
+import { AiInsightLine } from '@/components/AiInsightLine';
 
 export interface GameBoardProps {
   gameState: GameState;
@@ -10,9 +11,11 @@ export interface GameBoardProps {
   discardCard: (discardPileIndex: number) => Promise<{ success: boolean; message: string }>;
   clearSelection: () => void;
   canPlayCard: (card: CardType, buildPileIndex: number, gameState: GameState) => boolean;
+  aiInsightText?: string;
 }
 
 export function GameBoard({ 
+  aiInsightText,
   gameState, 
   selectCard, 
   playCard, 
@@ -53,6 +56,7 @@ export function GameBoard({
       <h1 className="my-4 lg:my-6" data-testid="game-message">
         {gameState.message}
       </h1>
+      {aiInsightText !== undefined ? <AiInsightLine text={aiInsightText} /> : null}
 
       {/* Human Player Area */}
       <PlayerArea

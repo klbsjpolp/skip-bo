@@ -4,6 +4,10 @@ await build({
   bundle: true,
   entryPoints: [
     'src/handlers/http/createRoom.ts',
+    'src/handlers/http/aiCoach.ts',
+    'src/handlers/http/aiLocalCoach.ts',
+    'src/handlers/http/aiLocalPostGameSummary.ts',
+    'src/handlers/http/aiPostGameSummary.ts',
     'src/handlers/http/joinRoom.ts',
     'src/handlers/ws/connect.ts',
     'src/handlers/ws/disconnect.ts',

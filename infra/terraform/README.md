@@ -11,11 +11,13 @@ This directory owns the production AWS infrastructure for the realtime backend. 
 
 The production deploy workflow also owns release creation in `.github/workflows/deploy.yml`. Keep its checkout unshallowed so release versioning can read the full conventional-commit history between tags. That same workflow writes the GitHub Pages runtime config, including the optional `minimumSupportedVersion` gate used to force installed PWAs off an older build.
 
+The realtime API module also owns the optional Gen AI insight routes. Production inference is configured through Bedrock variables in `envs/prod`; Ollama-compatible URLs are supported only when the endpoint is reachable from the Lambda runtime. Local-game insight routes are unauthenticated best-effort HTTP routes protected by route-level throttling in the realtime API module.
+
 ## Layout
 
 - `modules/dynamodb`: room and connection tables
 - `modules/iam`: Lambda execution role and data-plane policies
-- `modules/realtime_api`: Lambda functions plus HTTP and WebSocket API Gateway resources
+- `modules/realtime_api`: Lambda functions plus HTTP, AI insight, and WebSocket API Gateway resources
 - `modules/monitoring`: CloudWatch alarms and monitoring wiring
 - `envs/prod`: production environment composition
 - `scripts/validate-offline-prod.sh`: offline validation wrapper used by CI and local checks

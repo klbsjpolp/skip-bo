@@ -30,6 +30,8 @@
 - optional `VITE_SENTRY_DSN`
 - optional `BACKEND_SENTRY_DSN` or `SENTRY_DSN` GitHub secret if the backend should report to a different Sentry project than the browser
 - optional `TF_VAR_sentry_dsn`, `TF_VAR_sentry_release`, and `TF_VAR_sentry_traces_sample_rate` for local plan or apply
+- optional `TF_VAR_genai_provider`, `TF_VAR_bedrock_model_id`, `TF_VAR_bedrock_region`, and `TF_VAR_genai_timeout_ms` for online coach and post-game summary generation
+- optional `TF_VAR_ollama_base_url` and `TF_VAR_ollama_model` only when using an Ollama-compatible inference endpoint instead of Bedrock
 
 ## Steps
 
@@ -65,6 +67,7 @@ tofu -chdir=infra/terraform/envs/prod init \
   -backend-config="dynamodb_table=skipbo-opentofu-locks"
 TF_VAR_sentry_dsn=your_backend_dsn \
 TF_VAR_sentry_release=v$(node -p 'require("./package.json").version') \
+TF_VAR_bedrock_model_id=your_bedrock_model_id \
 pnpm tofu:plan
 ```
 
@@ -74,6 +77,7 @@ pnpm tofu:plan
 pnpm --filter @skipbo/realtime-api build
 TF_VAR_sentry_dsn=your_backend_dsn \
 TF_VAR_sentry_release=v$(node -p 'require("./package.json").version') \
+TF_VAR_bedrock_model_id=your_bedrock_model_id \
 pnpm tofu:apply
 ```
 
@@ -84,6 +88,8 @@ pnpm tofu:apply
 - The release job checks out `main` with full git history so `commit-and-tag-version` can inspect commits since the previous tag and produce the correct SemVer bump.
 - Backend deploy uses `TOFU_BACKEND_CONFIG_HCL` plus `AWS_OPENTOFU_ROLE_ARN` or `AWS_DEPLOY_ROLE_ARN`.
 - Backend deploy resolves the Sentry DSN from `BACKEND_SENTRY_DSN`, then `SENTRY_DSN`, then `VITE_SENTRY_DSN`.
+- Gen AI insight routes default to the Bedrock provider. Set `TF_VAR_bedrock_model_id` to enable model-backed text; production routes fall back to deterministic text and log provider failures when model-backed text is unavailable.
+- Local-game Gen AI insight routes are unauthenticated best-effort routes. The realtime API module applies route-level API Gateway throttling to `POST /ai/local/coach` and `POST /ai/local/post-game-summary`.
 - Frontend deploy writes `apps/web/public/runtime-config.json` with `apiBaseUrl`, the current release tag as `appVersion`, and an optional `minimumSupportedVersion` sourced from the workflow-dispatch input or the `PWA_MINIMUM_SUPPORTED_VERSION` repository variable.
 - Leave `PWA_MINIMUM_SUPPORTED_VERSION` empty for normal soft-update behavior. Set it to a release tag such as `v1.4.0` only when older installed PWAs must block and reload before continuing.
 
@@ -94,6 +100,9 @@ pnpm tofu:apply
 3. Open two browser sessions.
 4. Create a room in one browser and join it from the other.
 5. Confirm room-code display, live selection sync, hidden opponent hand, and replay creating a fresh online room.
+6. During the local player's turn, confirm the Coach toggle is on by default when no stored preference exists, the inline insight line updates automatically after moves without moving the board, and disabling the toggle removes the coach line's empty space.
+7. After a completed game, confirm a one-line personal summary appears automatically.
+8. With `VITE_SKIPBO_API_URL` pointing at the backend, confirm local games still work when the backend is down and improve only the insight text when the backend is available.
 
 ## Rollback
 
@@ -111,3 +120,7 @@ pnpm tofu:apply
 - Setting `PWA_MINIMUM_SUPPORTED_VERSION` too high can block otherwise healthy installed PWAs until they reload onto a newer release.
 - Missing Sentry variables disables backend release tagging and monitoring integration.
 - When `TF_VAR_sentry_dsn` is set, backend tracing defaults to a `1.0` sample rate unless `TF_VAR_sentry_traces_sample_rate` overrides it.
+- Missing `TF_VAR_bedrock_model_id` or unavailable Bedrock model access makes production AI insight routes use deterministic fallback text and capture the provider error in backend monitoring.
+- In non-production, missing or disabled Gen AI provider settings surface as HTTP error messages so local setup problems are visible.
+- Ollama URLs must be reachable from the Lambda runtime if `TF_VAR_genai_provider=ollama`; a developer laptop `localhost` is only useful for local dev server runs.
+- Local games do not require the backend to play. If local insight routes fail, the browser keeps deterministic fallback text and does not block gameplay.

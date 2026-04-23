@@ -2,8 +2,11 @@ import {type ReactNode, useEffect, useState} from 'react';
 
 import type {CreateRoomResponse} from '@skipbo/multiplayer-protocol';
 
+import {useLocalAiInsights} from '@/hooks/useLocalAiInsights';
 import {useLocalSkipBoGame} from '@/hooks/useLocalSkipBoGame';
+import {useOnlineAiInsights} from '@/hooks/useOnlineAiInsights';
 import {useOnlineSkipBoGame} from '@/hooks/useOnlineSkipBoGame';
+import {useStoredCoachEnabled} from '@/hooks/useStoredCoachEnabled';
 import type {GameType} from '@/app/types';
 import {AppUpdateBanner} from '@/components/AppUpdateBanner';
 import {ForcedUpdateOverlay} from '@/components/ForcedUpdateOverlay';
@@ -12,6 +15,7 @@ import {OnlineStatusStrip} from '@/components/OnlineStatusStrip';
 import {ThemeSwitcher} from '@/components/ThemeSwitcher';
 import {LocalGameBoard} from '@/components/LocalGameBoard';
 import {OnlineGameBoard} from '@/components/OnlineGameBoard';
+import {AiCoachToggle} from '@/components/AiCoachToggle';
 import {Button} from '@/components/ui/button';
 import NewGame from '@/components/NewGame';
 import {useCardAnimation} from '@/contexts/useCardAnimation';
@@ -36,6 +40,7 @@ interface AppShellProps {
   onStartLocalGame: () => void;
   onStartOnlineGame: (stockSize?: number) => Promise<void>;
   statusStrip?: ReactNode;
+  toolbarActions?: ReactNode;
   updateNotice?: ReactNode;
 }
 
@@ -49,6 +54,7 @@ function AppShell({
   onStartLocalGame,
   onStartOnlineGame,
   statusStrip,
+  toolbarActions,
   updateNotice,
 }: AppShellProps) {
   return (
@@ -74,7 +80,13 @@ function AppShell({
             />
             {statusStrip}
           </div>
-          <ThemeSwitcher/>
+          <div
+              className="flex flex-row items-center gap-2 self-end sm:self-start"
+              data-testid="app-toolbar-right"
+          >
+            {toolbarActions}
+            <ThemeSwitcher/>
+          </div>
         </div>
         {updateNotice ? <div className="mb-3">{updateNotice}</div> : null}
         {gameBoard}
@@ -147,11 +159,20 @@ function LocalGameScreen({
     debugWin,
     discardCard,
     gameState,
+    localActionLog,
     playCard,
     selectCard,
   } = useLocalSkipBoGame();
+  const [isCoachEnabled, setIsCoachEnabled] = useStoredCoachEnabled();
+  const {aiInsightText} = useLocalAiInsights({
+    actionLog: localActionLog,
+    gameState,
+    isCoachEnabled,
+  });
+  const shouldRenderAiInsightLine = isCoachEnabled || gameState.gameIsOver;
   const gameBoard = (
     <LocalGameBoard
+      aiInsightText={shouldRenderAiInsightLine ? aiInsightText : undefined}
       gameState={gameState}
       selectCard={selectCard}
       playCard={playCard}
@@ -173,6 +194,12 @@ function LocalGameScreen({
       onReplay={onReplay}
       onStartLocalGame={onStartLocalGame}
       onStartOnlineGame={onStartOnlineGame}
+      toolbarActions={
+        <AiCoachToggle
+            enabled={isCoachEnabled}
+            onEnabledChange={setIsCoachEnabled}
+        />
+      }
       updateNotice={updateNotice}
     />
   );
@@ -209,6 +236,7 @@ function OnlineGameScreen({
     playCard,
     roomCode,
     roomStatus,
+    roomVersion,
     seatCapacity,
     selectCard,
     sendSetReady,
@@ -216,6 +244,17 @@ function OnlineGameScreen({
     startGame,
     lobbyRemovalReason,
   } = useOnlineSkipBoGame(session);
+  const [isCoachEnabled, setIsCoachEnabled] = useStoredCoachEnabled();
+  const {aiInsightText} = useOnlineAiInsights({
+    gameIsOver: gameState.gameIsOver,
+    isCoachEnabled,
+    isLocalTurn: gameState.currentPlayerIndex === 0,
+    roomStatus,
+    roomVersion,
+    session,
+  });
+  const shouldRenderAiInsightLine = isCoachEnabled || gameState.gameIsOver;
+
 
   const handleLeave = () => {
     leaveLobby();
@@ -224,6 +263,7 @@ function OnlineGameScreen({
 
   const gameBoard = (
     <OnlineGameBoard
+      aiInsightText={shouldRenderAiInsightLine ? aiInsightText : undefined}
       gameState={gameState}
       selectCard={selectCard}
       playCard={playCard}
@@ -237,20 +277,20 @@ function OnlineGameScreen({
     <>
       <LobbyRemovedDialog reason={lobbyRemovalReason} onDismiss={onLeaveSession} />
       <LobbyDialog
-        canStartGame={canStartGame}
-        connectedSeats={connectedSeats}
-        isHost={isLocalHost}
-        kickSeat={kickSeat}
-        lobbySeats={lobbySeats}
-        mySeatIndex={session.seatIndex}
-        myReadyState={myReadyState}
-        onLeave={handleLeave}
-        onReady={sendSetReady}
-        onStartGame={startGame}
-        onUnready={sendSetUnready}
-        open={roomStatus === 'WAITING' && lobbyRemovalReason === null}
-        roomCode={roomCode}
-        seatCapacity={seatCapacity}
+          canStartGame={canStartGame}
+          connectedSeats={connectedSeats}
+          isHost={isLocalHost}
+          kickSeat={kickSeat}
+          lobbySeats={lobbySeats}
+          mySeatIndex={session.seatIndex}
+          myReadyState={myReadyState}
+          onLeave={handleLeave}
+          onReady={sendSetReady}
+          onStartGame={startGame}
+          onUnready={sendSetUnready}
+          open={roomStatus === 'WAITING' && lobbyRemovalReason === null}
+          roomCode={roomCode}
+          seatCapacity={seatCapacity}
       />
       <AppShell
         debugStrip={<DebugStrip
@@ -265,14 +305,20 @@ function OnlineGameScreen({
         onStartOnlineGame={onStartOnlineGame}
         statusStrip={
           <OnlineStatusStrip
-            canStartGame={canStartGame}
-            connectedSeats={connectedSeats}
-            connectionStatus={connectionStatus}
-            isHost={isLocalHost}
-            onStartGame={startGame}
-            roomCode={roomCode}
-            roomStatus={roomStatus}
-            seatCapacity={seatCapacity}
+              canStartGame={canStartGame}
+              connectedSeats={connectedSeats}
+              connectionStatus={connectionStatus}
+              isHost={isLocalHost}
+              onStartGame={startGame}
+              roomCode={roomCode}
+              roomStatus={roomStatus}
+              seatCapacity={seatCapacity}
+          />
+        }
+        toolbarActions={
+          <AiCoachToggle
+              enabled={isCoachEnabled}
+              onEnabledChange={setIsCoachEnabled}
           />
         }
         updateNotice={updateNotice}

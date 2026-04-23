@@ -21,9 +21,9 @@ function getTextAndColourForCard(card: CardType | null, overriddenDisplayValue: 
   const cardValue = (overriddenDisplayValue === undefined) ? (card.isSkipBo ? 'Skip-Bo' : card.value?.toString() ?? '') : overriddenDisplayValue;
   const colourClass =
     (cardValue === 'Skip-Bo') ? 'skipbo-text' :
-      (Number(cardValue) <= 4) ? 'card-range-1 normal-card' :
-        (Number(cardValue) <= 8) ? 'card-range-2 normal-card' :
-          (Number(cardValue) <= 12) ? 'card-range-3 normal-card' : '';
+        (Number(cardValue) <= 4) ? 'card-range-1 normal-card' :
+            (Number(cardValue) <= 8) ? 'card-range-2 normal-card' :
+                (Number(cardValue) <= 12) ? 'card-range-3 normal-card' : '';
   return { colourClass, cardValue };
 }
 

@@ -37,6 +37,37 @@ variable "extra_tags" {
   default     = {}
 }
 
+variable "bedrock_model_id" {
+  description = "Optional Amazon Bedrock model ID used by Gen AI insight routes."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "bedrock_region" {
+  description = "Optional Amazon Bedrock runtime region. Defaults to aws_region when unset."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "genai_provider" {
+  description = "Gen AI provider used by insight routes: bedrock, ollama, or disabled."
+  type        = string
+  default     = "bedrock"
+
+  validation {
+    condition     = contains(["bedrock", "ollama", "disabled"], var.genai_provider)
+    error_message = "genai_provider must be one of: bedrock, ollama, disabled."
+  }
+}
+
+variable "genai_timeout_ms" {
+  description = "Timeout in milliseconds for Gen AI provider calls."
+  type        = number
+  default     = 4500
+}
+
 variable "lambda_source_dir" {
   description = "Path to the built realtime Lambda bundle directory."
   type        = string
@@ -47,6 +78,20 @@ variable "log_retention_days" {
   description = "CloudWatch log retention window for Lambda log groups."
   type        = number
   default     = 30
+}
+
+variable "ollama_base_url" {
+  description = "Optional Ollama base URL for local or self-hosted Gen AI inference."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "ollama_model" {
+  description = "Optional Ollama model name when genai_provider is ollama."
+  type        = string
+  default     = null
+  nullable    = true
 }
 
 variable "offline_validation" {

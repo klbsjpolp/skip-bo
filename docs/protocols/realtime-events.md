@@ -73,6 +73,162 @@ Request:
 Response matches the create payload, with `seatIndex` set to the first open seat.
 Join is allowed only while the room is still in `WAITING`.
 
+### `POST /ai/coach`
+
+Returns a one-line online coach suggestion for the authenticated seat. The suggestion is advisory only; the client does not execute it automatically.
+
+Request:
+
+```json
+{
+  "roomCode": "7K2QF",
+  "seatIndex": 0,
+  "seatToken": "<opaque bearer token>",
+  "roomVersion": 12
+}
+```
+
+Response:
+
+```json
+{
+  "roomVersion": 12,
+  "displayText": "Coach: joue le 3 de ton talon vers la pile 2.",
+  "fallbackUsed": true,
+  "recommendation": {
+    "action": "play",
+    "source": "stock",
+    "sourceIndex": 4,
+    "buildPileIndex": 1,
+    "card": {
+      "value": 3,
+      "isSkipBo": false
+    },
+    "reasonCodes": ["play-stock"],
+    "score": 1003
+  }
+}
+```
+
+Notes:
+
+- The endpoint is allowed only while the room is `ACTIVE` and it is the authenticated seat's turn.
+- The server computes the recommendation deterministically before any model call.
+- Gen AI receives only viewer-relative/redacted context and may only rewrite the short display text.
+- In production, provider failures return deterministic fallback text and are logged for backend monitoring. Non-production surfaces the provider error message to help diagnose local configuration.
+
+### `POST /ai/post-game-summary`
+
+Returns a one-line personal summary for the authenticated seat after the room is finished.
+
+Request:
+
+```json
+{
+  "roomCode": "7K2QF",
+  "seatIndex": 0,
+  "seatToken": "<opaque bearer token>"
+}
+```
+
+Response:
+
+```json
+{
+  "roomVersion": 20,
+  "displayText": "Résumé: victoire en 18 coups - point fort: pression sur le talon.",
+  "fallbackUsed": true
+}
+```
+
+Notes:
+
+- The endpoint is allowed only once the room is finished.
+- The summary uses the server action log plus a redacted viewer-relative snapshot.
+- `displayText` is capped at 140 characters.
+- In production, provider failures return deterministic fallback text and are logged for backend monitoring. Non-production surfaces the provider error message to help diagnose local configuration.
+
+### `POST /ai/local/coach`
+
+Returns a one-line model-improved coach suggestion for a local browser game. The request is not room-authenticated and must contain only the deterministic recommendation, not the full local game state.
+
+Request:
+
+```json
+{
+  "localVersion": 12,
+  "recommendation": {
+    "action": "play",
+    "source": "stock",
+    "sourceIndex": 4,
+    "buildPileIndex": 1,
+    "card": {
+      "value": 3,
+      "isSkipBo": false
+    },
+    "reasonCodes": ["play-stock"],
+    "score": 1003
+  }
+}
+```
+
+Response:
+
+```json
+{
+  "localVersion": 12,
+  "displayText": "Coach: joue le 3 de ton talon vers la pile 2.",
+  "fallbackUsed": false
+}
+```
+
+### `POST /ai/local/post-game-summary`
+
+Returns a one-line model-improved summary for a local browser game. The request is not room-authenticated and must contain only a bounded local action log plus winner metadata.
+
+Request:
+
+```json
+{
+  "localVersion": 20,
+  "playerIndex": 0,
+  "winnerIndex": 0,
+  "actionLog": [
+    {
+      "action": "play",
+      "buildPileIndex": 0,
+      "card": {
+        "value": 1,
+        "isSkipBo": false
+      },
+      "playerIndex": 0,
+      "source": "stock",
+      "sourceIndex": 0,
+      "stockCountAfter": 0,
+      "stockCountBefore": 1,
+      "version": 1
+    }
+  ]
+}
+```
+
+Response:
+
+```json
+{
+  "localVersion": 20,
+  "displayText": "Résumé: victoire en 18 coups - point fort: pression sur le talon.",
+  "fallbackUsed": false
+}
+```
+
+Notes:
+
+- Local insight endpoints never execute moves and never receive the hidden deck or hidden AI hand.
+- The local action log accepts at most 200 entries.
+- The browser treats these routes as best-effort. If the API or provider fails, local games silently keep the deterministic browser text.
+- Production local insight routes are unauthenticated and protected with API Gateway route throttling plus strict request validation.
+
 ## WebSocket Client Messages
 
 ### `auth`

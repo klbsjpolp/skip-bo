@@ -46,8 +46,10 @@ pnpm dev:api
 
 The local API listens on `http://127.0.0.1:8787` by default and exposes WebSocket upgrades on `/ws`.
 Use `SKIPBO_LOCAL_API_HOST`, `SKIPBO_LOCAL_API_PORT`, and `SKIPBO_LOCAL_API_PUBLIC_HOST` to override the bind or advertised address.
+For local backend configuration, put variables in `apps/realtime-api/.env.local`; the realtime API dev server loads that file on startup without overriding shell-provided values.
+For example, set `GENAI_PROVIDER=ollama`, `OLLAMA_MODEL=<model>`, and `GENAI_TIMEOUT_MS=30000` there to use a local Ollama model for AI insight text.
 
-To exercise online play against the local backend, run the web app in a second terminal with:
+To exercise online play or model-backed local-game insights against the local backend, run the web app in a second terminal with:
 
 ```bash
 VITE_SKIPBO_API_URL=http://127.0.0.1:8787 pnpm dev
@@ -67,7 +69,7 @@ VITE_SKIPBO_API_URL=http://127.0.0.1:8787 pnpm dev
 
 ## Environment Notes
 
-The web app only needs backend configuration when you want to exercise online play locally:
+The web app only needs backend configuration when you want to exercise online play locally or improve local-game insight text through the backend:
 
 ```bash
 VITE_SKIPBO_API_URL=http://127.0.0.1:8787

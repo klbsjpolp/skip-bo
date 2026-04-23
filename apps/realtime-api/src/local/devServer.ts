@@ -7,6 +7,10 @@ import { WebSocketServer } from 'ws';
 
 import {
   clientMessageSchema,
+  aiCoachRequestSchema,
+  aiLocalCoachRequestSchema,
+  aiLocalPostGameSummaryRequestSchema,
+  aiPostGameSummaryRequestSchema,
   createRoomRequestSchema,
   joinRoomRequestSchema,
   type ClientMessage,
@@ -27,6 +31,12 @@ import {
   rejectAction,
   startGame,
 } from '../services/roomService.js';
+import {
+  requestAiCoach,
+  requestAiPostGameSummary,
+  requestLocalAiCoach,
+  requestLocalAiPostGameSummary,
+} from '../services/aiInsightsService.js';
 import { InMemoryConnectionRepository, InMemoryRoomRepository } from './inMemoryRepositories.js';
 import { LocalRealtimeBroadcaster } from './localBroadcaster.js';
 
@@ -93,7 +103,7 @@ const sendNoContent = (response: ServerResponse): void => {
   response.end();
 };
 
-const rawDataToString = (data: RawData): string => {
+const rawDataToString = (data: RawData | string): string => {
   if (typeof data === 'string') {
     return data;
   }
@@ -172,6 +182,34 @@ export const startLocalRealtimeDevServer = async (
           const requestWsUrl = `ws://${request.headers.host ?? `${publicHost}:${resolvedPort}`}${WS_PATH}`;
           const room = await joinRoom(createDependencies(requestWsUrl), body);
           sendJson(response, 200, room);
+          return;
+        }
+
+        if (request.method === 'POST' && requestUrl.pathname === '/ai/coach') {
+          const body = aiCoachRequestSchema.parse(await readJsonBody(request));
+          const insight = await requestAiCoach(createDependencies(), body);
+          sendJson(response, 200, insight);
+          return;
+        }
+
+        if (request.method === 'POST' && requestUrl.pathname === '/ai/post-game-summary') {
+          const body = aiPostGameSummaryRequestSchema.parse(await readJsonBody(request));
+          const insight = await requestAiPostGameSummary(createDependencies(), body);
+          sendJson(response, 200, insight);
+          return;
+        }
+
+        if (request.method === 'POST' && requestUrl.pathname === '/ai/local/coach') {
+          const body = aiLocalCoachRequestSchema.parse(await readJsonBody(request));
+          const insight = await requestLocalAiCoach(createDependencies(), body);
+          sendJson(response, 200, insight);
+          return;
+        }
+
+        if (request.method === 'POST' && requestUrl.pathname === '/ai/local/post-game-summary') {
+          const body = aiLocalPostGameSummaryRequestSchema.parse(await readJsonBody(request));
+          const insight = await requestLocalAiPostGameSummary(createDependencies(), body);
+          sendJson(response, 200, insight);
           return;
         }
 

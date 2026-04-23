@@ -45,6 +45,18 @@ variable "log_retention_days" {
   default     = 30
 }
 
+variable "local_ai_throttling_burst_limit" {
+  description = "Burst limit for unauthenticated local AI insight HTTP routes."
+  type        = number
+  default     = 20
+}
+
+variable "local_ai_throttling_rate_limit" {
+  description = "Steady-state requests per second limit for unauthenticated local AI insight HTTP routes."
+  type        = number
+  default     = 10
+}
+
 variable "rooms_table_name" {
   description = "Name of the DynamoDB rooms table."
   type        = string

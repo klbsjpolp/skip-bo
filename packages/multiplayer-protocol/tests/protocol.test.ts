@@ -5,13 +5,21 @@ import { initialGameState } from '@skipbo/game-core';
 import {
   HIDDEN_CARD,
   MAX_PLAYER_NAME_LENGTH,
+  aiCoachRequestSchema,
+  aiCoachResponseSchema,
+  aiLocalCoachRequestSchema,
+  aiLocalCoachResponseSchema,
+  aiLocalPostGameSummaryRequestSchema,
+  aiLocalPostGameSummaryResponseSchema,
+  aiPostGameSummaryRequestSchema,
+  aiPostGameSummaryResponseSchema,
   createRoomRequestSchema,
   isValidRoomCode,
   joinRoomRequestSchema,
   normalizeRoomCode,
   resolvePlayerName,
   serializeClientGameView,
-} from '../src/index.js';
+} from '../src';
 
 describe('room code normalization', () => {
   it('normalizes case-insensitive Crockford aliases', () => {
@@ -121,6 +129,151 @@ describe('joinRoomRequestSchema', () => {
     expect(joinRoomRequestSchema.parse({ playerName: 'Bob', roomCode: 'abcde' })).toEqual({
       playerName: 'Bob',
       roomCode: 'abcde',
+    });
+  });
+});
+
+describe('AI HTTP schemas', () => {
+  it('accepts authenticated coach requests and bounded responses', () => {
+    expect(aiCoachRequestSchema.parse({
+      roomCode: 'ABCDE',
+      roomVersion: 3,
+      seatIndex: 1,
+      seatToken: 'seat-token',
+    })).toEqual({
+      roomCode: 'ABCDE',
+      roomVersion: 3,
+      seatIndex: 1,
+      seatToken: 'seat-token',
+    });
+
+    expect(aiCoachResponseSchema.parse({
+      displayText: 'Coach: joue le 3 de ton talon vers la pile 2.',
+      fallbackUsed: false,
+      recommendation: {
+        action: 'play',
+        buildPileIndex: 1,
+        card: { value: 3, isSkipBo: false },
+        reasonCodes: ['play-stock'],
+        score: 1003,
+        source: 'stock',
+        sourceIndex: 4,
+      },
+      roomVersion: 3,
+    })).toMatchObject({
+      fallbackUsed: false,
+      roomVersion: 3,
+    });
+
+    expect(() => aiCoachResponseSchema.parse({
+      displayText: 'x'.repeat(141),
+      fallbackUsed: false,
+      recommendation: {
+        action: 'end',
+        reasonCodes: ['no-legal-move'],
+        score: 0,
+      },
+      roomVersion: 3,
+    })).toThrow();
+  });
+
+  it('accepts authenticated post-game summary requests and bounded responses', () => {
+    expect(aiPostGameSummaryRequestSchema.parse({
+      roomCode: 'ABCDE',
+      seatIndex: 0,
+      seatToken: 'seat-token',
+    })).toEqual({
+      roomCode: 'ABCDE',
+      seatIndex: 0,
+      seatToken: 'seat-token',
+    });
+
+    expect(aiPostGameSummaryResponseSchema.parse({
+      displayText: 'Résumé: victoire en 18 coups - point fort: pression sur le talon.',
+      fallbackUsed: true,
+      roomVersion: 9,
+    })).toEqual({
+      displayText: 'Résumé: victoire en 18 coups - point fort: pression sur le talon.',
+      fallbackUsed: true,
+      roomVersion: 9,
+    });
+  });
+
+  it('accepts local coach insight requests without room credentials', () => {
+    expect(aiLocalCoachRequestSchema.parse({
+      localVersion: 4,
+      recommendation: {
+        action: 'play',
+        buildPileIndex: 1,
+        card: { value: 3, isSkipBo: false },
+        reasonCodes: ['play-stock'],
+        score: 1003,
+        source: 'stock',
+        sourceIndex: 4,
+      },
+    })).toMatchObject({
+      localVersion: 4,
+      recommendation: {
+        action: 'play',
+        source: 'stock',
+      },
+    });
+
+    expect(aiLocalCoachResponseSchema.parse({
+      displayText: 'Coach: joue le 3 de ton talon vers la pile 2.',
+      fallbackUsed: false,
+      localVersion: 4,
+    })).toMatchObject({
+      fallbackUsed: false,
+      localVersion: 4,
+    });
+  });
+
+  it('accepts bounded local post-game summary requests', () => {
+    expect(aiLocalPostGameSummaryRequestSchema.parse({
+      actionLog: [{
+        action: 'play',
+        buildPileIndex: 0,
+        card: { value: 1, isSkipBo: false },
+        playerIndex: 0,
+        source: 'stock',
+        sourceIndex: 0,
+        stockCountAfter: 0,
+        stockCountBefore: 1,
+        version: 1,
+      }],
+      localVersion: 1,
+      playerIndex: 0,
+      winnerIndex: 0,
+    })).toMatchObject({
+      localVersion: 1,
+      playerIndex: 0,
+      winnerIndex: 0,
+    });
+
+    expect(() => aiLocalPostGameSummaryRequestSchema.parse({
+      actionLog: Array.from({length: 201}, (_, index) => ({
+        action: 'discard',
+        card: { value: 9, isSkipBo: false },
+        discardPileIndex: 0,
+        playerIndex: 0,
+        source: 'hand',
+        sourceIndex: 0,
+        stockCountAfter: 1,
+        stockCountBefore: 1,
+        version: index + 1,
+      })),
+      playerIndex: 0,
+      winnerIndex: null,
+    })).toThrow();
+
+    expect(aiLocalPostGameSummaryResponseSchema.parse({
+      displayText: 'Résumé: victoire en 1 coups - point fort: pression sur le talon.',
+      fallbackUsed: true,
+      localVersion: 1,
+    })).toMatchObject({
+      fallbackUsed: true,
+      localVersion: 1,
     });
   });
 });

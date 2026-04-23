@@ -10,6 +10,26 @@ locals {
   })
 
   lambda_definitions = {
+    ai-coach = {
+      handler = "http/aiCoach.handler"
+      memory  = 512
+      timeout = 15
+    }
+    ai-local-coach = {
+      handler = "http/aiLocalCoach.handler"
+      memory  = 512
+      timeout = 15
+    }
+    ai-local-post-game-summary = {
+      handler = "http/aiLocalPostGameSummary.handler"
+      memory  = 512
+      timeout = 15
+    }
+    ai-post-game-summary = {
+      handler = "http/aiPostGameSummary.handler"
+      memory  = 512
+      timeout = 15
+    }
     create-room = {
       handler = "http/createRoom.handler"
       memory  = 256
@@ -100,8 +120,12 @@ resource "aws_cloudwatch_log_group" "lambda" {
 
 resource "aws_apigatewayv2_integration" "http" {
   for_each = {
-    create-room = aws_lambda_function.this["create-room"].invoke_arn
-    join-room   = aws_lambda_function.this["join-room"].invoke_arn
+    ai-coach                   = aws_lambda_function.this["ai-coach"].invoke_arn
+    ai-local-coach             = aws_lambda_function.this["ai-local-coach"].invoke_arn
+    ai-local-post-game-summary = aws_lambda_function.this["ai-local-post-game-summary"].invoke_arn
+    ai-post-game-summary       = aws_lambda_function.this["ai-post-game-summary"].invoke_arn
+    create-room                = aws_lambda_function.this["create-room"].invoke_arn
+    join-room                  = aws_lambda_function.this["join-room"].invoke_arn
   }
 
   api_id                 = aws_apigatewayv2_api.http.id
@@ -113,8 +137,12 @@ resource "aws_apigatewayv2_integration" "http" {
 
 resource "aws_apigatewayv2_route" "http" {
   for_each = {
-    "POST /rooms"      = aws_apigatewayv2_integration.http["create-room"].id
-    "POST /rooms/join" = aws_apigatewayv2_integration.http["join-room"].id
+    "POST /ai/coach"                   = aws_apigatewayv2_integration.http["ai-coach"].id
+    "POST /ai/local/coach"             = aws_apigatewayv2_integration.http["ai-local-coach"].id
+    "POST /ai/local/post-game-summary" = aws_apigatewayv2_integration.http["ai-local-post-game-summary"].id
+    "POST /ai/post-game-summary"       = aws_apigatewayv2_integration.http["ai-post-game-summary"].id
+    "POST /rooms"                      = aws_apigatewayv2_integration.http["create-room"].id
+    "POST /rooms/join"                 = aws_apigatewayv2_integration.http["join-room"].id
   }
 
   api_id    = aws_apigatewayv2_api.http.id
@@ -126,6 +154,20 @@ resource "aws_apigatewayv2_stage" "http" {
   api_id      = aws_apigatewayv2_api.http.id
   auto_deploy = true
   name        = "$default"
+  depends_on  = [aws_apigatewayv2_route.http]
+
+  dynamic "route_settings" {
+    for_each = toset([
+      "POST /ai/local/coach",
+      "POST /ai/local/post-game-summary",
+    ])
+
+    content {
+      route_key              = route_settings.value
+      throttling_burst_limit = var.local_ai_throttling_burst_limit
+      throttling_rate_limit  = var.local_ai_throttling_rate_limit
+    }
+  }
 
   tags = merge(var.tags, {
     Name = "${var.app_name}-http-default"
@@ -168,8 +210,12 @@ resource "aws_apigatewayv2_stage" "websocket" {
 
 resource "aws_lambda_permission" "http" {
   for_each = {
-    create-room = aws_lambda_function.this["create-room"].function_name
-    join-room   = aws_lambda_function.this["join-room"].function_name
+    ai-coach                   = aws_lambda_function.this["ai-coach"].function_name
+    ai-local-coach             = aws_lambda_function.this["ai-local-coach"].function_name
+    ai-local-post-game-summary = aws_lambda_function.this["ai-local-post-game-summary"].function_name
+    ai-post-game-summary       = aws_lambda_function.this["ai-post-game-summary"].function_name
+    create-room                = aws_lambda_function.this["create-room"].function_name
+    join-room                  = aws_lambda_function.this["join-room"].function_name
   }
 
   action        = "lambda:InvokeFunction"

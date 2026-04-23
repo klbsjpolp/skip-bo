@@ -960,6 +960,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const connectedSeats = view?.room.connectedSeats ?? [];
   const lobbySeats: LobbySeatInfo[] = view?.room.lobbySeats ?? [];
   const roomStatus = view?.room.status ?? 'WAITING';
+  const roomVersion = view?.room.version ?? 0;
   const isLocalHost = session?.seatIndex === hostSeatIndex;
   const myReadyState: LobbyReadyState = lobbySeats.find((s) => s.seatIndex === session?.seatIndex)?.readyState ?? 'never-ready';
   const canStartGame = Boolean(
@@ -989,6 +990,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     playCard,
     roomCode: view?.room.roomCode ?? session?.roomCode ?? '',
     roomStatus,
+    roomVersion,
     seatCapacity,
     selectCard,
     sendSetReady,

@@ -408,6 +408,12 @@
     @apply flex flex-col items-center justify-center gap-2;
   }
 
+  .ai-insight-line {
+    @apply mx-auto -mt-3 mb-4 flex h-8 max-w-full items-center justify-center overflow-hidden px-2 text-center text-sm font-medium text-muted-foreground lg:-mt-5 lg:mb-5;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
   .player-area.active-turn,
   .center-area.active-turn {
     @apply ring-(--active-turn-color);

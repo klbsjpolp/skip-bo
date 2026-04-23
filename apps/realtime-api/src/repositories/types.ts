@@ -1,4 +1,4 @@
-import type { GameState } from '@skipbo/game-core';
+import type { Card, GameState } from '@skipbo/game-core';
 import type { RoomStatus } from '@skipbo/multiplayer-protocol';
 
 export class RoomVersionConflictError extends Error {
@@ -13,6 +13,22 @@ export interface RoomSummaryRecord {
   winnerIndex: number | null;
 }
 
+export interface RoomActionLogEntry {
+  action: 'play' | 'discard';
+  buildPileIndex?: number;
+  card: Card;
+  completedBuildPile?: boolean;
+  discardPileIndex?: number;
+  playerIndex: number;
+  seatIndex: number;
+  source: 'hand' | 'stock' | 'discard';
+  sourceDiscardPileIndex?: number;
+  sourceIndex: number;
+  stockCountAfter: number;
+  stockCountBefore: number;
+  version: number;
+}
+
 export interface LobbyPlayerRecord {
   seatIndex: number;
   readyState: 'never-ready' | 'ready' | 'unready';
@@ -20,6 +36,7 @@ export interface LobbyPlayerRecord {
 }
 
 export interface RoomRecord {
+  actionLog?: RoomActionLogEntry[];
   activeSeatIndices?: number[];
   authenticatedSeats?: number[];
   createdAt: string;

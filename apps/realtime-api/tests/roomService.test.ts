@@ -246,6 +246,67 @@ describe('roomService', () => {
     expect(room?.state.players).toHaveLength(2);
   });
 
+  it('records compact public action log entries for completed online actions', async () => {
+    const dependencies = createDependencies();
+    const created = await createRoom(dependencies, { stockSize: 5 });
+    const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
+
+    await authenticateConnection(dependencies, {
+      connectionId: 'c-1',
+      roomCode: created.roomCode,
+      seatIndex: created.seatIndex,
+      seatToken: created.seatToken,
+    });
+    await authenticateConnection(dependencies, {
+      connectionId: 'c-2',
+      roomCode: joined.roomCode,
+      seatIndex: joined.seatIndex,
+      seatToken: joined.seatToken,
+    });
+    await startGame(dependencies, {
+      connectionId: 'c-1',
+    });
+
+    const activeRoom = await dependencies.roomRepository.get(created.roomCode);
+    expect(activeRoom).not.toBeNull();
+
+    await dependencies.roomRepository.update({
+      ...activeRoom!,
+      state: {
+        ...activeRoom!.state,
+        buildPiles: [[], [], [], []],
+        currentPlayerIndex: 0,
+        players: activeRoom!.state.players.map((player, playerIndex) => ({
+          ...player,
+          stockPile: playerIndex === 0 ? [{ value: 1, isSkipBo: false }] : player.stockPile,
+        })),
+        selectedCard: null,
+      },
+    });
+
+    await handleAction(dependencies, {
+      action: { type: 'SELECT_CARD', source: 'stock', index: 0 },
+      connectionId: 'c-1',
+    });
+    await handleAction(dependencies, {
+      action: { type: 'PLAY_CARD', buildPile: 0 },
+      connectionId: 'c-1',
+    });
+
+    const room = await dependencies.roomRepository.get(created.roomCode);
+    expect(room?.actionLog).toHaveLength(1);
+    expect(room?.actionLog?.[0]).toMatchObject({
+      action: 'play',
+      buildPileIndex: 0,
+      card: { value: 1, isSkipBo: false },
+      playerIndex: 0,
+      seatIndex: 0,
+      source: 'stock',
+      stockCountAfter: 0,
+      stockCountBefore: 1,
+    });
+  });
+
   it('starts the room even if the room connection query is stale during second auth', async () => {
     const dependencies = createEventuallyConsistentDependencies();
     const created = await createRoom(dependencies);

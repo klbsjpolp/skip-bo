@@ -3,9 +3,12 @@ import { GameBoard } from '@/components/GameBoard';
 import { DiscardPiles, HandSection, PlayerArea, StockPile } from '@/components/PlayerArea';
 import type { GameBoardProps } from '@/components/GameBoard';
 import { VictoryEffects } from '@/components/VictoryEffects';
+import { AiInsightLine } from '@/components/AiInsightLine';
 import { cn } from '@/lib/utils';
 
-type OnlineGameBoardProps = GameBoardProps;
+interface OnlineGameBoardProps extends GameBoardProps {
+  aiInsightText?: string;
+}
 
 interface RemoteSeatProps {
   clearSelection: OnlineGameBoardProps['clearSelection'];
@@ -92,6 +95,7 @@ function RemoteSeat({
 }
 
 export function OnlineGameBoard({
+  aiInsightText,
   canPlayCard,
   clearSelection,
   discardCard,
@@ -103,6 +107,7 @@ export function OnlineGameBoard({
     return (
       <GameBoard
         gameState={gameState}
+        aiInsightText={aiInsightText}
         selectCard={selectCard}
         playCard={playCard}
         discardCard={discardCard}
@@ -157,6 +162,7 @@ export function OnlineGameBoard({
       <h1 className="my-4 lg:my-6" data-testid="game-message">
         {gameState.message}
       </h1>
+      {aiInsightText !== undefined ? <AiInsightLine text={aiInsightText} /> : null}
 
       <PlayerArea
         player={localPlayer}

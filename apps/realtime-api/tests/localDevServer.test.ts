@@ -1,6 +1,6 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { RawData } from 'ws';
-import WebSocket from 'ws';
+import * as WebSocket from 'ws';
 
 import type { CreateRoomResponse, JoinRoomResponse, ServerMessage } from '@skipbo/multiplayer-protocol';
 
@@ -84,6 +84,8 @@ describe('local realtime dev server', () => {
   let server: LocalRealtimeDevServer | null = null;
 
   afterEach(async () => {
+    vi.unstubAllEnvs();
+
     if (!server) {
       return;
     }
@@ -219,6 +221,88 @@ describe('local realtime dev server', () => {
         },
       },
     });
+
+    vi.stubEnv('GENAI_PROVIDER', 'disabled');
+    vi.stubEnv('NODE_ENV', 'development');
+
+    const coachResponse = await fetch(`${server.httpUrl}/ai/coach`, {
+      body: JSON.stringify({
+        roomCode: created.roomCode,
+        seatIndex: created.seatIndex,
+        seatToken: created.seatToken,
+      }),
+      headers: {
+        'content-type': 'application/json',
+      },
+      method: 'POST',
+    });
+    expect(coachResponse.status).toBe(500);
+    await expect(coachResponse.json()).resolves.toEqual({
+      message: 'No Gen AI provider is configured',
+    });
+
+    const earlySummaryResponse = await fetch(`${server.httpUrl}/ai/post-game-summary`, {
+      body: JSON.stringify({
+        roomCode: created.roomCode,
+        seatIndex: created.seatIndex,
+        seatToken: created.seatToken,
+      }),
+      headers: {
+        'content-type': 'application/json',
+      },
+      method: 'POST',
+    });
+    expect(earlySummaryResponse.status).toBe(409);
+
+    vi.stubEnv('NODE_ENV', 'production');
+
+    const localCoachResponse = await fetch(`${server.httpUrl}/ai/local/coach`, {
+      body: JSON.stringify({
+        localVersion: 1,
+        recommendation: {
+          action: 'play',
+          buildPileIndex: 0,
+          card: { value: 1, isSkipBo: false },
+          reasonCodes: ['play-stock'],
+          score: 1001,
+          source: 'stock',
+          sourceIndex: 0,
+        },
+      }),
+      headers: {
+        'content-type': 'application/json',
+      },
+      method: 'POST',
+    });
+    expect(localCoachResponse.status).toBe(200);
+    await expect(localCoachResponse.json()).resolves.toMatchObject({
+      displayText: expect.stringContaining('Coach: joue le 1'),
+      fallbackUsed: true,
+      localVersion: 1,
+    });
+
+    const invalidLocalSummaryResponse = await fetch(`${server.httpUrl}/ai/local/post-game-summary`, {
+      body: JSON.stringify({
+        actionLog: Array.from({length: 201}, (_, index) => ({
+          action: 'discard',
+          card: { value: 9, isSkipBo: false },
+          discardPileIndex: 0,
+          playerIndex: 0,
+          source: 'hand',
+          sourceIndex: 0,
+          stockCountAfter: 1,
+          stockCountBefore: 1,
+          version: index + 1,
+        })),
+        playerIndex: 0,
+        winnerIndex: 0,
+      }),
+      headers: {
+        'content-type': 'application/json',
+      },
+      method: 'POST',
+    });
+    expect(invalidLocalSummaryResponse.status).toBe(400);
 
     const selectedSnapshot0 = waitForMessage(
       socket0,

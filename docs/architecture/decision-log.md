@@ -62,3 +62,21 @@ Dates below are record dates for the log, not guaranteed original implementation
 - Why: it keeps the product free of a separate lobby route while allowing 2, 3, or 4 human players to share the same room flow.
 - Implications: room creation no longer implies an immediate active game, the status strip is the waiting-room control surface, and the server must lock active seats when the host starts.
 - Related docs: [../../README.md](../../README.md), [online-multiplayer.md](online-multiplayer.md), [../protocols/realtime-events.md](../protocols/realtime-events.md)
+
+## D-008: CloudWatch Alarm Budget Capped At 10
+
+- Status: accepted
+- Recorded: 2026-04-19
+- Decision: the total number of active CloudWatch alarms must not exceed 10, matching the AWS Free Tier limit, unless the user explicitly instructs otherwise.
+- Why: AWS charges $0.10/alarm/month beyond 10; keeping at or below 10 avoids any CloudWatch monitoring cost.
+- Implications: when adding new monitored resources (Lambdas, tables, APIs), existing alarms must be pruned first. Lower-signal alarms (throttles on Lambda/DynamoDB) are dropped before higher-signal ones (errors, 5xx). AI/local Lambdas are excluded from monitoring as they are non-critical. Any agent or contributor proposing alarm additions must get explicit user approval and confirm the budget stays ≤ 10.
+- Related docs: [../../infra/terraform/modules/monitoring/main.tf](../../infra/terraform/modules/monitoring/main.tf)
+
+## D-007: Gen AI Is Advisory And Server-Mediated
+
+- Status: accepted
+- Recorded: 2026-04-18
+- Decision: online coach and post-game summary features run through authenticated realtime backend routes, while local games may call unauthenticated local-insight routes only to rewrite deterministic coach and summary text.
+- Why: it keeps secrets off the browser, preserves server authority for multiplayer, lets local games improve insight wording when a provider is configured, and prevents model output from bypassing deterministic card legality.
+- Implications: online prompts must be built from redacted viewer-relative context, local prompts must be built only from deterministic recommendations or bounded action logs, and deterministic fallback text must remain available when model inference is disabled or unavailable. Production local-insight routes are protected with API Gateway throttling rather than user authentication.
+- Related docs: [source-of-truth.md](source-of-truth.md), [runtime-invariants.md](runtime-invariants.md), [../protocols/realtime-events.md](../protocols/realtime-events.md)

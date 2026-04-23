@@ -45,6 +45,14 @@ data "aws_iam_policy_document" "runtime_access" {
       "arn:aws:execute-api:${var.aws_region}:*:*/*/@connections/*",
     ]
   }
+
+  statement {
+    actions = [
+      "bedrock:InvokeModel",
+      "bedrock:InvokeModelWithResponseStream",
+    ]
+    resources = ["*"]
+  }
 }
 
 resource "aws_iam_role_policy" "runtime_access" {

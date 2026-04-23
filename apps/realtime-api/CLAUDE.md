@@ -19,6 +19,7 @@ pnpm --filter @skipbo/realtime-api dev   # tsx watch src/local-dev.ts → http:/
 ```
 
 Set `VITE_SKIPBO_API_URL=http://127.0.0.1:8787` in the web app to connect.
+The local dev entrypoint loads `apps/realtime-api/.env.local` before starting the server. Shell environment values win over the file.
 
 ## Key Files
 

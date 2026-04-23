@@ -20,6 +20,7 @@
 - Online rooms are server-authoritative. The browser treats incoming snapshots as canonical in online mode.
 - Online client views are viewer-relative. In online mode the receiving player is rendered at index `0` even though backend seat order is preserved separately.
 - Online active turn order is locked from the connected seats present when the host starts the room.
+- AI insight features are consultative. They must use deterministic advice or summary inputs, must not execute moves, and must not send hidden opponent hands or hidden deck contents to a model. Online model-backed insights use server-owned redacted state; local model-backed insights send only the deterministic recommendation or bounded local action log and fall back to browser-side deterministic text.
 
 ## Current Implementation Details
 
@@ -29,6 +30,7 @@ These are true today and matter operationally, but they are easier to change tha
 - Human play and discard animations are kicked off from `apps/web/src/hooks/useSkipBoGame.ts`.
 - AI play, discard, and start-of-turn draw animations are driven by `apps/web/src/services/aiAnimationService.ts` and `apps/web/src/services/drawAnimationService.ts`.
 - Online opponent animations are inferred from snapshot-to-snapshot diffs in `apps/web/src/hooks/useOnlineSkipBoGame.ts`.
+- Coach and post-game summary text renders below the main game message. The single-line surface reserves its space while it is active; when the coach toggle is disabled during normal play, the coach surface is omitted instead of leaving an empty placeholder.
 
 ## Likely To Drift
 

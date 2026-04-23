@@ -89,6 +89,7 @@ describe('OnlineGameBoard', () => {
     );
 
     expect(container.querySelectorAll('.player-area')).toHaveLength(4);
+    expect(screen.queryByTestId('ai-insight-line')).toBeNull();
     expect(screen.queryByText(/Adversaire/)).toBeNull();
     expect(screen.queryByText('Tour')).toBeNull();
     expect(screen.getByText('Joueur 2')).toBeTruthy();
@@ -97,5 +98,56 @@ describe('OnlineGameBoard', () => {
     expect(container.querySelectorAll('.player-area[data-player-index="1"] .hand-area .back')).toHaveLength(5);
     expect(container.querySelectorAll('.player-area[data-player-index="2"] .hand-area .back')).toHaveLength(5);
     expect(container.querySelectorAll('.player-area[data-player-index="3"] .hand-area .back')).toHaveLength(5);
+  });
+
+  test('renders a reserved AI insight line below the game message without moving board sections', () => {
+    const { container, rerender } = render(
+      <OnlineGameBoard
+        aiInsightText=""
+        gameState={createTwoPlayerOnlineState()}
+        selectCard={vi.fn()}
+        playCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
+        discardCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
+        clearSelection={vi.fn()}
+        canPlayCard={() => false}
+      />,
+    );
+
+    const line = screen.getByTestId('ai-insight-line');
+    expect(line).toBeTruthy();
+    expect(line.className).toContain('ai-insight-line');
+    expect(container.querySelectorAll('.player-area')).toHaveLength(2);
+
+    rerender(
+      <OnlineGameBoard
+        aiInsightText="Coach: joue le 3 de ton talon vers la pile 2."
+        gameState={createTwoPlayerOnlineState()}
+        selectCard={vi.fn()}
+        playCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
+        discardCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
+        clearSelection={vi.fn()}
+        canPlayCard={() => false}
+      />,
+    );
+
+    expect(screen.getByTestId('ai-insight-line').className).toContain('ai-insight-line');
+    expect(screen.getByText('Coach: joue le 3 de ton talon vers la pile 2.')).toBeTruthy();
+    expect(container.querySelectorAll('.player-area')).toHaveLength(2);
+  });
+
+  test('omits the AI insight line when the coach surface is disabled', () => {
+    render(
+      <OnlineGameBoard
+        aiInsightText={undefined}
+        gameState={createTwoPlayerOnlineState()}
+        selectCard={vi.fn()}
+        playCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
+        discardCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
+        clearSelection={vi.fn()}
+        canPlayCard={() => false}
+      />,
+    );
+
+    expect(screen.queryByTestId('ai-insight-line')).toBeNull();
   });
 });

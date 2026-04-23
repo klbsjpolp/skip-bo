@@ -1,4 +1,5 @@
 export * from './lib/config.js';
+export * from './lib/advice.js';
 export * from './lib/handRefill.js';
 export * from './lib/retreatPile.js';
 export * from './lib/validators.js';

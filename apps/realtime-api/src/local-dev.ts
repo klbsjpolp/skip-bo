@@ -1,4 +1,8 @@
-import { startLocalRealtimeDevServer } from './local/devServer.js';
+import {loadLocalEnvFile} from './local/loadLocalEnvFile.js';
+
+loadLocalEnvFile();
+
+const {startLocalRealtimeDevServer} = await import('./local/devServer.js');
 
 const host = process.env.SKIPBO_LOCAL_API_HOST ?? '127.0.0.1';
 const port = process.env.SKIPBO_LOCAL_API_PORT

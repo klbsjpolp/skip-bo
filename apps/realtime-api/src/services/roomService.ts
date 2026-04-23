@@ -10,7 +10,7 @@ import type {
 } from '@skipbo/multiplayer-protocol';
 import { normalizePlayerName, normalizeRoomCode, serializeClientGameView } from '@skipbo/multiplayer-protocol';
 
-import { RoomVersionConflictError, type ConnectionRecord, type ConnectionRepository, type LobbyPlayerRecord, type RoomRecord, type RoomRepository } from '../repositories/types.js';
+import { RoomVersionConflictError, type ConnectionRecord, type ConnectionRepository, type LobbyPlayerRecord, type RoomActionLogEntry, type RoomRecord, type RoomRepository } from '../repositories/types.js';
 import {ClientError} from '../errors/clientError.js';
 import type {RealtimeBroadcaster} from './broadcaster.js';
 import {applyOnlineAction, createOnlineInitialGameState, createWaitingRoomState, isDebugAction, validateOnlineAction} from './gameState.js';
@@ -185,6 +185,45 @@ const allAuthenticatedSeatsReady = (room: RoomRecord): boolean => {
   return seats.every((s) => getLobbyPlayers(room).find((p) => p.seatIndex === s)?.readyState === 'ready');
 };
 
+const createRoomActionLogEntry = (
+  previousState: RoomRecord['state'],
+  action: GameAction,
+  nextState: RoomRecord['state'],
+  version: number,
+): RoomActionLogEntry | null => {
+  if (action.type !== 'PLAY_CARD' && action.type !== 'DISCARD_CARD') {
+    return null;
+  }
+
+  const selectedCard = previousState.selectedCard;
+  if (!selectedCard) {
+    return null;
+  }
+
+  const playerIndex = previousState.currentPlayerIndex;
+  const previousPlayer = previousState.players[playerIndex];
+  const nextPlayer = nextState.players[playerIndex] ?? previousPlayer;
+
+  return {
+    action: action.type === 'PLAY_CARD' ? 'play' : 'discard',
+    buildPileIndex: action.type === 'PLAY_CARD' ? action.buildPile : undefined,
+    card: {...selectedCard.card},
+    completedBuildPile:
+      action.type === 'PLAY_CARD'
+        ? previousState.buildPiles[action.buildPile]?.length === previousState.config.CARD_VALUES_MAX - 1
+        : undefined,
+    discardPileIndex: action.type === 'DISCARD_CARD' ? action.discardPile : undefined,
+    playerIndex,
+    seatIndex: previousPlayer.seatIndex ?? playerIndex,
+    source: selectedCard.source,
+    sourceDiscardPileIndex: selectedCard.discardPileIndex,
+    sourceIndex: selectedCard.index,
+    stockCountAfter: nextPlayer.stockPile.length,
+    stockCountBefore: previousPlayer.stockPile.length,
+    version,
+  };
+};
+
 const getAuthenticatedConnection = async (
   dependencies: RoomServiceDependencies,
   connectionId: string,
@@ -220,6 +259,7 @@ export const createRoom = async (
         hashSeatToken(seatToken),
         ...Array<string | null>(DEFAULT_SEAT_CAPACITY - 1).fill(null),
       ],
+      actionLog: [],
       state: waitingRoomState,
       status: 'WAITING',
       summary: null,
@@ -453,7 +493,9 @@ export const handleAction = async (
     }
 
     const nextState = applyOnlineAction(room.state, input.action);
+    const actionLogEntry = createRoomActionLogEntry(room.state, input.action, nextState, room.version + 1);
     const nextRoom = buildUpdatedRoom(room, {
+      actionLog: actionLogEntry ? [...(room.actionLog ?? []), actionLogEntry] : room.actionLog,
       state: nextState,
       status: nextState.gameIsOver ? 'FINISHED' : room.status,
       summary: nextState.gameIsOver

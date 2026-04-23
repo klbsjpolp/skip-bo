@@ -381,4 +381,36 @@ describe('useSkipBoGame', () => {
       [{ type: 'DISCARD_CARD', discardPile: 1 }],
     ]);
   });
+
+  it('records successful local human actions for insight summaries', async () => {
+    workingState.current = createSelectedStockCardState();
+    appendStockArea();
+
+    const { result } = renderHook(() => useSkipBoGame());
+
+    await act(async () => {
+      const moveResult = await result.current.playCard(0);
+      expect(moveResult).toEqual({ success: true, message: 'Carte jouée' });
+    });
+
+    expect(result.current.localActionLog).toMatchObject([
+      {
+        action: 'play',
+        buildPileIndex: 0,
+        card: { value: 1, isSkipBo: false },
+        playerIndex: 0,
+        source: 'stock',
+        sourceIndex: 1,
+        stockCountAfter: 1,
+        stockCountBefore: 2,
+        version: 1,
+      },
+    ]);
+
+    act(() => {
+      result.current.initializeGame();
+    });
+
+    expect(result.current.localActionLog).toEqual([]);
+  });
 });

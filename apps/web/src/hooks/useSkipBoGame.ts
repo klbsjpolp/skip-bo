@@ -1,7 +1,7 @@
-import React, {useCallback, useRef} from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 import {useMachine} from '@xstate/react';
 import {gameMachine} from '@/state/gameMachine';
-import type {Card, GameState, MoveResult} from '@/types';
+import type {Card, GameState, InsightActionLogEntry, MoveResult} from '@/types';
 import {canPlayCard} from '@/lib/validators';
 import {
   calculateAnimationDuration,
@@ -39,12 +39,55 @@ const willPlayCardEmptyHand = (gameState: GameState): boolean => {
   return handAfterPlay.every(card => card === null);
 };
 
+type LocalInsightAction =
+  | {type: 'PLAY_CARD'; buildPile: number}
+  | {type: 'DISCARD_CARD'; discardPile: number};
+
+const createLocalInsightActionLogEntry = (
+  previousState: GameState,
+  action: LocalInsightAction,
+  version: number,
+): InsightActionLogEntry | null => {
+  const selectedCard = previousState.selectedCard;
+
+  if (!selectedCard) {
+    return null;
+  }
+
+  const playerIndex = previousState.currentPlayerIndex;
+  const player = previousState.players[playerIndex];
+  const stockCountBefore = player.stockPile.length;
+  const stockCountAfter =
+    action.type === 'PLAY_CARD' && selectedCard.source === 'stock'
+      ? Math.max(0, stockCountBefore - 1)
+      : stockCountBefore;
+
+  return {
+    action: action.type === 'PLAY_CARD' ? 'play' : 'discard',
+    buildPileIndex: action.type === 'PLAY_CARD' ? action.buildPile : undefined,
+    card: {...selectedCard.card},
+    completedBuildPile:
+      action.type === 'PLAY_CARD'
+        ? previousState.buildPiles[action.buildPile]?.length === previousState.config.CARD_VALUES_MAX - 1
+        : undefined,
+    discardPileIndex: action.type === 'DISCARD_CARD' ? action.discardPile : undefined,
+    playerIndex,
+    source: selectedCard.source,
+    sourceDiscardPileIndex: selectedCard.discardPileIndex,
+    sourceIndex: selectedCard.index,
+    stockCountAfter,
+    stockCountBefore,
+    version,
+  };
+};
+
 export function useSkipBoGame() {
   const [snapshot, send] = useMachine(gameMachine);
   const state = snapshot.context.G;
   const dispatch = send;                     // alias pour préserver la suite du code
   const stateRef = useRef<GameState>(state);
   const interactionLockRef = useRef(false);
+  const [localActionLog, setLocalActionLog] = useState<InsightActionLogEntry[]>([]);
   const { activeAnimations, startAnimation, removeAnimation, waitForAnimations } = useCardAnimation();
   const activeAnimationCountRef = useRef(activeAnimations.length);
 
@@ -65,8 +108,24 @@ export function useSkipBoGame() {
 
   /* wrappers compatibles avec l'UI existante */
   const initializeGame = useCallback(() => {
+    setLocalActionLog([]);
     dispatch({ type: 'INIT' });
   }, [dispatch]);
+
+  const appendLocalInsightAction = useCallback((
+    previousState: GameState,
+    action: LocalInsightAction,
+  ) => {
+    if (previousState.players[previousState.currentPlayerIndex]?.isAI) {
+      return;
+    }
+
+    setLocalActionLog((currentLog) => {
+      const entry = createLocalInsightActionLogEntry(previousState, action, currentLog.length + 1);
+
+      return entry ? [...currentLog, entry] : currentLog;
+    });
+  }, []);
 
   const debugFillBuildPile = useCallback((buildPile: number) => {
     dispatch({ type: 'DEBUG_FILL_BUILD_PILE', buildPile });
@@ -219,6 +278,7 @@ export function useSkipBoGame() {
       buildPile,
       animationDuration: Math.max(completionAnimationDuration, drawAnimationDuration),
     });
+    appendLocalInsightAction(currentState, {type: 'PLAY_CARD', buildPile});
 
     if (refillCards.length > 0) {
       void triggerMultipleDrawAnimations(
@@ -233,7 +293,7 @@ export function useSkipBoGame() {
     }
     interactionLockRef.current = false;
     return { success: true, message: 'Carte jouée' };
-  }, [dispatch, isInteractionBlocked, startAnimation, waitForAnimations]);
+  }, [appendLocalInsightAction, dispatch, isInteractionBlocked, startAnimation, waitForAnimations]);
 
   const discardCard = useCallback(async (discardPile: number): Promise<MoveResult> => {
     const currentState = stateRef.current;
@@ -304,9 +364,10 @@ export function useSkipBoGame() {
     }
 
     dispatch({ type: 'DISCARD_CARD', discardPile });
+    appendLocalInsightAction(currentState, {type: 'DISCARD_CARD', discardPile});
     interactionLockRef.current = false;
     return { success: true, message: 'Carte défaussée' };
-  }, [dispatch, isInteractionBlocked, startAnimation, waitForAnimations]);
+  }, [appendLocalInsightAction, dispatch, isInteractionBlocked, startAnimation, waitForAnimations]);
 
   const clearSelection = useCallback(() => {
     if (isInteractionBlocked()) {
@@ -333,5 +394,6 @@ export function useSkipBoGame() {
     clearSelection,
     canPlayCard: canPlayCardWrapper,
     getLatestGameState,
+    localActionLog,
   };
 }
