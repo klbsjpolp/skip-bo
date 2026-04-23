@@ -201,7 +201,7 @@ export function DiscardPiles({
   // @ts-expect-error setting variable in style
   return <div className="flex items-center gap-2" style={{"--card-rotate": "0deg"}}>
     <div className="min-w-fit vertical-text">Défausses</div>
-    <div className="discard-piles self-start">
+    <div className="discard-piles">
       {player.discardPiles.map((pile, pileIndex) => (
         <DiscardPile key={`discard-${pileIndex}`} pile={pile} pileIndex={pileIndex} playerIndex={playerIndex}
                      isCurrentPlayer={isCurrentPlayer} gameState={gameState} selectCard={selectCard}
