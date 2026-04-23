@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.15.0](https://github.com/klbsjpolp/skip-bo/compare/v1.14.0...v1.15.0) (2026-04-23)
+
+
+### Bug Fixes
+
+* **playwright:** update console and game state logs for debugging ([0ade738](https://github.com/klbsjpolp/skip-bo/commit/0ade738fc7f08c8dfdb7180f95f33c8f1e20188f))
+* **realtime-api:** track disconnected connections in FakeBroadcaster ([046c719](https://github.com/klbsjpolp/skip-bo/commit/046c71951990bcd9cb3a3125ba9198edcda87989))
+* **web:** adjust styles and remove obsolete files for consistency ([5704784](https://github.com/klbsjpolp/skip-bo/commit/570478456b3bf2d2668487795289e1ac51db9227))
+* **web:** remove obsolete lobby removal reset in `useOnlineSkipBoGame` ([a023af4](https://github.com/klbsjpolp/skip-bo/commit/a023af4d896da77922264aa853600a3cae6c91ac))
+
+
+### Features
+
+* **multiplayer:** add lobby waiting room with ready/kick/leave flow ([7234123](https://github.com/klbsjpolp/skip-bo/commit/7234123e854b6b713fb52b4efba6129a69dd90cc))
+
+
+
 # [1.14.0](https://github.com/klbsjpolp/skip-bo/compare/v1.13.1...v1.14.0) (2026-04-22)
 
 
