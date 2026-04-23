@@ -66,14 +66,17 @@
     background-repeat: repeat;
   }
 
-  .player-area.active-turn {
+  .player-area {
     --minecraft-active-border-tile-size: 5px;
     --minecraft-active-border-width: 5px;
+  }
+
+  .player-area.active-turn {
     --tw-ring-color: transparent;
     --tw-ring-shadow: 0 0 #0000;
   }
 
-  .player-area.active-turn:not(.winner)::after {
+  .player-area::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -95,6 +98,12 @@
     box-shadow:
       inset 0 0 0 2px rgba(0, 0, 0, 0.55),
       5px 5px 0 rgba(0, 0, 0, 0.28);
+    opacity: 0;
+    transition: opacity 0.6s;
+  }
+
+  .player-area.active-turn:not(.winner)::after {
+    opacity: 1;
   }
 
   /* Empty spots — wood plank texture */
