@@ -19,3 +19,4 @@
 .env.local
 .env.*.local
 docs/runbooks/TOFU_BACKEND_CONFIG_HCL.hcl
+.claude/worktrees
