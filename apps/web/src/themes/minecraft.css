@@ -1,5 +1,5 @@
 .theme-minecraft {
-  --text-base: 0.85rem;
+  --text-base: 0.8rem;
 
   --text-xs: calc(var(--text-base) * 0.75);
   --text-sm: calc(var(--text-base) * 0.875);
@@ -43,12 +43,11 @@
   --victory-accent: #37ceff;
   --victory-badge-bg: color-mix(in srgb, #2f2418 78%, #9adf5a 22%);
   --victory-badge-text: #f4f4f4;
-
-
+  
   /* Global background — repeating dirt texture (SVG + noise) */
   body {
     font-family: 'Monaco', monospace;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
     text-transform: none;
     background-image: url("./textures/dirt.webp");
     background-size: 80px 80px;
@@ -68,13 +67,13 @@
   }
 
   .player-area.active-turn {
-    --minecraft-active-border-tile-size: 10px;
-    --minecraft-active-border-width: 10px;
+    --minecraft-active-border-tile-size: 5px;
+    --minecraft-active-border-width: 5px;
     --tw-ring-color: transparent;
     --tw-ring-shadow: 0 0 #0000;
   }
 
-  .player-area.active-turn::after {
+  .player-area.active-turn:not(.winner)::after {
     content: '';
     position: absolute;
     inset: 0;
