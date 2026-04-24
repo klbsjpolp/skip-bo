@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.16.0](https://github.com/klbsjpolp/skip-bo/compare/v1.15.2...v1.16.0) (2026-04-24)
+
+
+### Features
+
+* add specialized agents, hooks, and skills for review automation ([a622a1a](https://github.com/klbsjpolp/skip-bo/commit/a622a1ab3e9874a79d940150da0e85384fab2770))
+
+
+
 ## [1.15.2](https://github.com/klbsjpolp/skip-bo/compare/v1.15.1...v1.15.2) (2026-04-23)
 
 
