@@ -39,6 +39,10 @@
 
 - [monitoring/SENTRY_AWS_INTEGRATION.md](monitoring/SENTRY_AWS_INTEGRATION.md): Sentry-specific AWS integration notes.
 
+### Themes
+
+- [themes/README.md](themes/README.md): categorization of visual themes and links to per-theme notes covering current features and improvement ideas.
+
 ### Historical Investigations
 
 - [investigations/README.md](investigations/README.md): dated investigation notes and bug writeups.
