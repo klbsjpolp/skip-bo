@@ -3,7 +3,7 @@ import {
   calculateAnimationDuration,
   getDeckPosition,
   getHandCardAngle,
-  getHandCardPosition
+  getHandSlotLayoutPosition
 } from '@/utils/cardPositions';
 import type {CardAnimationData} from "@/contexts/CardAnimationContext.tsx";
 
@@ -46,7 +46,7 @@ const getDrawAnimationMetrics = (
       return null;
     }
 
-    const endPosition = getHandCardPosition(handContainer, handIndex);
+    const endPosition = getHandSlotLayoutPosition(handContainer, handIndex);
     const endAngleDeg = getHandCardAngle(handContainer, handIndex);
     const duration = calculateAnimationDuration(startPosition, endPosition);
 

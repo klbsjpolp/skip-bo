@@ -1,4 +1,5 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Card } from '@/components/Card';
 import type { CardAnimationData } from '@/contexts/CardAnimationContext';
 import { useCardAnimation } from '@/contexts/useCardAnimation';
@@ -12,6 +13,19 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
   const { removeAnimation, markAnimationStarted } = useCardAnimation();
   const rootRef = useRef<HTMLDivElement>(null);
   const flipRef = useRef<HTMLDivElement>(null);
+
+  // For draw animations, portal into the destination hand-area so the in-flight
+  // card shares its stacking context. Without this, .player-area's
+  // `isolation: isolate` traps the global animation layer (z=1000) below the
+  // hand cards' parent context, but the animated card still floats above
+  // siblings in the same stacking trap — producing the visible z-snap when the
+  // card lands and the real card mounts at its lower slot z-index.
+  const portalTarget = useMemo<HTMLElement | null>(() => {
+    if (animation.animationType !== 'draw') return null;
+    return document.querySelector<HTMLElement>(
+      `.player-area[data-player-index="${animation.sourceInfo.playerIndex}"] .hand-area.overlap-hand`
+    );
+  }, [animation.animationType, animation.sourceInfo.playerIndex]);
   // Card is invisible during the initial delay — same UX as before
   const [isVisible, setIsVisible] = useState(animation.initialDelay === 0);
   // For flip animations: tracks which face is currently showing
@@ -47,10 +61,16 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
 
     const startAngle = animation.startAngleDeg ?? 0;
     const endAngle = animation.endAngleDeg ?? 0;
-    const sx = animation.startPosition.x - halfW;
-    const sy = animation.startPosition.y - halfH;
-    const ex = animation.endPosition.x - halfW;
-    const ey = animation.endPosition.y - halfH;
+    // When portaled inside the hand-area (position: relative), the card's
+    // absolute children are positioned relative to it — so subtract its
+    // viewport offset so the same viewport coordinates resolve correctly.
+    const offsetRect = portalTarget?.getBoundingClientRect();
+    const offX = offsetRect?.left ?? 0;
+    const offY = offsetRect?.top ?? 0;
+    const sx = animation.startPosition.x - halfW - offX;
+    const sy = animation.startPosition.y - halfH - offY;
+    const ex = animation.endPosition.x - halfW - offX;
+    const ey = animation.endPosition.y - halfH - offY;
 
     // Pin the card at startPosition before WAAPI fires so it's never at 0,0
     el.style.transform = `translate(${sx}px, ${sy}px) rotateZ(${startAngle}deg)`;
@@ -119,7 +139,14 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
     return null;
   }
 
-  return (
+  // When portaled into the hand-area, use the destination slot index as
+  // z-index so the in-flight card stacks naturally with sibling hand cards
+  // (slot 4 above slot 3, etc.) — eliminating the z-snap on landing.
+  const zIndex = portalTarget
+    ? animation.sourceInfo.index
+    : 1000 - animation.sourceInfo.index;
+
+  const node = (
     <div
       ref={rootRef}
       className={cn('animated-card', `animation-${animation.animationType}`)}
@@ -127,7 +154,14 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
         position: 'absolute',
         left: 0,
         top: 0,
-        zIndex: 1000 - animation.sourceInfo.index,
+        // Give the root explicit card dimensions so its transform-origin
+        // (default 50% 50%) resolves to the card's geometric center. Without
+        // this, an empty 0×0 root rotates around its top-left corner, which
+        // offsets the rendered card by ~(h/2·sin θ, h/2·(1−cos θ)) — invisible
+        // at 0° but visible at the ±8° extremity slots.
+        width: 'var(--card-width)',
+        height: 'var(--card-height)',
+        zIndex,
         pointerEvents: 'none',
       }}
     >
@@ -150,4 +184,6 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
       )}
     </div>
   );
+
+  return portalTarget ? createPortal(node, portalTarget) : node;
 };
