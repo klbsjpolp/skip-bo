@@ -362,7 +362,14 @@ export function HandSection({
           {/* Hide cards that are being animated INTO the hand (draw animations) until animation completes */}
           {/* Only show cards that are in the hand normally and not being animated */}
           {isCardBeingAnimated(playerIndex, 'hand', index) || isCardBeingAnimated(playerIndex, 'deck', index) ? (
-            <div className="card opacity-0 pointer-events-none"/>
+            <div
+              className="card opacity-0 pointer-events-none"
+              style={handOverlaps ? {
+                left: `calc(${index} * (var(--card-width) - 10px))`,
+                top: `${[4, -3, -5, -3, 4][index]}px`,
+                zIndex: index,
+              } : undefined}
+            />
           ) : (
             <Card
               hint={`Hand card ${index + 1}`}

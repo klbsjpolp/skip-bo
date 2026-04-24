@@ -345,6 +345,11 @@
 
     &.overlap-hand {
       position: relative;
+      /* Stacking context above the stock pile (z=10) so a draw animation
+         portaled into the hand-area renders above the talon as it flies in.
+         Stays well below .card-animation-layer (z=1000) so play/discard
+         animations still float above the hand. */
+      z-index: 11;
       /* Remove flexbox properties that conflict with absolute positioning */
       .card {
         position: absolute;

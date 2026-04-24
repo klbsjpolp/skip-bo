@@ -33,10 +33,26 @@ export const getHandCardPosition = (
     return getElementCenter(cardElement);
   }
 
-  // Slot is empty (e.g. draw animation targeting an unfilled slot).
-  // Card.tsx always applies overlapIndex offsets (handOverlaps is always true for a
-  // 5-card hand) and the .hand-area holders are narrow, so we compute the final
-  // card position from the hand container's rect + the same offsets Card.tsx uses.
+  return getHandSlotLayoutPosition(handContainer, cardIndex);
+};
+
+/**
+ * Get the neutral layout position of a hand slot — independent of any transient
+ * per-card state (selected, hovered, in-flight transition). Use this for draw
+ * animation endpoints so the animated card lands exactly where the real card
+ * will settle, even if the slot currently renders a selected/translated card.
+ *
+ * Accounts for the `transform-origin: bottom center` rotation applied to hand
+ * cards: a card rotated by θ around its bottom-center has its visual (AABB)
+ * center shifted by ((h/2)·sin θ, (h/2)·(1 − cos θ)) relative to its unrotated
+ * center. Without this compensation, the animation lands at the slot's formula
+ * position but the real card settles at formula + rotation offset — a visible
+ * glitch on the ±8° extremity cards.
+ */
+export const getHandSlotLayoutPosition = (
+  handContainer: HTMLElement,
+  cardIndex: number,
+): CardPosition => {
   const handRect = handContainer.getBoundingClientRect();
   const handStyle = getComputedStyle(handContainer);
   const cardW = parseFloat(handStyle.getPropertyValue('--card-width')) || 0;
@@ -45,9 +61,13 @@ export const getHandCardPosition = (
     // Mirrors Card.tsx: left = overlapIndex * (cardWidth - 10), top = yOffsets[overlapIndex]
     const yOffsets = [4, -3, -5, -3, 4];
     const yOff = yOffsets[cardIndex] ?? 0;
+    const angleDeg = getHandCardAngle(handContainer, cardIndex);
+    const theta = (angleDeg * Math.PI) / 180;
+    const rotDx = (cardH / 2) * Math.sin(theta);
+    const rotDy = (cardH / 2) * (1 - Math.cos(theta));
     return {
-      x: handRect.left + cardIndex * (cardW - 10) + cardW / 2,
-      y: handRect.top + yOff + cardH / 2,
+      x: handRect.left + cardIndex * (cardW - 10) + cardW / 2 + rotDx,
+      y: handRect.top + yOff + cardH / 2 + rotDy,
     };
   }
 
