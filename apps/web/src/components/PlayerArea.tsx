@@ -6,6 +6,7 @@ import type {MouseEventHandler} from "react";
 import {Fragment} from "react";
 import {useCardAnimation} from "@/contexts/useCardAnimation.ts";
 import {VictoryEffects} from '@/components/VictoryEffects';
+import {HAND_Y_OFFSETS} from '@/utils/cardPositions';
 
 export interface PlayerAreaProps {
   player: Player;
@@ -366,7 +367,7 @@ export function HandSection({
               className="card opacity-0 pointer-events-none"
               style={handOverlaps ? {
                 left: `calc(${index} * (var(--card-width) - 10px))`,
-                top: `${[4, -3, -5, -3, 4][index]}px`,
+                top: `${HAND_Y_OFFSETS[index]}px`,
                 zIndex: index,
               } : undefined}
             />

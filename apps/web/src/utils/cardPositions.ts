@@ -9,6 +9,13 @@ export interface CardPosition {
 }
 
 /**
+ * Vertical pixel offsets per overlap-hand slot — the fan curve. Shared between
+ * Card.tsx (layout), PlayerArea.tsx (animation placeholder), and the animation
+ * endpoint math below so all three stay in sync.
+ */
+export const HAND_Y_OFFSETS = [4, -3, -5, -3, 4] as const;
+
+/**
  * Get the center position of a DOM element
  */
 export const getElementCenter = (element: HTMLElement): CardPosition => {
@@ -58,9 +65,7 @@ export const getHandSlotLayoutPosition = (
   const cardW = parseFloat(handStyle.getPropertyValue('--card-width')) || 0;
   const cardH = parseFloat(handStyle.getPropertyValue('--card-height')) || 0;
   if (cardW > 0 && cardH > 0) {
-    // Mirrors Card.tsx: left = overlapIndex * (cardWidth - 10), top = yOffsets[overlapIndex]
-    const yOffsets = [4, -3, -5, -3, 4];
-    const yOff = yOffsets[cardIndex] ?? 0;
+    const yOff = HAND_Y_OFFSETS[cardIndex] ?? 0;
     const angleDeg = getHandCardAngle(handContainer, cardIndex);
     const theta = (angleDeg * Math.PI) / 180;
     const rotDx = (cardH / 2) * Math.sin(theta);
