@@ -12,6 +12,7 @@
       "mcp__plugin_playwright_playwright__browser_take_screenshot",
       "mcp__plugin_playwright_playwright__browser_snapshot",
       "mcp__plugin_playwright_playwright__browser_click",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
       "Bash(gh pr *)",
       "Bash(chmod +x */.claude/hooks/*)"
     ]
