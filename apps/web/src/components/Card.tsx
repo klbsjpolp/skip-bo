@@ -1,5 +1,6 @@
 import type {Card as CardType} from '@/types';
 import {cn} from '@/lib/utils';
+import {HAND_Y_OFFSETS} from '@/utils/cardPositions';
 import type {CSSProperties, HTMLAttributes, KeyboardEventHandler, MouseEventHandler} from "react";
 import React, {memo, useLayoutEffect, useState} from "react";
 
@@ -81,7 +82,7 @@ const CardComponent: React.FC<CardProps> = ({
       zIndex: stackIndex,
     }
   } else if (overlapIndex !== undefined) {
-    const offset = [4, -3, -5, -3, 4][overlapIndex]
+    const offset = HAND_Y_OFFSETS[overlapIndex]
 
     style = {
       left: `calc(${overlapIndex} * (var(--card-width) - 10px))`,
