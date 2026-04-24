@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.16.1](https://github.com/klbsjpolp/skip-bo/compare/v1.16.0...v1.16.1) (2026-04-24)
+
+
+### Bug Fixes
+
+* **web:** draw animation lands exactly in hand slot ([7d9c07f](https://github.com/klbsjpolp/skip-bo/commit/7d9c07f3d68ede440a6e80c9bc6f95a06bd1c175))
+
+
+
 # [1.16.0](https://github.com/klbsjpolp/skip-bo/compare/v1.15.2...v1.16.0) (2026-04-24)
 
 
