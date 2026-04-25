@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.17.0](https://github.com/klbsjpolp/skip-bo/compare/v1.16.2...v1.17.0) (2026-04-25)
+
+
+### Features
+
+* **settings:** add preview_start command to Claude MCP settings ([d1deb06](https://github.com/klbsjpolp/skip-bo/commit/d1deb067dbf43d3fc7e210fe081f20ad33a7f0bb))
+* **theme/minecraft:** add firework burst and ambient pixel drift ([81df208](https://github.com/klbsjpolp/skip-bo/commit/81df208acccea645253d4ccc8df460491c2989a2))
+* **theme/neon:** add synthwave grid floor, card trail, VHS aberration ([98675f7](https://github.com/klbsjpolp/skip-bo/commit/98675f74db240c8a0fc368137506fbb4a077fa94))
+* **theme/retro-space:** add inbound victory flyby streak ([6ffcc2d](https://github.com/klbsjpolp/skip-bo/commit/6ffcc2d5ca78aeaa67e3097b49c874071fe6d4ed))
+* **theme/retro:** add CRT scanlines, fonts, slot contrast, confetti ([dd43754](https://github.com/klbsjpolp/skip-bo/commit/dd43754c7a13d85d95a0a603e7c6f729adc54818))
+
+
+
 ## [1.16.2](https://github.com/klbsjpolp/skip-bo/compare/v1.16.1...v1.16.2) (2026-04-24)
 
 
