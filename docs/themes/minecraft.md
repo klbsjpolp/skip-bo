@@ -23,16 +23,15 @@
 
 - Every element has `border-radius: 0` (enforced on all children via `!important`) — no rounding anywhere.
 - Body background uses a `dirt.webp` tile; playable areas use `grass.webp`; empty card slots use `wood.webp`; card backs use `stone.webp`.
+- Ambient particles now drift slowly across the body background as tiny 4×4px squares in XP green, redstone red, and portal purple via fixed CSS layers behind the board.
 - Active player area uses a `netherite` border texture.
 - Skip-Bo card layers `obsidian.webp` with `diamond.webp` overlay.
 - Card backs include a sword overlay.
-- Victory burst pieces are 14×14px cycling between `grass`, `stone`, `diamond`, `wood` textures with no rounding.
+- Victory burst uses a Minecraft firework star animation: 3 rockets fire in sequence, each ascending as a thin vertical spark trail, flashing at peak, then bursting into a 12-particle star spread in XP green / redstone red / portal purple / diamond cyan, before drifting down with gravity and fading. Piece colors override `--victory-piece-1/2/3/4` to match the ambient palette.
 - All textures are 80×80px webp, rendered pixelated.
 
 ## Improvement Ideas
 
-- **Ambient particle drift.** Float small 4×4px squares (XP-orb green, redstone red, portal purple) slowly across the body background during idle. Cheap via CSS keyframes, strongly reinforces the theme identity.
 - **Break-block animation on card play.** When a card is played, a quick 3-frame "cracking" overlay (small SVG or CSS art) then disappear could mimic block-breaking. Should respect the shared animation gate to avoid stacking.
 - **Biome-based player tinting.** Human player area uses grass biome; AI player area could use a different biome (e.g. desert, nether, snow) so the two sides feel like distinct worlds rather than the same field.
 - **Iconic drop indicator.** The drop indicator could render as a tiny pickaxe or a block outline, matching the theme's gaming vocabulary.
-- **Victory fireworks block.** Minecraft's on-win motif is firework stars — a burst variant that spawns 3-4 firework trails (short vertical line, puff at top) would give the theme a dedicated win beat rather than the current block-confetti.

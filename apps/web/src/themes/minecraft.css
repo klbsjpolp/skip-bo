@@ -43,9 +43,16 @@
   --victory-accent: #37ceff;
   --victory-badge-bg: color-mix(in srgb, #2f2418 78%, #9adf5a 22%);
   --victory-badge-text: #f4f4f4;
+
+  /* Firework star particle colors: XP green / redstone / portal purple / diamond */
+  --victory-piece-1: #9adf5a;
+  --victory-piece-2: #ff5a58;
+  --victory-piece-3: #c974ff;
+  --victory-piece-4: #37ceff;
   
   /* Global background — repeating dirt texture (SVG + noise) */
   body {
+    position: relative;
     font-family: 'Monaco', monospace;
     letter-spacing: 0.01em;
     text-transform: none;
@@ -58,12 +65,173 @@
     }
   }
 
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    inset: -12vh -12vw;
+    pointer-events: none;
+    z-index: 9999;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    will-change: transform, opacity;
+  }
+
+  body::before {
+    opacity: 0.2;
+    background-image:
+      linear-gradient(#9adf5a, #9adf5a),
+      linear-gradient(#9adf5a, #9adf5a),
+      linear-gradient(#9adf5a, #9adf5a),
+      linear-gradient(#9adf5a, #9adf5a),
+      linear-gradient(#ff5a58, #ff5a58),
+      linear-gradient(#ff5a58, #ff5a58),
+      linear-gradient(#c974ff, #c974ff),
+      linear-gradient(#c974ff, #c974ff);
+    background-size:
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px;
+    background-position:
+      10% 16%,
+      26% 70%,
+      56% 28%,
+      84% 62%,
+      18% 86%,
+      74% 20%,
+      40% 10%,
+      92% 44%;
+    animation: minecraftAmbientDriftNear 78s linear infinite;
+  }
+
+  body::after {
+    opacity: 0.14;
+    background-image:
+      linear-gradient(#9adf5a, #9adf5a),
+      linear-gradient(#9adf5a, #9adf5a),
+      linear-gradient(#ff5a58, #ff5a58),
+      linear-gradient(#ff5a58, #ff5a58),
+      linear-gradient(#c974ff, #c974ff),
+      linear-gradient(#c974ff, #c974ff),
+      linear-gradient(#c974ff, #c974ff),
+      linear-gradient(#9adf5a, #9adf5a);
+    background-size:
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px;
+    background-position:
+      6% 46%,
+      34% 84%,
+      22% 24%,
+      68% 78%,
+      48% 58%,
+      80% 30%,
+      94% 12%,
+      60% 6%;
+    animation: minecraftAmbientDriftFar 112s linear infinite reverse;
+  }
+
+  #main {
+    position: relative;
+    z-index: 1;
+  }
+
   /* Player and center zones — grass texture */
   .player-area .bg-layer,
   .center-area .bg-layer {
     background-image: url("./textures/grass.webp");
     background-size: 80px 80px;
     background-repeat: repeat;
+  }
+
+  .player-area .bg-layer::before,
+  .player-area .bg-layer::after,
+  .center-area .bg-layer::before,
+  .center-area .bg-layer::after {
+    content: "";
+    position: absolute;
+    inset: -10%;
+    pointer-events: none;
+    image-rendering: pixelated;
+    will-change: transform, opacity;
+  }
+
+  .player-area .bg-layer::before,
+  .center-area .bg-layer::before {
+    opacity: 0.94;
+    background-image:
+      linear-gradient(#9adf5a, #9adf5a),
+      linear-gradient(#9adf5a, #9adf5a),
+      linear-gradient(#9adf5a, #9adf5a),
+      linear-gradient(#ff5a58, #ff5a58),
+      linear-gradient(#ff5a58, #ff5a58),
+      linear-gradient(#c974ff, #c974ff),
+      linear-gradient(#c974ff, #c974ff),
+      linear-gradient(#c974ff, #c974ff);
+    background-repeat: no-repeat;
+    background-size:
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px;
+    background-position:
+      8% 18%,
+      28% 74%,
+      66% 32%,
+      18% 84%,
+      78% 18%,
+      44% 16%,
+      58% 62%,
+      90% 48%;
+    animation: minecraftAmbientDriftNear 5s linear infinite;
+  }
+
+  .player-area .bg-layer::after,
+  .center-area .bg-layer::after {
+    opacity: 0.92;
+    background-image:
+      linear-gradient(#9adf5a, #9adf5a),
+      linear-gradient(#9adf5a, #9adf5a),
+      linear-gradient(#ff5a58, #ff5a58),
+      linear-gradient(#ff5a58, #ff5a58),
+      linear-gradient(#c974ff, #c974ff),
+      linear-gradient(#c974ff, #c974ff),
+      linear-gradient(#c974ff, #c974ff),
+      linear-gradient(#9adf5a, #9adf5a);
+    background-repeat: no-repeat;
+    background-size:
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px,
+      4px 4px;
+    background-position:
+      4% 52%,
+      36% 86%,
+      24% 20%,
+      70% 80%,
+      48% 58%,
+      82% 28%,
+      94% 10%,
+      62% 8%;
+    animation: minecraftAmbientDriftFar 8s linear infinite reverse;
   }
 
   .player-area {
@@ -189,38 +357,26 @@
       6px 6px 0 rgba(0, 0, 0, 0.22);
   }
 
+  /* Minecraft firework star particles — small glowing pixel squares,
+     no block textures. Texture nth-child overrides are removed. */
   .victory-burst-piece {
-    width: 14px;
-    height: 14px;
+    width: 8px;
+    height: 8px;
     border-radius: 0;
+    background-image: none;
     background-color: var(--piece-color);
-    background-size: 18px 18px;
-    background-position: center;
-    background-repeat: repeat;
-    opacity: 1;
+    opacity: 0;
     box-shadow:
-      inset -2px -2px 0 rgba(0, 0, 0, 0.28),
-      inset 2px 2px 0 rgba(255, 255, 255, 0.18),
-      0 0 0 2px rgba(0, 0, 0, 0.38);
+      inset -1px -1px 0 rgba(0, 0, 0, 0.35),
+      inset 1px 1px 0 rgba(255, 255, 255, 0.3),
+      0 0 4px var(--piece-color),
+      0 0 8px var(--piece-color);
     image-rendering: pixelated;
-    filter: saturate(1.05);
-    animation-name: minecraftVictoryBurst;
-  }
-
-  .victory-burst-piece:nth-child(4n + 1) {
-    background-image: url("./textures/grass.webp");
-  }
-
-  .victory-burst-piece:nth-child(4n + 2) {
-    background-image: url("./textures/stone.webp");
-  }
-
-  .victory-burst-piece:nth-child(4n + 3) {
-    background-image: url("./textures/diamond.webp");
-  }
-
-  .victory-burst-piece:nth-child(4n + 4) {
-    background-image: url("./textures/wood.webp");
+    filter: none;
+    /* Launch all pieces in a group at the same moment — no per-piece stagger */
+    animation-name: minecraftFireworkLaunch;
+    animation-timing-function: linear;
+    animation-delay: var(--burst-delay, 0ms);
   }
 
   .victory-badge {
@@ -248,31 +404,140 @@
   }
 }
 
-@keyframes minecraftVictoryBurst {
+@keyframes minecraftAmbientDriftNear {
   0% {
     opacity: 0;
-    transform: translate3d(-50%, -50%, 0) scale(0.25) rotate(0deg);
+    transform: translate3d(0, 0, 0);
   }
-  8% {
+  10% {
+    opacity: 0.5;
+    transform: translate3d(0, 0, 0);
+  }
+  35% {
     opacity: 1;
   }
-  28% {
-    opacity: 1;
+  50% {
+    transform: translate3d(-32px, 18px, 0);
   }
-  44% {
+  90% {
+    opacity: 0.5;
+    transform: translate3d(-64px, 36px, 0);
+  }
+  100% {
     opacity: 0;
+    transform: translate3d(-64px, 36px, 0);
+  }
+}
+
+@keyframes minecraftAmbientDriftFar {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+  10% {
+    opacity: 0.4;
+    transform: translate3d(0, 0, 0);
+  }
+  40% {
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate3d(24px, -20px, 0);
+  }
+  90% {
+    opacity: 0.4;
+    transform: translate3d(48px, -40px, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(48px, -40px, 0);
+  }
+}
+
+@keyframes minecraftFireworkLaunch {
+  /* 1 — Rocket ignites at center, thin vertical spark */
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scaleX(0.3) scaleY(0.4);
+  }
+  4% {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scaleX(0.25) scaleY(0.7);
+  }
+
+  /* 2 — Rocket ascends: scaleY elongation gives the upward-trail look;
+          no fixed Y offset so the explosion stays at the element's center
+          regardless of whether the player section is a strip or a block. */
+  20% {
+    opacity: 0.85;
+    transform: translate3d(-50%, -50%, 0) scaleX(0.2) scaleY(3.5);
+  }
+
+  /* 3 — Explosion flash at center */
+  23% {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(3.5);
+  }
+
+  /* 4 — Star burst: pieces fly outward from center */
+  26% {
+    opacity: 0.95;
+    transform: translate3d(
+      calc(-50% + var(--piece-offset-x) * 0.06),
+      calc(-50% + var(--piece-offset-y) * 0.06),
+      0
+    ) scale(1);
+  }
+  52% {
+    opacity: 0.85;
     transform: translate3d(
       calc(-50% + var(--piece-offset-x)),
       calc(-50% + var(--piece-offset-y)),
       0
-    ) scale(1) rotate(var(--piece-rotation));
+    ) scale(1);
+  }
+
+  /* 5 — Gravity: uniform downward drift in em so it scales with the theme's
+          font size rather than being a hardcoded pixel value. */
+  74% {
+    opacity: 0.3;
+    transform: translate3d(
+      calc(-50% + var(--piece-offset-x)),
+      calc(-50% + var(--piece-offset-y) + 1em),
+      0
+    ) scale(0.85);
+  }
+  90% {
+    opacity: 0;
+    transform: translate3d(
+      calc(-50% + var(--piece-offset-x)),
+      calc(-50% + var(--piece-offset-y) + 2.2em),
+      0
+    ) scale(0.6);
   }
   100% {
     opacity: 0;
     transform: translate3d(
       calc(-50% + var(--piece-offset-x)),
-      calc(-50% + var(--piece-offset-y)),
+      calc(-50% + var(--piece-offset-y) + 2.2em),
       0
-    ) scale(1) rotate(var(--piece-rotation));
+    ) scale(0.6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-minecraft {
+    body::before,
+    body::after,
+    .player-area .bg-layer::before,
+    .player-area .bg-layer::after,
+    .center-area .bg-layer::before,
+    .center-area .bg-layer::after {
+      animation: none;
+    }
+
+    .victory-burst-piece {
+      animation: none;
+    }
   }
 }
