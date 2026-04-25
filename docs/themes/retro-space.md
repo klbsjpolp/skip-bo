@@ -36,4 +36,4 @@ The most identity-rich theme currently in the registry: fonts, background, card 
 - **Slow parallax on the starfield.** Shift the starfield layer 5–10% slower than the grid layer so the depth implied by the two backgrounds becomes visible during long sessions.
 - **Orbit ring on the Skip-Bo planet.** A faint elliptical ring (border over a rotated pseudo-element) around the Skip-Bo card's central planet would reinforce the "astronomical object" reading that the card already hints at.
 - **Countdown rumble before bot turn.** A very subtle screen-shake or border pulse when the AI starts thinking would fit the Mission-Control vibe without interfering with gameplay pacing.
-- **Second victory flyby direction.** The current 5.2s flyby always goes the same way. Alternating direction by winner id (or adding a second inbound streak) would make repeated wins feel less scripted.
+- ~~**Second victory flyby direction.**~~ A second inbound streak (`victory-shine-inbound`) now flies right→left at `top: 68%` with a 2.6s delay and `scaleX(-1)` mirroring, so the two passes alternate on every half-cycle.

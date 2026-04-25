@@ -54,6 +54,7 @@ export function VictoryEffects() {
         <div className="victory-pattern" />
         <div className="victory-emblem" />
         <div className="victory-shine" />
+        <div className="victory-shine-inbound" />
       </div>
 
       <div className="victory-layer victory-burst-layer" aria-hidden="true">

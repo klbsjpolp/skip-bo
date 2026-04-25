@@ -476,6 +476,56 @@
       0 0 22px rgb(241 149 77 / 0.18);
   }
 
+  .victory-shine-inbound {
+    position: absolute;
+    opacity: 1;
+    top: 68%;
+    left: 102%;
+    width: clamp(108px, 15vw, 164px);
+    height: clamp(30px, 4vw, 44px);
+    pointer-events: none;
+    will-change: transform;
+    animation: retroSpaceVictoryFlybyInbound 5.2s cubic-bezier(0, 0, 0.2, 1) 2.6s infinite;
+    background: none;
+  }
+
+  .victory-shine-inbound::before {
+    content: "";
+    position: absolute;
+    inset: 28% 44% 28% 0;
+    border-radius: 999px;
+    background:
+      linear-gradient(
+        90deg,
+        transparent 0%,
+        rgb(127 212 215 / 0.04) 18%,
+        rgb(127 212 215 / 0.2) 36%,
+        rgb(255 244 216 / 0.82) 66%,
+        rgb(241 149 77 / 0.94) 100%
+      );
+    filter: blur(0.6px);
+  }
+
+  .victory-shine-inbound::after {
+    content: "";
+    position: absolute;
+    inset: 8% 0 8% 34%;
+    clip-path: polygon(0% 50%, 18% 18%, 70% 18%, 100% 50%, 70% 82%, 18% 82%);
+    background:
+      radial-gradient(circle at 68% 50%, rgb(255 255 255 / 0.9) 0 10%, transparent 11%),
+      linear-gradient(
+        90deg,
+        #7fd4d7 0 18%,
+        #f1954d 18% 72%,
+        #ffd59d 72% 86%,
+        rgb(252 244 232 / 0.98) 86% 100%
+      );
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.1),
+      0 0 16px rgb(127 212 215 / 0.16),
+      0 0 22px rgb(241 149 77 / 0.18);
+  }
+
   .hoverable-card:hover {
     box-shadow:
       0 14px 26px rgb(0 0 0 / 0.32),
@@ -506,5 +556,19 @@
   100% {
     left: 102%;
     transform: translateY(6px) rotate(-2deg) scale(0.96);
+  }
+}
+
+@keyframes retroSpaceVictoryFlybyInbound {
+  0% {
+    left: 102%;
+    transform: translateY(6px) rotate(-2deg) scaleX(-1) scale(0.96);
+  }
+  55% {
+    transform: translateY(-3px) rotate(1deg) scaleX(-1) scale(1);
+  }
+  100% {
+    left: -32%;
+    transform: translateY(10px) rotate(3deg) scaleX(-1) scale(0.88);
   }
 }
