@@ -88,8 +88,10 @@
 
     &.skipbo-text {
       --shadow-color: color-mix(in srgb, currentColor 80%, black);
-      /* Big neon text glow */
+      /* VHS chromatic aberration: R (magenta) left, B (cyan) right, then neon glow */
       text-shadow:
+          -2px 0 0 rgba(255, 0, 153, 0.85),
+          2px 0 0 rgba(0, 212, 255, 0.85),
           0 0 2px var(--shadow-color),
           0 0 4px var(--shadow-color),
           0 0 8px var(--shadow-color);
@@ -146,6 +148,57 @@
     }
   }
 
+  body {
+    background: radial-gradient(ellipse 90% 55% at 50% 100%, #13002a 0%, #0a0a0a 65%);
+  }
+
+  /* Synthwave perspective grid floor */
+  body::before {
+    content: "";
+    position: fixed;
+    left: -60%;
+    right: -60%;
+    bottom: -25%;
+    height: 70vh;
+    background:
+      repeating-linear-gradient(
+        rgba(0, 212, 255, 0.55) 0px,
+        rgba(0, 212, 255, 0.55) 1px,
+        transparent 1px,
+        transparent 80px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        rgba(255, 0, 153, 0.45) 0px,
+        rgba(255, 0, 153, 0.45) 1px,
+        transparent 1px,
+        transparent 100px
+      );
+    transform: perspective(400px) rotateX(50deg);
+    transform-origin: top center;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.7;
+    mask-image: linear-gradient(to top, transparent 0%, black 50%, black 60%, transparent 92%);
+  }
+
+  /* Fade the grid into the background at the very bottom of the viewport */
+  body::after {
+    content: "";
+    position: fixed;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(to top, #0a0a0a 60%, transparent 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .card.selected {
+    animation: neonCardTrail 200ms ease-out forwards;
+  }
+
   .player-area.winner {
     box-shadow:
       0 0 0 1px rgba(0, 255, 136, 0.7),
@@ -159,5 +212,17 @@
       0 0 22px var(--piece-color);
     filter: saturate(1.15);
     animation-duration: 1050ms;
+  }
+}
+
+@keyframes neonCardTrail {
+  0% {
+    box-shadow:
+            0 0 0 2px #00ff88,
+            0 0 24px 8px rgba(0, 255, 136, 0.8),
+            0 0 60px 16px rgba(0, 255, 136, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 20px #00ff88;
   }
 }
