@@ -1,94 +1,169 @@
 .theme-retro {
-    --primary: hsl(174 59% 39%);
-    --primary-foreground: hsl(0 0% 95%);
-    --secondary: #e9c46a;
-    --secondary-foreground: #264653;
-    --success: #2a9d8f;
-    --success-foreground: hsl(0 0% 100%);
-    --border: #e76f51;
+  --primary: hsl(174 59% 39%);
+  --primary-foreground: hsl(0 0% 95%);
+  --secondary: #e9c46a;
+  --secondary-foreground: #264653;
+  --success: #2a9d8f;
+  --success-foreground: hsl(0 0% 100%);
+  --border: #e76f51;
 
-    --background: #f4f1de;
-    --text-color: #264653;
-    --card-front-color: #f4a261;
-    --card-border-color: #e76f51;
-    --card-shadow: 3px 3px 0 var(--card-border-color);
-    --card-radius: 15px;
-    --card-back-color: var(--secondary);
-    --retro-back-transparent-size: calc(var(--card-height) / 50);
-    --retro-back-stripe-size: calc(var(--card-height) / 10);
-    --card-back-bg:
-      repeating-linear-gradient(
-        45deg,
-        var(--card-g1) 0,
-        var(--card-g1) calc(var(--retro-back-stripe-size) * 1),
-        transparent calc(var(--retro-back-stripe-size) * 1),
-        transparent calc(var(--retro-back-stripe-size) * 1 + var(--retro-back-transparent-size) * 1),
-        var(--card-g2) calc(var(--retro-back-stripe-size) * 1 + var(--retro-back-transparent-size) * 1),
-        var(--card-g2) calc(var(--retro-back-stripe-size) * 2 + var(--retro-back-transparent-size) * 1),
-        transparent calc(var(--retro-back-stripe-size) * 2 + var(--retro-back-transparent-size) * 1),
-        transparent calc(var(--retro-back-stripe-size) * 2 + var(--retro-back-transparent-size) * 2),
-        var(--card-g3) calc(var(--retro-back-stripe-size) * 2 + var(--retro-back-transparent-size) * 2),
-        var(--card-g3) calc(var(--retro-back-stripe-size) * 3 + var(--retro-back-transparent-size) * 2),
-        transparent calc(var(--retro-back-stripe-size) * 3 + var(--retro-back-transparent-size) * 2),
-        transparent calc(var(--retro-back-stripe-size) * 3 + var(--retro-back-transparent-size) * 3),
-        var(--card-front-color) calc(var(--retro-back-stripe-size) * 3 + var(--retro-back-transparent-size) * 3),
-        var(--card-front-color) calc(var(--retro-back-stripe-size) * 4 + var(--retro-back-transparent-size) * 3),
-        transparent calc(var(--retro-back-stripe-size) * 4 + var(--retro-back-transparent-size) * 3),
-        transparent calc(var(--retro-back-stripe-size) * 4 + var(--retro-back-transparent-size) * 4)
-      ),
-      linear-gradient(var(--card-back-color), var(--card-back-color));
-    --selected-border-color: var(--primary);
-    --selected-shadow: 3px 3px 0 var(--primary);
-    --victory-border: #264653;
-    --victory-accent: #e76f51;
-    --victory-pattern-opacity: 0.22;
-    --victory-pattern-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='32' viewBox='0 0 48 32'%3E%3Cg fill='%23264653'%3E%3Cpath d='M8 23 12 10l8 7 4-10 4 10 8-7 4 13H8Z'/%3E%3Crect x='10' y='23' width='28' height='3' rx='1.2'/%3E%3C/g%3E%3C/svg%3E");
-    --victory-pattern-size: 44px 30px;
-    --victory-pattern-drift-to: 44px 30px;
+  --background: #f4f1de;
+  --text-color: #264653;
+  --card-front-color: #f4a261;
+  --card-border-color: #e76f51;
+  --card-shadow: 3px 3px 0 var(--card-border-color);
+  --card-radius: 15px;
+  --card-back-color: var(--secondary);
+  --retro-back-transparent-size: calc(var(--card-height) / 50);
+  --retro-back-stripe-size: calc(var(--card-height) / 10);
+  --card-back-bg:
+    repeating-linear-gradient(
+      45deg,
+      var(--card-g1) 0,
+      var(--card-g1) calc(var(--retro-back-stripe-size) * 1),
+      transparent calc(var(--retro-back-stripe-size) * 1),
+      transparent calc(var(--retro-back-stripe-size) * 1 + var(--retro-back-transparent-size) * 1),
+      var(--card-g2) calc(var(--retro-back-stripe-size) * 1 + var(--retro-back-transparent-size) * 1),
+      var(--card-g2) calc(var(--retro-back-stripe-size) * 2 + var(--retro-back-transparent-size) * 1),
+      transparent calc(var(--retro-back-stripe-size) * 2 + var(--retro-back-transparent-size) * 1),
+      transparent calc(var(--retro-back-stripe-size) * 2 + var(--retro-back-transparent-size) * 2),
+      var(--card-g3) calc(var(--retro-back-stripe-size) * 2 + var(--retro-back-transparent-size) * 2),
+      var(--card-g3) calc(var(--retro-back-stripe-size) * 3 + var(--retro-back-transparent-size) * 2),
+      transparent calc(var(--retro-back-stripe-size) * 3 + var(--retro-back-transparent-size) * 2),
+      transparent calc(var(--retro-back-stripe-size) * 3 + var(--retro-back-transparent-size) * 3),
+      var(--card-front-color) calc(var(--retro-back-stripe-size) * 3 + var(--retro-back-transparent-size) * 3),
+      var(--card-front-color) calc(var(--retro-back-stripe-size) * 4 + var(--retro-back-transparent-size) * 3),
+      transparent calc(var(--retro-back-stripe-size) * 4 + var(--retro-back-transparent-size) * 3),
+      transparent calc(var(--retro-back-stripe-size) * 4 + var(--retro-back-transparent-size) * 4)
+    ),
+    linear-gradient(var(--card-back-color), var(--card-back-color));
+  --selected-border-color: var(--primary);
+  --selected-shadow: 3px 3px 0 var(--primary);
+  --victory-border: #264653;
+  --victory-accent: #e76f51;
+  --victory-accent-soft: color-mix(in srgb, var(--victory-accent) 24%, transparent);
+  --victory-pattern-opacity: 0.22;
+  --victory-pattern-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='32' viewBox='0 0 48 32'%3E%3Cg fill='%23264653'%3E%3Cpath d='M8 23 12 10l8 7 4-10 4 10 8-7 4 13H8Z'/%3E%3Crect x='10' y='23' width='28' height='3' rx='1.2'/%3E%3C/g%3E%3C/svg%3E");
+  --victory-pattern-size: 44px 30px;
+  --victory-pattern-drift-to: 44px 30px;
+  --victory-shine-opacity: 1;
+  --victory-shine-duration: 3.2s;
+  --victory-piece-1: #e76f51;
+  --victory-piece-2: #e9c46a;
+  --victory-piece-3: #2a9d8f;
+  --victory-piece-4: #264653;
 
-    --skipbo-text: hsl(40 80% 80%);
-    --skipbo-bg: var(--card-front-color);
-    --card-g1: #2a9d8f;
-    --card-g2: #e76f51;
-    --card-g3: #264653;
+  --skipbo-text: hsl(40 80% 80%);
+  --skipbo-bg: var(--card-front-color);
+  --card-g1: #2a9d8f;
+  --card-g2: #e76f51;
+  --card-g3: #264653;
 
-    .card {
-      @apply shadow-2xl;
-      &.skipbo-text {
-        .card-inner {
-          @apply before:absolute before:top-0   before:left-0 before:w-full before:h-1/6
-                 after:absolute  after:bottom-0 after:left-0  after:w-full  after:h-1/6;
-          &::before {
-            background-image: conic-gradient(from 45deg,
-              transparent 0deg 180deg,
-              var(--card-g2) 180deg 360deg
-            );
-          }
-          &::after {
-            background-image: conic-gradient(from 225deg,
+  body {
+    background:
+      radial-gradient(circle at top, rgb(255 255 255 / 0.32), transparent 34%),
+      linear-gradient(180deg, #f7f3e4 0%, #f0e1b2 100%);
+  }
+
+  h1,
+  h3 {
+    font-family: "Avenir Next Condensed", "Arial Narrow", Impact, sans-serif;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .card {
+    @apply shadow-2xl;
+
+    &.empty-card {
+      opacity: 0.9;
+      color: color-mix(in srgb, var(--card-border-color) 86%, var(--text-color) 14%);
+      background:
+        linear-gradient(180deg, rgb(255 255 255 / 0.38), transparent 28%),
+        linear-gradient(135deg, rgb(231 111 81 / 0.08), transparent 65%),
+        #ebe1c5;
+      border-style: dashed;
+      box-shadow:
+        inset 0 0 0 2px rgb(231 111 81 / 0.36),
+        inset 0 8px 12px rgb(255 255 255 / 0.22),
+        3px 3px 0 rgb(231 111 81 / 0.5);
+      text-shadow: 0 1px 0 rgb(255 255 255 / 0.45);
+    }
+
+    &.skipbo-text {
+      .card-inner {
+        @apply before:absolute before:top-0 before:left-0 before:w-full before:h-1/6
+               after:absolute after:bottom-0 after:left-0 after:w-full after:h-1/6;
+        &::before {
+          background-image: conic-gradient(
+            from 45deg,
+            transparent 0deg 180deg,
+            var(--card-g2) 180deg 360deg
+          );
+        }
+
+        &::after {
+          background-image: conic-gradient(
+            from 225deg,
             transparent 0deg 180deg,
             var(--card-g1) 180deg 360deg
-            );
-          }
-        }
-
-          .card-number {
-          @apply relative z-0
-            before:absolute before:z-[-1] before:content-['Skip-Bo']
-            after:absolute  after:z-[-1]  after:content-['Skip-Bo']
-            before:card-range-1  before:bottom-1 before:right-1.5
-            after:card-range-2   after:top-1     after:left-1.5;
+          );
         }
       }
-    }
 
-    .player-area.winner {
-      box-shadow: 4px 4px 0 var(--victory-border);
-    }
-
-    .victory-burst-layer,
-    .victory-shine,
-    .victory-sunburst {
-      display: none;
+      .card-number {
+        @apply relative z-0
+          before:absolute before:z-[-1] before:content-['Skip-Bo']
+          after:absolute after:z-[-1] after:content-['Skip-Bo']
+          before:card-range-1 before:bottom-1 before:right-1.5
+          after:card-range-2 after:top-1 after:left-1.5;
+      }
     }
   }
+
+  .player-area,
+  .center-area {
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border-radius: inherit;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(
+          180deg,
+          transparent 0 9px,
+          rgb(38 70 83 / 0.12) 9px 11px
+        ),
+        linear-gradient(180deg, rgb(255 255 255 / 0.03), transparent 26%);
+      opacity: 0.8;
+    }
+
+    .bg-layer {
+      background:
+        linear-gradient(180deg, rgb(255 255 255 / 0.14), transparent 26%),
+        linear-gradient(135deg, rgb(231 111 81 / 0.1), transparent 45%),
+        linear-gradient(var(--secondary), var(--secondary));
+      opacity: 1;
+    }
+  }
+
+  .player-area.winner {
+    box-shadow: 4px 4px 0 var(--victory-border);
+  }
+
+  .player-area.winner .victory-persistent-layer {
+    z-index: 0;
+  }
+
+  .player-area.winner .victory-accent {
+    opacity: 0;
+  }
+
+  .victory-burst-layer,
+  .victory-shine,
+  .victory-sunburst {
+    display: none;
+  }
+}

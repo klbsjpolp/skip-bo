@@ -23,14 +23,14 @@
 ## Current Features
 
 - Card backs layer a complex 45° repeating stripe pattern (gradient stripes alternating with transparent bands).
-- Skip-Bo card uses conic gradients on the top and bottom 1/6 of the card face, styled differently from normal cards.
-- Victory uses a custom simplified SVG pattern and hides the default shine/burst animations (`display: none`), keeping the theme print-era rather than screen-era.
+- Player and center sections now carry a subtle CRT-style scanline overlay, giving the play zones a 70s TV-screen texture without applying it to the whole page.
+- Retro headings now switch to a condensed display stack, giving titles a poster-era voice while leaving body copy on the shared app font.
+- Skip-Bo cards keep the original retro conic-band treatment on the top and bottom edges of the face.
+- Empty slots now render with a darker cream fill and dashed coral outline so dedicated drop targets are visible at a glance.
+- Victory keeps the custom simplified SVG pattern and hides the generic shine/burst animations so the winner state stays print-era.
 - Selection shadow is also chunky and offset (`3px 3px`), preserving the style under interaction.
 
-## Improvement Ideas
+## Improvement Notes
 
-- **CRT scanlines on the table.** A 1px repeating linear-gradient overlay on the body background would push the theme from "70s print" toward "70s TV" — a welcome secondary register without new assets.
-- **Replace the disabled victory shine with a tape-tracking glitch.** A slow horizontal line sweeping the winner's area once, mimicking VHS tracking, fits the era better than hiding the shine entirely.
-- **Period headline font.** A condensed display face (e.g. Antonio, Bebas Neue) on titles would give the theme a poster-era voice the palette is already promising.
-- **Halftone Skip-Bo card.** Replace the two conic bands with a halftone dot pattern (radial-gradient repeats) for a print-comic feel that differentiates the Skip-Bo card from the normal cards more clearly.
-- **Warmer empty-slot contrast.** Empty slots currently inherit the cream background; a slightly darker cream plus a dashed coral outline would read as "a dedicated spot", not a missing card.
+- The previously listed ideas have been adopted into `retro.css`.
+- Future changes should preserve the print-era palette and chunky offset shadows even when adding motion or overlays.
