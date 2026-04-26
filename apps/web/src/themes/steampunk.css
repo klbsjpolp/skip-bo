@@ -43,6 +43,25 @@
   --card-g2: hsl(16 61% 45%);    /* rust red */
   --card-g3: hsl(290 28% 45%);   /* aged plum */
 
+  h1,
+  h3,
+  .card-number {
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.02em;
+  }
+
+  h1 {
+    @apply text-xl lg:text-2xl;
+  }
+
+  .card-number {
+    @apply text-xl lg:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xs lg:text-sm;
+  }
+
   /* Global workshop background: dark gradient + faint blueprint grid */
   body {
     background-image:

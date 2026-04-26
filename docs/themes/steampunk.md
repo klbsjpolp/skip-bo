@@ -18,7 +18,7 @@
 - Warm metallics: brass `hsl(37 61% 47%)`, bronze `hsl(27 32% 32%)`, aged plum `#7b5a6e`, patina teal `#4f7a6d`, parchment `#f1e3c9`.
 - Body background workshop charcoal `#1f1a14`, card front parchment `#f1e3c9`, card back aged leather / bronze `#463a2f`, burnished-brass borders `#6b5640`.
 - Card radius 12px; standard shadows.
-- Typography: inherited.
+- Typography: classical serif (**Cinzel**) on headlines and card numbers; inherited elsewhere.
 
 ## Current Features
 
@@ -40,4 +40,3 @@ Alongside [retro-space](retro-space.md), one of the most committed theme identit
 - **Brass glint sweep on card-back hover.** A diagonal gradient sweep across card backs on hover (similar to [retro-space](retro-space.md)'s flyby but shorter) would make the metallic surface read as polished on interaction.
 - **Steam release on victory.** A short puff of 3-4 white/gray radial gradients rising and fading from the winner's area would give the theme a dedicated win beat; the current victory inherits defaults, which reads as generic confetti on an otherwise committed theme.
 - **Animated pressure gauge on active turn.** Replace the active-turn outline with a tiny gauge dial in the top-left corner whose needle sweeps as the turn elapses. Non-trivial, but meaningfully on-theme.
-- **Period-appropriate headline font.** A classical serif (e.g. Cinzel, IM Fell) on titles would finish the Victorian identity the visuals already promise.

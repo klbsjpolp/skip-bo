@@ -1,12 +1,9 @@
-import type { GameState, Card as CardType } from '@/types';
-import { Card } from '@/components/Card';
+import type {Card as CardType, GameState} from '@/types';
+import {Card} from '@/components/Card';
 import {EmptyCard} from "@/components/EmptyCard.tsx";
-import { cn } from '@/lib/utils';
-import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
-import {
-  getRetreatPileAngle,
-  RETREAT_PILE_PREVIEW_LIMIT,
-} from '@/lib/retreatPile';
+import {cn} from '@/lib/utils';
+import {useCardAnimation} from '@/contexts/useCardAnimation.ts';
+import {getRetreatPileAngle, RETREAT_PILE_PREVIEW_LIMIT,} from '@/lib/retreatPile';
 
 interface CenterAreaProps {
   gameState: GameState;
@@ -38,9 +35,9 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
       <div className="bg-layer"/>
       <div className="content-layer flex items-center gap-2 lg:gap-4 h-full flex-wrap">
         <div className="flex items-center gap-2 lg:gap-4" data-testid="center-deck-section">
-          <div className="min-w-fit vertical-text" data-testid="center-deck-title">
+          <h3 className="min-w-fit vertical-text" data-testid="center-deck-title">
             Pioche ({gameState.deck.length})
-          </div>
+          </h3>
           <div className="deck">
             {gameState.deck.length > 0 ? (
               <Card
@@ -56,9 +53,9 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
         </div>
 
         <div className="flex items-center gap-2 lg:gap-4" data-testid="center-build-section">
-          <div className="min-w-fit vertical-text" data-testid="center-build-title">
+          <h3 className="min-w-fit vertical-text" data-testid="center-build-title">
             Piles de<br />construction
-          </div>
+          </h3>
           <div className="build-piles">
             {gameState.buildPiles.map((pile, index) => {
               const canDropSelectedCard = Boolean(
@@ -172,9 +169,9 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
         </div>
 
         <div className="flex items-center gap-2 lg:gap-4" data-testid="center-retreat-section">
-          <div className="min-w-fit vertical-text" data-testid="retreat-pile-title">
+          <h3 className="min-w-fit vertical-text" data-testid="retreat-pile-title">
             Retrait ({gameState.completedBuildPiles.length})
-          </div>
+          </h3>
           <div
             className="retreat-pile-stack"
             data-retreat-pile
