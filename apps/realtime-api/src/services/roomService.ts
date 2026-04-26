@@ -10,7 +10,7 @@ import type {
 } from '@skipbo/multiplayer-protocol';
 import { normalizePlayerName, normalizeRoomCode, serializeClientGameView } from '@skipbo/multiplayer-protocol';
 
-import { RoomVersionConflictError, type ConnectionRecord, type ConnectionRepository, type LobbyPlayerRecord, type RoomRecord, type RoomRepository } from '../repositories/types.js';
+import { RoomVersionConflictError, type ConnectionRecord, type ConnectionRepository, type DisconnectedSeatRecord, type LobbyPlayerRecord, type RoomRecord, type RoomRepository } from '../repositories/types.js';
 import {ClientError} from '../errors/clientError.js';
 import type {RealtimeBroadcaster} from './broadcaster.js';
 import {applyOnlineAction, createOnlineInitialGameState, createWaitingRoomState, isDebugAction, validateOnlineAction} from './gameState.js';
@@ -28,6 +28,7 @@ const ROOM_TTL_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_SEAT_CAPACITY = 4;
 const DEFAULT_HOST_SEAT_INDEX = 0;
 const ROOM_UPDATE_MAX_ATTEMPTS = 5;
+export const DISCONNECT_GRACE_MS = 5 * 60 * 1000;
 
 const createExpiryTimestamp = (updatedAt: string): number =>
   Math.floor((new Date(updatedAt).getTime() + ROOM_TTL_MS) / 1000);
@@ -37,6 +38,65 @@ const getConnectedSeats = (connections: ConnectionRecord[]): number[] =>
 
 const getAuthenticatedSeats = (room: RoomRecord): number[] =>
   [...new Set(room.authenticatedSeats ?? [])].sort((left, right) => left - right);
+
+const getDisconnectedSeatsMap = (room: RoomRecord): Record<string, DisconnectedSeatRecord> =>
+  room.disconnectedSeats ?? {};
+
+const toDisconnectedSeatsArray = (
+  disconnectedSeats: Record<string, DisconnectedSeatRecord>,
+): Array<{ seatIndex: number; disconnectedAt: string }> =>
+  Object.entries(disconnectedSeats)
+    .map(([key, value]) => ({ seatIndex: Number(key), disconnectedAt: value.disconnectedAt }))
+    .sort((left, right) => left.seatIndex - right.seatIndex);
+
+const markSeatDisconnected = (
+  disconnectedSeats: Record<string, DisconnectedSeatRecord>,
+  seatIndex: number,
+  disconnectedAt: string,
+): Record<string, DisconnectedSeatRecord> => ({
+  ...disconnectedSeats,
+  [String(seatIndex)]: { disconnectedAt },
+});
+
+const clearSeatDisconnected = (
+  disconnectedSeats: Record<string, DisconnectedSeatRecord>,
+  seatIndex: number,
+): Record<string, DisconnectedSeatRecord> => {
+  if (!(String(seatIndex) in disconnectedSeats)) {
+    return disconnectedSeats;
+  }
+
+  const next = { ...disconnectedSeats };
+  delete next[String(seatIndex)];
+  return next;
+};
+
+const pruneStaleDisconnects = (
+  room: RoomRecord,
+  now: number = Date.now(),
+): { authenticatedSeats: number[]; disconnectedSeats: Record<string, DisconnectedSeatRecord>; changed: boolean } => {
+  const authenticatedSeats = getAuthenticatedSeats(room);
+  const disconnectedSeats = getDisconnectedSeatsMap(room);
+  const expiredSeatIndices = Object.entries(disconnectedSeats)
+    .filter(([, entry]) => now - new Date(entry.disconnectedAt).getTime() > DISCONNECT_GRACE_MS)
+    .map(([key]) => Number(key));
+
+  if (expiredSeatIndices.length === 0) {
+    return { authenticatedSeats, disconnectedSeats, changed: false };
+  }
+
+  const expiredSet = new Set(expiredSeatIndices);
+  const nextDisconnected = { ...disconnectedSeats };
+  for (const key of expiredSeatIndices) {
+    delete nextDisconnected[String(key)];
+  }
+
+  return {
+    authenticatedSeats: authenticatedSeats.filter((seatIndex) => !expiredSet.has(seatIndex)),
+    disconnectedSeats: nextDisconnected,
+    changed: true,
+  };
+};
 
 const getActiveSeatIndices = (room: RoomRecord): number[] =>
   room.activeSeatIndices
@@ -77,9 +137,11 @@ const broadcastPresence = async (
 ): Promise<void> => {
   const connections = await dependencies.connectionRepository.listByRoomCode(room.roomCode);
   const connectedSeats = connectedSeatsOverride ?? getConnectedSeats(connections);
+  const disconnectedSeats = toDisconnectedSeatsArray(getDisconnectedSeatsMap(room));
   const message: ServerMessage = {
     room: {
       connectedSeats,
+      disconnectedSeats,
       expiresAt: new Date(room.expiresAt * 1000).toISOString(),
       hostSeatIndex: room.hostSeatIndex,
       lobbySeats: buildLobbySeats(room),
@@ -115,6 +177,7 @@ const broadcastSnapshots = async (
       type: 'snapshot',
       view: serializeClientGameView({
         connectedSeats,
+        disconnectedSeats: toDisconnectedSeatsArray(getDisconnectedSeatsMap(room)),
         expiresAt: new Date(room.expiresAt * 1000).toISOString(),
         gameState: room.state,
         hostSeatIndex: room.hostSeatIndex,
@@ -330,15 +393,19 @@ export const authenticateConnection = async (
       throw new ClientError('Room not found', 404);
     }
 
+    const pruned = pruneStaleDisconnects(currentRoom);
+
     if (currentRoom.status !== 'WAITING' && currentRoom.activeSeatIndices && !currentRoom.activeSeatIndices.includes(input.seatIndex)) {
       throw new ClientError('Seat is not active in this room', 409);
     }
 
     const existingConnections = await dependencies.connectionRepository.listByRoomCode(currentRoom.roomCode);
     const connectedSeats = [...new Set([...getConnectedSeats(existingConnections), input.seatIndex])].sort((left, right) => left - right);
-    const authenticatedSeats = [...new Set([...getAuthenticatedSeats(currentRoom), input.seatIndex])].sort((left, right) => left - right);
+    const authenticatedSeats = [...new Set([...pruned.authenticatedSeats, input.seatIndex])].sort((left, right) => left - right);
+    const disconnectedSeats = clearSeatDisconnected(pruned.disconnectedSeats, input.seatIndex);
     const updatedRoom = buildUpdatedRoom(currentRoom, {
       authenticatedSeats,
+      disconnectedSeats,
       version: currentRoom.version + 1,
     });
 
@@ -453,7 +520,10 @@ export const handleAction = async (
     }
 
     const nextState = applyOnlineAction(room.state, input.action);
+    const pruned = pruneStaleDisconnects(room);
     const nextRoom = buildUpdatedRoom(room, {
+      authenticatedSeats: pruned.authenticatedSeats,
+      disconnectedSeats: pruned.disconnectedSeats,
       state: nextState,
       status: nextState.gameIsOver ? 'FINISHED' : room.status,
       summary: nextState.gameIsOver
@@ -481,6 +551,7 @@ export const handleAction = async (
 export const handleDisconnect = async (
   dependencies: RoomServiceDependencies,
   connectionId: string,
+  options: { intentional?: boolean } = {},
 ): Promise<void> => {
   const connection = await dependencies.connectionRepository.get(connectionId);
 
@@ -510,11 +581,25 @@ export const handleDisconnect = async (
       return;
     }
 
-    const authenticatedSeats = getAuthenticatedSeats(currentRoom).filter((seatIndex) => seatIndex !== connection.seatIndex);
-    const updatedRoom = buildUpdatedRoom(currentRoom, {
-      authenticatedSeats,
-      version: currentRoom.version + 1,
-    });
+    if (!getAuthenticatedSeats(currentRoom).includes(connection.seatIndex)) {
+      return;
+    }
+
+    const updates: Partial<RoomRecord> = options.intentional
+      ? {
+          authenticatedSeats: getAuthenticatedSeats(currentRoom).filter((seatIndex) => seatIndex !== connection.seatIndex),
+          disconnectedSeats: clearSeatDisconnected(getDisconnectedSeatsMap(currentRoom), connection.seatIndex),
+          version: currentRoom.version + 1,
+        }
+      : {
+          disconnectedSeats: markSeatDisconnected(
+            getDisconnectedSeatsMap(currentRoom),
+            connection.seatIndex,
+            new Date().toISOString(),
+          ),
+          version: currentRoom.version + 1,
+        };
+    const updatedRoom = buildUpdatedRoom(currentRoom, updates);
 
     try {
       await dependencies.roomRepository.update(updatedRoom, currentRoom.version);
@@ -642,9 +727,11 @@ export const handleKickSeat = async (
     nextSeatTokenHashes[input.targetSeatIndex] = null;
 
     const nextAuthenticatedSeats = getAuthenticatedSeats(room).filter((s) => s !== input.targetSeatIndex);
+    const nextDisconnectedSeats = clearSeatDisconnected(getDisconnectedSeatsMap(room), input.targetSeatIndex);
 
     const updatedRoom = buildUpdatedRoom(room, {
       authenticatedSeats: nextAuthenticatedSeats,
+      disconnectedSeats: nextDisconnectedSeats,
       lobbyPlayers: removeLobbyPlayer(room, input.targetSeatIndex),
       seatTokenHashes: nextSeatTokenHashes,
       version: room.version + 1,
@@ -678,7 +765,7 @@ export const handleLeaveLobby = async (
   dependencies: RoomServiceDependencies,
   input: { connectionId: string },
 ): Promise<void> => {
-  await handleDisconnect(dependencies, input.connectionId);
+  await handleDisconnect(dependencies, input.connectionId, { intentional: true });
   try {
     await dependencies.broadcaster.disconnect(input.connectionId);
   } catch { /* connection may already be gone */ }
