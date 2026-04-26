@@ -206,7 +206,7 @@
         var(--card-front-color);
 
       .card-corner-number {
-        @apply top-1 left-1 text-xs md:text-sm md:top-1.5 md:left-1.5;
+        @apply top-1 left-1 text-xs lg:text-sm lg:top-1 lg:left-2;
       }
 
       /* Panel seams for number cards (avoid Skip-Bo frame which has its own mask) */
