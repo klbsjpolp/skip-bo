@@ -183,7 +183,7 @@
         );
     }
 
-    &.skip-bo {
+    &.skipbo-text {
       background: linear-gradient(180deg, #fff8fb 0%, #fff1f7 100%);
       isolation: isolate;
       --lollipop-size: calc(var(--card-width) * 0.68);
@@ -307,6 +307,10 @@
         mix-blend-mode: screen;
         opacity: 0.92;
       }
+    }
+
+    &.selected {
+      scale: 112%;
     }
   }
 
