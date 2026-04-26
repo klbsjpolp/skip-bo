@@ -43,7 +43,7 @@
     --card-g2: #f7a9a8;
     --card-g3: #d0a5db;
 
-    h1, h3, .card-number {
+    h1, h2, .card-number {
         font-family: 'Quicksand', sans-serif;
     }
 

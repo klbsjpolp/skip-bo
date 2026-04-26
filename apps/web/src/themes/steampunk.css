@@ -44,7 +44,7 @@
   --card-g3: hsl(290 28% 45%);   /* aged plum */
 
   h1,
-  h3,
+  h2,
   .card-number {
     font-family: 'Cinzel', serif;
     letter-spacing: 0.02em;
@@ -58,7 +58,7 @@
     @apply text-xl lg:text-4xl;
   }
 
-  h3 {
+  h2 {
     @apply text-2xs lg:text-sm;
   }
 

@@ -619,7 +619,7 @@
     @apply text-center font-bold text-lg lg:text-xl text-(--title-color);
   }
 
-  h3 {
+  h2 {
     @apply text-xs lg:text-base text-(--title-color);
   }
 

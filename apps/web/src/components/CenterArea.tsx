@@ -35,9 +35,9 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
       <div className="bg-layer"/>
       <div className="content-layer flex items-center gap-2 lg:gap-4 h-full flex-wrap">
         <div className="flex items-center gap-2 lg:gap-4" data-testid="center-deck-section">
-          <h3 className="min-w-fit vertical-text" data-testid="center-deck-title">
+          <h2 className="min-w-fit vertical-text" data-testid="center-deck-title">
             Pioche ({gameState.deck.length})
-          </h3>
+          </h2>
           <div className="deck">
             {gameState.deck.length > 0 ? (
               <Card
@@ -53,9 +53,9 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
         </div>
 
         <div className="flex items-center gap-2 lg:gap-4" data-testid="center-build-section">
-          <h3 className="min-w-fit vertical-text" data-testid="center-build-title">
+          <h2 className="min-w-fit vertical-text" data-testid="center-build-title">
             Piles de<br />construction
-          </h3>
+          </h2>
           <div className="build-piles">
             {gameState.buildPiles.map((pile, index) => {
               const canDropSelectedCard = Boolean(
@@ -169,9 +169,9 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
         </div>
 
         <div className="flex items-center gap-2 lg:gap-4" data-testid="center-retreat-section">
-          <h3 className="min-w-fit vertical-text" data-testid="retreat-pile-title">
+          <h2 className="min-w-fit vertical-text" data-testid="retreat-pile-title">
             Retrait ({gameState.completedBuildPiles.length})
-          </h3>
+          </h2>
           <div
             className="retreat-pile-stack"
             data-retreat-pile

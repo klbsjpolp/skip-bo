@@ -44,7 +44,7 @@ export function PlayerArea({
       <div className="bg-layer"/>
       {isWinner && <VictoryEffects />}
       <div className="content-layer flex items-center gap-2 lg:gap-4 h-full flex-wrap">
-          {player.name && <h3 className="vertical-text border-l border-primary">{player.name}</h3>}
+          {player.name && <h2 className="vertical-text border-l border-primary">{player.name}</h2>}
         <StockPile player={player} playerIndex={playerIndex} isCurrentPlayer={isCurrentPlayer} gameState={gameState}
                    selectCard={selectCard} clearSelection={clearSelection}/>
         <HandSection player={player} playerIndex={playerIndex} isCurrentPlayer={isCurrentPlayer} gameState={gameState}
@@ -201,7 +201,7 @@ export function DiscardPiles({
 
   // @ts-expect-error setting variable in style
   return <div className="flex items-center gap-2" style={{"--card-rotate": "0deg"}}>
-      <h3 className="min-w-fit vertical-text">Défausses</h3>
+      <h2 className="min-w-fit vertical-text">Défausses</h2>
     <div className="discard-piles">
       {player.discardPiles.map((pile, pileIndex) => (
         <DiscardPile key={`discard-${pileIndex}`} pile={pile} pileIndex={pileIndex} playerIndex={playerIndex}
@@ -257,7 +257,7 @@ export function StockPile({
 
   // @ts-expect-error setting variable in style
   return <div className="flex items-center relative gap-2" style={{"--card-rotate": "0deg"}}>
-      <h3 className="vertical-text">Talon ({player.stockPile.length})</h3>
+      <h2 className="vertical-text">Talon ({player.stockPile.length})</h2>
     {player.stockPile.length > 0 ? (
       <div className="relative w-full stock-pile">
         {/* Show the top card unless it's being animated */}
@@ -348,7 +348,7 @@ export function HandSection({
 
 
   return <div className="flex items-center gap-2">
-      <h3 className="vertical-text">Main</h3>
+      <h2 className="vertical-text">Main</h2>
     <div className={cn(
       "hand-area",
       handOverlaps && "overlap-hand"
