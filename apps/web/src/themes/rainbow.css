@@ -35,11 +35,12 @@
     );
 
     --skipbo-text: white;
-    --card-g1: #4caf50;
-    --card-g2: #ff6b6b;
-    --card-g3: #9381ff;
+    --card-g1: #ff6b6b; /* Red band from back gradient */
+    --card-g2: #4caf50; /* Green band from back gradient */
+    --card-g3: #9381ff; /* Indigo/Purple band from back gradient */
 
     body {
+      background-color: var(--background);
       background-image:
         /* Cloud Set 1 */
         radial-gradient(ellipse at 15% 25%, white 0%, transparent 8%),
@@ -56,7 +57,9 @@
         radial-gradient(ellipse at 88% 60%, white 0%, transparent 4%),
         radial-gradient(ellipse at 90% 65%, white 0%, transparent 6%);
       background-size: 2000px 500px;
-      animation: clouds-drift 90s linear infinite;
+      animation:
+        clouds-drift 90s linear infinite,
+        sky-time-drift 180s ease-in-out infinite alternate;
     }
 
     .discard-pile-stack {
@@ -144,5 +147,26 @@
     .victory-sunburst,
     .victory-shine {
       display: none;
+    }
+  }
+
+  @keyframes sky-time-drift {
+    0% {
+      /* Dawn Warm */
+      background-color: #ffb59d;
+    }
+    50% {
+      /* Midday Blue */
+      background-color: #87ceeb;
+    }
+    100% {
+      /* Dusk Pink */
+      background-color: #f4a8c0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .theme-rainbow body {
+      animation: none;
     }
   }
