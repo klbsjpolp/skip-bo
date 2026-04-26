@@ -1,3 +1,9 @@
+/* 
+  Imports with nested @import statements (like fonts) must come before Tailwind 
+  to satisfy CSS specification requirements for the final bundle.
+*/
+@import "./themes/pastel.css";
+
 @import 'tailwindcss';
 @import "./themes/light.css";
 @import "./themes/dark.css";
@@ -8,7 +14,6 @@
 @import "./themes/metro.css";
 @import "./themes/retro.css" layer(components);
 @import "./themes/retro-space.css";
-@import "./themes/pastel.css";
 @import "./themes/candy.css";
 @import "./themes/minecraft.css";
 @import "./themes/steampunk.css";
