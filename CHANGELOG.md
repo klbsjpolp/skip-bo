@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.18.0](https://github.com/klbsjpolp/skip-bo/compare/v1.17.1...v1.18.0) (2026-04-26)
+
+
+### Features
+
+* **theme/candy:** refine styles with hover and selection effects ([29114fa](https://github.com/klbsjpolp/skip-bo/commit/29114fa4845c02b03587d24d8c45710bc2cdc080))
+* **theme/pastel:** improve typography, burst shapes, and imports ([7a8335d](https://github.com/klbsjpolp/skip-bo/commit/7a8335de65bed3d44805a3f3871d2032431319ab))
+* **theme/rainbow:** add sky-time drift and align range colors ([f73f689](https://github.com/klbsjpolp/skip-bo/commit/f73f6894bf600cbf5920acaf93d71ec1eb2d922a))
+* **theme/steampunk:** adjust card corner number spacing for lg screens ([e183f45](https://github.com/klbsjpolp/skip-bo/commit/e183f456da074a2845bc67e6dd597db3adddf2f0))
+* **theme:** refine typography, imports, and add `steampunk` updates ([dd578b7](https://github.com/klbsjpolp/skip-bo/commit/dd578b78f1ee6f677db494c851da7826d8f56531))
+* **theme:** replace all h3 with h2 for improved semantic consistency ([fabcf8c](https://github.com/klbsjpolp/skip-bo/commit/fabcf8c3d1d1cc0a8a6c319280f7eb39a69b55bb))
+
+
+
 ## [1.17.1](https://github.com/klbsjpolp/skip-bo/compare/v1.17.0...v1.17.1) (2026-04-25)
 
 
