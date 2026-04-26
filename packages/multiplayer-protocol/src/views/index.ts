@@ -23,8 +23,14 @@ export interface SelectedCardView extends SelectedCard {
   isHidden?: boolean;
 }
 
+export interface DisconnectedSeatInfo {
+  seatIndex: number;
+  disconnectedAt: string;
+}
+
 export interface RoomSummary {
   connectedSeats: number[];
+  disconnectedSeats: DisconnectedSeatInfo[];
   expiresAt: string;
   hostSeatIndex: number;
   lobbySeats: LobbySeatInfo[];
@@ -50,6 +56,7 @@ export interface ClientGameView {
 
 export interface SerializeClientGameViewInput {
   connectedSeats: number[];
+  disconnectedSeats?: DisconnectedSeatInfo[];
   expiresAt: string;
   gameState: GameState;
   hostSeatIndex?: number;
@@ -183,6 +190,7 @@ const toSelectedCardView = (
 
 export const serializeClientGameView = ({
   connectedSeats,
+  disconnectedSeats = [],
   expiresAt,
   gameState,
   hostSeatIndex = 0,
@@ -229,6 +237,7 @@ export const serializeClientGameView = ({
     players,
     room: {
       connectedSeats,
+      disconnectedSeats,
       expiresAt,
       hostSeatIndex,
       lobbySeats,

@@ -103,6 +103,31 @@ describe('serializeClientGameView', () => {
     expect(view.room.seatCapacity).toBe(4);
     expect(view.message).toBe('En attente du démarrage');
   });
+
+  it('exposes disconnected seats in the room summary, defaulting to an empty array', () => {
+    const state = initialGameState();
+
+    const baseInput = {
+      connectedSeats: [0],
+      expiresAt: new Date('2026-04-04T12:00:00.000Z').toISOString(),
+      gameState: state,
+      roomCode: 'ABCDE',
+      status: 'ACTIVE' as const,
+      version: 1,
+      viewerSeatIndex: 0,
+    };
+
+    const viewWithoutDisconnects = serializeClientGameView(baseInput);
+    expect(viewWithoutDisconnects.room.disconnectedSeats).toEqual([]);
+
+    const viewWithDisconnects = serializeClientGameView({
+      ...baseInput,
+      disconnectedSeats: [{ seatIndex: 1, disconnectedAt: '2026-04-04T11:59:00.000Z' }],
+    });
+    expect(viewWithDisconnects.room.disconnectedSeats).toEqual([
+      { seatIndex: 1, disconnectedAt: '2026-04-04T11:59:00.000Z' },
+    ]);
+  });
 });
 
 describe('createRoomRequestSchema', () => {

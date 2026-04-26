@@ -19,10 +19,15 @@ export interface LobbyPlayerRecord {
   playerName: string | null;
 }
 
+export interface DisconnectedSeatRecord {
+  disconnectedAt: string;
+}
+
 export interface RoomRecord {
   activeSeatIndices?: number[];
   authenticatedSeats?: number[];
   createdAt: string;
+  disconnectedSeats?: Record<string, DisconnectedSeatRecord>;
   expiresAt: number;
   hostSeatIndex: number;
   lobbyPlayers?: LobbyPlayerRecord[];

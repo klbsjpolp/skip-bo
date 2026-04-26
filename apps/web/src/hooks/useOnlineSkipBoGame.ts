@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { canPlayCard, gameReducer, getCompletedBuildPileCards, initialGameState, type Card, type GameState, type MoveResult } from '@skipbo/game-core';
-import { serializeClientGameView, type ClientGameView, type CreateRoomResponse, type LobbySeatInfo, type LobbyReadyState, type ServerMessage } from '@skipbo/multiplayer-protocol';
+import { serializeClientGameView, type ClientGameView, type CreateRoomResponse, type DisconnectedSeatInfo, type LobbySeatInfo, type LobbyReadyState, type ServerMessage } from '@skipbo/multiplayer-protocol';
 
 import type { GameAction } from '@/state/gameActions';
 import { useCardAnimation } from '@/contexts/useCardAnimation';
@@ -24,6 +24,7 @@ import {
   getNextDiscardCardPosition,
   getStockCardPosition,
 } from '@/utils/cardPositions';
+import { clearOnlineSession } from '@/state/sessionPersistence';
 
 type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
@@ -527,7 +528,12 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
               break;
             case 'actionRejected':
               setInteractionLocked(false);
-              if (authoritativeViewRef.current?.room.status === 'WAITING') {
+              if (authoritativeViewRef.current === null) {
+                intentionalLeaveRef.current = true;
+                clearOnlineSession();
+                setLastError(message.reason);
+                currentSocket.close();
+              } else if (authoritativeViewRef.current.room.status === 'WAITING') {
                 intentionalLeaveRef.current = true;
                 currentSocket.close();
                 setLobbyRemovalReason('kicked');
@@ -538,6 +544,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
               break;
             case 'roomClosed':
               setInteractionLocked(false);
+              clearOnlineSession();
               if (message.status === 'WAITING' || (authoritativeViewRef.current?.room.status === 'WAITING')) {
                 setLobbyRemovalReason('host-left');
               }
@@ -955,9 +962,25 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     }
   }, []);
 
+  const playersBySeatIndex = useMemo(() => {
+    const map: Record<number, { displayName: string; seatIndex: number }> = {};
+    view?.players.forEach((player) => {
+      if (typeof player.seatIndex === 'number') {
+        map[player.seatIndex] = { displayName: player.displayName, seatIndex: player.seatIndex };
+      }
+    });
+    view?.room.lobbySeats.forEach((seat) => {
+      if (!map[seat.seatIndex] && seat.displayName) {
+        map[seat.seatIndex] = { displayName: seat.displayName, seatIndex: seat.seatIndex };
+      }
+    });
+    return map;
+  }, [view?.players, view?.room.lobbySeats]);
+
   const seatCapacity = view?.room.seatCapacity ?? session?.seatCapacity ?? 4;
   const hostSeatIndex = view?.room.hostSeatIndex ?? session?.hostSeatIndex ?? 0;
   const connectedSeats = view?.room.connectedSeats ?? [];
+  const disconnectedSeats: DisconnectedSeatInfo[] = view?.room.disconnectedSeats ?? [];
   const lobbySeats: LobbySeatInfo[] = view?.room.lobbySeats ?? [];
   const roomStatus = view?.room.status ?? 'WAITING';
   const isLocalHost = session?.seatIndex === hostSeatIndex;
@@ -978,6 +1001,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     connectionStatus,
     debugFillBuildPile,
     debugWin,
+    disconnectedSeats,
     gameState,
     hostSeatIndex,
     isLocalHost,
@@ -987,6 +1011,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     lobbySeats,
     myReadyState,
     playCard,
+    playersBySeatIndex,
     roomCode: view?.room.roomCode ?? session?.roomCode ?? '',
     roomStatus,
     seatCapacity,

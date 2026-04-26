@@ -4,7 +4,7 @@ import type { ServerMessage } from '@skipbo/multiplayer-protocol';
 
 import { RoomVersionConflictError, type ConnectionRecord, type ConnectionRepository, type RoomRecord, type RoomRepository } from '../src/repositories/types.js';
 import type { RealtimeBroadcaster } from '../src/services/broadcaster.js';
-import { authenticateConnection, createRoom, handleAction, handleDisconnect, handleSetReady, joinRoom, rejectAction, startGame } from '../src/services/roomService.js';
+import { authenticateConnection, createRoom, DISCONNECT_GRACE_MS, handleAction, handleDisconnect, handleLeaveLobby, handleSetReady, joinRoom, rejectAction, startGame } from '../src/services/roomService.js';
 
 class InMemoryRoomRepository implements RoomRepository {
   readonly rooms = new Map<string, RoomRecord>();
@@ -371,7 +371,7 @@ describe('roomService', () => {
     })).rejects.toThrow('Only the host can start the room');
   });
 
-  it('removes a disconnected seat from authenticated seats', async () => {
+  it('marks a disconnected seat with a grace timestamp instead of removing it', async () => {
     const dependencies = createDependencies();
     const created = await createRoom(dependencies);
     const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
@@ -392,7 +392,140 @@ describe('roomService', () => {
     await handleDisconnect(dependencies, 'c-2');
 
     const room = await dependencies.roomRepository.get(created.roomCode);
+    expect(room?.authenticatedSeats).toEqual([0, 1]);
+    expect(room?.disconnectedSeats?.['1']?.disconnectedAt).toBeTypeOf('string');
+
+    const presenceMessage = dependencies.broadcaster.sent
+      .filter((entry) => entry.message.type === 'presence')
+      .at(-1);
+    expect(presenceMessage).toBeDefined();
+    if (presenceMessage?.message.type === 'presence') {
+      expect(presenceMessage.message.room.disconnectedSeats).toEqual([
+        { seatIndex: 1, disconnectedAt: expect.any(String) },
+      ]);
+    }
+  });
+
+  it('clears the disconnect entry when the seat re-authenticates within the grace window', async () => {
+    const dependencies = createDependencies();
+    const created = await createRoom(dependencies);
+    const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
+
+    await authenticateConnection(dependencies, {
+      connectionId: 'c-1',
+      roomCode: created.roomCode,
+      seatIndex: created.seatIndex,
+      seatToken: created.seatToken,
+    });
+    await authenticateConnection(dependencies, {
+      connectionId: 'c-2',
+      roomCode: joined.roomCode,
+      seatIndex: joined.seatIndex,
+      seatToken: joined.seatToken,
+    });
+
+    await handleDisconnect(dependencies, 'c-2');
+    await authenticateConnection(dependencies, {
+      connectionId: 'c-2-resumed',
+      roomCode: joined.roomCode,
+      seatIndex: joined.seatIndex,
+      seatToken: joined.seatToken,
+    });
+
+    const room = await dependencies.roomRepository.get(created.roomCode);
+    expect(room?.authenticatedSeats).toEqual([0, 1]);
+    expect(room?.disconnectedSeats?.['1']).toBeUndefined();
+  });
+
+  it('prunes stale disconnect entries when the next action runs after the grace period', async () => {
+    const dependencies = createDependencies();
+    const created = await createRoom(dependencies);
+    const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
+
+    await authenticateConnection(dependencies, {
+      connectionId: 'c-1',
+      roomCode: created.roomCode,
+      seatIndex: created.seatIndex,
+      seatToken: created.seatToken,
+    });
+    await authenticateConnection(dependencies, {
+      connectionId: 'c-2',
+      roomCode: joined.roomCode,
+      seatIndex: joined.seatIndex,
+      seatToken: joined.seatToken,
+    });
+    await handleSetReady(dependencies, { connectionId: 'c-1' });
+    await handleSetReady(dependencies, { connectionId: 'c-2' });
+    await startGame(dependencies, { connectionId: 'c-1' });
+
+    await handleDisconnect(dependencies, 'c-2');
+
+    const beforePrune = await dependencies.roomRepository.get(created.roomCode);
+    const expiredAt = new Date(Date.now() - DISCONNECT_GRACE_MS - 1_000).toISOString();
+    if (!beforePrune) throw new Error('room missing');
+    await dependencies.roomRepository.update({
+      ...beforePrune,
+      disconnectedSeats: { '1': { disconnectedAt: expiredAt } },
+    });
+
+    await handleAction(dependencies, {
+      action: { type: 'SELECT_CARD', source: 'hand', index: 0 },
+      connectionId: 'c-1',
+    });
+
+    const room = await dependencies.roomRepository.get(created.roomCode);
     expect(room?.authenticatedSeats).toEqual([0]);
+    expect(room?.disconnectedSeats?.['1']).toBeUndefined();
+  });
+
+  it('removes the seat immediately when leaving the lobby intentionally', async () => {
+    const dependencies = createDependencies();
+    const created = await createRoom(dependencies);
+    const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
+
+    await authenticateConnection(dependencies, {
+      connectionId: 'c-1',
+      roomCode: created.roomCode,
+      seatIndex: created.seatIndex,
+      seatToken: created.seatToken,
+    });
+    await authenticateConnection(dependencies, {
+      connectionId: 'c-2',
+      roomCode: joined.roomCode,
+      seatIndex: joined.seatIndex,
+      seatToken: joined.seatToken,
+    });
+
+    await handleLeaveLobby(dependencies, { connectionId: 'c-2' });
+
+    const room = await dependencies.roomRepository.get(created.roomCode);
+    expect(room?.authenticatedSeats).toEqual([0]);
+    expect(room?.disconnectedSeats?.['1']).toBeUndefined();
+  });
+
+  it('closes the room when the host disconnects during WAITING regardless of grace', async () => {
+    const dependencies = createDependencies();
+    const created = await createRoom(dependencies);
+    const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
+
+    await authenticateConnection(dependencies, {
+      connectionId: 'c-1',
+      roomCode: created.roomCode,
+      seatIndex: created.seatIndex,
+      seatToken: created.seatToken,
+    });
+    await authenticateConnection(dependencies, {
+      connectionId: 'c-2',
+      roomCode: joined.roomCode,
+      seatIndex: joined.seatIndex,
+      seatToken: joined.seatToken,
+    });
+
+    await handleDisconnect(dependencies, 'c-1');
+
+    const closeMessages = dependencies.broadcaster.sent
+      .filter((entry) => entry.message.type === 'roomClosed' && entry.connectionId === 'c-2');
+    expect(closeMessages.length).toBeGreaterThan(0);
   });
 
   it('drops a stale connection when rejecting an action to a closed socket', async () => {

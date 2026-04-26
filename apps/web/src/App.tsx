@@ -9,6 +9,7 @@ import {AppUpdateBanner} from '@/components/AppUpdateBanner';
 import {ForcedUpdateOverlay} from '@/components/ForcedUpdateOverlay';
 import {LobbyDialog, LobbyRemovedDialog} from '@/components/LobbyDialog';
 import {OnlineStatusStrip} from '@/components/OnlineStatusStrip';
+import {ResumeGameBanner} from '@/components/ResumeGameBanner';
 import {ThemeSwitcher} from '@/components/ThemeSwitcher';
 import {LocalGameBoard} from '@/components/LocalGameBoard';
 import {OnlineGameBoard} from '@/components/OnlineGameBoard';
@@ -20,6 +21,7 @@ import {APP_VERSION} from '@/lib/appVersion';
 import {canPlayCard} from '@/lib/validators';
 import {createOnlineRoom, joinOnlineRoom} from '@/online/api';
 import {getStoredStockSize} from '@/state/initialGameState';
+import {clearOnlineSession, loadOnlineSession, saveOnlineSession} from '@/state/sessionPersistence';
 import {getRequestedUiFixtureName, getUiFixture, type UiFixtureName} from '@/testing/uiFixtures';
 import {DebugStrip} from "@/components/DebugStrip";
 import {usePwaVersionGate} from '@/hooks/usePwaVersionGate';
@@ -200,6 +202,7 @@ function OnlineGameScreen({
     debugFillBuildPile,
     debugWin,
     discardCard,
+    disconnectedSeats,
     gameState,
     isLocalHost,
     kickSeat,
@@ -207,6 +210,7 @@ function OnlineGameScreen({
     lobbySeats,
     myReadyState,
     playCard,
+    playersBySeatIndex,
     roomCode,
     roomStatus,
     seatCapacity,
@@ -268,8 +272,10 @@ function OnlineGameScreen({
             canStartGame={canStartGame}
             connectedSeats={connectedSeats}
             connectionStatus={connectionStatus}
+            disconnectedSeats={disconnectedSeats}
             isHost={isLocalHost}
             onStartGame={startGame}
+            playersBySeatIndex={playersBySeatIndex}
             roomCode={roomCode}
             roomStatus={roomStatus}
             seatCapacity={seatCapacity}
@@ -286,6 +292,7 @@ function LiveApp() {
   const [currentGameType, setCurrentGameType] = useState<GameType>('local-ai');
   const [localSessionVersion, setLocalSessionVersion] = useState(0);
   const [onlineSession, setOnlineSession] = useState<CreateRoomResponse | null>(null);
+  const [pendingResumeSession, setPendingResumeSession] = useState<CreateRoomResponse | null>(() => loadOnlineSession());
   const {
     currentAppVersion,
     dismissSoftUpdate,
@@ -309,19 +316,37 @@ function LiveApp() {
 
   const startOnlineGame = async (stockSize = getStoredStockSize()) => {
     const session = await createOnlineRoom(stockSize);
+    saveOnlineSession(session);
+    setPendingResumeSession(null);
     setOnlineSession(session);
     setCurrentGameType('online-human');
   };
 
   const joinGame = async (roomCode: string) => {
     const session = await joinOnlineRoom(roomCode);
+    saveOnlineSession(session);
+    setPendingResumeSession(null);
     setOnlineSession(session);
     setCurrentGameType('online-human');
   };
 
   const leaveOnlineSession = () => {
+    clearOnlineSession();
+    setPendingResumeSession(null);
     setOnlineSession(null);
     setCurrentGameType('local-ai');
+  };
+
+  const resumeOnlineSession = () => {
+    if (!pendingResumeSession) return;
+    setOnlineSession(pendingResumeSession);
+    setCurrentGameType('online-human');
+    setPendingResumeSession(null);
+  };
+
+  const dismissPendingResumeSession = () => {
+    clearOnlineSession();
+    setPendingResumeSession(null);
   };
 
   const replayCurrentGame = async () => {
@@ -333,16 +358,30 @@ function LiveApp() {
     await startOnlineGame();
   };
 
-  const updateNotice = shouldShowSoftUpdate ? (
-    <AppUpdateBanner
-      currentVersion={currentAppVersion}
-      hasPendingServiceWorkerUpdate={hasPendingServiceWorkerUpdate}
-      isReloading={isApplyingUpdate}
-      latestVersion={latestAppVersion}
-      onDismiss={dismissSoftUpdate}
-      onReload={reloadToUpdate}
-    />
-  ) : null;
+  const showResumeBanner = pendingResumeSession !== null && onlineSession === null;
+  const updateNotice = (
+    <>
+      {showResumeBanner ? (
+        <ResumeGameBanner
+          isResuming={false}
+          onDismiss={dismissPendingResumeSession}
+          onResume={resumeOnlineSession}
+          roomCode={pendingResumeSession.roomCode}
+        />
+      ) : null}
+      {shouldShowSoftUpdate ? (
+        <AppUpdateBanner
+          currentVersion={currentAppVersion}
+          hasPendingServiceWorkerUpdate={hasPendingServiceWorkerUpdate}
+          isReloading={isApplyingUpdate}
+          latestVersion={latestAppVersion}
+          onDismiss={dismissSoftUpdate}
+          onReload={reloadToUpdate}
+        />
+      ) : null}
+    </>
+  );
+  const hasUpdateNotice = showResumeBanner || shouldShowSoftUpdate;
 
   const screen = currentGameType === 'online-human' && onlineSession ? (
     <OnlineGameScreen
@@ -353,7 +392,7 @@ function LiveApp() {
       onStartLocalGame={startLocalGame}
       onStartOnlineGame={startOnlineGame}
       session={onlineSession}
-      updateNotice={updateNotice}
+      updateNotice={hasUpdateNotice ? updateNotice : undefined}
     />
   ) : (
     <LocalGameScreen
@@ -362,7 +401,7 @@ function LiveApp() {
       onReplay={replayCurrentGame}
       onStartLocalGame={startLocalGame}
       onStartOnlineGame={startOnlineGame}
-      updateNotice={updateNotice}
+      updateNotice={hasUpdateNotice ? updateNotice : undefined}
     />
   );
 
