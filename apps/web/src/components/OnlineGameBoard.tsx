@@ -16,6 +16,7 @@ interface RemoteSeatProps {
   player: OnlineGameBoardProps['gameState']['players'][number];
   playerIndex: number;
   selectCard: OnlineGameBoardProps['selectCard'];
+  stackingZIndex: number;
 }
 
 function RemoteSeat({
@@ -27,6 +28,7 @@ function RemoteSeat({
   player,
   playerIndex,
   selectCard,
+  stackingZIndex,
 }: RemoteSeatProps) {
   return (
     <section
@@ -38,6 +40,7 @@ function RemoteSeat({
       data-player-index={playerIndex}
       data-player-seat={player.seatIndex}
       data-player-state={isWinner ? 'winner' : isCurrentPlayer ? 'active' : 'idle'}
+      style={{ zIndex: stackingZIndex }}
     >
       <div className="bg-layer" />
       {isWinner && <VictoryEffects />}
@@ -142,6 +145,10 @@ export function OnlineGameBoard({
                 player={player}
                 playerIndex={playerIndex}
                 selectCard={selectCard}
+                // Higher z-index for earlier-DOM seats so draw animations
+                // portaled into a top seat's hand-area aren't covered by the
+                // seat rendered below it.
+                stackingZIndex={20 + (remotePlayers.length - remotePlayerOffset)}
               />
             );
           })}
