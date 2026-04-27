@@ -231,17 +231,22 @@ describe('roomService', () => {
       connectionId: 'c-1',
     });
 
+    room = await dependencies.roomRepository.get(created.roomCode);
+    const currentSeat = room?.activeSeatIndices?.[room!.state.currentPlayerIndex];
+    const currentConnectionId = currentSeat === created.seatIndex ? 'c-1' : 'c-2';
+
     await handleAction(dependencies, {
       action: { type: 'SELECT_CARD', source: 'hand', index: 0 },
-      connectionId: 'c-1',
+      connectionId: currentConnectionId,
     });
 
     room = await dependencies.roomRepository.get(created.roomCode);
     expect(room?.status).toBe('ACTIVE');
-    expect(room?.activeSeatIndices).toEqual([0, 1]);
+    expect(room?.activeSeatIndices).toEqual(expect.arrayContaining([0, 1]));
+    expect(room?.activeSeatIndices).toHaveLength(2);
     expect(room?.authenticatedSeats).toEqual([0, 1]);
-    expect(room?.state.players[0].name).toBe('Alice');
-    expect(room?.state.players[1].name).toBe('Joueur 2');
+    expect(room?.state.players.find((p) => p.seatIndex === created.seatIndex)?.name).toBe('Alice');
+    expect(room?.state.players.find((p) => p.seatIndex === joined.seatIndex)?.name).toBe('Joueur 2');
     expect(room?.state.selectedCard?.source).toBe('hand');
     expect(room?.state.players).toHaveLength(2);
   });
@@ -271,14 +276,19 @@ describe('roomService', () => {
       connectionId: 'c-1',
     });
 
+    const roomAfterStart = await dependencies.roomRepository.get(created.roomCode);
+    const currentSeat = roomAfterStart?.activeSeatIndices?.[roomAfterStart!.state.currentPlayerIndex];
+    const currentConnectionId = currentSeat === created.seatIndex ? 'c-1' : 'c-2';
+
     await handleAction(dependencies, {
       action: { type: 'SELECT_CARD', source: 'hand', index: 0 },
-      connectionId: 'c-1',
+      connectionId: currentConnectionId,
     });
 
     const room = await dependencies.roomRepository.get(created.roomCode);
     expect(room?.status).toBe('ACTIVE');
-    expect(room?.activeSeatIndices).toEqual([0, 1]);
+    expect(room?.activeSeatIndices).toEqual(expect.arrayContaining([0, 1]));
+    expect(room?.activeSeatIndices).toHaveLength(2);
     expect(room?.authenticatedSeats).toEqual([0, 1]);
     expect(room?.state.selectedCard?.source).toBe('hand');
   });
@@ -310,7 +320,8 @@ describe('roomService', () => {
 
     const room = await dependencies.roomRepository.get(created.roomCode);
     expect(room?.status).toBe('ACTIVE');
-    expect(room?.activeSeatIndices).toEqual([0, 1]);
+    expect(room?.activeSeatIndices).toEqual(expect.arrayContaining([0, 1]));
+    expect(room?.activeSeatIndices).toHaveLength(2);
     expect(room?.authenticatedSeats).toEqual([0, 1]);
     expect(room?.state.players).toHaveLength(2);
   });

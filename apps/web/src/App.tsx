@@ -220,13 +220,25 @@ function OnlineGameScreen({
     startGame,
     lobbyRemovalReason,
   } = useOnlineSkipBoGame(session);
+  const {
+    gameState: localGameState,
+  } = useLocalSkipBoGame();
 
   const handleLeave = () => {
     leaveLobby();
     onLeaveSession();
   };
 
-  const gameBoard = (
+  const gameBoard = roomStatus === 'WAITING' ? (
+    <LocalGameBoard
+      gameState={localGameState}
+      selectCard={() => undefined}
+      playCard={() => Promise.resolve({ success: true, message: '' })}
+      discardCard={() => Promise.resolve({ success: true, message: '' })}
+      clearSelection={() => undefined}
+      canPlayCard={canPlayCard}
+    />
+  ) : (
     <OnlineGameBoard
       gameState={gameState}
       selectCard={selectCard}
