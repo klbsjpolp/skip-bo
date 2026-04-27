@@ -107,9 +107,10 @@ export function OnlineStatusStrip({
       data-testid="online-status-strip"
     >
       <span className="text-primary-foreground" title={statusLabel} aria-label={statusLabel}>
-        {roomStatus === 'WAITING' && (<LoaderCircle className="animate-spin text-primary"/>)}
-        {roomStatus === 'ACTIVE' && (<CircleCheck className="text-success" />)}
-        {roomStatus === 'FINISHED' && (<Flag className="text-muted-foreground"/>)}
+        {disconnectedSeats?.length ? <WifiOff className="text-destructive" /> :
+         roomStatus === 'WAITING' ? (<LoaderCircle className="animate-spin text-primary"/>) :
+         roomStatus === 'ACTIVE' ? (<CircleCheck className="text-success" />) :
+         roomStatus === 'FINISHED' ? (<Flag className="text-muted-foreground"/>) : null}
       </span>
       {roomStatus === 'WAITING' && (<>
           <div
@@ -151,7 +152,7 @@ export function OnlineStatusStrip({
             const isExpired = remainingMs <= 0;
             const text = isExpired
               ? `${seatLabel} a quitté`
-              : `${seatLabel} déconnecté — revient dans ${formatRemaining(remainingMs)}`;
+              : `${seatLabel} déconnecté (${formatRemaining(remainingMs)})`;
             return (
               <div
                 key={entry.seatIndex}
@@ -160,7 +161,6 @@ export function OnlineStatusStrip({
                 data-seat-index={entry.seatIndex}
                 data-expired={isExpired ? 'true' : 'false'}
               >
-                <WifiOff className="text-destructive" size={14} aria-hidden="true" />
                 <p className="text-sm font-medium tabular-nums">{text}</p>
               </div>
             );
