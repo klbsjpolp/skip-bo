@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.19.0](https://github.com/klbsjpolp/skip-bo/compare/v1.18.0...v1.19.0) (2026-04-27)
+
+
+### Bug Fixes
+
+* **web:** conditionally render copy button in LobbyDialog during dev ([17be735](https://github.com/klbsjpolp/skip-bo/commit/17be735f28db1d3b5251a0a23b388db5eab537cc))
+* **web:** drop manual memoization for playersBySeatIndex ([3c42721](https://github.com/klbsjpolp/skip-bo/commit/3c427214b0127c76b0b0d89250f4ce5d96926c8c))
+* **web:** enhance OnlineStatusStrip with disconnected seat status ([9075bda](https://github.com/klbsjpolp/skip-bo/commit/9075bda095d5fa194d4a75bcc2f8e96608800123))
+
+
+### Features
+
+* **multiplayer:** 5-minute reconnection grace for dropped players ([16b867f](https://github.com/klbsjpolp/skip-bo/commit/16b867f92e0090fcd85b4ca81f9c0cab54755447))
+
+
+
 # [1.18.0](https://github.com/klbsjpolp/skip-bo/compare/v1.17.1...v1.18.0) (2026-04-26)
 
 
