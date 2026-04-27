@@ -962,20 +962,17 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     }
   }, []);
 
-  const playersBySeatIndex = useMemo(() => {
-    const map: Record<number, { displayName: string; seatIndex: number }> = {};
-    view?.players.forEach((player) => {
-      if (typeof player.seatIndex === 'number') {
-        map[player.seatIndex] = { displayName: player.displayName, seatIndex: player.seatIndex };
-      }
-    });
-    view?.room.lobbySeats.forEach((seat) => {
-      if (!map[seat.seatIndex] && seat.displayName) {
-        map[seat.seatIndex] = { displayName: seat.displayName, seatIndex: seat.seatIndex };
-      }
-    });
-    return map;
-  }, [view?.players, view?.room.lobbySeats]);
+  const playersBySeatIndex: Record<number, { displayName: string; seatIndex: number }> = {};
+  view?.players.forEach((player) => {
+    if (typeof player.seatIndex === 'number') {
+      playersBySeatIndex[player.seatIndex] = { displayName: player.displayName, seatIndex: player.seatIndex };
+    }
+  });
+  view?.room.lobbySeats.forEach((seat) => {
+    if (!playersBySeatIndex[seat.seatIndex] && seat.displayName) {
+      playersBySeatIndex[seat.seatIndex] = { displayName: seat.displayName, seatIndex: seat.seatIndex };
+    }
+  });
 
   const seatCapacity = view?.room.seatCapacity ?? session?.seatCapacity ?? 4;
   const hostSeatIndex = view?.room.hostSeatIndex ?? session?.hostSeatIndex ?? 0;
