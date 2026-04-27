@@ -162,11 +162,13 @@ export function LobbyDialog({
               <p className="text-xs text-muted-foreground">Code de partie</p>
               <p className="font-mono text-2xl font-bold tracking-[0.25em]">{roomCode}</p>
             </div>
-            <Button type="button" size="sm" variant="outline" onClick={() => void handleCopy()}>
-              {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-              &nbsp;
-              {copied ? 'Copié' : 'Copier'}
-            </Button>
+            {import.meta.env.DEV &&
+              <Button type="button" size="sm" variant="outline" onClick={() => void handleCopy()}>
+                {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+                &nbsp;
+                {copied ? 'Copié' : 'Copier'}
+              </Button>
+            }
           </div>
 
           {/* My controls */}
