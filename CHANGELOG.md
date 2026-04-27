@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.19.1](https://github.com/klbsjpolp/skip-bo/compare/v1.19.0...v1.19.1) (2026-04-27)
+
+
+### Bug Fixes
+
+* **theme:** update writing-mode in vertical-text utility for correctness ([3981ec3](https://github.com/klbsjpolp/skip-bo/commit/3981ec36171c9f0a736161c3ba655b0b39269f25))
+
+
+
 # [1.19.0](https://github.com/klbsjpolp/skip-bo/compare/v1.18.0...v1.19.0) (2026-04-27)
 
 
