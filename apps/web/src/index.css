@@ -743,7 +743,7 @@
 
 @utility vertical-text {
   @apply transform rotate-180;
-  writing-mode: vertical-rl;
+  writing-mode: sideways-rl;
 }
 
 @utility drop-indicator {
