@@ -779,6 +779,18 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       }
 
       optimisticViewCommitted = true;
+      // Register the build→retreat animation BEFORE committing the optimistic view.
+      // The reducer moves the completed cards into completedBuildPiles, and CenterArea
+      // relies on activeAnimations to mask them at the destination. If we commit first,
+      // the cards render on the retreat pile for one frame before the animation starts.
+      if (completedBuildPileCards) {
+        triggerCompletedBuildPileAnimation(
+          currentState,
+          buildPile,
+          completedBuildPileCards,
+          currentState.completedBuildPiles.length,
+        );
+      }
       commitView(applyOptimisticPlayView(viewRef.current, buildPile, willEmptyHand));
     };
 
@@ -845,14 +857,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
 
     commitOptimisticPlayView();
 
-    if (completedBuildPileCards) {
-      triggerCompletedBuildPileAnimation(
-        currentState,
-        buildPile,
-        completedBuildPileCards,
-        currentState.completedBuildPiles.length,
-      );
-    }
     sendAction({ type: 'PLAY_CARD', buildPile });
     return { success: true, message: 'Carte jouée' };
   }, [commitView, gameState, isInteractionBlocked, sendAction, setInteractionLocked, startAnimation, waitForAnimations]);
