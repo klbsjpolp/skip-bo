@@ -14,9 +14,14 @@ import {
 } from '../src/index.js';
 
 describe('room code normalization', () => {
-  it('normalizes case-insensitive Crockford aliases', () => {
-    expect(normalizeRoomCode('ilo')).toBe('110');
-    expect(isValidRoomCode('ilo')).toBe(true);
+  it('uppercases and trims input', () => {
+    expect(normalizeRoomCode('  abc  ')).toBe('ABC');
+    expect(isValidRoomCode('abc')).toBe(true);
+  });
+
+  it('rejects ambiguous letters and digits', () => {
+    expect(isValidRoomCode('ILO')).toBe(false);
+    expect(isValidRoomCode('123')).toBe(false);
   });
 });
 

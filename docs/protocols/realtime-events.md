@@ -16,12 +16,9 @@
 ## Room Codes
 
 - Length: `3`
-- Alphabet: Crockford base32
+- Alphabet: 23 uppercase letters (`A-Z` excluding the ambiguous `I`, `L`, `O`)
 - Canonical output: uppercase
 - Input parsing ignores case
-- Aliases normalize as:
-  - `O/o -> 0`
-  - `I/i/L/l -> 1`
 
 ## HTTP Endpoints
 
@@ -50,7 +47,7 @@ Response:
 ```json
 {
   "hostSeatIndex": 0,
-  "roomCode": "7K2",
+  "roomCode": "KMP",
   "seatCapacity": 4,
   "seatIndex": 0,
   "seatToken": "<opaque bearer token>",
@@ -65,7 +62,7 @@ Request:
 
 ```json
 {
-  "roomCode": "7k2",
+  "roomCode": "kmp",
   "playerName": "Bob"
 }
 ```
@@ -82,7 +79,7 @@ Sent first after opening the socket.
 ```json
 {
   "type": "auth",
-  "roomCode": "7K2",
+  "roomCode": "KMP",
   "seatIndex": 0,
   "seatToken": "<opaque bearer token>"
 }
@@ -137,7 +134,7 @@ Contains the authoritative redacted room view for the receiving seat.
       "connectedSeats": [0, 1],
       "expiresAt": "2026-04-04T12:00:00.000Z",
       "hostSeatIndex": 0,
-      "roomCode": "7K2",
+      "roomCode": "KMP",
       "seatCapacity": 4,
       "status": "ACTIVE",
       "version": 3
@@ -174,7 +171,7 @@ Used for seat-connect and seat-disconnect updates.
     "connectedSeats": [0, 1],
     "expiresAt": "2026-04-04T12:00:00.000Z",
     "hostSeatIndex": 0,
-    "roomCode": "7K2",
+    "roomCode": "KMP",
     "seatCapacity": 4,
     "status": "WAITING",
     "version": 2
@@ -187,7 +184,7 @@ Used for seat-connect and seat-disconnect updates.
 ```json
 {
   "type": "roomClosed",
-  "roomCode": "7K2",
+  "roomCode": "KMP",
   "status": "FINISHED"
 }
 ```
