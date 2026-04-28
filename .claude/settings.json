@@ -19,7 +19,8 @@
       "Bash(xargs *)",
       "Bash(printenv)",
       "Bash(node *)",
-      "Bash(curl *)"
+      "Bash(curl *)",
+      "Bash(ps *)"
     ]
   },
   "hooks": {
