@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import { canPlayCard, gameReducer, getCompletedBuildPileCards, initialGameState, type Card, type GameState, type MoveResult } from '@skipbo/game-core';
 import { serializeClientGameView, type ClientGameView, type CreateRoomResponse, type DisconnectedSeatInfo, type LobbySeatInfo, type LobbyReadyState, type ServerMessage } from '@skipbo/multiplayer-protocol';
@@ -469,6 +470,20 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
 
                 if (opponentTransition) {
                   holdPreviousTurnPresentation();
+                  // Commit the new view *before* triggering the animation. The
+                  // DOM has not yet been updated (React only schedules the
+                  // re-render), so triggerAIAnimation can still read the
+                  // previous layout via document.querySelector. The flushSync
+                  // inside startAnimation then flushes both the new view and
+                  // the new animation in a single render — preventing a
+                  // one-frame intermediate render where the animation is
+                  // registered against the *old* state. That intermediate
+                  // render would mask the old stock top and fall back to the
+                  // second-from-top card, which on the opponent's stock is a
+                  // redacted HIDDEN_CARD and renders as a face-down back —
+                  // visible as a brief card-back flash before the new top
+                  // appears.
+                  commitView(message.view);
                   void triggerAIAnimation(previousState, opponentTransition.action, {
                     cardOverride: opponentTransition.animationCard,
                     sourceRevealedOverride: opponentTransition.sourceRevealed,
@@ -503,10 +518,12 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                   }
                   scheduleDrawAnimations(drawTransitions);
                   applyTurnPresentationDelay(drawAnimationDuration);
+                  commitView(message.view);
                 }
+              } else {
+                commitView(message.view);
               }
 
-              commitView(message.view);
               break;
             }
             case 'presence':
