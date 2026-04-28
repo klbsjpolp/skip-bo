@@ -203,7 +203,12 @@ describe('local realtime dev server', () => {
       clientVersion: 3,
     }));
 
-    await expect(activeSnapshot0).resolves.toMatchObject({
+    const [resolvedActiveSnapshot0, resolvedActiveSnapshot1] = await Promise.all([
+      activeSnapshot0,
+      activeSnapshot1,
+    ]);
+
+    expect(resolvedActiveSnapshot0).toMatchObject({
       type: 'snapshot',
       view: {
         room: {
@@ -211,7 +216,7 @@ describe('local realtime dev server', () => {
         },
       },
     });
-    await expect(activeSnapshot1).resolves.toMatchObject({
+    expect(resolvedActiveSnapshot1).toMatchObject({
       type: 'snapshot',
       view: {
         room: {
@@ -219,6 +224,17 @@ describe('local realtime dev server', () => {
         },
       },
     });
+
+    // `startGame` shuffles `activeSeatIndices`, so the first turn can land on
+    // either socket. Each viewer's snapshot rotates `currentPlayerIndex` so
+    // that `0` means "viewer is the current player". Pick the socket that
+    // owns the turn before issuing SELECT_CARD; otherwise the action is
+    // rejected with "It is not your turn" and the test would time out.
+    const currentSocket =
+      resolvedActiveSnapshot0.type === 'snapshot' &&
+      resolvedActiveSnapshot0.view.currentPlayerIndex === 0
+        ? socket0
+        : socket1;
 
     const selectedSnapshot0 = waitForMessage(
       socket0,
@@ -229,7 +245,7 @@ describe('local realtime dev server', () => {
       (message) => message.type === 'snapshot' && message.view.selectedCard?.source === 'hand',
     );
 
-    socket0.send(JSON.stringify({
+    currentSocket.send(JSON.stringify({
       action: {
         index: 0,
         source: 'hand',

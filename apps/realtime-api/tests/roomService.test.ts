@@ -469,24 +469,41 @@ describe('roomService', () => {
     await handleSetReady(dependencies, { connectionId: 'c-2' });
     await startGame(dependencies, { connectionId: 'c-1' });
 
-    await handleDisconnect(dependencies, 'c-2');
+    // `startGame` shuffles `activeSeatIndices`, so the seat that plays first
+    // is non-deterministic. Resolve the active and idle seats from the room
+    // state instead of hard-coding seat 0 as the actor.
+    const started = await dependencies.roomRepository.get(created.roomCode);
+    if (!started) throw new Error('room missing after startGame');
+    const currentSeat = started.activeSeatIndices[started.state.currentPlayerIndex];
+    const idleSeat = started.activeSeatIndices.find((seat) => seat !== currentSeat);
+    if (currentSeat === undefined || idleSeat === undefined) {
+      throw new Error('expected both seats to be active');
+    }
+    const seatToConnection: Record<number, string> = {
+      [created.seatIndex]: 'c-1',
+      [joined.seatIndex]: 'c-2',
+    };
+    const currentConnectionId = seatToConnection[currentSeat];
+    const idleConnectionId = seatToConnection[idleSeat];
+
+    await handleDisconnect(dependencies, idleConnectionId);
 
     const beforePrune = await dependencies.roomRepository.get(created.roomCode);
     const expiredAt = new Date(Date.now() - DISCONNECT_GRACE_MS - 1_000).toISOString();
     if (!beforePrune) throw new Error('room missing');
     await dependencies.roomRepository.update({
       ...beforePrune,
-      disconnectedSeats: { '1': { disconnectedAt: expiredAt } },
+      disconnectedSeats: { [String(idleSeat)]: { disconnectedAt: expiredAt } },
     });
 
     await handleAction(dependencies, {
       action: { type: 'SELECT_CARD', source: 'hand', index: 0 },
-      connectionId: 'c-1',
+      connectionId: currentConnectionId,
     });
 
     const room = await dependencies.roomRepository.get(created.roomCode);
-    expect(room?.authenticatedSeats).toEqual([0]);
-    expect(room?.disconnectedSeats?.['1']).toBeUndefined();
+    expect(room?.authenticatedSeats).toEqual([currentSeat]);
+    expect(room?.disconnectedSeats?.[String(idleSeat)]).toBeUndefined();
   });
 
   it('removes the seat immediately when leaving the lobby intentionally', async () => {
