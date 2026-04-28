@@ -9,14 +9,14 @@ describe('OnlineStatusStrip', () => {
       <OnlineStatusStrip
         connectedSeats={[0, 1]}
         connectionStatus="connected"
-        roomCode="ABCDE"
+        roomCode="ABC"
         roomStatus="WAITING"
         seatCapacity={4}
       />,
     );
 
     expect(screen.getByTestId('online-seat-count').textContent).toContain('2/4 joueurs');
-    expect(screen.getByText('ABCDE')).toBeTruthy();
+    expect(screen.getByText('ABC')).toBeTruthy();
   });
 
   test('defaults to the current two-seat room capacity', () => {
@@ -24,7 +24,7 @@ describe('OnlineStatusStrip', () => {
       <OnlineStatusStrip
         connectedSeats={[0]}
         connectionStatus="connected"
-        roomCode="ABCDE"
+        roomCode="ABC"
         roomStatus="WAITING"
       />,
     );
@@ -37,7 +37,7 @@ describe('OnlineStatusStrip', () => {
       <OnlineStatusStrip
         connectedSeats={[0, 1]}
         connectionStatus="connected"
-        roomCode="ABCDE"
+        roomCode="ABC"
         roomStatus="ACTIVE"
         seatCapacity={4}
       />,
@@ -57,7 +57,7 @@ describe('OnlineStatusStrip', () => {
         connectionStatus="connected"
         isHost={true}
         onStartGame={onStartGame}
-        roomCode="ABCDE"
+        roomCode="ABC"
         roomStatus="WAITING"
         seatCapacity={4}
       />,

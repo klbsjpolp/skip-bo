@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ServerMessage } from '@skipbo/multiplayer-protocol';
+import { ROOM_CODE_LENGTH, type ServerMessage } from '@skipbo/multiplayer-protocol';
 
 import { RoomVersionConflictError, type ConnectionRecord, type ConnectionRepository, type RoomRecord, type RoomRepository } from '../src/repositories/types.js';
 import type { RealtimeBroadcaster } from '../src/services/broadcaster.js';
@@ -193,7 +193,7 @@ describe('roomService', () => {
     const joinedFourth = await joinRoom(dependencies, { roomCode: created.roomCode });
     const room = await dependencies.roomRepository.get(created.roomCode);
 
-    expect(created.roomCode).toHaveLength(5);
+    expect(created.roomCode).toHaveLength(ROOM_CODE_LENGTH);
     expect(joined.roomCode).toBe(created.roomCode);
     expect(joined.seatIndex).toBe(1);
     expect(joinedThird.seatIndex).toBe(2);
@@ -561,7 +561,7 @@ describe('roomService', () => {
     await dependencies.connectionRepository.put({
       connectedAt: new Date('2026-04-08T22:25:45.000Z').toISOString(),
       connectionId: 'gone-connection',
-      roomCode: 'ABCDE',
+      roomCode: 'ABC',
       seatIndex: 0,
       updatedAt: new Date('2026-04-08T22:25:45.000Z').toISOString(),
     });

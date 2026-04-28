@@ -19,7 +19,7 @@ describe('online api configuration', () => {
     vi.stubEnv('VITE_SKIPBO_API_URL', 'https://api.example.com/');
 
     const fetchMock = vi.fn<typeof fetch>()
-      .mockResolvedValueOnce(makeJsonResponse({roomCode: 'ABCDE', seatToken: 'seat-token'}));
+      .mockResolvedValueOnce(makeJsonResponse({roomCode: 'ABC', seatToken: 'seat-token'}));
     vi.stubGlobal('fetch', fetchMock);
 
     const {createOnlineRoom} = await import('../api.ts');
@@ -39,7 +39,7 @@ describe('online api configuration', () => {
 
     const fetchMock = vi.fn<typeof fetch>()
       .mockResolvedValueOnce(makeJsonResponse({apiBaseUrl: 'https://runtime.example.com/'}))
-      .mockResolvedValueOnce(makeJsonResponse({roomCode: 'ABCDE', seatToken: 'seat-token'}));
+      .mockResolvedValueOnce(makeJsonResponse({roomCode: 'ABC', seatToken: 'seat-token'}));
     vi.stubGlobal('fetch', fetchMock);
 
     const {createOnlineRoom} = await import('../api.ts');
@@ -65,7 +65,7 @@ describe('online api configuration', () => {
 
     const {joinOnlineRoom} = await import('../api.ts');
 
-    await expect(joinOnlineRoom('ABCDE')).rejects.toThrow('Le jeu en ligne n’est pas configuré pour cette installation.');
+    await expect(joinOnlineRoom('ABC')).rejects.toThrow('Le jeu en ligne n’est pas configuré pour cette installation.');
   });
 
   it('sends room code in join requests', async () => {
@@ -73,15 +73,15 @@ describe('online api configuration', () => {
     vi.stubEnv('VITE_SKIPBO_API_URL', 'https://api.example.com');
 
     const fetchMock = vi.fn<typeof fetch>()
-      .mockResolvedValueOnce(makeJsonResponse({ roomCode: 'ABCDE', seatToken: 'seat-token' }));
+      .mockResolvedValueOnce(makeJsonResponse({ roomCode: 'ABC', seatToken: 'seat-token' }));
     vi.stubGlobal('fetch', fetchMock);
 
     const { joinOnlineRoom } = await import('../api.ts');
 
-    await joinOnlineRoom('ABCDE');
+    await joinOnlineRoom('ABC');
 
     expect(fetchMock).toHaveBeenCalledWith('https://api.example.com/rooms/join', expect.objectContaining({
-      body: JSON.stringify({ roomCode: 'ABCDE' }),
+      body: JSON.stringify({ roomCode: 'ABC' }),
       method: 'POST',
     }));
   });

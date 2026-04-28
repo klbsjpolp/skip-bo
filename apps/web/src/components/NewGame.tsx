@@ -7,6 +7,7 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,} from '
 import {Input} from '@/components/ui/input';
 import {getStoredStockSize} from '@/state/initialGameState.ts';
 import {
+  ROOM_CODE_LENGTH,
   isValidRoomCode,
   normalizeRoomCode,
 } from '@skipbo/multiplayer-protocol';
@@ -47,7 +48,7 @@ const MODE_OPTIONS: ModeOption[] = [
     key: 'join-online',
     title: 'Rejoindre en ligne',
     shortLabel: 'Rejoindre',
-    description: 'Entrez le code de 5 caractères reçu de l’hôte.',
+    description: `Entrez le code de ${ROOM_CODE_LENGTH} caractères reçu de l’hôte.`,
     icon: Plug,
   },
 ];
@@ -114,7 +115,7 @@ function NewGame({
   const handleJoinOnline = async () => {
     const normalizedRoomCode = normalizeRoomCode(roomCode);
     if (!isValidRoomCode(normalizedRoomCode)) {
-      setErrorMessage('Entrez un code de partie valide sur 5 caractères.');
+      setErrorMessage(`Entrez un code de partie valide sur ${ROOM_CODE_LENGTH} caractères.`);
       return;
     }
 
@@ -240,8 +241,8 @@ function NewGame({
                       setRoomCode(normalizeRoomCode(event.target.value));
                       setErrorMessage(null);
                     }}
-                    placeholder="ABCDE"
-                    maxLength={5}
+                    placeholder="ABC"
+                    maxLength={ROOM_CODE_LENGTH}
                     autoCapitalize="characters"
                     autoComplete="off"
                     enterKeyHint="go"

@@ -73,11 +73,11 @@ describe('NewGame', () => {
     expect(within(dialog).queryByRole('combobox', { name: 'Taille de pile de départ' })).toBeNull();
     expect(within(dialog).getByText('Les paramètres de partie sont définis par l’hôte.')).toBeTruthy();
 
-    fireEvent.change(within(dialog).getByRole('textbox', { name: 'Code de partie' }), { target: { value: 'abcde' } });
+    fireEvent.change(within(dialog).getByRole('textbox', { name: 'Code de partie' }), { target: { value: 'abc' } });
     const joinButtons = within(dialog).getAllByRole('button', { name: 'Rejoindre' });
     fireEvent.click(joinButtons[joinButtons.length - 1]);
 
-    expect(onJoinOnlineGame).toHaveBeenCalledWith('ABCDE');
+    expect(onJoinOnlineGame).toHaveBeenCalledWith('ABC');
   });
 
   test('starts a local game only after the dialog begins closing', async () => {
