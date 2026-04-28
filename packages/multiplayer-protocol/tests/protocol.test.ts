@@ -15,8 +15,8 @@ import {
 
 describe('room code normalization', () => {
   it('normalizes case-insensitive Crockford aliases', () => {
-    expect(normalizeRoomCode('ab1lo')).toBe('AB110');
-    expect(isValidRoomCode('ab1lo')).toBe(true);
+    expect(normalizeRoomCode('ilo')).toBe('110');
+    expect(isValidRoomCode('ilo')).toBe(true);
   });
 });
 
@@ -29,7 +29,7 @@ describe('serializeClientGameView', () => {
       connectedSeats: [0, 1],
       expiresAt: new Date('2026-04-04T12:00:00.000Z').toISOString(),
       gameState: state,
-      roomCode: 'ABCDE',
+      roomCode: 'ABC',
       status: 'ACTIVE',
       version: 1,
       viewerSeatIndex: 0,
@@ -57,7 +57,7 @@ describe('serializeClientGameView', () => {
       connectedSeats: [0, 1],
       expiresAt: new Date('2026-04-04T12:00:00.000Z').toISOString(),
       gameState: state,
-      roomCode: 'ABCDE',
+      roomCode: 'ABC',
       status: 'ACTIVE',
       version: 1,
       viewerSeatIndex: 0,
@@ -85,7 +85,7 @@ describe('serializeClientGameView', () => {
       expiresAt: new Date('2026-04-04T12:00:00.000Z').toISOString(),
       gameState: state,
       hostSeatIndex: 0,
-      roomCode: 'ABCDE',
+      roomCode: 'ABC',
       seatCapacity: 4,
       status: 'WAITING',
       version: 3,
@@ -111,7 +111,7 @@ describe('serializeClientGameView', () => {
       connectedSeats: [0],
       expiresAt: new Date('2026-04-04T12:00:00.000Z').toISOString(),
       gameState: state,
-      roomCode: 'ABCDE',
+      roomCode: 'ABC',
       status: 'ACTIVE' as const,
       version: 1,
       viewerSeatIndex: 0,
@@ -143,9 +143,9 @@ describe('createRoomRequestSchema', () => {
 
 describe('joinRoomRequestSchema', () => {
   it('accepts optional player names and normalizes only the room code downstream', () => {
-    expect(joinRoomRequestSchema.parse({ playerName: 'Bob', roomCode: 'abcde' })).toEqual({
+    expect(joinRoomRequestSchema.parse({ playerName: 'Bob', roomCode: 'abc' })).toEqual({
       playerName: 'Bob',
-      roomCode: 'abcde',
+      roomCode: 'abc',
     });
   });
 });

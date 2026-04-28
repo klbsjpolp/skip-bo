@@ -15,7 +15,7 @@
 
 ## Room Codes
 
-- Length: `5`
+- Length: `3`
 - Alphabet: Crockford base32
 - Canonical output: uppercase
 - Input parsing ignores case
@@ -50,7 +50,7 @@ Response:
 ```json
 {
   "hostSeatIndex": 0,
-  "roomCode": "7K2QF",
+  "roomCode": "7K2",
   "seatCapacity": 4,
   "seatIndex": 0,
   "seatToken": "<opaque bearer token>",
@@ -65,7 +65,7 @@ Request:
 
 ```json
 {
-  "roomCode": "7k2qf",
+  "roomCode": "7k2",
   "playerName": "Bob"
 }
 ```
@@ -82,7 +82,7 @@ Sent first after opening the socket.
 ```json
 {
   "type": "auth",
-  "roomCode": "7K2QF",
+  "roomCode": "7K2",
   "seatIndex": 0,
   "seatToken": "<opaque bearer token>"
 }
@@ -137,7 +137,7 @@ Contains the authoritative redacted room view for the receiving seat.
       "connectedSeats": [0, 1],
       "expiresAt": "2026-04-04T12:00:00.000Z",
       "hostSeatIndex": 0,
-      "roomCode": "7K2QF",
+      "roomCode": "7K2",
       "seatCapacity": 4,
       "status": "ACTIVE",
       "version": 3
@@ -174,7 +174,7 @@ Used for seat-connect and seat-disconnect updates.
     "connectedSeats": [0, 1],
     "expiresAt": "2026-04-04T12:00:00.000Z",
     "hostSeatIndex": 0,
-    "roomCode": "7K2QF",
+    "roomCode": "7K2",
     "seatCapacity": 4,
     "status": "WAITING",
     "version": 2
@@ -187,7 +187,7 @@ Used for seat-connect and seat-disconnect updates.
 ```json
 {
   "type": "roomClosed",
-  "roomCode": "7K2QF",
+  "roomCode": "7K2",
   "status": "FINISHED"
 }
 ```

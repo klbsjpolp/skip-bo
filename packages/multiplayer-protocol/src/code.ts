@@ -1,5 +1,5 @@
 export const ROOM_CODE_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
-export const ROOM_CODE_LENGTH = 5;
+export const ROOM_CODE_LENGTH = 3;
 
 const CROCKFORD_ALIASES: Record<string, string> = {
   I: '1',

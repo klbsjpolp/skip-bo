@@ -61,7 +61,7 @@ const createOnlineView = (
     connectedSeats: gameState.players.map((_, index) => index),
     expiresAt: '2026-04-05T12:00:00.000Z',
     gameState,
-    roomCode: 'ABCDE',
+    roomCode: 'ABC',
     status: 'ACTIVE',
     version,
     viewerSeatIndex: 0,
@@ -93,7 +93,7 @@ const createWaitingView = (
     gameState: state,
     hostSeatIndex: 0,
     lobbySeats,
-    roomCode: 'ABCDE',
+    roomCode: 'ABC',
     seatCapacity: 4,
     status: 'WAITING',
     version,
@@ -104,7 +104,7 @@ const createWaitingView = (
 const createSession = (): CreateRoomResponse => ({
   expiresAt: '2026-04-05T12:00:00.000Z',
   hostSeatIndex: 0,
-  roomCode: 'ABCDE',
+  roomCode: 'ABC',
   seatCapacity: 4,
   seatIndex: 0,
   seatToken: 'seat-token',
@@ -1007,7 +1007,7 @@ describe('useOnlineSkipBoGame', () => {
     });
 
     await act(async () => {
-      socket.emitMessage({ type: 'roomClosed', status: 'WAITING', roomCode: 'ABCDE' });
+      socket.emitMessage({ type: 'roomClosed', status: 'WAITING', roomCode: 'ABC' });
       await Promise.resolve();
     });
 

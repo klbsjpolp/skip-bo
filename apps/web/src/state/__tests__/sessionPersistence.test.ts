@@ -7,7 +7,7 @@ import { clearOnlineSession, loadOnlineSession, saveOnlineSession } from '@/stat
 const validSession: CreateRoomResponse = {
   expiresAt: new Date('2099-01-01T00:00:00.000Z').toISOString(),
   hostSeatIndex: 0,
-  roomCode: 'ABCDE',
+  roomCode: 'ABC',
   seatCapacity: 4,
   seatIndex: 1,
   seatToken: 'token-xyz',
