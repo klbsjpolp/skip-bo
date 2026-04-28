@@ -6,6 +6,7 @@
     "declarationMap": true,
     "outDir": "dist-types",
     "rootDir": "src",
+    "lib": ["ES2020"],
     "types": ["node", "aws-lambda"]
   },
   "include": ["src"]
