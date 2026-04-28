@@ -25,6 +25,7 @@ import {clearOnlineSession, loadOnlineSession, saveOnlineSession} from '@/state/
 import {getRequestedUiFixtureName, getUiFixture, type UiFixtureName} from '@/testing/uiFixtures';
 import {DebugStrip} from "@/components/DebugStrip";
 import {usePwaVersionGate} from '@/hooks/usePwaVersionGate';
+import {useThemeColorMeta} from '@/hooks/useThemeColorMeta';
 
 const fixtureActionResult = Promise.resolve({ success: true, message: 'Fixture mode' });
 
@@ -434,6 +435,7 @@ function LiveApp() {
 }
 
 function App() {
+  useThemeColorMeta();
   const fixtureName = getRequestedUiFixtureName();
 
   if (fixtureName) {
