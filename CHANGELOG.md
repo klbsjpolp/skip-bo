@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.22.0](https://github.com/klbsjpolp/skip-bo/compare/v1.21.1...v1.22.0) (2026-04-28)
+
+
+### Features
+
+* **web:** sync iOS PWA status bar color with active theme ([8d8dde9](https://github.com/klbsjpolp/skip-bo/commit/8d8dde94be39356d08cedde349af321b0661127e))
+
+
+
 ## [1.21.1](https://github.com/klbsjpolp/skip-bo/compare/v1.21.0...v1.21.1) (2026-04-28)
 
 
