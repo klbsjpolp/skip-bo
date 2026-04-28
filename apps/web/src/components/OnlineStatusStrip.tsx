@@ -81,12 +81,13 @@ export function OnlineStatusStrip({
   const [now, setNow] = useState(() => Date.now());
   const connectedSeatCount = connectedSeats.length;
   const statusLabel = getStatusLabel(connectionStatus, roomStatus, connectedSeats, seatCapacity);
+  const visibleDisconnectedSeats = roomStatus === 'FINISHED' ? [] : disconnectedSeats;
 
   useEffect(() => {
-    if (disconnectedSeats.length === 0) return;
+    if (visibleDisconnectedSeats.length === 0) return;
     const interval = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(interval);
-  }, [disconnectedSeats.length]);
+  }, [visibleDisconnectedSeats.length]);
 
   const handleCopy = async () => {
     try {
@@ -107,10 +108,10 @@ export function OnlineStatusStrip({
       data-testid="online-status-strip"
     >
       <span className="text-primary-foreground" title={statusLabel} aria-label={statusLabel}>
-        {disconnectedSeats?.length ? <WifiOff className="text-destructive" /> :
+        {roomStatus === 'FINISHED' ? (<Flag className="text-muted-foreground"/>) :
+         visibleDisconnectedSeats.length ? <WifiOff className="text-destructive" /> :
          roomStatus === 'WAITING' ? (<LoaderCircle className="animate-spin text-primary"/>) :
-         roomStatus === 'ACTIVE' ? (<CircleCheck className="text-success" />) :
-         roomStatus === 'FINISHED' ? (<Flag className="text-muted-foreground"/>) : null}
+         roomStatus === 'ACTIVE' ? (<CircleCheck className="text-success" />) : null}
       </span>
       {roomStatus === 'WAITING' && (<>
           <div
@@ -141,12 +142,12 @@ export function OnlineStatusStrip({
           </div>
         </>
       )}
-      {disconnectedSeats.length > 0 && (
+      {visibleDisconnectedSeats.length > 0 && (
         <div
           className="flex flex-row gap-1 items-center"
           data-testid="online-disconnected-seats"
         >
-          {disconnectedSeats.map((entry) => {
+          {visibleDisconnectedSeats.map((entry) => {
             const remainingMs = GRACE_MS - (now - new Date(entry.disconnectedAt).getTime());
             const seatLabel = getSeatLabel(entry.seatIndex, playersBySeatIndex);
             const isExpired = remainingMs <= 0;

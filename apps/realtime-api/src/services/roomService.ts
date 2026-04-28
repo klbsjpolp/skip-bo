@@ -532,7 +532,7 @@ export const handleAction = async (
     const pruned = pruneStaleDisconnects(room);
     const nextRoom = buildUpdatedRoom(room, {
       authenticatedSeats: pruned.authenticatedSeats,
-      disconnectedSeats: pruned.disconnectedSeats,
+      disconnectedSeats: nextState.gameIsOver ? {} : pruned.disconnectedSeats,
       state: nextState,
       status: nextState.gameIsOver ? 'FINISHED' : room.status,
       summary: nextState.gameIsOver
@@ -583,6 +583,8 @@ export const handleDisconnect = async (
     return;
   }
 
+  const isCleanLeave = options.intentional || room.status === 'FINISHED';
+
   for (let attempt = 0; attempt < ROOM_UPDATE_MAX_ATTEMPTS; attempt += 1) {
     const currentRoom = await dependencies.roomRepository.get(connection.roomCode);
 
@@ -594,7 +596,7 @@ export const handleDisconnect = async (
       return;
     }
 
-    const updates: Partial<RoomRecord> = options.intentional
+    const updates: Partial<RoomRecord> = isCleanLeave
       ? {
           authenticatedSeats: getAuthenticatedSeats(currentRoom).filter((seatIndex) => seatIndex !== connection.seatIndex),
           disconnectedSeats: clearSeatDisconnected(getDisconnectedSeatsMap(currentRoom), connection.seatIndex),

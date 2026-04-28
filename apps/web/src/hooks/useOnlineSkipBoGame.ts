@@ -435,6 +435,10 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
               setLastError(null);
               authoritativeViewRef.current = message.view;
 
+              if (message.view.room.status === 'FINISHED' || message.view.gameIsOver) {
+                clearOnlineSession();
+              }
+
               const previousView = viewRef.current;
               if (previousView) {
                 const previousState = cloneGameStateFromView(previousView);
@@ -527,6 +531,9 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
             }
             case 'presence':
               setConnectionStatus('connected');
+              if (message.room.status === 'FINISHED') {
+                clearOnlineSession();
+              }
               authoritativeViewRef.current = authoritativeViewRef.current
                 ? {
                     ...authoritativeViewRef.current,
