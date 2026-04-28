@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.1](https://github.com/klbsjpolp/skip-bo/compare/v1.21.0...v1.21.1) (2026-04-28)
+
+
+### Bug Fixes
+
+* **multiplayer:** no disconnect timers or rejoin for finished games ([ee9dab8](https://github.com/klbsjpolp/skip-bo/commit/ee9dab8f2045787024254fc0516da438cff463a3))
+
+
+
 # [1.21.0](https://github.com/klbsjpolp/skip-bo/compare/v1.20.2...v1.21.0) (2026-04-28)
 
 
