@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.22.1](https://github.com/klbsjpolp/skip-bo/compare/v1.22.0...v1.22.1) (2026-04-28)
+
+
+### Bug Fixes
+
+* **web:** break iOS PWA splash → blank reload loop on hard updates ([57335f3](https://github.com/klbsjpolp/skip-bo/commit/57335f3a12d3c20f442d4f1d8dc04260b95b37bb))
+
+
+
 # [1.22.0](https://github.com/klbsjpolp/skip-bo/compare/v1.21.1...v1.22.0) (2026-04-28)
 
 
