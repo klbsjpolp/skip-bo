@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.21.0](https://github.com/klbsjpolp/skip-bo/compare/v1.20.2...v1.21.0) (2026-04-28)
+
+
+### Features
+
+* **protocol:** restrict room code to letters only ([b21def8](https://github.com/klbsjpolp/skip-bo/commit/b21def89c5b5675ad71cebf3be2e503bf4a8c948))
+* **protocol:** shorten room code to 3 characters ([7626911](https://github.com/klbsjpolp/skip-bo/commit/7626911235fcad9b2999000cf07bd10a872d79ac))
+
+
+
 ## [1.20.2](https://github.com/klbsjpolp/skip-bo/compare/v1.20.1...v1.20.2) (2026-04-28)
 
 
