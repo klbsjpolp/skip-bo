@@ -47,6 +47,37 @@ describe('OnlineStatusStrip', () => {
     expect(screen.queryByTestId('online-seat-count')).toBeNull();
   });
 
+  test('hides disconnect warnings when the room is finished', () => {
+    render(
+      <OnlineStatusStrip
+        connectedSeats={[0]}
+        connectionStatus="connected"
+        disconnectedSeats={[{ seatIndex: 1, disconnectedAt: new Date().toISOString() }]}
+        roomCode="ABC"
+        roomStatus="FINISHED"
+        seatCapacity={2}
+      />,
+    );
+
+    expect(screen.queryByTestId('online-disconnected-seats')).toBeNull();
+    expect(screen.getByLabelText('Partie terminée')).toBeTruthy();
+  });
+
+  test('shows disconnect warnings when the room is still active', () => {
+    render(
+      <OnlineStatusStrip
+        connectedSeats={[0]}
+        connectionStatus="connected"
+        disconnectedSeats={[{ seatIndex: 1, disconnectedAt: new Date().toISOString() }]}
+        roomCode="ABC"
+        roomStatus="ACTIVE"
+        seatCapacity={2}
+      />,
+    );
+
+    expect(screen.getByTestId('online-disconnected-seats')).toBeTruthy();
+  });
+
   test('shows a host start button that can be enabled once enough players are connected', () => {
     const onStartGame = vi.fn();
 

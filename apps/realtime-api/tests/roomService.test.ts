@@ -531,6 +531,97 @@ describe('roomService', () => {
     expect(room?.disconnectedSeats?.['1']).toBeUndefined();
   });
 
+  it('removes the seat cleanly when disconnecting after the game has finished', async () => {
+    const dependencies = createDependencies();
+    const created = await createRoom(dependencies);
+    const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
+
+    await authenticateConnection(dependencies, {
+      connectionId: 'c-1',
+      roomCode: created.roomCode,
+      seatIndex: created.seatIndex,
+      seatToken: created.seatToken,
+    });
+    await authenticateConnection(dependencies, {
+      connectionId: 'c-2',
+      roomCode: joined.roomCode,
+      seatIndex: joined.seatIndex,
+      seatToken: joined.seatToken,
+    });
+
+    const room = await dependencies.roomRepository.get(created.roomCode);
+    if (!room) throw new Error('room missing');
+    await dependencies.roomRepository.update({
+      ...room,
+      activeSeatIndices: [created.seatIndex, joined.seatIndex],
+      disconnectedSeats: {},
+      status: 'FINISHED',
+    });
+
+    await handleDisconnect(dependencies, 'c-2');
+
+    const updated = await dependencies.roomRepository.get(created.roomCode);
+    expect(updated?.disconnectedSeats?.[String(joined.seatIndex)]).toBeUndefined();
+    expect(updated?.authenticatedSeats).not.toContain(joined.seatIndex);
+
+    const presenceMessages = dependencies.broadcaster.sent
+      .filter((entry) => entry.message.type === 'presence');
+    const lastPresence = presenceMessages.at(-1);
+    if (lastPresence?.message.type === 'presence') {
+      expect(lastPresence.message.room.disconnectedSeats).toEqual([]);
+    }
+  });
+
+  it('clears any disconnected seats when the game transitions to FINISHED', async () => {
+    const dependencies = createDependencies();
+    const created = await createRoom(dependencies);
+    const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
+
+    await authenticateConnection(dependencies, {
+      connectionId: 'c-1',
+      roomCode: created.roomCode,
+      seatIndex: created.seatIndex,
+      seatToken: created.seatToken,
+    });
+    await authenticateConnection(dependencies, {
+      connectionId: 'c-2',
+      roomCode: joined.roomCode,
+      seatIndex: joined.seatIndex,
+      seatToken: joined.seatToken,
+    });
+    await handleSetReady(dependencies, { connectionId: 'c-1' });
+    await handleSetReady(dependencies, { connectionId: 'c-2' });
+    await startGame(dependencies, { connectionId: 'c-1' });
+
+    const started = await dependencies.roomRepository.get(created.roomCode);
+    if (!started) throw new Error('room missing after startGame');
+    const currentSeat = started.activeSeatIndices?.[started.state.currentPlayerIndex];
+    const idleSeat = started.activeSeatIndices?.find((seat) => seat !== currentSeat);
+    if (currentSeat === undefined || idleSeat === undefined) {
+      throw new Error('expected both seats to be active');
+    }
+    const seatToConnection: Record<number, string> = {
+      [created.seatIndex]: 'c-1',
+      [joined.seatIndex]: 'c-2',
+    };
+    const currentConnectionId = seatToConnection[currentSeat];
+
+    await handleDisconnect(dependencies, seatToConnection[idleSeat]);
+
+    const beforeAction = await dependencies.roomRepository.get(created.roomCode);
+    if (!beforeAction) throw new Error('room missing');
+    expect(beforeAction.disconnectedSeats?.[String(idleSeat)]).toBeDefined();
+
+    await handleAction(dependencies, {
+      action: { type: 'DEBUG_WIN' },
+      connectionId: currentConnectionId,
+    });
+
+    const finished = await dependencies.roomRepository.get(created.roomCode);
+    expect(finished?.status).toBe('FINISHED');
+    expect(finished?.disconnectedSeats).toEqual({});
+  });
+
   it('closes the room when the host disconnects during WAITING regardless of grace', async () => {
     const dependencies = createDependencies();
     const created = await createRoom(dependencies);
