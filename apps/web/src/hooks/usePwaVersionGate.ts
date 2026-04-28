@@ -6,6 +6,23 @@ import {fetchRuntimeConfig} from '@/lib/runtimeConfig';
 import {compareAppVersions, normalizeVersionTag} from '@/lib/versionUtils';
 
 const UPDATE_CHECK_INTERVAL_MS = 10 * 60 * 1000;
+const AUTO_RELOAD_SESSION_STORAGE_KEY = 'skipbo:pwa-auto-reload-version';
+
+const readAutoReloadVersion = (): string | null => {
+  try {
+    return globalThis.sessionStorage?.getItem(AUTO_RELOAD_SESSION_STORAGE_KEY) ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const writeAutoReloadVersion = (version: string) => {
+  try {
+    globalThis.sessionStorage?.setItem(AUTO_RELOAD_SESSION_STORAGE_KEY, version);
+  } catch {
+    // ignore storage failures (private mode, disabled storage)
+  }
+};
 
 interface RuntimeVersionSnapshot {
   latestAppVersion: string | null;
@@ -67,10 +84,14 @@ export const usePwaVersionGate = (): PwaVersionGateState => {
     try {
       await refreshServiceWorkerRegistration().catch(() => undefined);
 
-      const appliedServiceWorkerUpdate = await applyServiceWorkerUpdate().catch(() => false);
-      if (!appliedServiceWorkerUpdate) {
-        globalThis.location.reload();
-      }
+      // We deliberately do NOT fall back to `location.reload()` when no
+      // service-worker update was applied: reloading just re-serves the
+      // stale precached bundle, which on iOS standalone PWAs creates a
+      // splash → blank → reload loop whenever a hard update is required.
+      // The `ForcedUpdateOverlay` stays visible so the user can retry
+      // manually, and the next interval check (or visibility-change event)
+      // will pick up the new worker as soon as it installs.
+      await applyServiceWorkerUpdate().catch(() => false);
     } finally {
       isApplyingUpdateRef.current = false;
       setIsApplyingUpdate(false);
@@ -138,7 +159,18 @@ export const usePwaVersionGate = (): PwaVersionGateState => {
       return;
     }
 
+    // sessionStorage survives `location.reload()` so a single tab will only
+    // auto-trigger the update flow once per minimum-supported version. Any
+    // subsequent retries must come from the manual `ForcedUpdateOverlay`
+    // button. This is defensive against cycles where the page reloads with
+    // the same stale bundle.
+    if (readAutoReloadVersion() === runtimeVersionSnapshot.minimumSupportedVersion) {
+      autoReloadVersionRef.current = runtimeVersionSnapshot.minimumSupportedVersion;
+      return;
+    }
+
     autoReloadVersionRef.current = runtimeVersionSnapshot.minimumSupportedVersion;
+    writeAutoReloadVersion(runtimeVersionSnapshot.minimumSupportedVersion);
     void reloadToUpdate();
   }, [isHardUpdateRequired, runtimeVersionSnapshot.minimumSupportedVersion]);
 

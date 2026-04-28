@@ -75,10 +75,54 @@ export const refreshServiceWorkerRegistration = async (): Promise<void> => {
   await snapshot.registration?.update();
 };
 
-export const applyServiceWorkerUpdate = async (): Promise<boolean> => {
-  await snapshot.registration?.update().catch(() => undefined);
+const SERVICE_WORKER_INSTALL_TIMEOUT_MS = 8000;
 
-  if ((snapshot.needRefresh || snapshot.registration?.waiting) && updateServiceWorker) {
+const waitForInstallingWorker = (worker: ServiceWorker, timeoutMs: number): Promise<void> =>
+  new Promise<void>((resolve) => {
+    if (worker.state !== 'installing') {
+      resolve();
+      return;
+    }
+
+    const handleStateChange = () => {
+      if (worker.state !== 'installing') {
+        cleanup();
+        resolve();
+      }
+    };
+
+    const cleanup = () => {
+      worker.removeEventListener('statechange', handleStateChange);
+      globalThis.clearTimeout(timeoutId);
+    };
+
+    const timeoutId = globalThis.setTimeout(() => {
+      cleanup();
+      resolve();
+    }, timeoutMs);
+
+    worker.addEventListener('statechange', handleStateChange);
+  });
+
+export const applyServiceWorkerUpdate = async (): Promise<boolean> => {
+  const registration = snapshot.registration;
+  if (!registration || !updateServiceWorker) {
+    return false;
+  }
+
+  await registration.update().catch(() => undefined);
+
+  // `registration.update()` resolves once the browser has *checked* for a new
+  // worker, but a freshly fetched worker is still in the `installing` state.
+  // Wait until it transitions out before deciding whether to apply the update,
+  // otherwise iOS PWAs reach the `location.reload()` fallback below while the
+  // new worker is still installing — serving the stale precached bundle and
+  // looping the splash → blank screen → reload cycle.
+  if (registration.installing) {
+    await waitForInstallingWorker(registration.installing, SERVICE_WORKER_INSTALL_TIMEOUT_MS);
+  }
+
+  if (snapshot.needRefresh || registration.waiting) {
     await updateServiceWorker(true);
     return true;
   }
