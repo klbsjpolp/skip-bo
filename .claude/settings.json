@@ -14,9 +14,9 @@
       "mcp__plugin_playwright_playwright__browser_click",
       "mcp__plugin_playwright_playwright__browser_evaluate",
       "Bash(gh pr *)",
-      "Bash(chmod +x */.claude/hooks/*)",
+      "Bash(chmod *)",
       "mcp__Claude_Preview__preview_start",
-      "Bash(xargs ls *)",
+      "Bash(xargs *)",
       "Bash(printenv)",
       "Bash(node *)"
     ]
