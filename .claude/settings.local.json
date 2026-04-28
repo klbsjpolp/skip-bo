@@ -16,7 +16,9 @@
       "Bash(gh pr *)",
       "Bash(chmod +x */.claude/hooks/*)",
       "mcp__Claude_Preview__preview_start",
-      "Bash(xargs ls *)"
+      "Bash(xargs ls *)",
+      "Bash(printenv)",
+      "Bash(node *)"
     ]
   },
   "hooks": {
