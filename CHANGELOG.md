@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.23.0](https://github.com/klbsjpolp/skip-bo/compare/v1.22.1...v1.23.0) (2026-04-28)
+
+
+### Features
+
+* **ci:** add npm test and dev:api run configurations for IDE ([99928b6](https://github.com/klbsjpolp/skip-bo/commit/99928b6e97aa3a0d1757a5e0743ece290e2e1ec9))
+* **ci:** allow `ps` command in Claude Code settings ([c117ee9](https://github.com/klbsjpolp/skip-bo/commit/c117ee91b28bfe3cc62ebf0437725ea557d94c3d))
+* **web:** enhance steampunk theme with new textures and card effects ([c22a661](https://github.com/klbsjpolp/skip-bo/commit/c22a66133fc0f4226c97de8032ec2c4adc2048c7))
+
+
+
 ## [1.22.1](https://github.com/klbsjpolp/skip-bo/compare/v1.22.0...v1.22.1) (2026-04-28)
 
 
