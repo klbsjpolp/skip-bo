@@ -112,12 +112,9 @@ export const applyServiceWorkerUpdate = async (): Promise<boolean> => {
 
   await registration.update().catch(() => undefined);
 
-  // `registration.update()` resolves once the browser has *checked* for a new
-  // worker, but a freshly fetched worker is still in the `installing` state.
-  // Wait until it transitions out before deciding whether to apply the update,
-  // otherwise iOS PWAs reach the `location.reload()` fallback below while the
-  // new worker is still installing — serving the stale precached bundle and
-  // looping the splash → blank screen → reload cycle.
+  // `registration.update()` resolves before a freshly fetched worker leaves
+  // `installing`. Wait it out so the `waiting`/`needRefresh` check below
+  // doesn't false-negative and skip an available update.
   if (registration.installing) {
     await waitForInstallingWorker(registration.installing, SERVICE_WORKER_INSTALL_TIMEOUT_MS);
   }

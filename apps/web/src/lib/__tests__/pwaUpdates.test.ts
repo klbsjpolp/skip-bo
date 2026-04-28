@@ -84,13 +84,9 @@ describe('pwaUpdates', () => {
 
     const pending = applyServiceWorkerUpdate();
 
-    // While the worker is still installing, neither updateServiceWorker
-    // nor the promise should resolve.
     await Promise.resolve();
     expect(updateServiceWorkerMock).not.toHaveBeenCalled();
 
-    // Simulate the worker finishing install: it transitions to 'installed'
-    // and the registration exposes it via `waiting`.
     registration.installing = null;
     registration.waiting = installingWorker;
     installingWorker.setState('installed');

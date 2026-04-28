@@ -43,7 +43,7 @@ vi.mock('@/lib/pwaUpdates', () => ({
   },
 }));
 
-import {usePwaVersionGate} from '../usePwaVersionGate';
+import {AUTO_RELOAD_SESSION_STORAGE_KEY, usePwaVersionGate} from '../usePwaVersionGate';
 
 describe('usePwaVersionGate', () => {
   beforeEach(() => {
@@ -131,7 +131,7 @@ describe('usePwaVersionGate', () => {
   });
 
   it('skips the auto-reload when sessionStorage already records this minimum version', async () => {
-    globalThis.sessionStorage?.setItem('skipbo:pwa-auto-reload-version', 'v1.1.0');
+    globalThis.sessionStorage?.setItem(AUTO_RELOAD_SESSION_STORAGE_KEY, 'v1.1.0');
 
     fetchRuntimeConfigMock.mockResolvedValue({
       appVersion: 'v1.2.0',
@@ -144,7 +144,6 @@ describe('usePwaVersionGate', () => {
       expect(result.current.isHardUpdateRequired).toBe(true);
     });
 
-    // Give any pending promise/effect a chance to (incorrectly) trigger.
     await Promise.resolve();
     await Promise.resolve();
 
@@ -163,7 +162,7 @@ describe('usePwaVersionGate', () => {
       expect(applyServiceWorkerUpdateMock).toHaveBeenCalledTimes(1);
     });
 
-    expect(globalThis.sessionStorage?.getItem('skipbo:pwa-auto-reload-version')).toBe('v1.1.0');
+    expect(globalThis.sessionStorage?.getItem(AUTO_RELOAD_SESSION_STORAGE_KEY)).toBe('v1.1.0');
   });
 
   it('rechecks runtime config when the document becomes visible again', async () => {
