@@ -63,6 +63,8 @@ describe('usePwaVersionGate', () => {
     applyServiceWorkerUpdateMock.mockResolvedValue(false);
     refreshServiceWorkerRegistrationMock.mockResolvedValue(undefined);
 
+    globalThis.sessionStorage?.clear();
+
     Object.defineProperty(document, 'visibilityState', {
       configurable: true,
       value: 'visible',
@@ -126,6 +128,42 @@ describe('usePwaVersionGate', () => {
     await waitFor(() => {
       expect(applyServiceWorkerUpdateMock).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('skips the auto-reload when sessionStorage already records this minimum version', async () => {
+    globalThis.sessionStorage?.setItem('skipbo:pwa-auto-reload-version', 'v1.1.0');
+
+    fetchRuntimeConfigMock.mockResolvedValue({
+      appVersion: 'v1.2.0',
+      minimumSupportedVersion: 'v1.1.0',
+    });
+
+    const {result} = renderHook(() => usePwaVersionGate());
+
+    await waitFor(() => {
+      expect(result.current.isHardUpdateRequired).toBe(true);
+    });
+
+    // Give any pending promise/effect a chance to (incorrectly) trigger.
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(applyServiceWorkerUpdateMock).not.toHaveBeenCalled();
+  });
+
+  it('records the minimum supported version in sessionStorage before the auto-reload runs', async () => {
+    fetchRuntimeConfigMock.mockResolvedValue({
+      appVersion: 'v1.2.0',
+      minimumSupportedVersion: 'v1.1.0',
+    });
+
+    renderHook(() => usePwaVersionGate());
+
+    await waitFor(() => {
+      expect(applyServiceWorkerUpdateMock).toHaveBeenCalledTimes(1);
+    });
+
+    expect(globalThis.sessionStorage?.getItem('skipbo:pwa-auto-reload-version')).toBe('v1.1.0');
   });
 
   it('rechecks runtime config when the document becomes visible again', async () => {
