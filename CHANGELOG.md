@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.20.0](https://github.com/klbsjpolp/skip-bo/compare/v1.19.1...v1.20.0) (2026-04-28)
+
+
+### Bug Fixes
+
+* **tests:** improve roomService test robustness and add seat validation ([171c37b](https://github.com/klbsjpolp/skip-bo/commit/171c37baf1354b4a7a369980b7b5548bf96de66a))
+* **tests:** make realtime-api tests deterministic under shuffled seats ([7b5eb42](https://github.com/klbsjpolp/skip-bo/commit/7b5eb42dbe3c694218bf8c8ee6c8ef28a06fe55d))
+* **tsconfig:** revert moduleResolution to bundler ([7be08cb](https://github.com/klbsjpolp/skip-bo/commit/7be08cb0aa50f5c607177ccf34c434a173f052b4))
+* **web:** ensure correct view state before AI animation triggers ([13ad655](https://github.com/klbsjpolp/skip-bo/commit/13ad655f9a60fbfffdf36c15919a8da18c2087e1))
+* **web:** polyfill localStorage in vitest setup for Node 22+ ([5e22b85](https://github.com/klbsjpolp/skip-bo/commit/5e22b85e88cbe752dd6c399cec4f856e389ac0f3))
+
+
+### Features
+
+* **theme:** add shooting stars background to retro-space theme ([3657102](https://github.com/klbsjpolp/skip-bo/commit/36571022813fff7209ed977dc35fa949307f3c81))
+
+
+
 ## [1.19.1](https://github.com/klbsjpolp/skip-bo/compare/v1.19.0...v1.19.1) (2026-04-27)
 
 
