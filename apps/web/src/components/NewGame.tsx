@@ -48,7 +48,7 @@ const MODE_OPTIONS: ModeOption[] = [
     key: 'join-online',
     title: 'Rejoindre en ligne',
     shortLabel: 'Rejoindre',
-    description: `Entrez le code de ${ROOM_CODE_LENGTH} caractères reçu de l’hôte.`,
+    description: `Entrez le code de ${ROOM_CODE_LENGTH} lettres reçu de l’hôte.`,
     icon: Plug,
   },
 ];
@@ -115,7 +115,7 @@ function NewGame({
   const handleJoinOnline = async () => {
     const normalizedRoomCode = normalizeRoomCode(roomCode);
     if (!isValidRoomCode(normalizedRoomCode)) {
-      setErrorMessage(`Entrez un code de partie valide sur ${ROOM_CODE_LENGTH} caractères.`);
+      setErrorMessage(`Entrez un code de partie valide sur ${ROOM_CODE_LENGTH} lettres.`);
       return;
     }
 
