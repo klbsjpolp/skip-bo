@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.20.1](https://github.com/klbsjpolp/skip-bo/compare/v1.20.0...v1.20.1) (2026-04-28)
+
+
+### Bug Fixes
+
+* **web:** keep top remote seat above siblings in 3+ player board ([43da645](https://github.com/klbsjpolp/skip-bo/commit/43da6458cbdc7b6d72587a5247aa8731707f49b1))
+* **web:** trigger retreat animation before optimistic commit ([765b050](https://github.com/klbsjpolp/skip-bo/commit/765b050c4ec375037b78e78731c7788378ba9862))
+
+
+
 # [1.20.0](https://github.com/klbsjpolp/skip-bo/compare/v1.19.1...v1.20.0) (2026-04-28)
 
 
