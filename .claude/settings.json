@@ -18,7 +18,8 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(xargs *)",
       "Bash(printenv)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(curl *)"
     ]
   },
   "hooks": {
