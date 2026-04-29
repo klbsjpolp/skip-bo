@@ -20,7 +20,8 @@
       "Bash(printenv)",
       "Bash(node *)",
       "Bash(curl *)",
-      "Bash(ps *)"
+      "Bash(ps *)",
+      "Bash(ipconfig *)"
     ]
   },
   "hooks": {
