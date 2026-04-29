@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.25.0](https://github.com/klbsjpolp/skip-bo/compare/v1.24.0...v1.25.0) (2026-04-29)
+
+
+### Features
+
+* **protocol:** include stock pile size in current turn indicator ([ca8466d](https://github.com/klbsjpolp/skip-bo/commit/ca8466d4cdf6863539280f615308defb05d86079))
+
+
+
 # [1.24.0](https://github.com/klbsjpolp/skip-bo/compare/v1.23.0...v1.24.0) (2026-04-29)
 
 
