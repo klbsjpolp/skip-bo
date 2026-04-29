@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.24.0](https://github.com/klbsjpolp/skip-bo/compare/v1.23.0...v1.24.0) (2026-04-29)
+
+
+### Features
+
+* **web:** add dynamic gear icon and colors to victory burst styling ([3c2d5d3](https://github.com/klbsjpolp/skip-bo/commit/3c2d5d365fadc75ca1c73509228ff07b19161754))
+
+
+
 # [1.23.0](https://github.com/klbsjpolp/skip-bo/compare/v1.22.1...v1.23.0) (2026-04-28)
 
 
