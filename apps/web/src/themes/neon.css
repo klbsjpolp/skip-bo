@@ -149,7 +149,7 @@
   }
 
   body {
-    background: radial-gradient(ellipse 90% 55% at 50% 100%, #13002a 0%, #0a0a0a 65%);
+    background-image: radial-gradient(ellipse 90% 55% at 50% 100%, #13002a 0%, #0a0a0a 65%);
   }
 
   /* Synthwave perspective grid floor */

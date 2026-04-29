@@ -47,6 +47,18 @@ http://localhost:5173/?fixture=<name>
 
 This bypasses the game loop entirely — useful for isolated layout/visual work without playing to a specific state.
 
+## Theme Styling
+
+Each theme lives in `src/themes/<name>.css` and overrides CSS variables on a `.theme-<name>` class. The base body rule in `src/index.css` applies `bg-background` (= `var(--background)`), so every theme inherits a solid background-color.
+
+Two rules when adding decorative gradients/textures on `body` (or any element that needs to keep a solid color):
+
+1. **Use `background-image:` — never the `background:` shorthand.** The shorthand resets `background-color` to transparent. iOS Safari samples the body's background-color when tinting its top bar; a transparent body falls back to the system default (white in light mode), which is what made Neon's status bar look wrong even though the meta `theme-color` was correct. If you need `background-attachment: fixed`, set it on its own line.
+
+2. **Keep `--background` close to what's actually visible at the top of the page.** `useThemeColorMeta` writes `--background` into `<meta name="theme-color">`, and Tailwind's `bg-background` paints the body with the same value. A wildly off-base `--background` makes the iOS bar mismatch the page (Neon's `#0a0a0a` underneath a `#13002a → #0a0a0a` gradient is fine; Minecraft's old `#2f2418` was much darker than the dirt texture's `#866043` average — fix that, not the bar).
+
+Multi-image gradients must be **comma-separated**. Browsers silently drop a `background-image` declaration whose layers are space-separated; `candy.css` and `retro-space.css` shipped broken halos for this reason.
+
 ## Debug Buttons
 
 `DebugStrip` renders in `DEV` mode only, in both local and online game screens:
