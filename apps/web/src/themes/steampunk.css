@@ -244,4 +244,11 @@
       }
     }
   }
+
+  .victory-burst-piece {
+    @apply before:content-['⚙'] before:text-inherit
+    before:text-2xl lg:before:text-4xl
+    nth-[4n]:text-primary nth-[4n+1]:text-secondary nth-[4n+2]:text-success nth-[4n+3]:text-primary-foreground
+    bg-transparent;
+  }
 }
