@@ -1,6 +1,6 @@
-import type { Card, GameConfig, GameState, Player, SelectedCard } from '@skipbo/game-core';
+import type {Card, GameConfig, GameState, Player, SelectedCard} from '@skipbo/game-core';
 
-import { getDefaultPlayerName, normalizePlayerName } from '../playerName.js';
+import {getDefaultPlayerName, normalizePlayerName} from '../playerName.js';
 
 export type RoomStatus = 'WAITING' | 'ACTIVE' | 'FINISHED';
 
@@ -161,7 +161,8 @@ const getViewMessage = (
   }
 
   const currentPlayerName = players[rotatedCurrentPlayerIndex]?.displayName;
-  return currentPlayerName ? `Tour de ${currentPlayerName}` : "Tour d’un adversaire";
+  const stockPileLength = players[rotatedCurrentPlayerIndex]?.stockPile?.length;
+  return currentPlayerName ? `Tour de ${currentPlayerName} (${stockPileLength ?? 0})` : "Tour d’un adversaire";
 };
 
 const toSelectedCardView = (
