@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.26.0](https://github.com/klbsjpolp/skip-bo/compare/v1.25.0...v1.26.0) (2026-04-29)
+
+
+### Bug Fixes
+
+* **web:** keep body background-color solid on themed pages ([29735b1](https://github.com/klbsjpolp/skip-bo/commit/29735b185a74811ecec7992f512235e0c342e39e))
+
+
+### Features
+
+* **ci:** allow `ipconfig` command in Claude Code settings ([6250d78](https://github.com/klbsjpolp/skip-bo/commit/6250d7814492695d647a1c3bf00f84793e6d5061))
+
+
+
 # [1.25.0](https://github.com/klbsjpolp/skip-bo/compare/v1.24.0...v1.25.0) (2026-04-29)
 
 
