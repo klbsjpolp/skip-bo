@@ -58,7 +58,11 @@
 
   body {
     font-family: "Segoe UI", sans-serif;
-    background: radial-gradient(circle at 15% 12%, rgb(127 212 215 / 0.12) 0, transparent 18%) radial-gradient(circle at 84% 6%, rgb(241 149 77 / 0.12) 0, transparent 20%) radial-gradient(circle at 50% 100%, rgb(9 22 36 / 0.96) 0, rgb(5 12 21 / 0.98) 60%, #03070d 100%) fixed;
+    background-image:
+      radial-gradient(circle at 15% 12%, rgb(127 212 215 / 0.12) 0, transparent 18%),
+      radial-gradient(circle at 84% 6%, rgb(241 149 77 / 0.12) 0, transparent 20%),
+      radial-gradient(circle at 50% 100%, rgb(9 22 36 / 0.96) 0, rgb(5 12 21 / 0.98) 60%, #03070d 100%);
+    background-attachment: fixed;
   }
 
   body::before {

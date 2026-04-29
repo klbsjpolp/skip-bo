@@ -7,7 +7,7 @@
   --success-foreground: hsl(0 0% 100%);
   --border: #e76f51;
 
-  --background: #f4f1de;
+  --background: #faf7ed;
   --text-color: #264653;
   --card-front-color: #f4a261;
   --card-border-color: #e76f51;
@@ -60,9 +60,10 @@
   --card-g3: #264653;
 
   body {
-    background:
+    background-image:
       radial-gradient(circle at top, rgb(255 255 255 / 0.32), transparent 34%),
       linear-gradient(180deg, #f7f3e4 0%, #f0e1b2 100%);
+    background-attachment: fixed;
   }
 
   h1,

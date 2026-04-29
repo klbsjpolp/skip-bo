@@ -4,8 +4,9 @@
     {
       "name": "web",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev:web"],
-      "port": 5173
+      "runtimeArgs": ["--filter", "@skipbo/web", "exec", "vite", "--host"],
+      "port": 5173,
+      "autoPort": true
     },
     {
       "name": "realtime-api",

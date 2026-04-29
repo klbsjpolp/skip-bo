@@ -55,7 +55,14 @@
 
   body {
     font-family: "Trebuchet MS", "Arial Rounded MT Bold", ui-rounded, sans-serif;
-    background: radial-gradient(circle at top, rgb(255 255 255 / 0.9) 0%, rgb(255 255 255 / 0) 28%) radial-gradient(circle at 16% 18%, rgb(255 132 177 / 0.34) 0 8%, transparent 8.5%) radial-gradient(circle at 82% 14%, rgb(115 225 189 / 0.3) 0 8%, transparent 8.5%) radial-gradient(circle at 22% 78%, rgb(255 213 111 / 0.26) 0 7%, transparent 7.5%) radial-gradient(circle at 84% 72%, rgb(181 147 255 / 0.26) 0 8%, transparent 8.5%) linear-gradient(180deg, #ffc9df 0%, #ffe7f2 44%, #f1fff8 100%) fixed;
+    background-image:
+      radial-gradient(circle at top, rgb(255 255 255 / 0.9) 0%, rgb(255 255 255 / 0) 28%),
+      radial-gradient(circle at 16% 18%, rgb(255 132 177 / 0.34) 0 8%, transparent 8.5%),
+      radial-gradient(circle at 82% 14%, rgb(115 225 189 / 0.3) 0 8%, transparent 8.5%),
+      radial-gradient(circle at 22% 78%, rgb(255 213 111 / 0.26) 0 7%, transparent 7.5%),
+      radial-gradient(circle at 84% 72%, rgb(181 147 255 / 0.26) 0 8%, transparent 8.5%),
+      linear-gradient(180deg, #ffc9df 0%, #ffe7f2 44%, #f1fff8 100%);
+    background-attachment: fixed;
   }
 
   #main {
