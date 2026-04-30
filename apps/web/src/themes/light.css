@@ -12,7 +12,7 @@
     --title-color: #374151;
     --card-front-color: white;
     --card-back-color: #3b82f6;
-    --card-back-color-2: #22c55e;
+    --card-back-color-2: #4f46e5;
     --card-border-color: #9ca3af;
     --card-shadow: 0 1px 3px rgba(0,0,0,0.2);
     --card-radius: 8px;
@@ -30,7 +30,7 @@
     );
 
     /* Card color ranges */
-    --skipbo-text: #333;
+    --skipbo-text: white;
     --skipbo-bg: var(--card-back-color-2);
     --card-g1: hsl(152 69% 58%);   /* 1‑4 */
     --card-g2: hsl(0 80% 60%);     /* 5‑8 */
