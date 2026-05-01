@@ -33,7 +33,7 @@
     "typecheck": "pnpm --filter @skipbo/game-core typecheck && pnpm --filter @skipbo/multiplayer-protocol typecheck && pnpm --filter @skipbo/realtime-api typecheck && pnpm --filter @skipbo/web typecheck"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.5.0",
+    "@commitlint/cli": "^20.5.3",
     "@commitlint/config-angular": "^20.5.0",
     "@eslint/js": "^9.39.4",
     "@types/node": "^25.5.0",
