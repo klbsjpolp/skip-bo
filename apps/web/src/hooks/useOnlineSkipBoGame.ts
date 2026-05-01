@@ -298,13 +298,17 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const pingIntervalRef = useRef<number | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const turnPresentationTimeoutRef = useRef<number | null>(null);
-  const { activeAnimations, removeAnimation, startAnimation, waitForAnimations } = useCardAnimation();
-  const activeAnimationCountRef = useRef(activeAnimations.length);
+  const { removeAnimation, startAnimation, waitForAnimations } = useCardAnimation();
   const setInteractionLocked = useCallback((locked: boolean) => {
     interactionLockRef.current = locked;
   }, []);
+  // Animations are decoupled from the interaction lock: the user can keep
+  // selecting and playing cards while previous animations are still in flight.
+  // `interactionLockRef` is only held for the synchronous body of
+  // playCard/discardCard so two concurrent dispatches can't race on the same
+  // selectedCard.
   const isInteractionBlocked = useCallback(() => (
-    interactionLockRef.current || activeAnimationCountRef.current > 0
+    interactionLockRef.current
   ), []);
   const commitView = useCallback((nextView: ClientGameView | null) => {
     viewRef.current = nextView;
@@ -321,10 +325,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     setGlobalDrawAnimationContext({ startAnimation, removeAnimation });
     setGlobalCompletedPileAnimationContext({ startAnimation });
   }, [removeAnimation, startAnimation, waitForAnimations]);
-
-  useEffect(() => {
-    activeAnimationCountRef.current = activeAnimations.length;
-  }, [activeAnimations.length]);
 
   useEffect(() => {
     const clearPingInterval = () => {
@@ -779,28 +779,12 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     setInteractionLocked(true);
 
     const willEmptyHand = willPlayCardEmptyHand(currentState);
-    let optimisticViewCommitted = false;
-    const commitOptimisticPlayView = () => {
-      if (optimisticViewCommitted || !viewRef.current) {
-        return;
-      }
 
-      optimisticViewCommitted = true;
-      // Register the build→retreat animation BEFORE committing the optimistic view.
-      // The reducer moves the completed cards into completedBuildPiles, and CenterArea
-      // relies on activeAnimations to mask them at the destination. If we commit first,
-      // the cards render on the retreat pile for one frame before the animation starts.
-      if (completedBuildPileCards) {
-        triggerCompletedBuildPileAnimation(
-          currentState,
-          buildPile,
-          completedBuildPileCards,
-          currentState.completedBuildPiles.length,
-        );
-      }
-      commitView(applyOptimisticPlayView(viewRef.current, buildPile, willEmptyHand));
-    };
-
+    // Trigger play animation. The completion animation is queued with a
+    // baseDelay so it lands once the play card has reached the build pile.
+    // The optimistic view is committed immediately afterwards so the user can
+    // continue selecting / playing while everything animates in parallel.
+    let playAnimationDuration = 0;
     try {
       const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
       const centerAreaElement = document.querySelector('.center-area') as HTMLElement;
@@ -830,8 +814,13 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         const endPosition = getBuildPilePosition(centerAreaElement, buildPile);
 
         if (startPosition) {
-          const duration = calculateAnimationDuration(startPosition, endPosition) * 1.2;
-          window.setTimeout(commitOptimisticPlayView, duration);
+          playAnimationDuration = calculateAnimationDuration(startPosition, endPosition) * 1.2;
+          // Mask the freshly-committed card at the build pile until the play
+          // animation has actually landed. Without targetSettledInState the
+          // optimistic view would render the new card immediately on top of
+          // the pile, making it appear teleported to its destination before
+          // flying there.
+          const previousBuildPileLength = currentState.buildPiles[buildPile].length;
           startAnimation({
             card: currentState.selectedCard.card,
             startPosition,
@@ -841,7 +830,9 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
             sourceRevealed: true,
             targetRevealed: true,
             initialDelay: 0,
-            duration,
+            duration: playAnimationDuration,
+            targetSettledInState: true,
+            targetPileLength: previousBuildPileLength + 1,
             sourceInfo: {
               playerIndex: currentState.currentPlayerIndex,
               source: currentState.selectedCard.source,
@@ -854,19 +845,35 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
               index: buildPile,
             },
           });
-
-          await waitForAnimations();
         }
       }
     } catch (error) {
       console.warn('Play animation failed, continuing with online game logic:', error);
     }
 
-    commitOptimisticPlayView();
+    // Register the build→retreat animation BEFORE committing the optimistic
+    // view. CenterArea relies on activeAnimations to mask completed cards at
+    // their destination; if we committed first, the cards would render on the
+    // retreat pile for one frame before the animation starts.
+    if (completedBuildPileCards) {
+      triggerCompletedBuildPileAnimation(
+        currentState,
+        buildPile,
+        completedBuildPileCards,
+        currentState.completedBuildPiles.length,
+        100,
+        playAnimationDuration,
+      );
+    }
+
+    if (viewRef.current) {
+      commitView(applyOptimisticPlayView(viewRef.current, buildPile, willEmptyHand));
+    }
 
     sendAction({ type: 'PLAY_CARD', buildPile });
+    setInteractionLocked(false);
     return { success: true, message: 'Carte jouée' };
-  }, [commitView, gameState, isInteractionBlocked, sendAction, setInteractionLocked, startAnimation, waitForAnimations]);
+  }, [commitView, gameState, isInteractionBlocked, sendAction, setInteractionLocked, startAnimation]);
 
   const discardCard = useCallback((discardPile: number): Promise<MoveResult> => new Promise((resolve) => {
     const currentState = gameState;
@@ -893,16 +900,12 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
 
     setInteractionLocked(true);
 
+    // Trigger discard animation, then commit the optimistic view and send the
+    // action immediately. The animation runs in parallel with the next user
+    // input — they can already select / play another card while this discard
+    // is still flying. The discard ends the human turn server-side, so any
+    // further play attempt is rejected (and the snapshot reconciles).
     let animationDuration = 0;
-    let optimisticViewCommitted = false;
-    const commitOptimisticDiscardView = () => {
-      if (optimisticViewCommitted || !viewRef.current) {
-        return;
-      }
-
-      optimisticViewCommitted = true;
-      commitView(applyOptimisticDiscardView(viewRef.current, discardPile));
-    };
 
     try {
       const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
@@ -915,11 +918,11 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
           if (discardContainer) {
             const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
             animationDuration = calculateAnimationDuration(startPosition, endPosition);
-            window.setTimeout(() => {
-              commitOptimisticDiscardView();
-              sendAction({ type: 'DISCARD_CARD', discardPile });
-              resolve({ success: true, message: 'Carte défaussée' });
-            }, animationDuration);
+            // Mask the freshly-committed card on the discard pile until the
+            // animation lands — the optimistic view applies immediately, so
+            // without this the card would teleport to the pile and then
+            // re-animate.
+            const previousDiscardPileLength = currentState.players[currentState.currentPlayerIndex].discardPiles[discardPile].length;
             startAnimation({
               card: currentState.selectedCard.card,
               startPosition,
@@ -930,6 +933,8 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
               initialDelay: 0,
               duration: animationDuration,
               startAngleDeg: getHandCardAngle(handContainer, currentState.selectedCard.index),
+              targetSettledInState: true,
+              targetPileLength: previousDiscardPileLength + 1,
               sourceInfo: {
                 playerIndex: currentState.currentPlayerIndex,
                 source: currentState.selectedCard.source,
@@ -950,11 +955,13 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       console.warn('Discard animation failed, continuing with online game logic:', error);
     }
 
-    if (animationDuration === 0) {
-      commitOptimisticDiscardView();
-      sendAction({ type: 'DISCARD_CARD', discardPile });
-      resolve({ success: true, message: 'Carte défaussée' });
+    if (viewRef.current) {
+      commitView(applyOptimisticDiscardView(viewRef.current, discardPile));
     }
+
+    sendAction({ type: 'DISCARD_CARD', discardPile });
+    setInteractionLocked(false);
+    resolve({ success: true, message: 'Carte défaussée' });
   }), [commitView, gameState, isInteractionBlocked, sendAction, setInteractionLocked, startAnimation]);
 
   const sendSetReady = useCallback((playerName?: string): void => {

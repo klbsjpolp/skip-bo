@@ -14,7 +14,7 @@ export type GameAction =
     }
   | { type: 'CLEAR_SELECTION' }
   | { type: 'PLAY_CARD'; buildPile: number; animationDuration?: number }
-  | { type: 'DISCARD_CARD'; discardPile: number }
+  | { type: 'DISCARD_CARD'; discardPile: number; animationDuration?: number }
   | { type: 'END_TURN' }
   | { type: 'RESET' }
   | { type: 'DEBUG_SET_AI_HAND'; hand: Card[] }

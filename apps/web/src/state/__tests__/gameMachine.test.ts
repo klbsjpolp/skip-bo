@@ -255,7 +255,7 @@ describe('gameMachine', () => {
     expect(actor.getSnapshot().context.G).toBeDefined();
   });
 
-  it('should ignore selection changes while a human action animation is running', async () => {
+  it('should apply selection changes while a human action animation is running', async () => {
     const actor = createActor(gameMachine);
     actor.start();
 
@@ -265,7 +265,7 @@ describe('gameMachine', () => {
       await Promise.resolve(); // laisse drawService se terminer
       await Promise.resolve(); // laisse animationGate se terminer
     });
-    
+
     actor.send({
       type: 'SELECT_CARD',
       source: 'hand',
@@ -283,15 +283,17 @@ describe('gameMachine', () => {
 
     await waitFor(actor, (state) => state.matches('humanTurn.humanActionAnimating'));
 
-    const selectionDuringAnimation = actor.getSnapshot().context.G.selectedCard;
-
+    // Now that actions are decoupled from animations, selection changes during
+    // humanActionAnimating ARE applied — the user can prepare their next move
+    // while the previous card is still flying.
     actor.send({
       type: 'SELECT_CARD',
       source: 'stock',
       index: 0,
     });
 
-    expect(actor.getSnapshot().context.G.selectedCard).toBe(selectionDuringAnimation);
+    const selectionDuringAnimation = actor.getSnapshot().context.G.selectedCard;
+    expect(selectionDuringAnimation?.source).toBe('stock');
 
     await waitFor(actor, (state) => state.matches('humanTurn.ready'));
   });

@@ -53,7 +53,7 @@ const createBaseState = (): GameState => ({
     createPlayer({
       isAI: false,
       stockPile: [card(12), card(11), card(10), card(9), card(8), card(7)],
-      hand: [card(1), card(5), card(7), card(9), card(12)],
+      hand: [card(1), card(5), card(7), card(0, true), card(12)],
       discardPiles: [[card(3)], [card(8)], [], [card(2), card(6)]],
     }),
     createPlayer({
@@ -84,7 +84,7 @@ const createReadyHumanFixture = (): GameState => ({
 
 const createSelectedHandFixture = (): GameState => {
   const state = createBaseState();
-  state.players[0].hand = [createSelectedHandCard().card, card(5), card(7), card(9), card(12)];
+  state.players[0].hand = [createSelectedHandCard().card, card(5), card(0, true), card(9), card(12)];
   state.buildPiles = [[], [], [card(1), card(2), card(3), card(4)], []];
   state.selectedCard = createSelectedHandCard();
   state.message = MESSAGES.SELECT_DESTINATION;
