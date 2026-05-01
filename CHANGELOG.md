@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.26.2](https://github.com/klbsjpolp/skip-bo/compare/v1.26.1...v1.26.2) (2026-05-01)
+
+
+### Bug Fixes
+
+* **web:** stop card layout shifts on theme/dropdown changes ([7453350](https://github.com/klbsjpolp/skip-bo/commit/74533503256cf3af80967ebe601c604b8e72911a))
+
+
+
 ## [1.26.1](https://github.com/klbsjpolp/skip-bo/compare/v1.26.0...v1.26.1) (2026-05-01)
 
 
