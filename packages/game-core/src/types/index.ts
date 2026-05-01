@@ -44,7 +44,7 @@ export interface MoveResult {
 
 export const themes = [
   { value: 'theme-light' as const, label: 'Clair', icon: 'Sun' },
-  { value: 'theme-dark' as const, label: 'Sombre', icon: 'Moon' },
+  { value: 'theme-midnight' as const, label: 'Minuit', icon: 'Moon' },
   { value: 'theme-pastel' as const, label: 'Pastel', icon: 'Flower2' },
   { value: 'theme-bonbon' as const, label: 'Bonbon', icon: 'Candy' },
   { value: 'theme-rainbow' as const, label: 'Arc-en-ciel', icon: 'Rainbow' },

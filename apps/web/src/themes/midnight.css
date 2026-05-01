@@ -1,0 +1,287 @@
+.theme-midnight {
+  /* Tailwind / shadcn tokens */
+  --background: #0b1027;
+  --foreground: hsl(230 30% 92%);
+  --popover: #11173a;
+  --popover-foreground: hsl(230 30% 92%);
+  --primary: #a5b4fc;
+  --primary-foreground: #0b1027;
+  --secondary: #1e1b4b;
+  --secondary-foreground: hsl(230 30% 92%);
+  --success: #34d399;
+  --success-foreground: #0b1027;
+  --muted: hsl(230 35% 15%);
+  --muted-foreground: hsl(230 20% 70%);
+  --accent: hsl(230 35% 18%);
+  --accent-foreground: hsl(230 30% 92%);
+  --destructive: hsl(0 62.8% 40%);
+  --destructive-foreground: hsl(230 30% 92%);
+  --border: hsl(230 30% 38%);
+  --ring: hsl(230 60% 72%);
+
+  /* Skip-Bo game tokens */
+  --text-color: #c7d2fe;
+  --title-color: #eef2ff;
+  --zone-bg-color: #11173a;
+  --card-front-color: #0d1133;        /* dark sky — numbered card face */
+  --card-border-color: #3d4878;
+  --card-back-color: #0e1431;
+  --card-back-color-2: #1a2150;
+  --selected-border-color: #f4dca0;
+  --card-radius: 10px;
+  --card-shadow:
+    0 8px 18px rgb(0 0 0 / 0.5),
+    0 1px 0 rgb(255 255 255 / 0.06);
+
+  --victory-border: #f4dca0;
+  --victory-accent: #fff1c2;
+  --victory-piece-1: #f4dca0;
+  --victory-piece-2: #c7d2fe;
+  --victory-piece-3: #a5b4fc;
+  --victory-piece-4: #fff1c2;
+  --victory-accent-opacity: 0.32;
+
+  /* Number-card text colors stay distinct between ranges */
+  --skipbo-text: #fff5dc;             /* cream so it reads on milky way */
+  --skipbo-bg: #0a0820;
+  --card-g1: hsl(220 85% 72%);   /* periwinkle blue — readable on dark */
+  --card-g2: hsl(354 75% 70%);   /* rose red */
+  --card-g3: hsl(38 85% 68%);    /* warm gold */
+
+  /* ── Body: deep navy + a single moon glow + a soft vignette ─────── */
+  body {
+    background-image:
+      radial-gradient(circle at 88% 12%,
+        rgb(255 245 220 / 0.22) 0,
+        rgb(255 245 220 / 0.12) 4%,
+        rgb(255 245 220 / 0.04) 9%,
+        transparent 14%),
+      radial-gradient(circle at 88% 12%,
+        rgb(165 180 252 / 0.10) 0,
+        transparent 28%),
+      radial-gradient(ellipse 60% 45% at 50% 55%,
+        rgb(255 240 200 / 0.06) 0,
+        transparent 70%),
+      radial-gradient(ellipse 95% 75% at 50% 50%,
+        transparent 55%,
+        rgb(0 0 0 / 0.45) 100%),
+      linear-gradient(to bottom, #0b1027 0%, #060818 100%);
+    background-attachment: fixed;
+  }
+
+  /* ── Card back: moon disc on navy, with crater shadows ──────────── */
+  .card {
+    .back {
+      background-image:
+        radial-gradient(circle at 56% 28%, rgb(170 165 140 / 0.45) 0 1.5px, transparent 2.5px),
+        radial-gradient(circle at 44% 38%, rgb(170 165 140 / 0.35) 0 1px, transparent 2px),
+        radial-gradient(circle at 38% 28%,
+          #fff5dc 0%,
+          #f1e7c4 35%,
+          #c8b893 60%,
+          rgb(180 165 130 / 0.15) 72%,
+          transparent 76%),
+        radial-gradient(circle at 50% 36%,
+          rgb(255 245 220 / 0.18) 0,
+          transparent 40%),
+        linear-gradient(160deg, #0e1431 0%, #161c44 60%, #0a0f29 100%);
+      background-size: cover;
+      overflow: hidden;
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+          radial-gradient(circle at 18% 72%, rgb(255 255 255 / 0.65) 0 0.7px, transparent 1.4px),
+          radial-gradient(circle at 78% 80%, rgb(255 255 255 / 0.5) 0 0.6px, transparent 1.2px),
+          radial-gradient(circle at 22% 88%, rgb(255 255 255 / 0.4) 0 0.5px, transparent 1px);
+        pointer-events: none;
+        opacity: 0.9;
+      }
+    }
+
+    /* ── Numbered cards: dark sky face, serif numerals, moon-phase corner ── */
+    &.normal-card {
+      background-color: var(--card-front-color);
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+
+      .card-number, .card-corner-number {
+        font-family: 'Cinzel', 'Times New Roman', serif;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        z-index: 2;
+      }
+
+      /* a handful of faint stars on the card face */
+      .card-inner::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+          radial-gradient(circle at 15% 20%, rgb(255 255 255 / 0.55) 0 0.7px, transparent 1.4px),
+          radial-gradient(circle at 70% 15%, rgb(255 255 255 / 0.45) 0 0.6px, transparent 1.2px),
+          radial-gradient(circle at 30% 72%, rgb(255 255 255 / 0.40) 0 0.6px, transparent 1.2px),
+          radial-gradient(circle at 82% 68%, rgb(255 220 180 / 0.50) 0 0.7px, transparent 1.4px),
+          radial-gradient(circle at 50% 85%, rgb(255 255 255 / 0.35) 0 0.5px, transparent 1px);
+        pointer-events: none;
+        border-radius: var(--card-radius);
+      }
+
+      /* MOON DISC (bright) — upper-right corner, clearly visible on dark sky */
+      &::before {
+        content: "";
+        position: absolute;
+        top: 5%;
+        right: 5%;
+        width: 32%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at 56% 32%, rgb(170 165 140 / 0.55) 0 0.8px, transparent 1.6px),
+          radial-gradient(circle at 40% 60%, rgb(170 165 140 / 0.45) 0 0.6px, transparent 1.2px),
+          radial-gradient(circle at 35% 40%,
+            #fff5dc 0%,
+            #f1e7c4 50%,
+            #c8b893 100%);
+        box-shadow:
+          0 0 8px rgb(255 241 194 / 0.7),
+          0 0 18px rgb(255 241 194 / 0.35);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* DARK MASK — same color as the card face so it erases the disc cleanly */
+      &::after {
+        content: "";
+        position: absolute;
+        top: 5%;
+        right: 5%;
+        width: 32%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background-color: var(--card-front-color);
+        pointer-events: none;
+        z-index: 1;
+        transform: translateX(calc(var(--moon-phase, 0) * -7.6923%));
+      }
+    }
+
+    &.normal-card[data-value="1"]  { --moon-phase: 1; }
+    &.normal-card[data-value="2"]  { --moon-phase: 2; }
+    &.normal-card[data-value="3"]  { --moon-phase: 3; }
+    &.normal-card[data-value="4"]  { --moon-phase: 4; }
+    &.normal-card[data-value="5"]  { --moon-phase: 5; }
+    &.normal-card[data-value="6"]  { --moon-phase: 6; }
+    &.normal-card[data-value="7"]  { --moon-phase: 7; }
+    &.normal-card[data-value="8"]  { --moon-phase: 8; }
+    &.normal-card[data-value="9"]  { --moon-phase: 9; }
+    &.normal-card[data-value="10"] { --moon-phase: 10; }
+    &.normal-card[data-value="11"] { --moon-phase: 11; }
+    &.normal-card[data-value="12"] { --moon-phase: 12; }
+
+    /* ── Empty piles: transparent so the night shows through ────────── */
+    &.empty-card {
+      background-color: transparent;
+      background-image: none;
+      border: 2px dashed rgb(165 180 252 / 0.35);
+      color: rgb(199 210 254 / 0.45);
+      box-shadow: none;
+    }
+
+    /* ── Selected card: warm-moonlight ring (no neon glow) ──────────── */
+    &.selected {
+      box-shadow:
+        0 0 0 2px var(--selected-border-color),
+        0 0 24px rgb(244 220 160 / 0.35),
+        var(--card-shadow);
+    }
+  }
+
+  /* ── Skip-Bo card: a slice of the night sky with a milky-way band ── */
+  .card.skipbo-text {
+    background-color: var(--skipbo-bg);
+    /* Layered: stars (foreground) → milky-way diagonal cloud → deep base */
+    background-image:
+      /* a few brighter stars */
+      radial-gradient(circle at 18% 18%, #ffffff 0 0.8px, transparent 1.6px),
+      radial-gradient(circle at 32% 12%, #ffffff 0 0.7px, transparent 1.4px),
+      radial-gradient(circle at 62% 14%, #fff8e6 0 1px, transparent 2px),
+      radial-gradient(circle at 80% 22%, #ffffff 0 0.7px, transparent 1.4px),
+      /* mid-band cluster — denser inside the milky-way ribbon */
+      radial-gradient(circle at 28% 48%, #ffe8c4 0 0.9px, transparent 1.8px),
+      radial-gradient(circle at 44% 42%, #ffffff 0 0.6px, transparent 1.2px),
+      radial-gradient(circle at 52% 52%, #ffffff 0 0.9px, transparent 1.8px),
+      radial-gradient(circle at 68% 46%, #d4c0ff 0 0.7px, transparent 1.4px),
+      /* lower stars */
+      radial-gradient(circle at 14% 78%, #ffffff 0 0.7px, transparent 1.4px),
+      radial-gradient(circle at 38% 86%, #ffffff 0 0.6px, transparent 1.2px),
+      radial-gradient(circle at 70% 82%, #ffe8c4 0 0.7px, transparent 1.4px),
+      radial-gradient(circle at 86% 90%, #ffffff 0 0.6px, transparent 1.2px),
+      /* the milky way: a soft diagonal cloud band */
+      linear-gradient(38deg,
+        transparent 22%,
+        rgba(120, 90, 170, 0.35) 36%,
+        rgba(255, 220, 180, 0.42) 46%,
+        rgba(220, 180, 240, 0.40) 54%,
+        rgba(120, 90, 170, 0.30) 64%,
+        transparent 78%),
+      /* deep-purple base gradient */
+      radial-gradient(ellipse at 50% 50%,
+        #1a0e3d 0%,
+        #0e0728 60%,
+        #06031a 100%);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+
+    .card-number {
+      font-family: 'Cinzel', 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--skipbo-text);
+      text-shadow:
+        0 0 6px rgb(0 0 0 / 0.7),
+        0 0 12px rgb(120 90 170 / 0.35);
+      z-index: 2;
+    }
+  }
+
+  /* ── Winner: a pulsing moon halo around their area ──────────────── */
+  .player-area.winner {
+    box-shadow:
+      0 0 0 1px rgb(244 220 160 / 0.6),
+      0 0 32px rgb(244 220 160 / 0.28),
+      0 0 64px rgb(165 180 252 / 0.18);
+    animation: midnightHalo 2.4s ease-in-out infinite;
+  }
+
+  .victory-burst-piece {
+    box-shadow:
+      0 0 8px var(--piece-color),
+      0 0 18px rgb(244 220 160 / 0.4);
+  }
+}
+
+@keyframes midnightHalo {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgb(244 220 160 / 0.6),
+      0 0 32px rgb(244 220 160 / 0.28),
+      0 0 64px rgb(165 180 252 / 0.18);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgb(244 220 160 / 0.85),
+      0 0 44px rgb(244 220 160 / 0.42),
+      0 0 88px rgb(165 180 252 / 0.28);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-midnight .player-area.winner {
+    animation: none;
+  }
+}

@@ -13,7 +13,7 @@ const cardTokens = ['--background', '--foreground', '--selected-border-color', '
 
 export const representativeThemes: Theme[] = [
   'theme-light',
-  'theme-dark',
+  'theme-midnight',
   'theme-glass',
   'theme-retro-space',
 ];
