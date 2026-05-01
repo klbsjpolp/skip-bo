@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@aws-sdk/client-apigatewaymanagementapi": "^3.924.0",
+    "@aws-sdk/client-apigatewaymanagementapi": "^3.1041.0",
     "@aws-sdk/client-dynamodb": "^3.924.0",
     "@aws-sdk/lib-dynamodb": "^3.924.0",
     "@sentry/aws-serverless": "^10.47.0",
