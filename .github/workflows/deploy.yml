@@ -77,6 +77,7 @@ jobs:
         with:
           ref: main # Garantir qu'on est sur main pour la release
           fetch-depth: 0 # Full history is required for conventional-commit version calculation
+          token: ${{ secrets.RELEASE_PUSH_TOKEN }}
       - uses: ./.github/actions/setup-node
 
       - name: Configure git author
