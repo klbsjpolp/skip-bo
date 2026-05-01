@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.27.0](https://github.com/klbsjpolp/skip-bo/compare/v1.26.3...v1.27.0) (2026-05-01)
+
+
+### Features
+
+* **animations:** decouple card actions from animations ([102851a](https://github.com/klbsjpolp/skip-bo/commit/102851ae2ffe4d3622034ffc0ed358027a6566b9))
+
+
+
 ## [1.26.3](https://github.com/klbsjpolp/skip-bo/compare/v1.26.2...v1.26.3) (2026-05-01)
 
 
