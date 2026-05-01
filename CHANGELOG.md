@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.26.1](https://github.com/klbsjpolp/skip-bo/compare/v1.26.0...v1.26.1) (2026-05-01)
+
+
+### Bug Fixes
+
+* **web:** replace green with indigo on Skip-Bo cards and card backs ([0093a83](https://github.com/klbsjpolp/skip-bo/commit/0093a839654a9897cee2975f5c779d9c77a361ee)), closes [#4f46e5](https://github.com/klbsjpolp/skip-bo/issues/4f46e5)
+
+
+
 # [1.26.0](https://github.com/klbsjpolp/skip-bo/compare/v1.25.0...v1.26.0) (2026-04-29)
 
 
