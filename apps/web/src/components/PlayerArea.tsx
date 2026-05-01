@@ -259,7 +259,7 @@ export function StockPile({
   return <div className="flex items-center relative gap-2" style={{"--card-rotate": "0deg"}}>
       <h2 className="vertical-text">Talon ({player.stockPile.length})</h2>
     {player.stockPile.length > 0 ? (
-      <div className="relative w-full stock-pile">
+      <div className="relative w-(--card-width) stock-pile">
         {/* Show the top card unless it's being animated */}
         {isCardBeingAnimated(playerIndex, 'stock', player.stockPile.length - 1)
           ? (player.stockPile.length > 1 ? (

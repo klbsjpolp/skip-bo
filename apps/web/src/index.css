@@ -744,6 +744,24 @@
 @utility vertical-text {
   @apply transform rotate-180;
   writing-mode: sideways-rl;
+  /* Lock the perpendicular extent so themes can change font-size / font-family
+     without shifting cards next to vertical labels. Width is fixed; the box is
+     a flex container so we can align the text along the block axis (horizontal
+     on screen) with align-items, since text-align only controls the inline
+     axis in vertical writing modes. After rotate(180), `align-items: start`
+     pins the text to the right edge of the box (card-facing side). */
+  display: flex;
+  align-items: center;
+  width: 1.25rem;
+  @media (width >= 64rem) {
+    width: 1.5rem;
+  }
+  &:has(br) {
+    width: 2.5rem;
+    @media (width >= 64rem) {
+      width: 3rem;
+    }
+  }
 }
 
 @utility drop-indicator {
