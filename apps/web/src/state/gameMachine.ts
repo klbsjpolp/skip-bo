@@ -118,6 +118,31 @@ export const gameMachine = createMachine({
           },
         },
         humanActionAnimating: {
+          // Allow further human actions while animations are still in flight.
+          // The animationGate keeps waiting on `waitForAnimations()`, which
+          // covers any animation queued during this state. We deliberately omit
+          // `target` on PLAY_CARD/DISCARD_CARD/SELECT_CARD/CLEAR_SELECTION so
+          // xstate v5 doesn't re-invoke `animationGate` on every chained action
+          // (a re-invoke would cancel the in-flight gate and reset the
+          // minimum-duration timer).
+          on: {
+            SELECT_CARD: {
+              actions: 'apply',
+              guard: 'isHumanAction',
+            },
+            CLEAR_SELECTION: {
+              actions: 'apply',
+              guard: 'isHumanAction',
+            },
+            PLAY_CARD: {
+              actions: 'applyAndStoreAnimation',
+              guard: 'isHumanAction',
+            },
+            DISCARD_CARD: {
+              actions: 'applyAndStoreAnimation',
+              guard: 'isHumanAction',
+            },
+          },
           invoke: {
             src: 'animationGate',
             input: ({ context }) => ({ duration: context.animationDuration }),

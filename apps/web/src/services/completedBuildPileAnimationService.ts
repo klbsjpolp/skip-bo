@@ -21,6 +21,7 @@ export const triggerCompletedBuildPileAnimation = (
   cards: Card[],
   initialCompletedCount: number,
   staggerDelay: number = 100,
+  baseDelay: number = 0,
 ): number => {
   if (!globalAnimationContext) {
     console.warn('Animation context not available for completed build pile animation');
@@ -49,7 +50,9 @@ export const triggerCompletedBuildPileAnimation = (
       // AnimatedCard hides each card (returns null) until its initialDelay fires,
       // so at most one card is visible at the departure point at a time.
       // Multiple cards may be in flight simultaneously — that's fine.
-      const initialDelay = index * staggerDelay;
+      // baseDelay shifts the whole sequence (e.g. to wait for a preceding play
+      // animation to land on the build pile before retreat begins).
+      const initialDelay = baseDelay + index * staggerDelay;
 
       animationContext.startAnimation({
         card,
@@ -69,7 +72,7 @@ export const triggerCompletedBuildPileAnimation = (
         },
       });
 
-      return Math.max(maxDuration, duration + initialDelay);
+      return Math.max(maxDuration, initialDelay + duration);
     }, 0);
   } catch (error) {
     console.warn('Completed build pile animation failed:', error);

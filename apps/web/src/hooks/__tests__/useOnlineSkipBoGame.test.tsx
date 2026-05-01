@@ -614,7 +614,7 @@ describe('useOnlineSkipBoGame', () => {
     });
   });
 
-  it('ignores new selections while a discard play is still resolving online', async () => {
+  it('accepts new selections while a play is still animating online', async () => {
     const session = createSession();
 
     mountOnlineDiscardAnimationDom();
@@ -638,46 +638,13 @@ describe('useOnlineSkipBoGame', () => {
       await Promise.resolve();
     });
 
-    let resolveAnimations: (() => void) | null = null;
-    waitForAnimations.mockImplementationOnce(() => new Promise<undefined>((resolve) => {
-      resolveAnimations = () => resolve(undefined);
-    }));
-
-    const playPromise = result.current.playCard(0);
-
     await act(async () => {
-      await Promise.resolve();
-    });
-
-    act(() => {
-      result.current.selectCard('hand', 0);
-    });
-
-    expect(result.current.gameState.selectedCard?.source).toBe('discard');
-    expect(getActionMessages(socket)).toEqual([]);
-
-    await act(async () => {
-      resolveAnimations?.();
-      const moveResult = await playPromise;
+      const moveResult = await result.current.playCard(0);
       expect(moveResult).toEqual({ success: true, message: 'Carte jouée' });
     });
 
-    expect(getActionMessages(socket)).toContainEqual({
-      type: 'action',
-      action: { type: 'PLAY_CARD', buildPile: 0 },
-      clientVersion: 1,
-    });
-    expect(getActionMessages(socket).some((message) => message.action?.type === 'SELECT_CARD')).toBe(false);
-
-    await act(async () => {
-      socket.emitMessage({
-        type: 'actionRejected',
-        code: 'invalid_action',
-        reason: 'Action refusée',
-      });
-      await Promise.resolve();
-    });
-
+    // The play action was sent immediately; while the visual animation runs in
+    // the background, the user can already pick the next card.
     act(() => {
       result.current.selectCard('hand', 0);
     });
@@ -685,10 +652,16 @@ describe('useOnlineSkipBoGame', () => {
     expect(result.current.gameState.selectedCard?.source).toBe('hand');
     expect(getActionMessages(socket)).toContainEqual({
       type: 'action',
+      action: { type: 'PLAY_CARD', buildPile: 0 },
+      clientVersion: 1,
+    });
+    expect(getActionMessages(socket)).toContainEqual({
+      type: 'action',
       action: {
         type: 'SELECT_CARD',
         source: 'hand',
         index: 0,
+        discardPileIndex: undefined,
       },
       clientVersion: 1,
     });
@@ -736,7 +709,7 @@ describe('useOnlineSkipBoGame', () => {
     });
   });
 
-  it('ignores new selections while snapshot-driven animations are still active online', async () => {
+  it('accepts new selections while snapshot-driven animations are still active online', async () => {
     const session = createSession();
 
     activeAnimationsState.current = [{
@@ -776,8 +749,19 @@ describe('useOnlineSkipBoGame', () => {
       result.current.selectCard('hand', 0);
     });
 
-    expect(result.current.gameState.selectedCard).toBeNull();
-    expect(getActionMessages(socket)).toEqual([]);
+    // Animations no longer block selection — the user can prepare their next
+    // move while opponent / completion animations are still in flight.
+    expect(result.current.gameState.selectedCard?.source).toBe('hand');
+    expect(getActionMessages(socket)).toContainEqual({
+      type: 'action',
+      action: {
+        type: 'SELECT_CARD',
+        source: 'hand',
+        index: 0,
+        discardPileIndex: undefined,
+      },
+      clientVersion: 1,
+    });
   });
 
   it('keeps the previous opponent message while a discard handoff animation is pending online', async () => {

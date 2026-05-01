@@ -45,16 +45,11 @@ export function useSkipBoGame() {
   const dispatch = send;                     // alias pour préserver la suite du code
   const stateRef = useRef<GameState>(state);
   const interactionLockRef = useRef(false);
-  const { activeAnimations, startAnimation, removeAnimation, waitForAnimations } = useCardAnimation();
-  const activeAnimationCountRef = useRef(activeAnimations.length);
+  const { startAnimation, removeAnimation, waitForAnimations } = useCardAnimation();
 
   React.useLayoutEffect(() => {
     stateRef.current = state;
   }, [state]);
-
-  React.useEffect(() => {
-    activeAnimationCountRef.current = activeAnimations.length;
-  }, [activeAnimations.length]);
 
   // Set up global animation context for AI animations and draw animations
   React.useEffect(() => {
@@ -76,8 +71,12 @@ export function useSkipBoGame() {
     dispatch({ type: 'DEBUG_WIN' });
   }, [dispatch]);
 
+  // Animations are decoupled from the interaction lock: the user can keep
+  // selecting and playing cards while previous animations are still in flight.
+  // The lock is held only for the synchronous body of playCard/discardCard so
+  // two concurrent dispatches can't race on the same selectedCard.
   const isInteractionBlocked = useCallback(() => (
-    interactionLockRef.current || activeAnimationCountRef.current > 0
+    interactionLockRef.current
   ), []);
 
   const selectCard = useCallback((source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => {
@@ -125,16 +124,22 @@ export function useSkipBoGame() {
     }
 
     interactionLockRef.current = true;
-    
-    // Trigger play animation first
+
+    // Compute play animation, then chain completion & refill via baseDelay so
+    // they queue up *without* awaiting. The dispatch happens immediately after,
+    // so further user actions (select / play / discard) aren't blocked by the
+    // visual animation. Cards in flight are masked at source/target via
+    // `isCardBeingAnimated` in PlayerArea/CenterArea.
+    let playAnimationDuration = 0;
+
     try {
       const playerAreaElement = document.querySelector<HTMLElement>(`.player-area[data-player-index="${currentState.currentPlayerIndex}"]`);
       const centerAreaElement = document.querySelector('.center-area') as HTMLElement;
       let startAngleDeg: number | undefined;
-      
+
       if (playerAreaElement && centerAreaElement) {
         let startPosition;
-        
+
         // Calculate start position based on source
         if (currentState.selectedCard.source === 'hand') {
           const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
@@ -153,12 +158,19 @@ export function useSkipBoGame() {
             startPosition = getDiscardTopCardPosition(discardContainer, currentState.selectedCard.discardPileIndex);
           }
         }
-        
+
         // Calculate end position (build pile)
         const endPosition = getBuildPilePosition(centerAreaElement, buildPile);
-        
+
         if (startPosition) {
           const duration = calculateAnimationDuration(startPosition, endPosition);
+          playAnimationDuration = duration * 1.2;
+          // Mask the freshly-dispatched card at the build pile until the play
+          // animation has actually landed. Without targetSettledInState the
+          // top of the pile would render the new card immediately (because we
+          // dispatched PLAY_CARD before the animation), making the card appear
+          // teleported to its destination before flying there.
+          const previousBuildPileLength = currentState.buildPiles[buildPile].length;
           startAnimation({
             card: currentState.selectedCard.card,
             startPosition,
@@ -168,7 +180,9 @@ export function useSkipBoGame() {
             sourceRevealed: true,
             targetRevealed: true,
             initialDelay: 0,
-            duration:duration*1.2,
+            duration: playAnimationDuration,
+            targetSettledInState: true,
+            targetPileLength: previousBuildPileLength + 1,
             sourceInfo: {
               playerIndex: currentState.currentPlayerIndex,
               source: currentState.selectedCard.source,
@@ -181,14 +195,13 @@ export function useSkipBoGame() {
               index: buildPile,
             },
           });
-          
-          await waitForAnimations();
         }
       }
     } catch (error) {
       console.warn('Play animation failed, continuing with game logic:', error);
     }
 
+    // Schedule completion animation to start once the play animation has landed.
     let completionAnimationDuration = 0;
 
     if (completedBuildPileCards) {
@@ -198,22 +211,33 @@ export function useSkipBoGame() {
           buildPile,
           completedBuildPileCards,
           currentState.completedBuildPiles.length,
+          100,
+          playAnimationDuration,
         );
       } catch (error) {
         console.warn('Completed build pile animation failed, continuing with game logic:', error);
       }
     }
 
+    // completionAnimationDuration already includes playAnimationDuration as its baseDelay,
+    // so when there is a completion the refill must wait until all retreat cards have landed.
+    // Without a completion, the refill just waits for the play animation itself.
+    const refillBaseDelay = completedBuildPileCards
+      ? completionAnimationDuration
+      : playAnimationDuration;
     const drawAnimationDuration =
       refillHandIndices.length > 0
         ? calculateMultipleDrawAnimationDuration(
           currentState.currentPlayerIndex,
           refillHandIndices,
           500,
-          completionAnimationDuration,
+          refillBaseDelay,
         )
         : 0;
 
+    // Dispatch immediately. The xstate machine transitions to
+    // humanActionAnimating, but it now permits further human actions while the
+    // animationGate waits on `waitForAnimations()` for every queued animation.
     dispatch({
       type: 'PLAY_CARD',
       buildPile,
@@ -226,14 +250,14 @@ export function useSkipBoGame() {
         refillCards,
         refillHandIndices,
         500,
-        completionAnimationDuration,
+        refillBaseDelay,
       ).catch((error) => {
         console.warn('Draw animation failed, continuing with game logic:', error);
       });
     }
     interactionLockRef.current = false;
     return { success: true, message: 'Carte jouée' };
-  }, [dispatch, isInteractionBlocked, startAnimation, waitForAnimations]);
+  }, [dispatch, isInteractionBlocked, startAnimation]);
 
   const discardCard = useCallback(async (discardPile: number): Promise<MoveResult> => {
     const currentState = stateRef.current;
@@ -256,7 +280,13 @@ export function useSkipBoGame() {
 
     interactionLockRef.current = true;
 
-    // Trigger animation before state change
+    // Trigger discard animation, then dispatch immediately. The animation runs
+    // in parallel; the discard ends the human turn (currentPlayerIndex flips),
+    // so the xstate guard `isHumanAction` will reject any stray action — but
+    // selections / plays issued *before* the discard ran can still complete
+    // their visual animations because the animationGate keeps waiting on
+    // `waitForAnimations()` until the queue is empty.
+    let discardAnimationDuration = 0;
     try {
       const playerAreaElement = document.querySelector<HTMLElement>(`.player-area[data-player-index="${currentState.currentPlayerIndex}"]`);
 
@@ -267,7 +297,11 @@ export function useSkipBoGame() {
           const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
           if (discardContainer) {
             const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
-            const duration = calculateAnimationDuration(startPosition, endPosition);
+            discardAnimationDuration = calculateAnimationDuration(startPosition, endPosition);
+            // Mask the freshly-dispatched card on the discard pile until the
+            // animation lands — the dispatch happens immediately, so without
+            // this the card would teleport to the pile and then re-animate.
+            const previousDiscardPileLength = currentState.players[currentState.currentPlayerIndex].discardPiles[discardPile].length;
             startAnimation({
               card: currentState.selectedCard.card,
               startPosition,
@@ -276,8 +310,10 @@ export function useSkipBoGame() {
               sourceRevealed: true,
               targetRevealed: true,
               initialDelay: 0,
-              duration,
+              duration: discardAnimationDuration,
               startAngleDeg: getHandCardAngle(handContainer, currentState.selectedCard.index),
+              targetSettledInState: true,
+              targetPileLength: previousDiscardPileLength + 1,
               sourceInfo: {
                 playerIndex: currentState.currentPlayerIndex,
                 source: currentState.selectedCard.source,
@@ -291,11 +327,6 @@ export function useSkipBoGame() {
                 discardPileIndex: discardPile,
               },
             });
-
-            // Await in the same microtask chain as removeAnimation so the dispatch
-            // happens before the browser can paint the gap between card removal and
-            // state update (fixes the arrival flicker).
-            await waitForAnimations();
           }
         }
       }
@@ -303,10 +334,10 @@ export function useSkipBoGame() {
       console.warn('Animation failed, continuing with game logic:', error);
     }
 
-    dispatch({ type: 'DISCARD_CARD', discardPile });
+    dispatch({ type: 'DISCARD_CARD', discardPile, animationDuration: discardAnimationDuration });
     interactionLockRef.current = false;
     return { success: true, message: 'Carte défaussée' };
-  }, [dispatch, isInteractionBlocked, startAnimation, waitForAnimations]);
+  }, [dispatch, isInteractionBlocked, startAnimation]);
 
   const clearSelection = useCallback(() => {
     if (isInteractionBlocked()) {

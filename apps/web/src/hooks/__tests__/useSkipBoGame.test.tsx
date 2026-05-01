@@ -325,60 +325,53 @@ describe('useSkipBoGame', () => {
       name: 'discard-source plays',
       stateFactory: createSelectedDiscardCardState,
     },
-  ])('ignores new selections while $name are still resolving locally', async ({ buildPile, mountDom, stateFactory }) => {
+  ])('accepts new selections while $name are still animating locally', async ({ buildPile, mountDom, stateFactory }) => {
     workingState.current = stateFactory();
     mountDom();
-
-    let resolveAnimations: (() => void) | null = null;
-    waitForAnimations.mockImplementationOnce(() => new Promise<undefined>((resolve) => {
-      resolveAnimations = () => resolve(undefined);
-    }));
 
     const { result } = renderHook(() => useSkipBoGame());
     const playPromise = result.current.playCard(buildPile);
 
     await act(async () => {
-      await Promise.resolve();
-    });
-
-    act(() => {
-      result.current.selectCard('stock', workingState.current!.players[0].stockPile.length - 1);
-    });
-
-    expect(send).toHaveBeenCalledTimes(0);
-
-    await act(async () => {
-      resolveAnimations?.();
       const moveResult = await playPromise;
       expect(moveResult).toEqual({ success: true, message: 'Carte jouée' });
     });
 
+    // PLAY_CARD has been dispatched immediately; the animation runs in
+    // parallel. The user can already queue a new selection.
+    act(() => {
+      result.current.selectCard('stock', workingState.current!.players[0].stockPile.length - 1);
+    });
+
     expect(send.mock.calls).toEqual([
       [{ type: 'PLAY_CARD', buildPile: 0, animationDuration: 0 }],
+      [{ type: 'SELECT_CARD', source: 'stock', index: workingState.current!.players[0].stockPile.length - 1, discardPileIndex: undefined }],
     ]);
   });
 
-  it('ignores new selections while a discard is still resolving locally', async () => {
+  it('accepts new selections while a discard is still animating locally', async () => {
     workingState.current = createSelectedHandCardState();
     appendHandAndDiscardArea();
 
     const { result } = renderHook(() => useSkipBoGame());
     const discardPromise = result.current.discardCard(1);
 
-    act(() => {
-      result.current.selectCard('stock', workingState.current!.players[0].stockPile.length - 1);
-    });
-
-    expect(send).toHaveBeenCalledTimes(0);
-
     await act(async () => {
-      vi.runAllTimers();
       const moveResult = await discardPromise;
       expect(moveResult).toEqual({ success: true, message: 'Carte défaussée' });
     });
 
+    // The discard ends the human turn (currentPlayerIndex flips), but we still
+    // dispatched SELECT_CARD locally — the xstate guard will be the one that
+    // prevents stale actions. Here we only assert that the lock no longer
+    // swallows selections during the animation.
+    act(() => {
+      result.current.selectCard('stock', workingState.current!.players[0].stockPile.length - 1);
+    });
+
     expect(send.mock.calls).toEqual([
-      [{ type: 'DISCARD_CARD', discardPile: 1 }],
+      [{ type: 'DISCARD_CARD', discardPile: 1, animationDuration: expect.any(Number) }],
+      [{ type: 'SELECT_CARD', source: 'stock', index: workingState.current!.players[0].stockPile.length - 1, discardPileIndex: undefined }],
     ]);
   });
 });
