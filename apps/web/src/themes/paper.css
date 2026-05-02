@@ -159,7 +159,7 @@
       .card-number {
         font-weight: 700;
         font-size: 1.45em;
-        line-height: 1;
+        left: -0.1em;
       }
     }
 
