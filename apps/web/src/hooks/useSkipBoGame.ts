@@ -41,7 +41,7 @@ const willPlayCardEmptyHand = (gameState: GameState): boolean => {
 };
 
 export function useSkipBoGame() {
-  const [snapshot, send] = useMachine(gameMachine);
+  const [snapshot, send, actorRef] = useMachine(gameMachine);
   const state = snapshot.context.G;
   const dispatch = send;                     // alias pour préserver la suite du code
   const stateRef = useRef<GameState>(state);
@@ -86,7 +86,13 @@ export function useSkipBoGame() {
     }
 
     dispatch({ type: 'SELECT_CARD', source, index, discardPileIndex });
-  }, [dispatch, isInteractionBlocked]);
+    // XState processes events synchronously, so the actor already has the new
+    // state. Eagerly sync stateRef so that playCard/discardCard called in the
+    // same synchronous turn (e.g. drag-drop: selectCard then immediately
+    // playCard from pointerup) read the updated selectedCard instead of the
+    // stale snapshot that React hasn't committed yet.
+    stateRef.current = actorRef.getSnapshot().context.G;
+  }, [dispatch, isInteractionBlocked, actorRef]);
 
   const playCard = useCallback(async (buildPile: number): Promise<MoveResult> => {
     const currentState = stateRef.current;
