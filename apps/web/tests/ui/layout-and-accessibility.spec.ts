@@ -12,7 +12,7 @@ import {
 
 test.describe('Layout and interaction coverage', () => {
   test('@desktop retreat-filled fixture keeps center order and retreat counter', async ({ page }) => {
-    await gotoFixture(page, 'retreat-filled', 'theme-light');
+    await gotoFixture(page, 'retreat-filled', 'theme-paper');
 
     await expect(page.getByTestId('retreat-pile-title')).toHaveText('Retrait (5)');
     await expect(page.getByTestId('retreat-pile').locator('.card')).toHaveCount(3);
@@ -31,7 +31,7 @@ test.describe('Layout and interaction coverage', () => {
   });
 
   test('@desktop theme switcher updates and persists the selected theme', async ({ page }, testInfo) => {
-    await gotoFixture(page, 'ready-human', 'theme-light');
+    await gotoFixture(page, 'ready-human', 'theme-paper');
     await expect(page.getByTestId('app-version')).toHaveText(/^Version v\d+\.\d+\.\d+/);
 
     await page.getByTestId('theme-switcher-trigger').click();
@@ -49,8 +49,8 @@ test.describe('Layout and interaction coverage', () => {
   });
 
   test('@desktop random theme button picks a different theme and persists it', async ({ page }) => {
-    await gotoFixture(page, 'ready-human', 'theme-light');
-    await expectThemeClass(page, 'theme-light');
+    await gotoFixture(page, 'ready-human', 'theme-paper');
+    await expectThemeClass(page, 'theme-paper');
 
     const availableThemes = themes.map(({ value }) => value as Theme);
 
@@ -58,7 +58,7 @@ test.describe('Layout and interaction coverage', () => {
     await page.waitForFunction(
       ({ themeValues, previousTheme }) =>
         themeValues.some((value) => document.documentElement.classList.contains(value) && value !== previousTheme),
-      { themeValues: availableThemes, previousTheme: 'theme-light' satisfies Theme },
+      { themeValues: availableThemes, previousTheme: 'theme-paper' satisfies Theme },
     );
 
     const selectedTheme = await page.evaluate(
@@ -68,7 +68,7 @@ test.describe('Layout and interaction coverage', () => {
     );
 
     expect(selectedTheme).not.toBeNull();
-    expect(selectedTheme).not.toBe('theme-light');
+    expect(selectedTheme).not.toBe('theme-paper');
     await expectThemeClass(page, selectedTheme as Theme);
 
     await page.reload();
@@ -134,7 +134,7 @@ test.describe('Layout and interaction coverage', () => {
   }
 
   test('@mobile retreat-filled fixture avoids horizontal overflow', async ({ page }) => {
-    await gotoFixture(page, 'retreat-filled', 'theme-light');
+    await gotoFixture(page, 'retreat-filled', 'theme-paper');
     await expectNoHorizontalOverflow(page);
   });
 });
@@ -149,7 +149,7 @@ test.describe('Accessibility smoke', () => {
   };
 
   test('@desktop ready-human fixture has no axe violations', async ({ page }) => {
-    await assertNoViolations('theme-light', 'ready-human', page);
+    await assertNoViolations('theme-paper', 'ready-human', page);
   });
 
   test('@desktop theme switcher open state has no axe violations', async ({ page }) => {
