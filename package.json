@@ -9,7 +9,7 @@
   "scripts": {
     "build": "pnpm --filter @skipbo/game-core build && pnpm --filter @skipbo/multiplayer-protocol build && pnpm --filter @skipbo/realtime-api build && pnpm --filter @skipbo/web build",
     "commit": "cz",
-    "dev": "pnpm dev:web",
+    "dev": "pnpm dev:web --host",
     "dev:api": "pnpm --filter @skipbo/realtime-api dev",
     "dev:web": "pnpm --filter @skipbo/web dev",
     "lint": "pnpm --filter @skipbo/game-core lint && pnpm --filter @skipbo/multiplayer-protocol lint && pnpm --filter @skipbo/realtime-api lint && pnpm --filter @skipbo/web lint",

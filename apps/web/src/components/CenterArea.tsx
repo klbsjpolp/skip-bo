@@ -3,6 +3,7 @@ import {Card} from '@/components/Card';
 import {EmptyCard} from "@/components/EmptyCard.tsx";
 import {cn} from '@/lib/utils';
 import {useCardAnimation} from '@/contexts/useCardAnimation.ts';
+import {useDrag} from '@/contexts/useDrag';
 import {getRetreatPileAngle, RETREAT_PILE_PREVIEW_LIMIT,} from '@/lib/retreatPile';
 
 interface CenterAreaProps {
@@ -13,6 +14,8 @@ interface CenterAreaProps {
 
 export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps) {
   const { activeAnimations } = useCardAnimation();
+  const {session: dragSession} = useDrag();
+  const isDragActive = dragSession !== null;
   const pendingRetreatCardsCount = activeAnimations.filter(
     (animation) => animation.animationType === 'complete',
   ).length;
@@ -58,11 +61,16 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
           </h2>
           <div className="build-piles">
             {gameState.buildPiles.map((pile, index) => {
-              const canDropSelectedCard = Boolean(
+              const canDropFromSelection = Boolean(
                 gameState.selectedCard &&
                 gameState.currentPlayerIndex === 0 &&
                 canPlayCard(gameState.selectedCard.card, index, gameState)
               );
+              const canDropFromDrag = isDragActive && dragSession.validBuildPiles.has(index);
+              const canDropSelectedCard = isDragActive ? canDropFromDrag : canDropFromSelection;
+              const isDragOver = canDropFromDrag
+                  && dragSession.hovered?.kind === 'build'
+                  && dragSession.hovered.index === index;
               const incomingPlayAnimation = activeAnimations.find(
                 (animation) =>
                   animation.animationType === 'play' &&
@@ -101,12 +109,15 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                 <div
                   key={`build-${index}`}
                   data-build-pile={index}
+                  data-drop-target={canDropFromDrag ? 'build' : undefined}
+                  data-drop-index={canDropFromDrag ? index : undefined}
                   role={canDropSelectedCard ? 'button' : undefined}
                   tabIndex={canDropSelectedCard ? 0 : undefined}
                   aria-label={`Pile de construction ${index + 1}`}
                   className={cn(
                     "relative drop-indicator build-pile",
-                    canDropSelectedCard && 'can-drop'
+                      canDropSelectedCard && 'can-drop',
+                      isDragOver && 'is-drag-over'
                   )}
                   onClick={(e) => {
                     e.stopPropagation();

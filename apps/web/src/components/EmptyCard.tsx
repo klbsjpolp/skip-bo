@@ -5,9 +5,12 @@ interface EmptyCardProps {
   onClick?: MouseEventHandler;
   canDropCard?: boolean;
   className?: string;
+  /** Hide the "Vide" text — useful when the placeholder sits behind another
+   *  card (e.g. the deck) and is only visible during a draw animation. */
+  hideLabel?: boolean;
 }
 
-export function EmptyCard({onClick, canDropCard = false, className}: EmptyCardProps) {
+export function EmptyCard({onClick, canDropCard = false, className, hideLabel = false}: EmptyCardProps) {
   return (
     <div
       className={cn(
@@ -18,7 +21,7 @@ export function EmptyCard({onClick, canDropCard = false, className}: EmptyCardPr
       )}
       onClick={onClick}
     >
-      Vide
+      {hideLabel ? null : 'Vide'}
     </div>
   );
 }

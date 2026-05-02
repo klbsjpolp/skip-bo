@@ -1,10 +1,12 @@
-import type {Card as CardType, GameState, Player} from '@/types';
+import type {Card as CardType, GameState, MoveResult, Player} from '@/types';
 import {Card} from '@/components/Card';
 import {cn} from '@/lib/utils';
 import {EmptyCard} from "@/components/EmptyCard.tsx";
 import type {MouseEventHandler} from "react";
 import {Fragment} from "react";
 import {useCardAnimation} from "@/contexts/useCardAnimation.ts";
+import {useDrag, useIsDragSource} from '@/contexts/useDrag';
+import {useDraggableCard} from '@/hooks/useDraggableCard';
 import {VictoryEffects} from '@/components/VictoryEffects';
 import {HAND_Y_OFFSETS} from '@/utils/cardPositions';
 
@@ -15,7 +17,8 @@ export interface PlayerAreaProps {
   isWinner: boolean;
   gameState: GameState;
   selectCard: (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void;
-  discardCard: (discardPileIndex: number) => Promise<{ success: boolean; message: string }>;
+    playCard: (buildPileIndex: number) => Promise<MoveResult>;
+    discardCard: (discardPileIndex: number) => Promise<MoveResult>;
   clearSelection: () => void;
 }
 
@@ -26,6 +29,7 @@ export function PlayerArea({
                              isWinner,
                              gameState,
                              selectCard,
+                               playCard,
                              discardCard,
                              clearSelection
                            }: PlayerAreaProps) {
@@ -46,13 +50,16 @@ export function PlayerArea({
       <div className="content-layer flex items-center gap-2 lg:gap-4 h-full flex-wrap">
           {player.name && <h2 className="vertical-text border-l border-primary">{player.name}</h2>}
         <StockPile player={player} playerIndex={playerIndex} isCurrentPlayer={isCurrentPlayer} gameState={gameState}
-                   selectCard={selectCard} clearSelection={clearSelection}/>
+                   selectCard={selectCard} playCard={playCard} discardCard={discardCard}
+                   clearSelection={clearSelection}/>
         <HandSection player={player} playerIndex={playerIndex} isCurrentPlayer={isCurrentPlayer} gameState={gameState}
-                     selectCard={selectCard} clearSelection={clearSelection}/>
+                     selectCard={selectCard} playCard={playCard} discardCard={discardCard}
+                     clearSelection={clearSelection}/>
         {/* Grow - blank space */}
         <div className="grow"></div>
         <DiscardPiles player={player} playerIndex={playerIndex} isCurrentPlayer={isCurrentPlayer} gameState={gameState}
-                      discardCard={discardCard} selectCard={selectCard} clearSelection={clearSelection}/>
+                      playCard={playCard} discardCard={discardCard} selectCard={selectCard}
+                      clearSelection={clearSelection}/>
       </div>
     </div>
   );
@@ -64,7 +71,8 @@ interface DiscardPileProps {
   isCurrentPlayer: boolean,
   gameState: GameState,
   selectCard: (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void,
-  discardCard: (discardPileIndex: number) => Promise<{ success: boolean; message: string }>,
+    playCard: (buildPileIndex: number) => Promise<MoveResult>,
+    discardCard: (discardPileIndex: number) => Promise<MoveResult>,
   clearSelection: () => void,
   pile: CardType[],
   pileIndex: number
@@ -78,10 +86,12 @@ function DiscardPile({
                        isCurrentPlayer,
                        gameState,
                        selectCard,
+                         playCard,
                        discardCard,
                        clearSelection
                      }: DiscardPileProps) {
   const {activeAnimations, isCardBeingAnimated} = useCardAnimation();
+    const {session: dragSession} = useDrag();
   const isHuman = !player.isAI;
   const hasIncomingDiscardAnimation = activeAnimations.some(
     (animation) =>
@@ -124,10 +134,25 @@ function DiscardPile({
     }
   };
 
-  return <div className={cn(
-    "drop-indicator discard-pile-stack",
-    isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand' && "can-drop"
+    const canDropFromSelection =
+        isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand';
+    const isDragActive = dragSession !== null;
+    const canDropFromDrag = isDragActive
+        && dragSession.validDiscardPiles.has(pileIndex)
+        && playerIndex === gameState.currentPlayerIndex
+        && isHuman;
+    const canDrop = isDragActive ? canDropFromDrag : canDropFromSelection;
+    const isDragOver = canDropFromDrag
+        && dragSession?.hovered?.kind === 'discard'
+        && dragSession.hovered.index === pileIndex;
+
+    return <div className={cn(
+        "drop-indicator discard-pile-stack relative",
+        canDrop && "can-drop",
+        isDragOver && "is-drag-over"
   )} data-pile-index={pileIndex}
+                data-drop-target={canDropFromDrag ? 'discard' : undefined}
+                data-drop-index={canDropFromDrag ? pileIndex : undefined}
     role={canInteract ? 'button' : undefined}
     tabIndex={canInteract ? 0 : undefined}
     aria-label={`Défausse ${pileIndex + 1}`}
@@ -147,7 +172,7 @@ function DiscardPile({
     }}
     style={{height: `calc(var(--card-height) + ${(pile.length <= 1 ? 0 : pile.length - 1) * 20}px)`}}
   >
-    {computedPiles.length === 0 && <EmptyCard/>}
+        <EmptyCard canDropCard={computedPiles.length === 0} className="absolute inset-0"/>
     {computedPiles.map(({card, cardIdx, isAnimated, key}) => {
       if (isAnimated) {
         const fakeCard = <div key={key} className="card opacity-0 pointer-events-none"
@@ -159,7 +184,23 @@ function DiscardPile({
           </Fragment>
         else
           return fakeCard
-      } else
+      }
+        const isTop = cardIdx === pile.length - 1;
+        if (isTop && isHuman && isCurrentPlayer) {
+            return (
+                <DraggableDiscardTop
+                    key={`discard-${pileIndex}-card-${cardIdx}`}
+                    card={card}
+                    pileIndex={pileIndex}
+                    cardIndex={cardIdx}
+                    playerIndex={playerIndex}
+                    gameState={gameState}
+                    selectCard={selectCard}
+                    playCard={playCard}
+                    discardCard={discardCard}
+                />
+            );
+        }
         return <Card
           hint={`discard pile ${pileIndex + 1}, card ${cardIdx + 1}`}
           key={`discard-${pileIndex}-card-${cardIdx}`}
@@ -171,12 +212,61 @@ function DiscardPile({
             gameState.currentPlayerIndex === playerIndex &&
             cardIdx === pile.length - 1
           }
-          canBeGrabbed={isHuman && isCurrentPlayer && cardIdx === pile.length - 1}
+          canBeGrabbed={isHuman && isCurrentPlayer && isTop}
           stackIndex={cardIdx}
-          // Remove onClick from Card to avoid nested handlers
-        />
+        />;
     })}
   </div>;
+}
+
+interface DraggableDiscardTopProps {
+    card: CardType;
+    pileIndex: number;
+    cardIndex: number;
+    playerIndex: number;
+    gameState: GameState;
+    selectCard: DiscardPileProps['selectCard'];
+    playCard: DiscardPileProps['playCard'];
+    discardCard: DiscardPileProps['discardCard'];
+}
+
+function DraggableDiscardTop({
+                                 card,
+                                 pileIndex,
+                                 cardIndex,
+                                 playerIndex,
+                                 gameState,
+                                 selectCard,
+                                 playCard,
+                                 discardCard,
+                             }: DraggableDiscardTopProps) {
+    const source = {kind: 'discard' as const, index: cardIndex, discardPileIndex: pileIndex};
+    const draggable = useDraggableCard({
+        source,
+        card,
+        enabled: true,
+        gameState,
+        selectCard,
+        playCard,
+        discardCard,
+    });
+    const isDragging = useIsDragSource(source);
+    const isSelected =
+        gameState.selectedCard?.source === 'discard' &&
+        gameState.selectedCard.discardPileIndex === pileIndex &&
+        gameState.currentPlayerIndex === playerIndex;
+    return (
+        <Card
+            hint={`discard pile ${pileIndex + 1}, card ${cardIndex + 1}`}
+            card={card}
+            isRevealed={true}
+            isSelected={isSelected}
+            canBeGrabbed={true}
+            stackIndex={cardIndex}
+            className={isDragging ? 'is-drag-source' : undefined}
+            extraProps={draggable}
+        />
+    );
 }
 
 interface DiscardPilesProps {
@@ -185,7 +275,8 @@ interface DiscardPilesProps {
   isCurrentPlayer: boolean;
   gameState: GameState;
   selectCard: (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void;
-  discardCard: (discardPileIndex: number) => Promise<{ success: boolean; message: string }>;
+    playCard: (buildPileIndex: number) => Promise<MoveResult>;
+    discardCard: (discardPileIndex: number) => Promise<MoveResult>;
   clearSelection: () => void;
 }
 
@@ -195,6 +286,7 @@ export function DiscardPiles({
                         isCurrentPlayer,
                         gameState,
                         selectCard,
+                                 playCard,
                         discardCard,
                         clearSelection
                       }: DiscardPilesProps) {
@@ -206,6 +298,7 @@ export function DiscardPiles({
       {player.discardPiles.map((pile, pileIndex) => (
         <DiscardPile key={`discard-${pileIndex}`} pile={pile} pileIndex={pileIndex} playerIndex={playerIndex}
                      isCurrentPlayer={isCurrentPlayer} gameState={gameState} selectCard={selectCard}
+                     playCard={playCard}
                      discardCard={discardCard} clearSelection={clearSelection} player={player}/>
       ))}
     </div>
@@ -218,6 +311,8 @@ interface StockPileProps {
   isCurrentPlayer: boolean;
   gameState: GameState;
   selectCard: (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void;
+    playCard: (buildPileIndex: number) => Promise<MoveResult>;
+    discardCard: (discardPileIndex: number) => Promise<MoveResult>;
   clearSelection: () => void;
 }
 
@@ -230,6 +325,8 @@ export function StockPile({
                             isCurrentPlayer,
                             gameState,
                             selectCard,
+                              playCard,
+                              discardCard,
                             clearSelection
                           }: StockPileProps) {
   const {isCardBeingAnimated} = useCardAnimation();
@@ -260,6 +357,12 @@ export function StockPile({
       <h2 className="vertical-text">Talon ({player.stockPile.length})</h2>
     {player.stockPile.length > 0 ? (
       <div className="relative w-(--card-width) stock-pile">
+          {/* Placeholder slot behind the stock top card so the slot stays
+            visible while the top card is animating to a build / discard
+            pile. The label is hidden because there's a real card on top in
+            the normal case; the empty-pile case has its own EmptyCard
+            below. */}
+          <EmptyCard canDropCard={false} hideLabel className="absolute inset-0"/>
         {/* Show the top card unless it's being animated */}
         {isCardBeingAnimated(playerIndex, 'stock', player.stockPile.length - 1)
           ? (player.stockPile.length > 1 ? (
@@ -269,23 +372,36 @@ export function StockPile({
               isRevealed={!isHiddenMultiplayerCard(player.stockPile[player.stockPile.length - 2])}
               canBeGrabbed={false}
             />
-          ) : (
-            <EmptyCard/>
-          ))
+            ) : null)
           : (
-            <Card
-              hint={player.stockPile.length === 1 ? 'Top card in stock' : 'Top card in stock (hidden)'}
-              card={player.stockPile[player.stockPile.length - 1]}
-              isRevealed={true}
-              onClick={stockPileOnClick}
-              isSelected={
-                gameState.selectedCard?.source === 'stock' &&
-                gameState.selectedCard.index === player.stockPile.length - 1 &&
-                gameState.currentPlayerIndex === playerIndex
-              }
-              canBeGrabbed={isHuman && isCurrentPlayer}
-              className="relative z-10"
-            />
+                isHuman && isCurrentPlayer && player.stockPile[player.stockPile.length - 1]
+                    ? (
+                        <DraggableStockTop
+                            card={player.stockPile[player.stockPile.length - 1]}
+                            stockTopIndex={player.stockPile.length - 1}
+                            playerIndex={playerIndex}
+                            gameState={gameState}
+                            selectCard={selectCard}
+                            playCard={playCard}
+                            discardCard={discardCard}
+                            onClick={stockPileOnClick}
+                        />
+                    )
+                    : (
+                        <Card
+                            hint={player.stockPile.length === 1 ? 'Top card in stock' : 'Top card in stock (hidden)'}
+                            card={player.stockPile[player.stockPile.length - 1]}
+                            isRevealed={true}
+                            onClick={stockPileOnClick}
+                            isSelected={
+                                gameState.selectedCard?.source === 'stock' &&
+                                gameState.selectedCard.index === player.stockPile.length - 1 &&
+                                gameState.currentPlayerIndex === playerIndex
+                            }
+                            canBeGrabbed={isHuman && isCurrentPlayer}
+                            className="relative z-10"
+                        />
+                    )
           )}
       </div>
     ) : (
@@ -303,12 +419,64 @@ export function StockPile({
   </div>;
 }
 
+interface DraggableStockTopProps {
+    card: CardType;
+    stockTopIndex: number;
+    playerIndex: number;
+    gameState: GameState;
+    selectCard: StockPileProps['selectCard'];
+    playCard: StockPileProps['playCard'];
+    discardCard: StockPileProps['discardCard'];
+    onClick: MouseEventHandler;
+}
+
+function DraggableStockTop({
+                               card,
+                               stockTopIndex,
+                               playerIndex,
+                               gameState,
+                               selectCard,
+                               playCard,
+                               discardCard,
+                               onClick,
+                           }: DraggableStockTopProps) {
+    const source = {kind: 'stock' as const, index: stockTopIndex};
+    const draggable = useDraggableCard({
+        source,
+        card,
+        enabled: true,
+        gameState,
+        selectCard,
+        playCard,
+        discardCard,
+    });
+    const isDragging = useIsDragSource(source);
+    return (
+        <Card
+            hint="Top card in stock"
+            card={card}
+            isRevealed={true}
+            onClick={onClick}
+            isSelected={
+                gameState.selectedCard?.source === 'stock' &&
+                gameState.selectedCard.index === stockTopIndex &&
+                gameState.currentPlayerIndex === playerIndex
+            }
+            canBeGrabbed={true}
+            className={cn('relative z-10', isDragging && 'is-drag-source')}
+            extraProps={draggable}
+        />
+    );
+}
+
 interface HandSectionProps {
   player: Player;
   playerIndex: number;
   isCurrentPlayer: boolean;
   gameState: GameState;
   selectCard: (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void;
+    playCard: (buildPileIndex: number) => Promise<MoveResult>;
+    discardCard: (discardPileIndex: number) => Promise<MoveResult>;
   clearSelection: () => void;
 }
 
@@ -318,6 +486,8 @@ export function HandSection({
                               isCurrentPlayer,
                               gameState,
                               selectCard,
+                                playCard,
+                                discardCard,
                               clearSelection
                             }: HandSectionProps) {
   const {isCardBeingAnimated} = useCardAnimation();
@@ -372,22 +542,91 @@ export function HandSection({
               } : undefined}
             />
           ) : (
-            <Card
-              hint={`Hand card ${index + 1}`}
-              card={card}
-              isRevealed={isHuman}
-              onClick={handCardOnClick}
-              isSelected={
-                gameState.selectedCard?.source === 'hand' &&
-                gameState.selectedCard.index === index &&
-                gameState.currentPlayerIndex === playerIndex
-              }
-              canBeGrabbed={isHuman && isCurrentPlayer}
-              overlapIndex={handOverlaps ? index : undefined}
-            />
+              isHuman && isCurrentPlayer && card
+                  ? (
+                      <DraggableHandCard
+                          card={card}
+                          index={index}
+                          playerIndex={playerIndex}
+                          gameState={gameState}
+                          selectCard={selectCard}
+                          playCard={playCard}
+                          discardCard={discardCard}
+                          onClick={handCardOnClick}
+                          overlapIndex={handOverlaps ? index : undefined}
+                      />
+                  )
+                  : (
+                      <Card
+                          hint={`Hand card ${index + 1}`}
+                          card={card}
+                          isRevealed={isHuman}
+                          onClick={handCardOnClick}
+                          isSelected={
+                              gameState.selectedCard?.source === 'hand' &&
+                              gameState.selectedCard.index === index &&
+                              gameState.currentPlayerIndex === playerIndex
+                          }
+                          canBeGrabbed={isHuman && isCurrentPlayer}
+                          overlapIndex={handOverlaps ? index : undefined}
+                      />
+                  )
           )}
         </div>
       ))}
     </div>
   </div>;
+}
+
+interface DraggableHandCardProps {
+    card: CardType;
+    index: number;
+    playerIndex: number;
+    gameState: GameState;
+    selectCard: HandSectionProps['selectCard'];
+    playCard: HandSectionProps['playCard'];
+    discardCard: HandSectionProps['discardCard'];
+    onClick: MouseEventHandler;
+    overlapIndex?: number;
+}
+
+function DraggableHandCard({
+                               card,
+                               index,
+                               playerIndex,
+                               gameState,
+                               selectCard,
+                               playCard,
+                               discardCard,
+                               onClick,
+                               overlapIndex,
+                           }: DraggableHandCardProps) {
+    const source = {kind: 'hand' as const, index};
+    const draggable = useDraggableCard({
+        source,
+        card,
+        enabled: true,
+        gameState,
+        selectCard,
+        playCard,
+        discardCard,
+    });
+    const isDragging = useIsDragSource(source);
+    return (
+        <Card
+            hint={`Hand card ${index + 1}`}
+            card={card}
+            isRevealed
+            onClick={onClick}
+            isSelected={
+                gameState.selectedCard?.source === 'hand' &&
+                gameState.selectedCard.index === index &&
+                gameState.currentPlayerIndex === playerIndex
+            }
+            canBeGrabbed
+            overlapIndex={overlapIndex}
+            className={isDragging ? 'is-drag-source' : undefined}
+            extraProps={draggable}
+        />
+    );
 }

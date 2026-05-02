@@ -1,11 +1,11 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, test, vi } from 'vitest';
+import {render, screen} from '@testing-library/react';
+import {describe, expect, test, vi} from 'vitest';
 
-import { CenterArea } from '@/components/CenterArea';
-import { PlayerArea } from '@/components/PlayerArea';
-import type { AnimationContextType, CardAnimationData } from '@/contexts/CardAnimationContext';
-import { CardAnimationContext } from '@/contexts/useCardAnimation';
-import type { Card, GameConfig, GameState, Player } from '@/types';
+import {CenterArea} from '@/components/CenterArea';
+import {PlayerArea} from '@/components/PlayerArea';
+import type {AnimationContextType, CardAnimationData} from '@/contexts/CardAnimationContext';
+import {CardAnimationContext} from '@/contexts/useCardAnimation';
+import type {Card, GameConfig, GameState, Player} from '@/types';
 
 const FIXTURE_CONFIG: GameConfig = {
   DECK_SIZE: 162,
@@ -194,6 +194,7 @@ describe('Online animation masking', () => {
           isWinner={false}
           gameState={gameState}
           selectCard={vi.fn()}
+          playCard={vi.fn(async () => ({success: true, message: 'ok'}))}
           discardCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
           clearSelection={vi.fn()}
         />
@@ -221,6 +222,7 @@ describe('Online animation masking', () => {
           isWinner={false}
           gameState={gameState}
           selectCard={vi.fn()}
+          playCard={vi.fn(async () => ({success: true, message: 'ok'}))}
           discardCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
           clearSelection={vi.fn()}
         />
@@ -248,6 +250,7 @@ describe('Online animation masking', () => {
           isWinner={false}
           gameState={gameState}
           selectCard={vi.fn()}
+          playCard={vi.fn(async () => ({success: true, message: 'ok'}))}
           discardCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
           clearSelection={vi.fn()}
         />
@@ -275,6 +278,7 @@ describe('Online animation masking', () => {
           isWinner={false}
           gameState={gameState}
           selectCard={vi.fn()}
+          playCard={vi.fn(async () => ({success: true, message: 'ok'}))}
           discardCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
           clearSelection={vi.fn()}
         />

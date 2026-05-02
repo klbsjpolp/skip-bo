@@ -14,7 +14,9 @@ interface CardProps {
   stackIndex?: number,
   overlapIndex?: number,
   displayValue?: string,
-  hint?: string
+  hint?: string,
+  /** Extra props to spread on the root element — used by drag bindings (onPointerDown, data-*). */
+  extraProps?: HTMLAttributes<HTMLDivElement>
 }
 
 function getTextAndColourForCard(card: CardType | null, overriddenDisplayValue: string | undefined, isRevealed: boolean) {
@@ -41,6 +43,7 @@ const CardComponent: React.FC<CardProps> = ({
                                               overlapIndex = undefined,
                                               displayValue: overriddenDisplayValue,
                                               hint,
+                                              extraProps,
                                             }) => {
   // When a Skip-Bo card is rendered with a displayValue (e.g. settled on a build
   // pile), morph from the Skip-Bo face to the numeric value. Start in 'yes' via
@@ -124,6 +127,7 @@ const CardComponent: React.FC<CardProps> = ({
         className='card-morph-wrapper'
         style={style}
         {...interactiveProps}
+        {...extraProps}
       >
         {/* FROM (Skip-Bo) layer */}
         <div
@@ -170,6 +174,7 @@ const CardComponent: React.FC<CardProps> = ({
         style={style}
         data-value={card.value}
         {...interactiveProps}
+        {...extraProps}
       >
         {content}
       </div>

@@ -1,10 +1,12 @@
 import App from "@/App.tsx";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ThemeProvider } from 'next-themes'
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
+import {ThemeProvider} from 'next-themes'
 import type {Theme} from "@/types";
-import { themes} from "@/types";
+import {themes} from "@/types";
 import {CardAnimationProvider} from "@/contexts/CardAnimationContext.tsx";
+import {DragProvider} from "@/contexts/DragContext.tsx";
 import {CardAnimationLayer} from "@/components/CardAnimationLayer.tsx";
+import {DragGhost} from "@/components/DragGhost.tsx";
 import React from "react";
 
 const queryClient = new QueryClient()
@@ -18,8 +20,11 @@ function Root() {
                 themes={themes.map(t => t.value)}
             >
                 <CardAnimationProvider>
-                    <App />
-                    <CardAnimationLayer />
+                    <DragProvider>
+                        <App/>
+                        <CardAnimationLayer/>
+                        <DragGhost/>
+                    </DragProvider>
                 </CardAnimationProvider>
             </ThemeProvider>
         </QueryClientProvider>
