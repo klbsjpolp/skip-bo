@@ -49,8 +49,8 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: dorny/paths-filter@v3
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           base: ${{ github.event.workflow_run.head_branch || github.ref }}
@@ -73,7 +73,7 @@ jobs:
       release_tag: ${{ steps.release_meta.outputs.release_tag }}
       release_version: ${{ steps.release_meta.outputs.release_version }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: main # Garantir qu'on est sur main pour la release
           fetch-depth: 0 # Full history is required for conventional-commit version calculation
@@ -115,7 +115,7 @@ jobs:
     outputs:
       api_url: ${{ steps.get_url.outputs.value }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: ${{ needs.release.outputs.release_sha }}
       - uses: ./.github/actions/setup-node
@@ -124,7 +124,7 @@ jobs:
         with:
           tofu_wrapper: false
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: ca-central-1
           role-to-assume: ${{ secrets.AWS_OPENTOFU_ROLE_ARN || secrets.AWS_DEPLOY_ROLE_ARN }}
@@ -171,14 +171,14 @@ jobs:
     outputs:
       api_url: ${{ steps.resolve.outputs.value }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-node
 
       - uses: opentofu/setup-opentofu@v2
         with:
           tofu_wrapper: false
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: ca-central-1
           role-to-assume: ${{ secrets.AWS_OPENTOFU_ROLE_ARN || secrets.AWS_DEPLOY_ROLE_ARN }}
@@ -215,7 +215,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: aws-prod
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: ${{ needs.release.outputs.release_sha }}
       - uses: ./.github/actions/setup-node
@@ -252,7 +252,7 @@ jobs:
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./apps/web/dist
 
@@ -274,7 +274,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Publish GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.release.outputs.release_tag }}
           name: ${{ needs.release.outputs.release_tag }}
