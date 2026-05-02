@@ -172,7 +172,7 @@ function DiscardPile({
     }}
     style={{height: `calc(var(--card-height) + ${(pile.length <= 1 ? 0 : pile.length - 1) * 20}px)`}}
   >
-        <EmptyCard canDropCard={computedPiles.length === 0} className="absolute inset-0"/>
+        <EmptyCard canDropCard={computedPiles.length === 0} hideLabel={computedPiles.length > 0} className="absolute inset-0"/>
     {computedPiles.map(({card, cardIdx, isAnimated, key}) => {
       if (isAnimated) {
         const fakeCard = <div key={key} className="card opacity-0 pointer-events-none"
