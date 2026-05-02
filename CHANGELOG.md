@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.28.0](https://github.com/klbsjpolp/skip-bo/compare/v1.27.1...v1.28.0) (2026-05-02)
+
+
+### Features
+
+* **settings:** add commit command skills to allowed Bash actions ([84fa417](https://github.com/klbsjpolp/skip-bo/commit/84fa41710e3068ae72ac6ee295fc62c2cdc7376a))
+* **themes:** refine midnight card back ([1a2a74d](https://github.com/klbsjpolp/skip-bo/commit/1a2a74d8e3e7bbaf7f26b395ebe37df1c2e63e33))
+* **themes:** triple star density in midnight body background ([a7c7e50](https://github.com/klbsjpolp/skip-bo/commit/a7c7e5067837b6fa11ce9a2ed835e189b91ecf9c))
+
+
+
 ## [1.27.1](https://github.com/klbsjpolp/skip-bo/compare/v1.27.0...v1.27.1) (2026-05-01)
 
 
