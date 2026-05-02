@@ -23,6 +23,7 @@ import {
   triggerCompletedBuildPileAnimation,
 } from '@/services/completedBuildPileAnimationService';
 import {useCardAnimation} from "@/contexts/useCardAnimation.ts";
+import {consumeDragCommitOverride} from '@/services/dragCommitOverride';
 import {getCompletedBuildPileCards} from '@/lib/retreatPile';
 import {planHandRefill} from '@/lib/handRefill';
 
@@ -132,6 +133,10 @@ export function useSkipBoGame() {
     // `isCardBeingAnimated` in PlayerArea/CenterArea.
     let playAnimationDuration = 0;
 
+
+    const dragOverride = consumeDragCommitOverride();
+
+    // Trigger play animation first
     try {
       const playerAreaElement = document.querySelector<HTMLElement>(`.player-area[data-player-index="${currentState.currentPlayerIndex}"]`);
       const centerAreaElement = document.querySelector('.center-area') as HTMLElement;
@@ -157,6 +162,15 @@ export function useSkipBoGame() {
           if (discardContainer && currentState.selectedCard.discardPileIndex !== undefined) {
             startPosition = getDiscardTopCardPosition(discardContainer, currentState.selectedCard.discardPileIndex);
           }
+        }
+
+        // If the play was committed via drag-and-drop, override the start
+        // position with where the user released the pointer so the fly-to-target
+        // animation continues from the ghost rather than jumping back to the
+        // source slot.
+        if (dragOverride?.startPosition) {
+          startPosition = dragOverride.startPosition;
+          startAngleDeg = undefined;
         }
 
         // Calculate end position (build pile)
@@ -287,13 +301,17 @@ export function useSkipBoGame() {
     // their visual animations because the animationGate keeps waiting on
     // `waitForAnimations()` until the queue is empty.
     let discardAnimationDuration = 0;
+    const dragOverride = consumeDragCommitOverride();
+
+    // Trigger animation before state change
     try {
       const playerAreaElement = document.querySelector<HTMLElement>(`.player-area[data-player-index="${currentState.currentPlayerIndex}"]`);
 
       if (playerAreaElement) {
         const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
         if (handContainer) {
-          const startPosition = getHandCardPosition(handContainer, currentState.selectedCard.index);
+          const startPosition = dragOverride?.startPosition
+              ?? getHandCardPosition(handContainer, currentState.selectedCard.index);
           const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
           if (discardContainer) {
             const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
@@ -311,7 +329,9 @@ export function useSkipBoGame() {
               targetRevealed: true,
               initialDelay: 0,
               duration: discardAnimationDuration,
-              startAngleDeg: getHandCardAngle(handContainer, currentState.selectedCard.index),
+              startAngleDeg: dragOverride?.startPosition
+                  ? undefined
+                  : getHandCardAngle(handContainer, currentState.selectedCard.index),
               targetSettledInState: true,
               targetPileLength: previousDiscardPileLength + 1,
               sourceInfo: {

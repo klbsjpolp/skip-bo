@@ -1,7 +1,7 @@
-import type {GameState, Card as CardType} from '@/types';
-import { PlayerArea } from '@/components/PlayerArea';
-import { CenterArea } from '@/components/CenterArea';
-import { cn } from '@/lib/utils';
+import type {Card as CardType, GameState} from '@/types';
+import {PlayerArea} from '@/components/PlayerArea';
+import {CenterArea} from '@/components/CenterArea';
+import {cn} from '@/lib/utils';
 
 export interface GameBoardProps {
   gameState: GameState;
@@ -38,13 +38,14 @@ export function GameBoard({
         isWinner={gameState.winnerIndex === 1}
         gameState={gameState}
         selectCard={selectCard}
+        playCard={playCard}
         discardCard={discardCard}
         clearSelection={clearSelection}
       />
 
       {/* Center Game Area */}
-      <CenterArea 
-        gameState={gameState} 
+      <CenterArea
+          gameState={gameState}
         playCard={playCard}
         canPlayCard={canPlayCard}
       />
@@ -62,6 +63,7 @@ export function GameBoard({
         isWinner={gameState.winnerIndex === 0}
         gameState={gameState}
         selectCard={selectCard}
+        playCard={playCard}
         discardCard={discardCard}
         clearSelection={clearSelection}
       />

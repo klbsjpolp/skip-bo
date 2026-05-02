@@ -1,10 +1,26 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
-import { canPlayCard, gameReducer, getCompletedBuildPileCards, initialGameState, type Card, type GameState, type MoveResult } from '@skipbo/game-core';
-import { serializeClientGameView, type ClientGameView, type CreateRoomResponse, type DisconnectedSeatInfo, type LobbySeatInfo, type LobbyReadyState, type ServerMessage } from '@skipbo/multiplayer-protocol';
+import {
+  canPlayCard,
+  type Card,
+  gameReducer,
+  type GameState,
+  getCompletedBuildPileCards,
+  initialGameState,
+  type MoveResult
+} from '@skipbo/game-core';
+import {
+  type ClientGameView,
+  type CreateRoomResponse,
+  type DisconnectedSeatInfo,
+  type LobbyReadyState,
+  type LobbySeatInfo,
+  serializeClientGameView,
+  type ServerMessage
+} from '@skipbo/multiplayer-protocol';
 
-import type { GameAction } from '@/state/gameActions';
-import { useCardAnimation } from '@/contexts/useCardAnimation';
+import type {GameAction} from '@/state/gameActions';
+import {useCardAnimation} from '@/contexts/useCardAnimation';
 import {
   setGlobalCompletedPileAnimationContext,
   triggerCompletedBuildPileAnimation,
@@ -14,7 +30,8 @@ import {
   setGlobalDrawAnimationContext,
   triggerMultipleDrawAnimations,
 } from '@/services/drawAnimationService';
-import { setGlobalAnimationContext, triggerAIAnimation } from '@/services/aiAnimationService';
+import {setGlobalAnimationContext, triggerAIAnimation} from '@/services/aiAnimationService';
+import {consumeDragCommitOverride} from '@/services/dragCommitOverride';
 import {
   calculateAnimationDuration,
   getBuildPilePosition,
@@ -24,7 +41,7 @@ import {
   getNextDiscardCardPosition,
   getStockCardPosition,
 } from '@/utils/cardPositions';
-import { clearOnlineSession } from '@/state/sessionPersistence';
+import {clearOnlineSession} from '@/state/sessionPersistence';
 
 type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
@@ -820,6 +837,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     // The optimistic view is committed immediately afterwards so the user can
     // continue selecting / playing while everything animates in parallel.
     let playAnimationDuration = 0;
+    const dragOverride = consumeDragCommitOverride();
     try {
       const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
       const centerAreaElement = document.querySelector('.center-area') as HTMLElement;
@@ -844,6 +862,12 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
           if (discardContainer && currentState.selectedCard.discardPileIndex !== undefined) {
             startPosition = getDiscardTopCardPosition(discardContainer, currentState.selectedCard.discardPileIndex);
           }
+        }
+
+        // Drag-and-drop commit: start the play animation from the drop point.
+        if (dragOverride?.startPosition) {
+          startPosition = dragOverride.startPosition;
+          startAngleDeg = undefined;
         }
 
         const endPosition = getBuildPilePosition(centerAreaElement, buildPile);
@@ -940,13 +964,16 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     // input — they can already select / play another card while this discard
     // is still flying. The discard ends the human turn server-side, so any
     // further play attempt is rejected (and the snapshot reconciles).
+    const dragOverride = consumeDragCommitOverride();
+
     try {
       const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
 
       if (playerAreaElement) {
         const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
         if (handContainer) {
-          const startPosition = getHandCardPosition(handContainer, currentState.selectedCard.index);
+          const startPosition = dragOverride?.startPosition
+              ?? getHandCardPosition(handContainer, currentState.selectedCard.index);
           const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
           if (discardContainer) {
             const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
@@ -965,7 +992,9 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
               targetRevealed: true,
               initialDelay: 0,
               duration: animationDuration,
-              startAngleDeg: getHandCardAngle(handContainer, currentState.selectedCard.index),
+              startAngleDeg: dragOverride?.startPosition
+                  ? undefined
+                  : getHandCardAngle(handContainer, currentState.selectedCard.index),
               targetSettledInState: true,
               targetPileLength: previousDiscardPileLength + 1,
               sourceInfo: {

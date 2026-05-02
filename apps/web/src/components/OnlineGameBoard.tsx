@@ -1,15 +1,16 @@
-import { CenterArea } from '@/components/CenterArea';
-import { GameBoard } from '@/components/GameBoard';
-import { DiscardPiles, HandSection, PlayerArea, StockPile } from '@/components/PlayerArea';
-import type { GameBoardProps } from '@/components/GameBoard';
-import { VictoryEffects } from '@/components/VictoryEffects';
-import { cn } from '@/lib/utils';
+import {CenterArea} from '@/components/CenterArea';
+import type {GameBoardProps} from '@/components/GameBoard';
+import {GameBoard} from '@/components/GameBoard';
+import {DiscardPiles, HandSection, PlayerArea, StockPile} from '@/components/PlayerArea';
+import {VictoryEffects} from '@/components/VictoryEffects';
+import {cn} from '@/lib/utils';
 
 type OnlineGameBoardProps = GameBoardProps;
 
 interface RemoteSeatProps {
   clearSelection: OnlineGameBoardProps['clearSelection'];
   discardCard: OnlineGameBoardProps['discardCard'];
+  playCard: OnlineGameBoardProps['playCard'];
   gameState: OnlineGameBoardProps['gameState'];
   isCurrentPlayer: boolean;
   isWinner: boolean;
@@ -22,6 +23,7 @@ interface RemoteSeatProps {
 function RemoteSeat({
   clearSelection,
   discardCard,
+                      playCard,
   gameState,
   isCurrentPlayer,
   isWinner,
@@ -62,6 +64,8 @@ function RemoteSeat({
           isCurrentPlayer={isCurrentPlayer}
           gameState={gameState}
           selectCard={selectCard}
+          playCard={playCard}
+          discardCard={discardCard}
           clearSelection={clearSelection}
         />
 
@@ -72,6 +76,8 @@ function RemoteSeat({
             isCurrentPlayer={isCurrentPlayer}
             gameState={gameState}
             selectCard={selectCard}
+            playCard={playCard}
+            discardCard={discardCard}
             clearSelection={clearSelection}
           />
         </div>
@@ -85,6 +91,7 @@ function RemoteSeat({
             isCurrentPlayer={isCurrentPlayer}
             gameState={gameState}
             discardCard={discardCard}
+            playCard={playCard}
             selectCard={selectCard}
             clearSelection={clearSelection}
           />
@@ -139,6 +146,7 @@ export function OnlineGameBoard({
                 key={`remote-seat-${player.seatIndex ?? playerIndex}`}
                 clearSelection={clearSelection}
                 discardCard={discardCard}
+                playCard={playCard}
                 gameState={gameState}
                 isCurrentPlayer={gameState.currentPlayerIndex === playerIndex}
                 isWinner={gameState.winnerIndex === playerIndex}
@@ -172,6 +180,7 @@ export function OnlineGameBoard({
         isWinner={gameState.winnerIndex === 0}
         gameState={gameState}
         selectCard={selectCard}
+        playCard={playCard}
         discardCard={discardCard}
         clearSelection={clearSelection}
       />
