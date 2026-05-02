@@ -9,3 +9,11 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    groups:
+      react-dependencies:
+        patterns:
+          - "react"
+          - "react-dom"
+          # Optional: include types if using TypeScript
+          - "@types/react"
+          - "@types/react-dom"
