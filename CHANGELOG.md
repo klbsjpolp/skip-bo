@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.29.5](https://github.com/klbsjpolp/skip-bo/compare/v1.29.4...v1.29.5) (2026-05-02)
+
+
+### Bug Fixes
+
+* **themes:** adjust card number alignment in paper theme ([22f685b](https://github.com/klbsjpolp/skip-bo/commit/22f685b39a7cdcbbfb96fce9bee254371fb0f88a))
+
+
+
 ## [1.29.4](https://github.com/klbsjpolp/skip-bo/compare/v1.29.3...v1.29.4) (2026-05-02)
 
 
