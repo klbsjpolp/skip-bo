@@ -17,7 +17,7 @@ Themes group into five categories along a mood / visual-language axis. The goal 
 
 | Category | What it looks like | Themes |
 |---|---|---|
-| **Clean & Minimal** | Flat surfaces, restrained palettes, no texture. The card is the star. | [light](light.md), [dark](dark.md), [metro](metro.md) |
+| **Clean & Minimal** | Flat surfaces, restrained palettes, no texture. The card is the star. | [paper](paper.md), [dark](dark.md), [metro](metro.md) |
 | **Soft & Playful** | High-key palettes, rounded shapes, decorative backgrounds. Reads as friendly and casual. | [pastel](pastel.md), [bonbon](bonbon.md), [rainbow](rainbow.md) |
 | **Retro & Vintage** | Era-specific palettes and shapes, reference-driven, avoids modern effects. | [retro](retro.md), [retro-space](retro-space.md) |
 | **Futuristic & Digital** | Glow, blur, animated gradients, high contrast, lean into screen-native effects. | [neon](neon.md), [glass](glass.md) |
@@ -47,7 +47,7 @@ A theme that only overrides the palette produces a minimal look. A theme that al
 
 ## Per-Theme Notes
 
-- [light](light.md)
+- [paper](paper.md)
 - [dark](dark.md)
 - [pastel](pastel.md)
 - [bonbon](bonbon.md)

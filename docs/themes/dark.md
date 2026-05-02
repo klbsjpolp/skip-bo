@@ -11,7 +11,7 @@
 
 - **Category:** Clean & Minimal
 - **Label / icon:** "Sombre" / `Moon`
-- **Role:** Standard dark mode — a comfortable low-light counterpart to [light](light.md).
+- **Role:** Standard dark mode — a comfortable low-light counterpart to [paper](paper.md).
 
 ## Palette & Typography
 

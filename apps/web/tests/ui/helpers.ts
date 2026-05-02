@@ -12,7 +12,7 @@ const stableScreenshotCss = readFileSync(
 const cardTokens = ['--background', '--foreground', '--selected-border-color', '--card-g1'] as const;
 
 export const representativeThemes: Theme[] = [
-  'theme-light',
+  'theme-paper',
   'theme-midnight',
   'theme-glass',
   'theme-retro-space',
