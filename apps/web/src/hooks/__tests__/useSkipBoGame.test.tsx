@@ -28,9 +28,13 @@ const {
   const workingState = {
     current: null as GameState | null,
   };
+  const actorRef = {
+    getSnapshot: () => ({ context: { G: workingState.current } }),
+  };
   const useMachineMock = vi.fn(() => ([
     { context: { G: workingState.current } },
     send,
+    actorRef,
   ] as const));
 
   return {
