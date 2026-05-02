@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.29.0](https://github.com/klbsjpolp/skip-bo/compare/v1.28.2...v1.29.0) (2026-05-02)
+
+
+### Features
+
+* **themes:** replace "light" theme with redesigned "paper" theme ([beb3ac0](https://github.com/klbsjpolp/skip-bo/commit/beb3ac072d2047a170e4655e5ff211b0f33f035e))
+
+
+
 ## [1.28.2](https://github.com/klbsjpolp/skip-bo/compare/v1.28.1...v1.28.2) (2026-05-02)
 
 
