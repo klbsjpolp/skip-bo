@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <symbol id="o-swan" viewBox="-60 -50 120 100">
+      <!-- ground shadow -->
+      <ellipse cx="0" cy="42" rx="42" ry="4" fill="rgba(0,0,0,0.18)"/>
+      <!-- body: large light triangle -->
+      <polygon points="-50,40 50,40 30,0" fill="var(--l)"/>
+      <!-- folded wing (shaded) -->
+      <polygon points="-30,40 30,0 10,30" fill="var(--d)"/>
+      <!-- pointed tail -->
+      <polygon points="-50,40 -38,18 -28,40" fill="var(--d)"/>
+      <!-- S-curve neck (3 facets) -->
+      <polygon points="30,0 36,-18 18,-12" fill="var(--l)"/>
+      <polygon points="36,-18 22,-30 18,-12" fill="var(--d)"/>
+      <polygon points="22,-30 38,-38 30,-22" fill="var(--l)"/>
+      <!-- head -->
+      <polygon points="38,-38 30,-22 14,-28" fill="var(--l)"/>
+      <!-- beak -->
+      <polygon points="14,-28 4,-26 12,-22" fill="var(--b)"/>
+      <!-- eye -->
+      <circle cx="22" cy="-28" r="1.2" fill="#2c2030"/>
+    </symbol>
+  </defs>
+
+  <!-- one swan per tile, with a few origami confetti shapes for movement -->
+  <g style="--l:#fdf8ee; --d:#efbac4; --b:#a82960;" opacity="0.85">
+    <use href="#o-swan" x="60" y="60" width="120" height="120"/>
+  </g>
+
+  <!-- diamond confetti -->
+  <polygon points="20,30 28,38 20,46 12,38" fill="#a82960" opacity="0.7"/>
+  <polygon points="210,40 218,48 210,56 202,48" fill="#d77a9a" opacity="0.65"/>
+  <polygon points="30,200 38,208 30,216 22,208" fill="#efbac4" opacity="0.7"/>
+  <polygon points="200,210 208,218 200,226 192,218" fill="#8a1f4a" opacity="0.7"/>
+</svg>

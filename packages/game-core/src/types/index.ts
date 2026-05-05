@@ -45,7 +45,7 @@ export interface MoveResult {
 export const themes = [
   { value: 'theme-paper' as const, label: 'Papier', icon: 'NotebookPen' },
   { value: 'theme-midnight' as const, label: 'Minuit', icon: 'Moon' },
-  { value: 'theme-pastel' as const, label: 'Pastel', icon: 'Flower2' },
+  { value: 'theme-origami' as const, label: 'Origami', icon: 'Bird' },
   { value: 'theme-bonbon' as const, label: 'Bonbon', icon: 'Candy' },
   { value: 'theme-rainbow' as const, label: 'Arc-en-ciel', icon: 'Rainbow' },
   { value: 'theme-metro' as const, label: 'Metro', icon: 'Building2' },

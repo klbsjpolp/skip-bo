@@ -1,0 +1,244 @@
+.theme-origami {
+  --primary: #a82960;
+  --primary-foreground: #fdf8ee;
+  --secondary: #f7dde3;
+  --secondary-foreground: #2c2030;
+  --success: #d77a9a;
+  --success-foreground: #fdf8ee;
+  --border: #efbac4;
+  --muted: #cddcd9;
+  --muted-foreground: #5b3a47;
+  --accent: #efbac4;
+  --accent-foreground: #8a1f4a;
+
+  --background: hsl(174 17% 76%);
+  --foreground: #2c2030;
+  --text-color: #2c2030;
+  --title-color: #8a1f4a;
+
+  /* Burgundy = the colour of the paper's reverse side. Used for the corner
+     fold on the face and the burgundy half of the back. */
+  --paper-envers: #8a1f4a;
+
+  --card-front-color: #fdf8ee;
+  --card-border-color: #efbac4;
+  --card-shadow:
+    0 1px 2px rgba(0,0,0,0.08),
+    0 6px 14px rgba(46,42,38,0.18);
+  --card-radius: 4px;
+  --card-back-color: var(--paper-envers);
+  --card-back-bg: linear-gradient(
+    -135deg,
+    var(--paper-envers) 0%, var(--paper-envers) 49.5%,
+    #f7dde3 50.5%, #f7dde3 100%
+  );
+
+  --selected-border-color: #a82960;
+  --selected-shadow: 0 0 0 3px rgba(253,248,238,0.7), 0 0 22px rgba(168,41,96,0.45);
+  --can-drop-shadow: 0 12px 26px rgba(168,41,96,0.22);
+  --drop-indicator-color: #8a1f4a;
+  --active-turn-color: #a82960;
+
+  --skipbo-text: var(--paper-envers);
+  --skipbo-bg: hsl(174 17% 92%);
+
+  /* Bottom-half tint per card range — light enough that the dark digit stays
+     readable when it crosses the fold midline. */
+  --card-g1: hsl(346 62% 92%);
+  --card-g2: hsl(349 62% 83%);
+  --card-g3: hsl(339 54% 66%);
+
+  /* victory: folded swans + confetti pattern */
+  --victory-border: #8a1f4a;
+  --victory-accent: #efbac4;
+  --victory-accent-soft: color-mix(in srgb, var(--victory-accent) 40%, transparent);
+  --victory-piece-1: #8a1f4a;
+  --victory-piece-2: #a82960;
+  --victory-piece-3: #d77a9a;
+  --victory-piece-4: #efbac4;
+  --victory-burst-size: 12px;
+  --victory-accent-opacity: 0.7;
+  --victory-pattern-opacity: 0.5;
+  --victory-pattern-image: url("./textures/origami-swans.svg");
+  --victory-pattern-size: 160px 160px;
+  --victory-pattern-drift-to: 160px 160px;
+  --victory-shine-opacity: 0.28;
+  
+  --plied-corner-size: 12px;
+  @media (width >= 64rem) {
+    --plied-corner-size: 16px;
+  }
+
+  body {
+    font-family: 'Shippori Mincho', 'Cormorant Garamond', serif;
+    background-image:
+      radial-gradient(ellipse at 80% 100%, #9bb4b1 0%, transparent 55%),
+      radial-gradient(ellipse at 0% 0%, #cddcd9 0%, transparent 50%),
+      url("./textures/origami-flowers.svg");
+    background-repeat: no-repeat, no-repeat, repeat;
+    background-size: auto, auto, 800px 600px;
+    background-color: #b9cdcb;
+    background-attachment: fixed;
+  }
+
+  h1, h2, .card-number {
+    font-family: 'Shippori Mincho', serif;
+    letter-spacing: 0.04em;
+  }
+
+  .player-area,
+  .center-area {
+    background:
+      linear-gradient(180deg, rgba(253,248,238,0.85) 0%, rgba(247,221,227,0.7) 100%);
+    border-color: rgba(168,41,96,0.3);
+    box-shadow: 0 8px 22px rgba(46,42,38,0.18);
+    backdrop-filter: blur(2px);
+  }
+
+  /* Numbers stay in neutral ink — colour identity comes from the bottom-half
+     tint, not the digit. */
+  .card.card-range-1,
+  .card.card-range-2,
+  .card.card-range-3 {
+    color: var(--text-color);
+  }
+
+  /* Two-tone face: top half cream, bottom half tinted by range. */
+  .card.normal-card.card-range-1 {
+    background-image: linear-gradient(
+      -45deg,
+      var(--card-front-color) 0%, var(--card-front-color) 50%,
+      var(--card-g1) 50%, var(--card-g1) 100%
+    );
+  }
+  .card.normal-card.card-range-2 {
+    background-image: linear-gradient(
+      -45deg,
+      var(--card-front-color) 0%, var(--card-front-color) 50%,
+      var(--card-g2) 50%, var(--card-g2) 100%
+    );
+  }
+  .card.normal-card.card-range-3 {
+    background-image: linear-gradient(
+      -45deg,
+      var(--card-front-color) 0%, var(--card-front-color) 50%,
+      var(--card-g3) 50%, var(--card-g3) 100%
+    );
+  }
+
+  /* Front fold (top-right) — always burgundy, the "envers" of the paper. */
+  .card.normal-card,
+  .card.skipbo-text {
+    overflow: visible;
+  }
+
+  .card.normal-card::after,
+  .card.skipbo-text::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: calc(var(--plied-corner-size) - 2px);
+    height: calc(var(--plied-corner-size) - 2px);
+    background: var(--paper-envers);
+    clip-path: polygon(0 0, 100% 100%, 0 100%);
+    pointer-events: none;
+    z-index: 3;
+    filter: drop-shadow(-1px 1px 1px rgba(0,0,0,0.18));
+  }
+
+  /* Crease shadow underneath the fold */
+  .card.normal-card::before,
+  .card.skipbo-text::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: var(--plied-corner-size);
+    height: var(--plied-corner-size);
+    background: linear-gradient(
+      225deg,
+      rgba(0,0,0,0.18) 0%,
+      rgba(0,0,0,0.06) 35%,
+      transparent 60%
+    );
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Back of card: missing corner is on the OPPOSITE side from the front
+     fold (top-left), because flipping the paper mirrors the corner. */
+  .card:has(> .back) {
+    clip-path: polygon(var(--plied-corner-size) 0, 100% 0, 100% 100%, 0 100%, 0 var(--plied-corner-size));
+  }
+  .normal-card, .skipbo-text {
+    clip-path: polygon(0 0, calc(100% - var(--plied-corner-size)) 0, 100% var(--plied-corner-size), 100% 100%, 0 100%);
+  }
+
+  /* Subtle inner washi border on the back */
+  .card .back::after {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border: 1px solid rgba(253,248,238,0.4);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+
+  /* Empty placeholder: dashed magenta on cream */
+  .empty-card,
+  .placeholder {
+    background: rgba(253,248,238,0.45);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  /* Skip-Bo card — washi sheet whose face shows a fully-folded paper crane,
+     with the underlying crease pattern still visible on the paper. */
+  .card.skipbo-text {
+    .card-inner-2 {
+      background-image: url("./textures/origami-crane.svg");
+      background-position: center 56%, center, center, center, center;
+      background-size: 100% auto, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+      background-repeat: no-repeat;
+    }
+
+    .card-number {
+      position: absolute;
+      top: 2%;
+      left: 40%;
+      transform: translateX(-50%);
+      color: var(--paper-envers);
+      font-family: 'Shippori Mincho', serif;
+      font-weight: 700;
+      font-size: clamp(8px, calc(var(--card-width) * 0.16), 11px);
+      letter-spacing: 0.14em;
+      line-height: 1;
+      z-index: 4;
+      white-space: nowrap;
+    }
+
+    .card-corner-number {
+      @apply invisible;
+    }
+  }
+  
+  .card .card-corner-number {
+    @apply top-0 lg:top-0.5 left-1 lg:left-1;
+  }
+
+  /* Diamond-shaped victory burst pieces (origami confetti) */
+  .victory-burst-piece {
+    border-radius: 2px;
+    transform-origin: center;
+    transform: translate3d(-50%, -50%, 0) scale(0.25) rotate(45deg);
+  }
+
+  .player-area.winner {
+    box-shadow:
+      0 0 0 2px var(--victory-border),
+      0 0 0 6px color-mix(in srgb, var(--victory-accent) 22%, transparent),
+      0 14px 36px rgba(138,31,74,0.3);
+  }
+}
