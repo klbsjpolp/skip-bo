@@ -445,6 +445,35 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                 const nextState = cloneGameStateFromView(message.view);
                 const drawTransitions = collectDrawTransitions(previousState, nextState);
                 const opponentTransition = inferOpponentTransition(previousState, nextState);
+                // When an opponent plays the last card of their hand, the slot
+                // it left behind gets refilled in the next snapshot. Comparing
+                // hand[index] before/after only catches null→card transitions,
+                // so the just-played slot would otherwise pop in without
+                // animation while its 4 siblings fly from the deck.
+                if (
+                  opponentTransition &&
+                  previousState.selectedCard?.source === 'hand' &&
+                  previousState.currentPlayerIndex !== 0
+                ) {
+                  const opponentIndex = previousState.currentPlayerIndex;
+                  const playedSlotIndex = previousState.selectedCard.index;
+                  const refilledCard = nextState.players[opponentIndex].hand[playedSlotIndex];
+                  const existing = drawTransitions.find((t) => t.playerIndex === opponentIndex);
+                  if (refilledCard && (!existing || !existing.handIndices.includes(playedSlotIndex))) {
+                    if (existing) {
+                      const insertAt = existing.handIndices.findIndex((i) => i > playedSlotIndex);
+                      const position = insertAt === -1 ? existing.handIndices.length : insertAt;
+                      existing.cards.splice(position, 0, { ...refilledCard });
+                      existing.handIndices.splice(position, 0, playedSlotIndex);
+                    } else {
+                      drawTransitions.push({
+                        cards: [{ ...refilledCard }],
+                        handIndices: [playedSlotIndex],
+                        playerIndex: opponentIndex,
+                      });
+                    }
+                  }
+                }
                 const turnChanged = previousView.currentPlayerIndex !== message.view.currentPlayerIndex;
                 const holdPreviousTurnPresentation = () => {
                   if (!turnChanged) {
