@@ -27,6 +27,7 @@ const willPlayCardEmptyHand = (gameState: GameState): boolean => {
 
 export const gameMachine = createMachine({
   id: 'skipbo',
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   types: {} as unknown as {
     context: {
       G: GameState;
