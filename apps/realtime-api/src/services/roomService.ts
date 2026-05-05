@@ -5,7 +5,6 @@ import type {
   JoinRoomRequest,
   JoinRoomResponse,
   LobbySeatInfo,
-  LobbyReadyState,
   ServerMessage
 } from '@skipbo/multiplayer-protocol';
 import { normalizePlayerName, normalizeRoomCode, serializeClientGameView } from '@skipbo/multiplayer-protocol';
@@ -247,7 +246,7 @@ const removeLobbyPlayer = (room: RoomRecord, seatIndex: number): LobbyPlayerReco
 const buildLobbySeats = (room: RoomRecord): LobbySeatInfo[] =>
   getLobbyPlayers(room).map((lp) => ({
     seatIndex: lp.seatIndex,
-    readyState: lp.readyState as LobbyReadyState,
+    readyState: lp.readyState,
     displayName: lp.readyState === 'never-ready' ? null : lp.playerName,
   }));
 
