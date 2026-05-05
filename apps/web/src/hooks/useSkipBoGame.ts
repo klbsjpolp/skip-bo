@@ -41,9 +41,8 @@ const willPlayCardEmptyHand = (gameState: GameState): boolean => {
 };
 
 export function useSkipBoGame() {
-  const [snapshot, send, actorRef] = useMachine(gameMachine);
+  const [snapshot, dispatch, actorRef] = useMachine(gameMachine);
   const state = snapshot.context.G;
-  const dispatch = send;                     // alias pour préserver la suite du code
   const stateRef = useRef<GameState>(state);
   const interactionLockRef = useRef(false);
   const { startAnimation, removeAnimation, waitForAnimations } = useCardAnimation();
@@ -92,7 +91,7 @@ export function useSkipBoGame() {
     // playCard from pointerup) read the updated selectedCard instead of the
     // stale snapshot that React hasn't committed yet.
     stateRef.current = actorRef.getSnapshot().context.G;
-  }, [dispatch, isInteractionBlocked, actorRef]);
+  }, [dispatch, isInteractionBlocked]);
 
   const playCard = useCallback(async (buildPile: number): Promise<MoveResult> => {
     const currentState = stateRef.current;
