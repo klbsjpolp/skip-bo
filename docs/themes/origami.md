@@ -22,11 +22,12 @@
 
 ## Current Features
 
-- Body background tiles a custom SVG of origami flowers (8-petal stars with bicolor light/shade triangles for the folded-paper illusion) in five sizes and four palette variations, layered over a soft blue-grey gradient.
-- Card front shows a folded-corner motif on the **top-right**: a magenta-deep triangle (the paper's reverse) with a soft crease shadow underneath, scaled up at desktop breakpoints.
-- Card back is a 135° two-tone diagonal (magenta deep / rose pale) with a thin ivory inner border evoking washi paper.
-- Victory pattern tiles a folded swan (corps + S-curve neck + beak + folded wing) plus diamond confetti pieces.
-- Victory burst pieces are diamond-shaped (rotated 45° squares).
+- Body background tiles a custom SVG of 6-petal origami flowers (each petal split into a light + shade half by a central crease for the folded-paper illusion) in five sizes and four palette variations, layered over a soft blue-grey gradient.
+- Card face is a two-tone diagonal split: cream top-left, range tint bottom-right. The range tint comes from `--card-g{1,2,3}` so 1-4 / 5-8 / 9-12 read at a glance without recolouring the digit.
+- Card face has a folded-corner motif at the **top-right**: a magenta-deep triangle (the paper's reverse) cut into the card outline via `clip-path`, with a soft crease shadow underneath. Sized via `--plied-corner-size` (12px / 16px desktop).
+- Card back uses a `-135°` two-tone diagonal (magenta deep / rose pale) with a thin ivory inner washi border, and its **top-left** corner is clipped — mirroring the face's fold so the same physical corner appears missing when the card is flipped.
+- Skip-Bo cards display a folded paper crane (orizuru) silhouette built from layered triangular facets (body, two wings, S-curve neck, head, beak, tail) over the cream washi face, with the "Skip-Bo" label set in Shippori Mincho at top.
+- Victory pattern tiles a folded swan plus diamond confetti pieces; victory burst pieces are diamond-shaped (rotated 45° squares).
 
 ## Improvement Ideas
 

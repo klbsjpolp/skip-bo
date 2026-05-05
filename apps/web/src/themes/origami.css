@@ -63,7 +63,7 @@
   --victory-pattern-size: 160px 160px;
   --victory-pattern-drift-to: 160px 160px;
   --victory-shine-opacity: 0.28;
-  
+
   --plied-corner-size: 12px;
   @media (width >= 64rem) {
     --plied-corner-size: 16px;
@@ -86,8 +86,7 @@
     letter-spacing: 0.04em;
   }
 
-  .player-area,
-  .center-area {
+  .player-area, .center-area {
     background:
       linear-gradient(180deg, rgba(253,248,238,0.85) 0%, rgba(247,221,227,0.7) 100%);
     border-color: rgba(168,41,96,0.3);
@@ -95,137 +94,135 @@
     backdrop-filter: blur(2px);
   }
 
-  /* Numbers stay in neutral ink — colour identity comes from the bottom-half
-     tint, not the digit. */
-  .card.card-range-1,
-  .card.card-range-2,
-  .card.card-range-3 {
-    color: var(--text-color);
+  .player-area.winner {
+    box-shadow:
+      0 0 0 2px var(--victory-border),
+      0 0 0 6px color-mix(in srgb, var(--victory-accent) 22%, transparent),
+      0 14px 36px rgba(138,31,74,0.3);
   }
 
-  /* Two-tone face: top half cream, bottom half tinted by range. */
-  .card.normal-card.card-range-1 {
-    background-image: linear-gradient(
-      -45deg,
-      var(--card-front-color) 0%, var(--card-front-color) 50%,
-      var(--card-g1) 50%, var(--card-g1) 100%
-    );
-  }
-  .card.normal-card.card-range-2 {
-    background-image: linear-gradient(
-      -45deg,
-      var(--card-front-color) 0%, var(--card-front-color) 50%,
-      var(--card-g2) 50%, var(--card-g2) 100%
-    );
-  }
-  .card.normal-card.card-range-3 {
-    background-image: linear-gradient(
-      -45deg,
-      var(--card-front-color) 0%, var(--card-front-color) 50%,
-      var(--card-g3) 50%, var(--card-g3) 100%
-    );
-  }
-
-  /* Front fold (top-right) — always burgundy, the "envers" of the paper. */
-  .card.normal-card,
-  .card.skipbo-text {
-    overflow: visible;
-  }
-
-  .card.normal-card::after,
-  .card.skipbo-text::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: calc(var(--plied-corner-size) - 2px);
-    height: calc(var(--plied-corner-size) - 2px);
-    background: var(--paper-envers);
-    clip-path: polygon(0 0, 100% 100%, 0 100%);
-    pointer-events: none;
-    z-index: 3;
-    filter: drop-shadow(-1px 1px 1px rgba(0,0,0,0.18));
-  }
-
-  /* Crease shadow underneath the fold */
-  .card.normal-card::before,
-  .card.skipbo-text::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: var(--plied-corner-size);
-    height: var(--plied-corner-size);
-    background: linear-gradient(
-      225deg,
-      rgba(0,0,0,0.18) 0%,
-      rgba(0,0,0,0.06) 35%,
-      transparent 60%
-    );
-    clip-path: polygon(0 0, 100% 0, 100% 100%);
-    pointer-events: none;
-    z-index: 2;
-  }
-
-  /* Back of card: missing corner is on the OPPOSITE side from the front
-     fold (top-left), because flipping the paper mirrors the corner. */
-  .card:has(> .back) {
-    clip-path: polygon(var(--plied-corner-size) 0, 100% 0, 100% 100%, 0 100%, 0 var(--plied-corner-size));
-  }
-  .normal-card, .skipbo-text {
-    clip-path: polygon(0 0, calc(100% - var(--plied-corner-size)) 0, 100% var(--plied-corner-size), 100% 100%, 0 100%);
-  }
-
-  /* Subtle inner washi border on the back */
-  .card .back::after {
-    content: "";
-    position: absolute;
-    inset: 6px;
-    border: 1px solid rgba(253,248,238,0.4);
-    border-radius: 2px;
-    pointer-events: none;
-  }
-
-  /* Empty placeholder: dashed magenta on cream */
-  .empty-card,
-  .placeholder {
-    background: rgba(253,248,238,0.45);
-    border-color: var(--primary);
-    color: var(--primary);
-  }
-
-  /* Skip-Bo card — washi sheet whose face shows a fully-folded paper crane,
-     with the underlying crease pattern still visible on the paper. */
-  .card.skipbo-text {
-    .card-inner-2 {
-      background-image: url("./textures/origami-crane.svg");
-      background-position: center 56%, center, center, center, center;
-      background-size: 100% auto, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
-      background-repeat: no-repeat;
+  .card {
+    /* Numbers stay in neutral ink — colour identity comes from the bottom-half
+       tint, not the digit. */
+    &.card-range-1, &.card-range-2, &.card-range-3 {
+      color: var(--text-color);
     }
 
-    .card-number {
+    /* Two-tone face — diagonal split, cream top-left, range tint bottom-right. */
+    &.normal-card {
+      &.card-range-1 { --card-g: var(--card-g1); }
+      &.card-range-2 { --card-g: var(--card-g2); }
+      &.card-range-3 { --card-g: var(--card-g3); }
+      &[class*="card-range-"] {
+        background-image: linear-gradient(
+          -45deg,
+          var(--card-front-color) 0 50%,
+          var(--card-g) 50% 100%
+        );
+      }
+    }
+
+    /* Face shape — cream paper with the top-right corner cut off; the
+       triangle ::after fills the cut with the burgundy "envers". */
+    &.normal-card,
+    &.skipbo-text {
+      overflow: visible;
+      clip-path: polygon(
+        0 0,
+        calc(100% - var(--plied-corner-size)) 0,
+        100% var(--plied-corner-size),
+        100% 100%, 0 100%
+      );
+
+      &::after {
+        content: "";
+        position: absolute;
+        top: 0; right: 0;
+        width: calc(var(--plied-corner-size) - 2px);
+        height: calc(var(--plied-corner-size) - 2px);
+        background: var(--paper-envers);
+        clip-path: polygon(0 0, 100% 100%, 0 100%);
+        pointer-events: none;
+        z-index: 3;
+        filter: drop-shadow(-1px 1px 1px rgba(0,0,0,0.18));
+      }
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0; right: 0;
+        width: var(--plied-corner-size);
+        height: var(--plied-corner-size);
+        background: linear-gradient(
+          225deg,
+          rgba(0,0,0,0.18) 0%,
+          rgba(0,0,0,0.06) 35%,
+          transparent 60%
+        );
+        clip-path: polygon(0 0, 100% 0, 100% 100%);
+        pointer-events: none;
+        z-index: 2;
+      }
+    }
+
+    /* Back: same physical fold mirrors to the OPPOSITE corner (top-left)
+       when the paper is flipped, so we cut top-left here. */
+    &:has(> .back) {
+      clip-path: polygon(
+        var(--plied-corner-size) 0,
+        100% 0, 100% 100%, 0 100%,
+        0 var(--plied-corner-size)
+      );
+    }
+
+    /* Inner washi border drawn on the back face */
+    .back::after {
+      content: "";
       position: absolute;
-      top: 2%;
-      left: 40%;
-      transform: translateX(-50%);
-      color: var(--paper-envers);
-      font-family: 'Shippori Mincho', serif;
-      font-weight: 700;
-      font-size: clamp(8px, calc(var(--card-width) * 0.16), 11px);
-      letter-spacing: 0.14em;
-      line-height: 1;
-      z-index: 4;
-      white-space: nowrap;
+      inset: 6px;
+      border: 1px solid rgba(253,248,238,0.4);
+      border-radius: 2px;
+      pointer-events: none;
     }
 
     .card-corner-number {
-      @apply invisible;
+      @apply top-0 lg:top-0.5 left-1 lg:left-1;
+    }
+
+    /* Skip-Bo card — washi sheet whose face shows a fully-folded paper crane. */
+    &.skipbo-text {
+      .card-inner-2 {
+        background-image: url("./textures/origami-crane.svg");
+        background-position: center 56%;
+        background-size: 100% auto;
+        background-repeat: no-repeat;
+      }
+
+      .card-number {
+        position: absolute;
+        top: 2%;
+        left: 40%;
+        transform: translateX(-50%);
+        color: var(--paper-envers);
+        font-family: 'Shippori Mincho', serif;
+        font-weight: 700;
+        font-size: clamp(8px, calc(var(--card-width) * 0.16), 11px);
+        letter-spacing: 0.14em;
+        line-height: 1;
+        z-index: 4;
+        white-space: nowrap;
+      }
+
+      .card-corner-number {
+        @apply invisible;
+      }
     }
   }
-  
-  .card .card-corner-number {
-    @apply top-0 lg:top-0.5 left-1 lg:left-1;
+
+  .empty-card, .placeholder {
+    background: rgba(253,248,238,0.45);
+    border-color: var(--primary);
+    color: var(--primary);
   }
 
   /* Diamond-shaped victory burst pieces (origami confetti) */
@@ -233,12 +230,5 @@
     border-radius: 2px;
     transform-origin: center;
     transform: translate3d(-50%, -50%, 0) scale(0.25) rotate(45deg);
-  }
-
-  .player-area.winner {
-    box-shadow:
-      0 0 0 2px var(--victory-border),
-      0 0 0 6px color-mix(in srgb, var(--victory-accent) 22%, transparent),
-      0 14px 36px rgba(138,31,74,0.3);
   }
 }
