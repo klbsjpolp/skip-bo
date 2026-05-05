@@ -1,7 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 84" width="60" height="84">
-  <!-- Step 8: tail — drawn first so the body sits in front of it.
-       Anchored on the body's lower-left edge (24,68) and bottom (30,76),
-       tail tip extends to (8,80). -->
+  <!-- Tail (drawn first so the body paints over its anchor edges) -->
   <polygon points="24,68 30,76 8,80" fill="#6c0f37"/>
 
   <!-- Left wing -->
