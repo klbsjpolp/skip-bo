@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.30.0](https://github.com/klbsjpolp/skip-bo/compare/v1.29.7...v1.30.0) (2026-05-05)
+
+
+### Bug Fixes
+
+* **theme/paper:** make paper sheet layers scroll as one ([dbfb4e7](https://github.com/klbsjpolp/skip-bo/commit/dbfb4e7355001e493caace1808255f5ecd74b000))
+* **web:** animate refilled slot when opponent empties hand online ([29ad4fc](https://github.com/klbsjpolp/skip-bo/commit/29ad4fc3575e15952a535843c39e985ae01e7aed))
+* **web:** mask retreat pile during opponent build-pile completion ([dbd4973](https://github.com/klbsjpolp/skip-bo/commit/dbd4973b16f2585431c1d7cdbed849baecc180ff))
+
+
+### Features
+
+* **themes/origami:** smooth tint via color-mix on data-value ([2cb61e6](https://github.com/klbsjpolp/skip-bo/commit/2cb61e645202e472087583252525ce55ac4cc08c))
+* **themes:** replace pastel with origami theme ([4a6c738](https://github.com/klbsjpolp/skip-bo/commit/4a6c73806011e7dae95ddf30b67f386908b57c65))
+
+
+
 ## [1.29.7](https://github.com/klbsjpolp/skip-bo/compare/v1.29.6...v1.29.7) (2026-05-03)
 
 
