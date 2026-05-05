@@ -56,7 +56,32 @@
     font-family: 'Caveat', 'Kalam', 'Bradley Hand', 'Comic Sans MS', cursive;
     color: var(--text-color);
     background-color: var(--background);
+    letter-spacing: 0.01em;
+  }
+
+  /* Paper sheet: ruled lines, red margin, grain, and spiral wire binding —
+     all rendered as one fixed layer behind the UI so they move together. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
     background-image:
+      /* binding holes shadow */
+      radial-gradient(
+        ellipse 7px 4px at 17px 14px,
+        transparent 0 35%,
+        rgba(0, 0, 0, 0.55) 50%,
+        rgba(0, 0, 0, 0.25) 75%,
+        transparent 80%
+      ),
+      /* binding holes highlight */
+      radial-gradient(
+        circle at 17px 14px,
+        rgba(255, 255, 255, 0.35) 0 1.5px,
+        transparent 2px
+      ),
       /* red margin line on the left */
       linear-gradient(
         to right,
@@ -76,40 +101,11 @@
       ),
       /* paper grain noise */
       url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.46 0 0 0 0 0.28 0 0 0 0.20 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-    background-repeat: repeat, repeat, repeat;
-    background-attachment: fixed, fixed, fixed;
-    letter-spacing: 0.01em;
+    background-repeat: repeat-y, repeat-y, repeat, repeat, repeat;
+    background-size: 18px 30px, 18px 30px, auto, auto, 240px 240px;
   }
 
-  /* Spiral wire binding down the left edge */
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 8px;
-    width: 18px;
-    pointer-events: none;
-    z-index: 50;
-    background-image:
-      radial-gradient(
-        ellipse 7px 4px at 9px 14px,
-        transparent 0 35%,
-        rgba(0, 0, 0, 0.55) 50%,
-        rgba(0, 0, 0, 0.25) 75%,
-        transparent 80%
-      ),
-      radial-gradient(
-        circle at 9px 14px,
-        rgba(255, 255, 255, 0.35) 0 1.5px,
-        transparent 2px
-      );
-    background-size: 18px 30px, 18px 30px;
-    background-repeat: repeat-y, repeat-y;
-    filter: drop-shadow(1px 0 1px rgba(0, 0, 0, 0.15));
-  }
-
-  /* Ink blot in the bottom-right corner */
+  /* Ink blot in the bottom-right corner — fixed with the paper sheet. */
   body::after {
     content: '';
     position: fixed;
@@ -118,7 +114,7 @@
     width: 240px;
     height: 240px;
     pointer-events: none;
-    z-index: 1;
+    z-index: 0;
     opacity: 0.55;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><g fill='%231e3a8a'><path d='M96 28 C 70 42, 54 68, 70 96 C 50 108, 46 138, 66 156 C 92 174, 132 168, 148 142 C 174 142, 188 116, 178 92 C 192 70, 178 46, 152 44 C 138 22, 114 18, 96 28 Z M 60 90 q -8 4 -6 14 q 4 6 12 2 q 4 -8 -6 -16 Z'/><circle cx='34' cy='52' r='5'/><circle cx='168' cy='34' r='3.5'/><circle cx='22' cy='128' r='4'/><circle cx='190' cy='168' r='3'/><circle cx='118' cy='192' r='4.5'/><circle cx='52' cy='180' r='2.5'/><ellipse cx='176' cy='100' rx='6' ry='3' transform='rotate(20 176 100)'/></g></svg>");
     background-repeat: no-repeat;
