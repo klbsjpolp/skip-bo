@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       ...plugins,
       VitePWA({
-        registerType: 'autoUpdate',
+        registerType: 'prompt',
         includeAssets: [
           // any additional static assets you want copied as-is:
           'favicon.svg',
