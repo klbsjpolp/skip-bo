@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.30.3](https://github.com/klbsjpolp/skip-bo/compare/v1.30.2...v1.30.3) (2026-05-05)
+
+
+### Bug Fixes
+
+* **lint:** avoid unused-directive error on [@typescript-eslint](https://github.com/typescript-eslint) 8.57 ([f8ac2f0](https://github.com/klbsjpolp/skip-bo/commit/f8ac2f0714ab5279736684a7b64a07807cd01ff1))
+* **lint:** remove type assertions flagged by [@typescript-eslint](https://github.com/typescript-eslint) 8.59 ([418d0b1](https://github.com/klbsjpolp/skip-bo/commit/418d0b1aa6715d5bafc711ffaafa8e9e3345e2d8))
+
+
+
 ## [1.30.2](https://github.com/klbsjpolp/skip-bo/compare/v1.30.1...v1.30.2) (2026-05-05)
 
 
