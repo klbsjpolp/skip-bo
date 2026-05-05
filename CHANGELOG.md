@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.30.4](https://github.com/klbsjpolp/skip-bo/compare/v1.30.3...v1.30.4) (2026-05-05)
+
+
+### Bug Fixes
+
+* **deps:** upgrade eslint 10, typescript 6, typescript-eslint 8.59 ([b0e35d6](https://github.com/klbsjpolp/skip-bo/commit/b0e35d64c1ce7f6f088bee76e9b14585593af0c4))
+
+
+
 ## [1.30.3](https://github.com/klbsjpolp/skip-bo/compare/v1.30.2...v1.30.3) (2026-05-05)
 
 
