@@ -91,7 +91,7 @@ export function useSkipBoGame() {
     // playCard from pointerup) read the updated selectedCard instead of the
     // stale snapshot that React hasn't committed yet.
     stateRef.current = actorRef.getSnapshot().context.G;
-  }, [dispatch, isInteractionBlocked]);
+  }, [dispatch, isInteractionBlocked, actorRef]);
 
   const playCard = useCallback(async (buildPile: number): Promise<MoveResult> => {
     const currentState = stateRef.current;
