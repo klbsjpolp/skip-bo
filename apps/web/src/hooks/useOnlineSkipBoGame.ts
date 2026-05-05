@@ -498,14 +498,20 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                       opponentTransition.completedCards &&
                       opponentTransition.completedBuildPileIndex !== undefined
                     ) {
-                      window.setTimeout(() => {
-                        triggerCompletedBuildPileAnimation(
-                          previousState,
-                          opponentTransition.completedBuildPileIndex!,
-                          opponentTransition.completedCards!,
-                          previousState.completedBuildPiles.length,
-                        );
-                      }, opponentAnimationDuration);
+                      // Register completion animations immediately with
+                      // baseDelay=opponentAnimationDuration so the cards are
+                      // tracked as in-flight as soon as state lands. Otherwise
+                      // CenterArea would briefly render the new top card on
+                      // the retreat pile during the play animation, before
+                      // the retreat animation begins.
+                      triggerCompletedBuildPileAnimation(
+                        previousState,
+                        opponentTransition.completedBuildPileIndex,
+                        opponentTransition.completedCards,
+                        previousState.completedBuildPiles.length,
+                        100,
+                        opponentAnimationDuration,
+                      );
                     }
 
                     scheduleDrawAnimations(drawTransitions, opponentAnimationDuration);
