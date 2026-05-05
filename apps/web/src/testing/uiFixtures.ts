@@ -7,6 +7,7 @@ export const uiFixtureNames = [
   'ai-turn',
   'retreat-filled',
   'victory-human',
+  'one-of-each',
 ] as const;
 
 export type UiFixtureName = typeof uiFixtureNames[number];
@@ -118,12 +119,24 @@ const createVictoryHumanFixture = (): GameState => {
   return state;
 };
 
+const createOneOfEachFixture = (): GameState => {
+  const state = createBaseState();
+  state.buildPiles = [[card(1)], [card(1),card(2)], [card(1),card(2),card(3)], [card(1),card(2),card(3),card(4)]];
+  state.completedBuildPiles = [card(0, true)]
+  state.players[0].hand = [card(5), card(6), card(7), card(8), card(0, true)];
+  state.players[0].discardPiles = [[card(1), card(5),card(9)], [card(2), card(6),card(10)], [card(3), card(7),card(11)], [card(4), card(8),card(12)]]
+  state.players[1].discardPiles = [[card(1), card(2),card(3)], [card(4), card(5),card(6)], [card(7), card(8),card(9)], [card(10), card(11),card(12)]]
+  
+  return state;
+};
+
 const fixtureFactories: Record<UiFixtureName, () => GameState> = {
   'ready-human': createReadyHumanFixture,
   'selected-hand': createSelectedHandFixture,
   'ai-turn': createAiTurnFixture,
   'retreat-filled': createRetreatFilledFixture,
   'victory-human': createVictoryHumanFixture,
+  'one-of-each': createOneOfEachFixture,
 };
 
 export const getRequestedUiFixtureName = (): UiFixtureName | null => {

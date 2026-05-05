@@ -44,9 +44,8 @@
 
   /* Bottom-half tint per card range — light enough that the dark digit stays
      readable when it crosses the fold midline. */
-  --card-g1: hsl(346 62% 92%);
-  --card-g2: hsl(349 62% 83%);
-  --card-g3: hsl(339 54% 66%);
+  --card-g1: rgb(247 222 228);
+  --card-g3: rgb(215 121 154);
 
   /* victory: folded swans + confetti pattern */
   --victory-border: #8a1f4a;
@@ -110,9 +109,25 @@
 
     /* Two-tone face — diagonal split, cream top-left, range tint bottom-right. */
     &.normal-card {
-      &.card-range-1 { --card-g: var(--card-g1); }
-      &.card-range-2 { --card-g: var(--card-g2); }
-      &.card-range-3 { --card-g: var(--card-g3); }
+      &[data-value="1"]  { --value: 0; }
+      &[data-value="2"]  { --value: 1; }
+      &[data-value="3"]  { --value: 2; }
+      &[data-value="4"]  { --value: 3; }
+      &[data-value="5"]  { --value: 4; }
+      &[data-value="6"]  { --value: 5; }
+      &[data-value="7"]  { --value: 6; }
+      &[data-value="8"]  { --value: 7; }
+      &[data-value="9"]  { --value: 8; }
+      &[data-value="10"] { --value: 9; }
+      &[data-value="11"] { --value: 10; }
+      &[data-value="12"] { --value: 11; }
+      
+      --card-g: color-mix(
+        in oklab,
+        var(--card-g1),
+        var(--card-g3) calc(var(--value)  / 11 * 100%)
+      );
+      
       &[class*="card-range-"] {
         background-image: linear-gradient(
           -45deg,
