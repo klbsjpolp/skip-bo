@@ -33,7 +33,7 @@ const getApiBaseUrl = async (): Promise<string> => {
 };
 
 const parseJsonResponse = async <T>(response: Response): Promise<T> => {
-  const payload: unknown = await response.json().catch(() => ({} as unknown));
+  const payload: unknown = await response.json().catch(() => ({}));
 
   if (!response.ok) {
     const message =

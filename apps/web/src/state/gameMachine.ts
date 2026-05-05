@@ -27,6 +27,7 @@ const willPlayCardEmptyHand = (gameState: GameState): boolean => {
 
 export const gameMachine = createMachine({
   id: 'skipbo',
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   types: {} as {
     context: {
       G: GameState;
@@ -230,7 +231,7 @@ export const gameMachine = createMachine({
     apply: assign({ 
       G: ({ context, event }) => {
         if (event && typeof event === 'object' && 'type' in event) {
-          return gameReducer(context.G, event as GameAction);
+          return gameReducer(context.G, event);
         }
         return context.G;
       }
@@ -263,7 +264,7 @@ export const gameMachine = createMachine({
     applyAndStoreAnimation: assign({
       G: ({ context, event }) => {
         if (event && typeof event === 'object' && 'type' in event) {
-          return gameReducer(context.G, event as GameAction);
+          return gameReducer(context.G, event);
         }
         return context.G;
       },
@@ -432,7 +433,7 @@ export const gameMachine = createMachine({
 
             if (numbers.length > 0) {
               const hand: Card[] = numbers.map((v) => ({ value: v, isSkipBo: false }));
-              return { type: 'DEBUG_SET_AI_HAND', hand, animationDuration: 0 } as GameAction & { animationDuration: number };
+              return { type: 'DEBUG_SET_AI_HAND', hand, animationDuration: 0 };
             }
           }
         } catch { /* ignore invalid aiHand param */ }
@@ -456,7 +457,7 @@ export const gameMachine = createMachine({
         }
       }
       
-      return { type: 'DRAW', count: cardsToDraw, animationDuration } as GameAction & { animationDuration: number };
+      return { type: 'DRAW', count: cardsToDraw, animationDuration };
     }),
   },
 });

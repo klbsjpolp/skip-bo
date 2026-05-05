@@ -1,7 +1,7 @@
 import type {Card as CardType} from '@/types';
 import {cn} from '@/lib/utils';
 import {HAND_Y_OFFSETS} from '@/utils/cardPositions';
-import type {CSSProperties, HTMLAttributes, KeyboardEventHandler, MouseEventHandler} from "react";
+import type {CSSProperties, HTMLAttributes, MouseEventHandler} from "react";
 import React, {memo, useLayoutEffect, useState} from "react";
 
 interface CardProps {
@@ -88,7 +88,7 @@ const CardComponent: React.FC<CardProps> = ({
       left: `calc(${overlapIndex} * (var(--card-width) - 10px))`,
       top: `${offset}px`,
       zIndex: overlapIndex
-    } as CSSProperties;
+    };
   }
 
   const renderContent = (value: string) => (
@@ -112,7 +112,7 @@ const CardComponent: React.FC<CardProps> = ({
         event.preventDefault();
         onClick(event as unknown as Parameters<NonNullable<CardProps['onClick']>>[0]);
       }
-    }) as KeyboardEventHandler<HTMLDivElement>,
+    }),
   } : {};
 
   if (card && shouldMorph) {
