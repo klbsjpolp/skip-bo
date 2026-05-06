@@ -468,27 +468,10 @@
     @apply bg-contain bg-center bg-no-repeat block inset-auto top-1/2 left-1/2 -translate-1/2 bg-(image:--victory-emblem-image) opacity-(--victory-emblem-opacity);
   }
 
-  .victory-ray {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: clamp(12px, 1.8vw, 18px);
-    height: 64%;
-    border-radius: 999px;
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--victory-accent) 82%, white 18%) 0%,
-        rgba(255, 255, 255, 0) 100%
-      );
-    mix-blend-mode: screen;
-    transform: translate(-50%, -100%) rotate(var(--ray-angle));
-    transform-origin: center top;
-    animation: victorySunPulse 2.8s ease-in-out infinite;
-    animation-delay: var(--ray-delay);
-  }
-
   .victory-burst-piece {
+    --piece-color: var(--victory-piece-1);
+    --burst-delay: 0;
+    --piece-index: 0;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -518,10 +501,6 @@
     }
 
     .victory-burst-piece:nth-child(n + 9) {
-      display: none;
-    }
-
-    .victory-ray:nth-child(n + 7) {
       display: none;
     }
   }
@@ -603,8 +582,7 @@
     }
 
     .victory-pattern,
-    .victory-shine,
-    .victory-ray {
+    .victory-shine {
       animation: none !important;
     }
   }
