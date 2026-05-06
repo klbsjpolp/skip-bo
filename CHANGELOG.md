@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.30.6](https://github.com/klbsjpolp/skip-bo/compare/v1.30.5...v1.30.6) (2026-05-06)
+
+
+### Bug Fixes
+
+* **pwa:** switch SW registration from autoUpdate to prompt ([7e348a3](https://github.com/klbsjpolp/skip-bo/commit/7e348a3664bd4f259a1d69df8a8d5ca8e7286e23))
+
+
+
 ## [1.30.5](https://github.com/klbsjpolp/skip-bo/compare/v1.30.4...v1.30.5) (2026-05-05)
 
 
