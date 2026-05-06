@@ -251,13 +251,46 @@
     background: var(--piece-color);
     -webkit-mask-image: none;
     mask-image: none;
-    clip-path: polygon(
-      50% 50%, 0% 0%, 50% 0%,
-      50% 50%, 100% 0%, 100% 50%,
-      50% 50%, 100% 100%, 50% 100%,
-      50% 50%, 0% 100%, 0% 50%
-    );
     transform-origin: center;
     transform: translate3d(-50%, -50%, 0) scale(0.25) rotate(0deg);
+  }
+
+  .burst-group-1 .piece-group-1, .burst-group-2 .piece-group-2, .burst-group-3 .piece-group-3 {
+    clip-path: polygon(
+            50% 25%, 50% 0%, 75% 25%,
+            75% 50%, 100% 50%, 75% 75%,
+            50% 75%, 50% 100%, 25% 75%,
+            25% 50%, 0% 50%, 25% 25%
+    );
+  }
+  .burst-group-1 .piece-group-2, .burst-group-2 .piece-group-3, .burst-group-3 .piece-group-4 {
+    clip-path: polygon(
+            50% 0%,    /* top outer */
+            61% 35%,   /* top-right outer */
+            98% 35%,   /* right outer */
+            68% 57%,   /* bottom-right inner */
+            79% 91%,   /* bottom-right outer */
+            50% 70%,   /* bottom inner */
+            21% 91%,   /* bottom-left outer */
+            32% 57%,   /* bottom-left inner */
+            2% 35%,    /* left outer */
+            39% 35%    /* top-left inner */
+    );
+  }
+  .burst-group-1 .piece-group-3, .burst-group-2 .piece-group-4, .burst-group-3 .piece-group-1 {
+    clip-path: polygon(
+            50% 50%, 0% 0%, 50% 0%,
+            50% 50%, 100% 0%, 100% 50%,
+            50% 50%, 100% 100%, 50% 100%,
+            50% 50%, 0% 100%, 0% 50%
+    );
+  }
+  .burst-group-1 .piece-group-4, .burst-group-2 .piece-group-1, .burst-group-3 .piece-group-2 {
+    clip-path: polygon(
+            50% 0%,
+            75% 50%,
+            50% 100%,
+            25% 50%
+    );
   }
 }
