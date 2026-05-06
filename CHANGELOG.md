@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.31.0](https://github.com/klbsjpolp/skip-bo/compare/v1.30.6...v1.31.0) (2026-05-06)
+
+
+### Features
+
+* **origami:** add group-specific clip-paths for confetti bursts ([77caa71](https://github.com/klbsjpolp/skip-bo/commit/77caa71a8f72f3d1351b13abf4dc503c60146b64))
+
+
+
 ## [1.30.6](https://github.com/klbsjpolp/skip-bo/compare/v1.30.5...v1.30.6) (2026-05-06)
 
 

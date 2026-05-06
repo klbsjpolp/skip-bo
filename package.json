@@ -1,7 +1,7 @@
 {
   "name": "skip-bo-workspace",
   "private": true,
-  "version": "1.30.6",
+  "version": "1.31.0",
   "type": "module",
   "engines": {
     "node": ">=22.12.0"
