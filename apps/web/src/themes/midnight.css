@@ -18,6 +18,7 @@
   --destructive-foreground: hsl(230 30% 92%);
   --border: hsl(230 30% 38%);
   --ring: hsl(230 60% 72%);
+  --active-turn-color: rgb(247 217 157 / 0.72);
 
   /* Skip-Bo game tokens */
   --text-color: #efe4d0;
@@ -43,7 +44,7 @@
 
   /* Number-card text colors stay distinct between ranges */
   --skipbo-text: #fff5dc;             /* cream so it reads on milky way */
-  --skipbo-bg: #0a0820;
+  --skipbo-bg: var(--card-front-color);
   --card-g1: hsl(220 85% 72%);   /* periwinkle blue — readable on dark */
   --card-g2: hsl(354 75% 70%);   /* rose red */
   --card-g3: hsl(38 85% 68%);    /* warm gold */
@@ -52,311 +53,85 @@
   body {
     background-image:
       /* large stars (1.5px) */
-      radial-gradient(circle at 5% 8%,
-        rgb(255 245 220 / 0.86) 0,
-        rgb(255 245 220 / 0.80) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 10% 10%,
-        rgb(255 245 220 / 0.88) 0,
-        rgb(255 245 220 / 0.82) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 19% 7%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 24% 18%,
-        rgb(255 245 220 / 0.86) 0,
-        rgb(255 245 220 / 0.80) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 33% 5%,
-        rgb(255 245 220 / 0.88) 0,
-        rgb(255 245 220 / 0.82) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 41% 12%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 48% 4%,
-        rgb(255 245 220 / 0.82) 0,
-        rgb(255 245 220 / 0.76) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 52% 22%,
-        rgb(255 245 220 / 0.86) 0,
-        rgb(255 245 220 / 0.80) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 58% 20%,
-        rgb(255 245 220 / 0.88) 0,
-        rgb(255 245 220 / 0.80) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 70% 7%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 76% 14%,
-        rgb(255 245 220 / 0.86) 0,
-        rgb(255 245 220 / 0.80) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 78% 28%,
-        rgb(255 245 220 / 0.86) 0,
-        rgb(255 245 220 / 0.80) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 89% 26%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 95% 16%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 3% 32%,
-        rgb(255 245 220 / 0.82) 0,
-        rgb(255 245 220 / 0.76) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 43% 29%,
-        rgb(255 245 220 / 0.86) 0,
-        rgb(255 245 220 / 0.80) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 69% 35%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.5px,
-        transparent 3px),
-      radial-gradient(circle at 92% 38%,
-        rgb(255 245 220 / 0.82) 0,
-        rgb(255 245 220 / 0.76) 1.5px,
-        transparent 3px),
+      radial-gradient(circle at 5% 8%, rgb(255 245 220 / 0.86) 0, rgb(255 245 220 / 0.80) 1.5px, transparent 3px),
+      radial-gradient(circle at 10% 10%, rgb(255 245 220 / 0.88) 0, rgb(255 245 220 / 0.82) 1.5px, transparent 3px),
+      radial-gradient(circle at 19% 7%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.5px, transparent 3px),
+      radial-gradient(circle at 24% 18%, rgb(255 245 220 / 0.86) 0, rgb(255 245 220 / 0.80) 1.5px, transparent 3px),
+      radial-gradient(circle at 33% 5%, rgb(255 245 220 / 0.88) 0, rgb(255 245 220 / 0.82) 1.5px, transparent 3px),
+      radial-gradient(circle at 41% 12%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.5px, transparent 3px),
+      radial-gradient(circle at 48% 4%, rgb(255 245 220 / 0.82) 0, rgb(255 245 220 / 0.76) 1.5px, transparent 3px),
+      radial-gradient(circle at 52% 22%, rgb(255 245 220 / 0.86) 0, rgb(255 245 220 / 0.80) 1.5px, transparent 3px),
+      radial-gradient(circle at 58% 20%, rgb(255 245 220 / 0.88) 0, rgb(255 245 220 / 0.80) 1.5px, transparent 3px),
+      radial-gradient(circle at 70% 7%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.5px, transparent 3px),
+      radial-gradient(circle at 76% 14%, rgb(255 245 220 / 0.86) 0, rgb(255 245 220 / 0.80) 1.5px, transparent 3px),
+      radial-gradient(circle at 78% 28%, rgb(255 245 220 / 0.86) 0, rgb(255 245 220 / 0.80) 1.5px, transparent 3px),
+      radial-gradient(circle at 89% 26%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.5px, transparent 3px),
+      radial-gradient(circle at 95% 16%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.5px, transparent 3px),
+      radial-gradient(circle at 3% 32%, rgb(255 245 220 / 0.82) 0, rgb(255 245 220 / 0.76) 1.5px, transparent 3px),
+      radial-gradient(circle at 43% 29%, rgb(255 245 220 / 0.86) 0, rgb(255 245 220 / 0.80) 1.5px, transparent 3px),
+      radial-gradient(circle at 69% 35%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.5px, transparent 3px),
+      radial-gradient(circle at 92% 38%, rgb(255 245 220 / 0.82) 0, rgb(255 245 220 / 0.76) 1.5px, transparent 3px),
       /* medium stars (1.25px) */
-      radial-gradient(circle at 7% 44%,
-        rgb(255 245 220 / 0.82) 0,
-        rgb(255 245 220 / 0.76) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 14% 50%,
-        rgb(165 180 252 / 0.84) 0,
-        rgb(165 180 252 / 0.78) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 18% 56%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 21% 38%,
-        rgb(255 245 220 / 0.80) 0,
-        rgb(255 245 220 / 0.76) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 30% 62%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 37% 48%,
-        rgb(255 245 220 / 0.82) 0,
-        rgb(255 245 220 / 0.76) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 38% 65%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 49% 54%,
-        rgb(255 245 220 / 0.82) 0,
-        rgb(255 245 220 / 0.77) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 55% 40%,
-        rgb(255 245 220 / 0.82) 0,
-        rgb(255 245 220 / 0.76) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 57% 72%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 60% 32%,
-        rgb(165 180 252 / 0.80) 0,
-        rgb(165 180 252 / 0.76) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 67% 61%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 72% 46%,
-        rgb(255 245 220 / 0.82) 0,
-        rgb(255 245 220 / 0.76) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 79% 58%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 83% 52%,
-        rgb(255 245 220 / 0.86) 0,
-        rgb(255 245 220 / 0.80) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 91% 34%,
-        rgb(255 245 220 / 0.80) 0,
-        rgb(255 245 220 / 0.76) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 93% 64%,
-        rgb(255 245 220 / 0.82) 0,
-        rgb(255 245 220 / 0.76) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 4% 68%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 8% 84%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 11% 76%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 27% 78%,
-        rgb(255 245 220 / 0.86) 0,
-        rgb(255 245 220 / 0.80) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 33% 70%,
-        rgb(255 245 220 / 0.82) 0,
-        rgb(255 245 220 / 0.76) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 46% 82%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 52% 88%,
-        rgb(255 245 220 / 0.80) 0,
-        rgb(255 245 220 / 0.76) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 64% 86%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 72% 94%,
-        rgb(255 245 220 / 0.84) 0,
-        rgb(255 245 220 / 0.78) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 87% 80%,
-        rgb(255 245 220 / 0.86) 0,
-        rgb(255 245 220 / 0.80) 1.25px,
-        transparent 2.5px),
-      radial-gradient(circle at 91% 84%,
-        rgb(255 245 220 / 0.82) 0,
-        rgb(255 245 220 / 0.76) 1.25px,
-        transparent 2.5px),
+      radial-gradient(circle at 7% 44%, rgb(255 245 220 / 0.82) 0, rgb(255 245 220 / 0.76) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 14% 50%, rgb(165 180 252 / 0.84) 0, rgb(165 180 252 / 0.78) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 18% 56%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 21% 38%, rgb(255 245 220 / 0.80) 0, rgb(255 245 220 / 0.76) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 30% 62%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 37% 48%, rgb(255 245 220 / 0.82) 0, rgb(255 245 220 / 0.76) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 38% 65%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 49% 54%, rgb(255 245 220 / 0.82) 0, rgb(255 245 220 / 0.77) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 55% 40%, rgb(255 245 220 / 0.82) 0, rgb(255 245 220 / 0.76) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 57% 72%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 60% 32%, rgb(165 180 252 / 0.80) 0, rgb(165 180 252 / 0.76) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 67% 61%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 72% 46%, rgb(255 245 220 / 0.82) 0, rgb(255 245 220 / 0.76) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 79% 58%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 83% 52%, rgb(255 245 220 / 0.86) 0, rgb(255 245 220 / 0.80) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 91% 34%, rgb(255 245 220 / 0.80) 0, rgb(255 245 220 / 0.76) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 93% 64%, rgb(255 245 220 / 0.82) 0, rgb(255 245 220 / 0.76) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 4% 68%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 8% 84%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 11% 76%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 27% 78%, rgb(255 245 220 / 0.86) 0, rgb(255 245 220 / 0.80) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 33% 70%, rgb(255 245 220 / 0.82) 0, rgb(255 245 220 / 0.76) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 46% 82%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 52% 88%, rgb(255 245 220 / 0.80) 0, rgb(255 245 220 / 0.76) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 64% 86%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 72% 94%, rgb(255 245 220 / 0.84) 0, rgb(255 245 220 / 0.78) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 87% 80%, rgb(255 245 220 / 0.86) 0, rgb(255 245 220 / 0.80) 1.25px, transparent 2.5px),
+      radial-gradient(circle at 91% 84%, rgb(255 245 220 / 0.82) 0, rgb(255 245 220 / 0.76) 1.25px, transparent 2.5px),
       /* small stars (1px) */
-      radial-gradient(circle at 6% 23%,
-        rgb(255 241 194 / 0.80) 0,
-        rgb(255 241 194 / 0.76) 1px,
-        transparent 2px),
-      radial-gradient(circle at 12% 10%,
-        rgb(255 241 194 / 0.80) 0,
-        rgb(255 241 194 / 0.76) 1px,
-        transparent 2px),
-      radial-gradient(circle at 15% 42%,
-        rgb(255 245 220 / 0.76) 0,
-        rgb(255 245 220 / 0.72) 1px,
-        transparent 2px),
-      radial-gradient(circle at 16% 18%,
-        rgb(255 241 194 / 0.84) 0,
-        rgb(255 241 194 / 0.78) 1px,
-        transparent 2px),
-      radial-gradient(circle at 22% 62%,
-        rgb(165 180 252 / 0.80) 0,
-        rgb(165 180 252 / 0.76) 1px,
-        transparent 2px),
-      radial-gradient(circle at 22% 90%,
-        rgb(255 241 194 / 0.78) 0,
-        rgb(255 241 194 / 0.74) 1px,
-        transparent 2px),
-      radial-gradient(circle at 28% 8%,
-        rgb(255 241 194 / 0.78) 0,
-        rgb(255 241 194 / 0.74) 1px,
-        transparent 2px),
-      radial-gradient(circle at 3% 82%,
-        rgb(255 241 194 / 0.76) 0,
-        rgb(255 241 194 / 0.72) 1px,
-        transparent 2px),
-      radial-gradient(circle at 34% 24%,
-        rgb(255 241 194 / 0.80) 0,
-        rgb(255 241 194 / 0.76) 1px,
-        transparent 2px),
-      radial-gradient(circle at 40% 52%,
-        rgb(255 241 194 / 0.78) 0,
-        rgb(255 241 194 / 0.74) 1px,
-        transparent 2px),
-      radial-gradient(circle at 42% 96%,
-        rgb(255 241 194 / 0.76) 0,
-        rgb(255 241 194 / 0.72) 1px,
-        transparent 2px),
-      radial-gradient(circle at 44% 17%,
-        rgb(255 241 194 / 0.82) 0,
-        rgb(255 241 194 / 0.77) 1px,
-        transparent 2px),
-      radial-gradient(circle at 47% 57%,
-        rgb(255 241 194 / 0.77) 0,
-        rgb(255 241 194 / 0.74) 1px,
-        transparent 2px),
-      radial-gradient(circle at 52% 27%,
-        rgb(255 241 194 / 0.78) 0,
-        rgb(255 241 194 / 0.74) 1px,
-        transparent 2px),
-      radial-gradient(circle at 62% 15%,
-        rgb(255 241 194 / 0.82) 0,
-        rgb(255 241 194 / 0.77) 1px,
-        transparent 2px),
-      radial-gradient(circle at 62% 58%,
-        rgb(255 241 194 / 0.76) 0,
-        rgb(255 241 194 / 0.72) 1px,
-        transparent 2px),
-      radial-gradient(circle at 66% 88%,
-        rgb(255 241 194 / 0.78) 0,
-        rgb(255 241 194 / 0.74) 1px,
-        transparent 2px),
-      radial-gradient(circle at 71% 11%,
-        rgb(255 241 194 / 0.80) 0,
-        rgb(255 241 194 / 0.76) 1px,
-        transparent 2px),
-      radial-gradient(circle at 73% 66%,
-        rgb(255 241 194 / 0.78) 0,
-        rgb(255 241 194 / 0.75) 1px,
-        transparent 2px),
-      radial-gradient(circle at 82% 14%,
-        rgb(255 241 194 / 0.80) 0,
-        rgb(255 241 194 / 0.76) 1px,
-        transparent 2px),
-      radial-gradient(circle at 84% 20%,
-        rgb(255 241 194 / 0.80) 0,
-        rgb(255 241 194 / 0.76) 1px,
-        transparent 2px),
-      radial-gradient(circle at 88% 48%,
-        rgb(255 241 194 / 0.78) 0,
-        rgb(255 241 194 / 0.74) 1px,
-        transparent 2px),
-      radial-gradient(circle at 90% 78%,
-        rgb(255 241 194 / 0.78) 0,
-        rgb(255 241 194 / 0.74) 1px,
-        transparent 2px),
-      radial-gradient(circle at 96% 30%,
-        rgb(255 241 194 / 0.78) 0,
-        rgb(255 241 194 / 0.74) 1px,
-        transparent 2px),
-      radial-gradient(circle at 97% 6%,
-        rgb(255 241 194 / 0.78) 0,
-        rgb(255 241 194 / 0.74) 1px,
-        transparent 2px),
-      radial-gradient(circle at 97% 92%,
-        rgb(255 241 194 / 0.76) 0,
-        rgb(255 241 194 / 0.72) 1px,
-        transparent 2px),
+      radial-gradient(circle at 6% 23%, rgb(255 241 194 / 0.80) 0, rgb(255 241 194 / 0.76) 1px, transparent 2px),
+      radial-gradient(circle at 12% 10%, rgb(255 241 194 / 0.80) 0, rgb(255 241 194 / 0.76) 1px, transparent 2px),
+      radial-gradient(circle at 15% 42%, rgb(255 245 220 / 0.76) 0, rgb(255 245 220 / 0.72) 1px, transparent 2px),
+      radial-gradient(circle at 16% 18%, rgb(255 241 194 / 0.84) 0, rgb(255 241 194 / 0.78) 1px, transparent 2px),
+      radial-gradient(circle at 22% 62%, rgb(165 180 252 / 0.80) 0, rgb(165 180 252 / 0.76) 1px, transparent 2px),
+      radial-gradient(circle at 22% 90%, rgb(255 241 194 / 0.78) 0, rgb(255 241 194 / 0.74) 1px, transparent 2px),
+      radial-gradient(circle at 28% 8%, rgb(255 241 194 / 0.78) 0, rgb(255 241 194 / 0.74) 1px, transparent 2px),
+      radial-gradient(circle at 3% 82%, rgb(255 241 194 / 0.76) 0, rgb(255 241 194 / 0.72) 1px, transparent 2px),
+      radial-gradient(circle at 34% 24%, rgb(255 241 194 / 0.80) 0, rgb(255 241 194 / 0.76) 1px, transparent 2px),
+      radial-gradient(circle at 40% 52%, rgb(255 241 194 / 0.78) 0, rgb(255 241 194 / 0.74) 1px, transparent 2px),
+      radial-gradient(circle at 42% 96%, rgb(255 241 194 / 0.76) 0, rgb(255 241 194 / 0.72) 1px, transparent 2px),
+      radial-gradient(circle at 44% 17%, rgb(255 241 194 / 0.82) 0, rgb(255 241 194 / 0.77) 1px, transparent 2px),
+      radial-gradient(circle at 47% 57%, rgb(255 241 194 / 0.77) 0, rgb(255 241 194 / 0.74) 1px, transparent 2px),
+      radial-gradient(circle at 52% 27%, rgb(255 241 194 / 0.78) 0, rgb(255 241 194 / 0.74) 1px, transparent 2px),
+      radial-gradient(circle at 62% 15%, rgb(255 241 194 / 0.82) 0, rgb(255 241 194 / 0.77) 1px, transparent 2px),
+      radial-gradient(circle at 62% 58%, rgb(255 241 194 / 0.76) 0, rgb(255 241 194 / 0.72) 1px, transparent 2px),
+      radial-gradient(circle at 66% 88%, rgb(255 241 194 / 0.78) 0, rgb(255 241 194 / 0.74) 1px, transparent 2px),
+      radial-gradient(circle at 71% 11%, rgb(255 241 194 / 0.80) 0, rgb(255 241 194 / 0.76) 1px, transparent 2px),
+      radial-gradient(circle at 73% 66%, rgb(255 241 194 / 0.78) 0, rgb(255 241 194 / 0.75) 1px, transparent 2px),
+      radial-gradient(circle at 82% 14%, rgb(255 241 194 / 0.80) 0, rgb(255 241 194 / 0.76) 1px, transparent 2px),
+      radial-gradient(circle at 84% 20%, rgb(255 241 194 / 0.80) 0, rgb(255 241 194 / 0.76) 1px, transparent 2px),
+      radial-gradient(circle at 88% 48%, rgb(255 241 194 / 0.78) 0, rgb(255 241 194 / 0.74) 1px, transparent 2px),
+      radial-gradient(circle at 90% 78%, rgb(255 241 194 / 0.78) 0, rgb(255 241 194 / 0.74) 1px, transparent 2px),
+      radial-gradient(circle at 96% 30%, rgb(255 241 194 / 0.78) 0, rgb(255 241 194 / 0.74) 1px, transparent 2px),
+      radial-gradient(circle at 97% 6%, rgb(255 241 194 / 0.78) 0, rgb(255 241 194 / 0.74) 1px, transparent 2px),
+      radial-gradient(circle at 97% 92%, rgb(255 241 194 / 0.76) 0, rgb(255 241 194 / 0.72) 1px, transparent 2px),
       /* moon glow, milky-way shimmer, vignette, base */
-      radial-gradient(circle at 88% 12%,
-        rgb(255 245 220 / 0.22) 0,
-        rgb(255 245 220 / 0.12) 4%,
-        rgb(255 245 220 / 0.04) 9%,
-        transparent 14%),
-      radial-gradient(circle at 88% 12%,
-        rgb(165 180 252 / 0.10) 0,
-        transparent 28%),
-      radial-gradient(ellipse 60% 45% at 50% 55%,
-        rgb(255 240 200 / 0.06) 0,
-        transparent 70%),
-      radial-gradient(ellipse 95% 75% at 50% 50%,
-        transparent 55%,
-        rgb(0 0 0 / 0.45) 100%),
+      radial-gradient(circle at 88% 12%, rgb(255 245 220 / 0.22) 0, rgb(255 245 220 / 0.12) 4%, rgb(255 245 220 / 0.04) 9%, transparent 14%),
+      radial-gradient(circle at 88% 12%, rgb(165 180 252 / 0.10) 0, transparent 28%),
+      radial-gradient(ellipse 60% 45% at 50% 55%, rgb(255 240 200 / 0.06) 0, transparent 70%),
+      radial-gradient(ellipse 95% 75% at 50% 50%, transparent 55%, rgb(0 0 0 / 0.45) 100%),
       linear-gradient(to bottom, #0b1027 0%, #060818 100%);
     background-attachment: fixed;
   }
@@ -380,17 +155,47 @@
       position: relative;
     }
 
-    /* ── Numbered cards: dark sky face, serif numerals, moon-phase corner ── */
-    &.normal-card {
+    &.normal-card, &.skipbo-text {
       background-color: var(--card-front-color);
-      background-image:
-        radial-gradient(circle at 72% 17%, rgb(255 241 194 / 0.16) 0, transparent 32%),
-        radial-gradient(ellipse at 50% 92%, rgb(238 176 102 / 0.14) 0, transparent 54%),
-        linear-gradient(160deg, rgb(40 42 91 / 0.78), rgb(10 14 45 / 0.94));
       border-color: rgb(232 189 112 / 0.72);
       box-shadow: var(--card-shadow);
       overflow: hidden;
+      
+      /* a handful of faint stars on the card face */
+      .card-inner::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+                radial-gradient(circle at 16% 24%, rgb(255 255 255 / 0.44) 0 0.65px, transparent 1.3px),
+                radial-gradient(circle at 24% 78%, rgb(255 255 255 / 0.34) 0 0.55px, transparent 1.1px),
+                radial-gradient(circle at 82% 70%, rgb(255 255 255 / 0.28) 0 0.55px, transparent 1.1px),
+                radial-gradient(circle at 12% 45%, rgb(255 255 255 / 0.4) 0 0.6px, transparent 1.2px),
+                radial-gradient(circle at 35% 12%, rgb(255 220 180 / 0.35) 0 0.6px, transparent 1.2px),
+                radial-gradient(circle at 68% 35%, rgb(255 255 255 / 0.3) 0 0.5px, transparent 1px),
+                radial-gradient(circle at 58% 86%, rgb(255 220 180 / 0.38) 0 0.65px, transparent 1.3px),
+                radial-gradient(circle at 45% 68%, rgb(255 220 180 / 0.32) 0 0.55px, transparent 1.1px),
+                radial-gradient(circle at 78% 45%, rgb(255 255 255 / 0.36) 0 0.6px, transparent 1.2px),
+                radial-gradient(circle at 8% 72%, rgb(255 220 180 / 0.34) 0 0.58px, transparent 1.16px),
+                radial-gradient(circle at 92% 28%, rgb(255 255 255 / 0.38) 0 0.62px, transparent 1.24px),
+                radial-gradient(circle at 28% 92%, rgb(255 220 180 / 0.33) 0 0.57px, transparent 1.14px),
+                radial-gradient(circle at 55% 15%, rgb(255 255 255 / 0.35) 0 0.6px, transparent 1.2px),
+                radial-gradient(circle at 85% 85%, rgb(255 220 180 / 0.37) 0 0.64px, transparent 1.28px),
+                  /* mid-band cluster — denser inside the milky-way ribbon */ radial-gradient(circle at 28% 48%, #ffe8c4 0 0.9px, transparent 1.8px),
+                radial-gradient(circle at 44% 22%, #ffffff 0 0.6px, transparent 1.2px),
+                radial-gradient(circle at 62% 70%, #ffffff 0 0.9px, transparent 1.8px),
+                radial-gradient(circle at 68% 36%, #d4c0ff 0 0.7px, transparent 1.4px),
+                  /* lower stars */ radial-gradient(circle at 14% 78%, #ffffff 0 0.7px, transparent 1.4px),
+                radial-gradient(circle at 38% 86%, #ffffff 0 0.6px, transparent 1.2px),
+                radial-gradient(circle at 70% 82%, #ffe8c4 0 0.7px, transparent 1.4px),
+                radial-gradient(circle at 86% 90%, #ffffff 0 0.6px, transparent 1.2px);
+        pointer-events: none;
+        border-radius: var(--card-radius);
+      }
+    }
 
+    /* ── Numbered cards: dark sky face, serif numerals, moon-phase corner ── */
+    &.normal-card {
       .card-number, .card-corner-number {
         font-family: 'Cinzel', 'Times New Roman', serif;
         font-weight: 700;
@@ -400,31 +205,6 @@
           0 1px 1px rgb(0 0 0 / 0.75),
           0 0 8px rgb(245 202 120 / 0.24);
         z-index: 2;
-      }
-
-      /* a handful of faint stars on the card face */
-      .card-inner::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-image:
-          radial-gradient(circle at 16% 24%, rgb(255 255 255 / 0.44) 0 0.65px, transparent 1.3px),
-          radial-gradient(circle at 24% 78%, rgb(255 255 255 / 0.34) 0 0.55px, transparent 1.1px),
-          radial-gradient(circle at 58% 86%, rgb(255 220 180 / 0.38) 0 0.65px, transparent 1.3px),
-          radial-gradient(circle at 82% 70%, rgb(255 255 255 / 0.28) 0 0.55px, transparent 1.1px),
-          radial-gradient(ellipse at 56% 91%, rgb(238 176 102 / 0.2) 0, transparent 44%),
-          radial-gradient(circle at 12% 45%, rgb(255 255 255 / 0.4) 0 0.6px, transparent 1.2px),
-          radial-gradient(circle at 35% 12%, rgb(255 220 180 / 0.35) 0 0.6px, transparent 1.2px),
-          radial-gradient(circle at 68% 35%, rgb(255 255 255 / 0.3) 0 0.5px, transparent 1px),
-          radial-gradient(circle at 45% 68%, rgb(255 220 180 / 0.32) 0 0.55px, transparent 1.1px),
-          radial-gradient(circle at 78% 45%, rgb(255 255 255 / 0.36) 0 0.6px, transparent 1.2px),
-          radial-gradient(circle at 8% 72%, rgb(255 220 180 / 0.34) 0 0.58px, transparent 1.16px),
-          radial-gradient(circle at 92% 28%, rgb(255 255 255 / 0.38) 0 0.62px, transparent 1.24px),
-          radial-gradient(circle at 28% 92%, rgb(255 220 180 / 0.33) 0 0.57px, transparent 1.14px),
-          radial-gradient(circle at 55% 15%, rgb(255 255 255 / 0.35) 0 0.6px, transparent 1.2px),
-          radial-gradient(circle at 85% 85%, rgb(255 220 180 / 0.37) 0 0.64px, transparent 1.28px);
-        pointer-events: none;
-        border-radius: var(--card-radius);
       }
 
       .card-corner-inset {
@@ -441,18 +221,29 @@
         aspect-ratio: 1;
         border-radius: 50%;
         background:
+          radial-gradient(circle at 72% 17%, rgb(255 241 194 / 0.16) 0, transparent 32%),
           radial-gradient(circle at 56% 32%, rgb(170 165 140 / 0.55) 0 0.8px, transparent 1.6px),
           radial-gradient(circle at 40% 60%, rgb(170 165 140 / 0.45) 0 0.6px, transparent 1.2px),
-          radial-gradient(circle at 35% 40%,
-            #fff5dc 0%,
-            #f1e7c4 50%,
-            #c8b893 100%);
+          radial-gradient(circle at 35% 40%, #fff5dc 0%, #f1e7c4 50%, #c8b893 100%);
         box-shadow:
           0 0 8px rgb(255 241 194 / 0.7),
           0 0 18px rgb(255 241 194 / 0.35);
         pointer-events: none;
         z-index: 0;
       }
+
+      &[data-value="1"]  { --moon-phase: 1; }
+      &[data-value="2"]  { --moon-phase: 2; }
+      &[data-value="3"]  { --moon-phase: 3; }
+      &[data-value="4"]  { --moon-phase: 4; }
+      &[data-value="5"]  { --moon-phase: 5; }
+      &[data-value="6"]  { --moon-phase: 6; }
+      &[data-value="7"]  { --moon-phase: 7; }
+      &[data-value="8"]  { --moon-phase: 8; }
+      &[data-value="9"]  { --moon-phase: 9; }
+      &[data-value="10"] { --moon-phase: 10; }
+      &[data-value="11"] { --moon-phase: 11; }
+      &[data-value="12"] { --moon-phase: 12; }
 
       /* DARK MASK — same color as the card face so it erases the disc cleanly */
       &::after {
@@ -470,19 +261,6 @@
       }
     }
 
-    &.normal-card[data-value="1"]  { --moon-phase: 1; }
-    &.normal-card[data-value="2"]  { --moon-phase: 2; }
-    &.normal-card[data-value="3"]  { --moon-phase: 3; }
-    &.normal-card[data-value="4"]  { --moon-phase: 4; }
-    &.normal-card[data-value="5"]  { --moon-phase: 5; }
-    &.normal-card[data-value="6"]  { --moon-phase: 6; }
-    &.normal-card[data-value="7"]  { --moon-phase: 7; }
-    &.normal-card[data-value="8"]  { --moon-phase: 8; }
-    &.normal-card[data-value="9"]  { --moon-phase: 9; }
-    &.normal-card[data-value="10"] { --moon-phase: 10; }
-    &.normal-card[data-value="11"] { --moon-phase: 11; }
-    &.normal-card[data-value="12"] { --moon-phase: 12; }
-
     /* ── Empty piles: transparent so the night shows through ────────── */
     &.empty-card {
       background-color: transparent;
@@ -499,6 +277,28 @@
         0 0 24px rgb(244 220 160 / 0.35),
         var(--card-shadow);
     }
+
+    /* ── Skip-Bo card: a slice of the night sky with a milky-way band ── */
+    &.skipbo-text {
+      /* Layered: stars (foreground) → milky-way diagonal cloud → deep base */
+      background-image: 
+          linear-gradient(38deg, transparent 20%, rgba(120, 90, 170, 0.30) 36%, rgba(255, 220, 180, 0.37) 46%, rgba(220, 180, 240, 0.35) 54%, rgba(120, 90, 170, 0.25) 64%, transparent 80%);
+
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+
+      .card-number {
+        font-family: 'Cinzel', 'Times New Roman', serif;
+        font-style: italic;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: var(--skipbo-text);
+        text-shadow:
+                0 0 6px rgb(0 0 0 / 0.7),
+                0 0 12px rgb(120 90 170 / 0.35);
+        z-index: 2;
+      }
+    }
   }
 
   .player-area,
@@ -508,11 +308,6 @@
       radial-gradient(circle at 92% 100%, rgb(115 92 155 / 0.14) 0, transparent 30%),
       linear-gradient(180deg, rgb(18 24 61 / 0.94), rgb(7 10 32 / 0.9));
     border-color: rgb(232 189 112 / 0.34);
-    box-shadow:
-      inset 0 0 0 1px rgb(255 241 194 / 0.08),
-      0 12px 32px rgb(0 0 0 / 0.34),
-      0 0 34px rgb(96 86 164 / 0.08);
-    color: #efe4d0;
   }
 
   .player-area .bg-layer,
@@ -543,65 +338,6 @@
     border-radius: calc(0.5rem - 2px);
     pointer-events: none;
     z-index: 1;
-  }
-
-  .player-area.active-turn,
-  .center-area.active-turn {
-    border-color: rgb(247 217 157 / 0.72);
-    box-shadow:
-      inset 0 0 0 1px rgb(255 241 194 / 0.13),
-      0 0 0 1px rgb(247 217 157 / 0.24),
-      0 0 34px rgb(244 220 160 / 0.2),
-      0 12px 32px rgb(0 0 0 / 0.38);
-  }
-
-  /* ── Skip-Bo card: a slice of the night sky with a milky-way band ── */
-  .card.skipbo-text {
-    background-color: var(--skipbo-bg);
-    /* Layered: stars (foreground) → milky-way diagonal cloud → deep base */
-    background-image:
-      /* a few brighter stars */
-      radial-gradient(circle at 18% 18%, #ffffff 0 0.8px, transparent 1.6px),
-      radial-gradient(circle at 32% 12%, #ffffff 0 0.7px, transparent 1.4px),
-      radial-gradient(circle at 62% 14%, #fff8e6 0 1px, transparent 2px),
-      radial-gradient(circle at 80% 22%, #ffffff 0 0.7px, transparent 1.4px),
-      /* mid-band cluster — denser inside the milky-way ribbon */
-      radial-gradient(circle at 28% 48%, #ffe8c4 0 0.9px, transparent 1.8px),
-      radial-gradient(circle at 44% 42%, #ffffff 0 0.6px, transparent 1.2px),
-      radial-gradient(circle at 52% 52%, #ffffff 0 0.9px, transparent 1.8px),
-      radial-gradient(circle at 68% 46%, #d4c0ff 0 0.7px, transparent 1.4px),
-      /* lower stars */
-      radial-gradient(circle at 14% 78%, #ffffff 0 0.7px, transparent 1.4px),
-      radial-gradient(circle at 38% 86%, #ffffff 0 0.6px, transparent 1.2px),
-      radial-gradient(circle at 70% 82%, #ffe8c4 0 0.7px, transparent 1.4px),
-      radial-gradient(circle at 86% 90%, #ffffff 0 0.6px, transparent 1.2px),
-      /* the milky way: a soft diagonal cloud band */
-      linear-gradient(38deg,
-        transparent 22%,
-        rgba(120, 90, 170, 0.35) 36%,
-        rgba(255, 220, 180, 0.42) 46%,
-        rgba(220, 180, 240, 0.40) 54%,
-        rgba(120, 90, 170, 0.30) 64%,
-        transparent 78%),
-      /* deep-purple base gradient */
-      radial-gradient(ellipse at 50% 50%,
-        #1a0e3d 0%,
-        #0e0728 60%,
-        #06031a 100%);
-    box-shadow: var(--card-shadow);
-    overflow: hidden;
-
-    .card-number {
-      font-family: 'Cinzel', 'Times New Roman', serif;
-      font-style: italic;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      color: var(--skipbo-text);
-      text-shadow:
-        0 0 6px rgb(0 0 0 / 0.7),
-        0 0 12px rgb(120 90 170 / 0.35);
-      z-index: 2;
-    }
   }
 
   /* ── Winner: a pulsing moon halo around their area ──────────────── */
