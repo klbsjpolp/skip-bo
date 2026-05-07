@@ -88,16 +88,7 @@
   .player-area, .center-area {
     background:
       linear-gradient(180deg, rgba(253,248,238,0.85) 0%, rgba(247,221,227,0.7) 100%);
-    border-color: rgba(168,41,96,0.3);
-    box-shadow: 0 8px 22px rgba(46,42,38,0.18);
     backdrop-filter: blur(2px);
-  }
-
-  .player-area.winner {
-    box-shadow:
-      0 0 0 2px var(--victory-border),
-      0 0 0 6px color-mix(in srgb, var(--victory-accent) 22%, transparent),
-      0 14px 36px rgba(138,31,74,0.3);
   }
 
   .card {
