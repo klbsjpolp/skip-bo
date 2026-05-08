@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.31.6](https://github.com/klbsjpolp/skip-bo/compare/v1.31.5...v1.31.6) (2026-05-08)
+
+
+### Bug Fixes
+
+* **lint:** scope animationDuration to its only use site ([345a91c](https://github.com/klbsjpolp/skip-bo/commit/345a91c8b6c00ee3bad520f8164431eab4c20f84))
+
+
+
 ## [1.31.5](https://github.com/klbsjpolp/skip-bo/compare/v1.31.4...v1.31.5) (2026-05-08)
 
 
