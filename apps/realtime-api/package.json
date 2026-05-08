@@ -12,10 +12,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@aws-sdk/client-apigatewaymanagementapi": "^3.1042.0",
-    "@aws-sdk/client-dynamodb": "^3.1042.0",
-    "@aws-sdk/lib-dynamodb": "^3.1042.0",
-    "@sentry/aws-serverless": "^10.51.0",
+    "@aws-sdk/client-apigatewaymanagementapi": "^3.1045.0",
+    "@aws-sdk/client-dynamodb": "^3.1045.0",
+    "@aws-sdk/lib-dynamodb": "^3.1045.0",
+    "@sentry/aws-serverless": "^10.52.0",
     "@skipbo/game-core": "workspace:*",
     "@skipbo/multiplayer-protocol": "workspace:*",
     "ws": "^8.20.0",
