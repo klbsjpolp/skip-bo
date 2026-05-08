@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.31.7](https://github.com/klbsjpolp/skip-bo/compare/v1.31.6...v1.31.7) (2026-05-08)
+
+
+### Bug Fixes
+
+* **ui:** preserve safe-area gutters when Radix portals lock scroll ([38b9284](https://github.com/klbsjpolp/skip-bo/commit/38b92846a30689cb4e34dd17bbbecddf6b5f927b))
+
+
+
 ## [1.31.6](https://github.com/klbsjpolp/skip-bo/compare/v1.31.5...v1.31.6) (2026-05-08)
 
 
