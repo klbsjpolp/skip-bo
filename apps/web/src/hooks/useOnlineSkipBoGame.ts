@@ -940,8 +940,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     // input — they can already select / play another card while this discard
     // is still flying. The discard ends the human turn server-side, so any
     // further play attempt is rejected (and the snapshot reconciles).
-    let animationDuration = 0;
-
     try {
       const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
 
@@ -952,7 +950,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
           const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
           if (discardContainer) {
             const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
-            animationDuration = calculateAnimationDuration(startPosition, endPosition);
+            const animationDuration = calculateAnimationDuration(startPosition, endPosition);
             // Mask the freshly-committed card on the discard pile until the
             // animation lands — the optimistic view applies immediately, so
             // without this the card would teleport to the pile and then
