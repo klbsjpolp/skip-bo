@@ -21,6 +21,7 @@ if (sentryEnabled) {
     ...(process.env.SENTRY_RELEASE ? { release: process.env.SENTRY_RELEASE } : {}),
     ...(Number.isFinite(tracesSampleRate) ? { tracesSampleRate } : {}),
   });
+  Sentry.captureMessage('backend boot test', 'info');
 } else if (process.env.NODE_ENV !== 'production' && process.env.VITEST !== 'true') {
   console.info('[sentry] disabled: SENTRY_DSN is not set');
 }
