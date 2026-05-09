@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.32.3](https://github.com/klbsjpolp/skip-bo/compare/v1.32.2...v1.32.3) (2026-05-09)
+
+
+### Reverts
+
+* drop Sentry boot test message ([03030bf](https://github.com/klbsjpolp/skip-bo/commit/03030bfddd48f06453568430d011f0b213392604))
+
+
+
 ## [1.32.2](https://github.com/klbsjpolp/skip-bo/compare/v1.32.1...v1.32.2) (2026-05-09)
 
 
