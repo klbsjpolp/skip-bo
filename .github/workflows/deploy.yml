@@ -247,7 +247,7 @@ jobs:
           NODE_ENV: production
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: pierre-luc
-          SENTRY_PROJECT: skip-bo
+          SENTRY_PROJECT: skip-bo-frontend
           VITE_APP_VERSION: ${{ needs.release.outputs.release_tag }}
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
 
