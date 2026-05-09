@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type {CSSProperties} from 'react';
 import {cn} from "@/lib/utils.ts";
 
 type VictoryStyle = CSSProperties;
@@ -27,24 +27,30 @@ const BURST_GROUPS = [
     style: {
       '--burst-offset-x': '0px',
       '--burst-offset-y': '0px',
-      '--burst-delay': '0ms',
     } as VictoryStyle,
+    pieceStyle: {
+      '--burst-delay': '0ms',
+    } as VictoryStyle
   },
   {
     key: 'left',
     style: {
       '--burst-offset-x': 'calc(-120px * var(--victory-burst-distance-scale, 1))',
       '--burst-offset-y': 'calc(-16px * var(--victory-burst-distance-scale, 1))',
-      '--burst-delay': '250ms',
     } as VictoryStyle,
+    pieceStyle: {
+      '--burst-delay': '250ms',
+    }
   },
   {
     key: 'right',
     style: {
       '--burst-offset-x': 'calc(190px * var(--victory-burst-distance-scale, 1))',
       '--burst-offset-y': 'calc(28px * var(--victory-burst-distance-scale, 1))',
-      '--burst-delay': '600ms',
     } as VictoryStyle,
+    pieceStyle: {
+      '--burst-delay': '600ms',
+    }
   },
 ];
 
@@ -60,10 +66,11 @@ export function VictoryEffects() {
       </div>
 
       <div className="victory-layer victory-burst-layer" aria-hidden="true">
-        {BURST_GROUPS.map(({ key: groupKey, style: groupStyle }, index) => (
+        {BURST_GROUPS.map(({key: groupKey, style: groupStyle, pieceStyle}, index) => (
           <div key={groupKey} className={cn("victory-burst-group", `burst-group-${index+1}`)} style={groupStyle}>
             {BURST_PIECES.map(({ key, className, style }, index) => (
-              <span key={`${groupKey}-${key}`} className={cn("victory-burst-piece", `piece-${index+1}`, className)} style={style} />
+                <span key={`${groupKey}-${key}`} className={cn("victory-burst-piece", `piece-${index + 1}`, className)}
+                      style={{...pieceStyle, ...style}}/>
             ))}
           </div>
         ))}
