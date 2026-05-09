@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.32.0](https://github.com/klbsjpolp/skip-bo/compare/v1.31.7...v1.32.0) (2026-05-09)
+
+
+### Bug Fixes
+
+* **web:** pass actorRef to `useSkipBoGame` and hide pile label for cards ([637447f](https://github.com/klbsjpolp/skip-bo/commit/637447ff9844378b2bb261478299ebea873ce214))
+* **web:** restore actorRef to selectCard useCallback deps ([55e4fcd](https://github.com/klbsjpolp/skip-bo/commit/55e4fcd4b1f09311f9dc0c4f13410b8ae5873a85))
+* **web:** sync stateRef to handle synchronous card actions properly ([225587b](https://github.com/klbsjpolp/skip-bo/commit/225587ba0d448e7f519b340a2e200513fd8329d9))
+
+
+### Features
+
+* **web:** implement drag-and-drop with animated card transitions ([5dbea45](https://github.com/klbsjpolp/skip-bo/commit/5dbea459829bbe728d5282c84d74079bf7b36097))
+
+
+
 ## [1.31.7](https://github.com/klbsjpolp/skip-bo/compare/v1.31.6...v1.31.7) (2026-05-08)
 
 
