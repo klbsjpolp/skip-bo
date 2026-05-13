@@ -24,7 +24,8 @@
       "Bash(ipconfig *)",
       "Skill(commit-commands:commit)",
       "Skill(commit-commands:commit:*)",
-      "Bash(disown)"
+      "Bash(disown *)",
+      "Bash(qlmanage *)"
     ]
   },
   "hooks": {

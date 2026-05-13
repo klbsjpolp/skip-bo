@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 100" role="img" aria-label="Metro tiles">
+  <rect width="70" height="100" fill="#fff"/>
+
+  <!-- Top medium: Mail (envelope) with live-tile counter -->
+  <rect x="4" y="3" width="30" height="30" fill="#2D89EF"/>
+  <g fill="none" stroke="#ffffff" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="11" y="12.5" width="16" height="11"/>
+    <path d="M11,12.5 L19,19.5 L27,12.5"/>
+  </g>
+  <g>
+    <circle cx="29" cy="8" r="3.4" fill="#E51400"/>
+    <text x="29" y="9.6" font-family="Segoe UI, Arial, sans-serif" font-size="4.6" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+  </g>
+
+  <!-- Small teal: photo grid -->
+  <rect x="36" y="3" width="14" height="14" fill="#00ABA9"/>
+  <g fill="#ffffff">
+    <rect x="40"   y="7"    width="2.4" height="2.4"/>
+    <rect x="43.6" y="7"    width="2.4" height="2.4"/>
+    <rect x="40"   y="10.6" width="2.4" height="2.4"/>
+    <rect x="43.6" y="10.6" width="2.4" height="2.4"/>
+  </g>
+
+  <!-- Small orange: music note (eighth note) -->
+  <rect x="52" y="3" width="14" height="14" fill="#DA532C"/>
+  <g fill="#ffffff">
+    <ellipse cx="57.6" cy="12.2" rx="1.7" ry="1.25" transform="rotate(-22 57.6 12.2)"/>
+    <rect x="58.8" y="5.6" width="0.9" height="6.6"/>
+    <path d="M59.7,5.6 C62.3,6.4 63,8 62,9.5 C62.4,8.2 61.6,6.9 59.7,6.6 Z"/>
+  </g>
+
+  <!-- Small purple: star -->
+  <rect x="36" y="19" width="14" height="14" fill="#603CBA"/>
+  <path d="M43,22.6 L43.95,24.95 L46.45,25.15 L44.55,26.75 L45.15,29.2 L43,27.85 L40.85,29.2 L41.45,26.75 L39.55,25.15 L42.05,24.95 Z" fill="#ffffff"/>
+
+  <!-- Small magenta: phone (handset) -->
+  <rect x="52" y="19" width="14" height="14" fill="#B91D47"/>
+  <path d="M54.2,22.4
+           A1.4,1.4 0 0 1 55.6,21 L56.7,21
+           A0.8,0.8 0 0 1 57.5,21.7 L57.8,23.2
+           A0.8,0.8 0 0 1 57.4,24 L56.5,24.5
+           Q57.1,25.7 58,26.6 Q58.9,27.5 60.1,28.1 L60.6,27.2
+           A0.8,0.8 0 0 1 61.4,26.8 L62.9,27.1
+           A0.8,0.8 0 0 1 63.6,27.9 L63.6,29
+           A1.4,1.4 0 0 1 62.2,30.4
+           Q58.7,30.4 56.2,27.9 Q53.7,25.4 54.2,22.4 Z"
+        fill="#ffffff"/>
+
+  <!-- Medium amber: sun -->
+  <rect x="4" y="35" width="30" height="30" fill="#E3A21A"/>
+  <g fill="#ffffff">
+    <circle cx="19" cy="50" r="3.6"/>
+    <g>
+      <rect x="18.4" y="41"  width="1.2" height="2.6"/>
+      <rect x="18.4" y="56.4" width="1.2" height="2.6"/>
+      <rect x="10"   y="49.4" width="2.6" height="1.2"/>
+      <rect x="25.4" y="49.4" width="2.6" height="1.2"/>
+    </g>
+    <g transform="rotate(45 19 50)">
+      <rect x="18.4" y="41"  width="1.2" height="2.6"/>
+      <rect x="18.4" y="56.4" width="1.2" height="2.6"/>
+      <rect x="10"   y="49.4" width="2.6" height="1.2"/>
+      <rect x="25.4" y="49.4" width="2.6" height="1.2"/>
+    </g>
+  </g>
+
+  <!-- Medium green: dollar -->
+  <rect x="36" y="35" width="30" height="30" fill="#00A300"/>
+  <g>
+    <rect x="50.4" y="42" width="1.2" height="16" fill="#ffffff"/>
+    <path d="M55,46 C55,44.5 53,44 51,44 C49,44 47,45 47,47 C47,49 49,49.5 51,50 C53,50.5 55,51 55,53 C55,55 53,56 51,56 C49,56 47,55 47,53.5"
+          fill="none" stroke="#ffffff" stroke-width="1.7" stroke-linecap="round"/>
+  </g>
+
+  <!-- Bottom rectangle: cloud -->
+  <rect x="4" y="67" width="62" height="30" fill="#1BA1E2"/>
+  <g fill="#ffffff">
+    <circle cx="30" cy="83" r="3"/>
+    <circle cx="35" cy="80.5" r="4"/>
+    <circle cx="40" cy="83" r="3.2"/>
+    <rect x="29.5" y="83" width="11.5" height="3.5" rx="1.5"/>
+  </g>
+</svg>

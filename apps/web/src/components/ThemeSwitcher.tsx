@@ -37,7 +37,7 @@ export function ThemeSwitcher() {
               {activeTheme.label}
             </div>
         </SelectTrigger>
-        <SelectContent data-testid="theme-switcher-content">
+        <SelectContent data-testid="theme-switcher-content" className="popper">
           {themes.map(({ value, label, icon }) => (
             <SelectItem key={value} value={value} data-testid={`theme-option-${value}`}>
               <div className="flex items-center">
