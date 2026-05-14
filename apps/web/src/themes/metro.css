@@ -56,16 +56,39 @@
   }
 
   .card {
-    @apply border-0 color-white;
+    @apply border-0 text-white;
     font-family: "Segoe UI", "Segoe UI Light", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
     
-    .card-number {
+    &.normal-card:not(.skipbo-text) .card-number {
+      position: absolute !important;
+      left: 6px;
+      bottom: 4px;
+      top: auto;
+      right: auto;
+      z-index: 2;
       font-weight: 300;
       letter-spacing: -0.02em;
+      line-height: 1;
+      @media (width >= 64rem) {
+        left: 8px;
+        bottom: 6px;
+      }
     }
     .card-corner-number {
-      @apply font-normal;
+      @apply font-semibold absolute flex items-center justify-center text-2xs lg:text-xs;
       letter-spacing: 0;
+      width: 16px;
+      height: 16px;
+      top: 2px;
+      left: 2px;
+      color: white;
+      background: hsl(0 0% 0% / 0.35);
+      @media (width >= 64rem) {
+        width: 18px;
+        height: 18px;
+        top: 3px;
+        left: 3px;
+      }
     }
 
     .back {
@@ -106,6 +129,43 @@
     font-family: "Segoe UI Light", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
   }
 
+  /* #7 Left-align game-message prompt */
+  [data-testid="game-message"] {
+    text-align: left;
+  }
+
+  /* #4 Top toolbar as a full-width accent stripe */
+  [data-testid="app-toolbar"] {
+    background: hsl(0 0% 0% / 0.25);
+    margin: -1rem -1rem 1rem;
+    padding: 0.75rem 1rem;
+    align-items: center;
+  }
+
+  /* #5 Tile-tilt press animation */
+  .card.normal-card, .card.skip-bo, .card .back {
+    transition: transform 0.15s ease-out;
+    transform-origin: center;
+  }
+  .card.normal-card:active, .card.skip-bo:active {
+    transform: perspective(600px) rotateX(18deg) scale(0.98);
+  }
+
+  /* #6 Build pile empty state — show a "+" hint */
+  .build-piles .empty-card::after,
+  .center-area .empty-card::after,
+  .player-area .empty-card::after {
+    content: "+";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 200;
+    color: hsl(0 0% 100% / 0.35);
+  }
+
   .app-version-badge {
     color: hsl(0 0% 100% / 0.7);
   }
@@ -122,6 +182,7 @@
   }
 
   .discard-pile-stack {
+    .card.normal-card { position: absolute; }
     .card.normal-card:not(:last-child) {
       @apply bg-transparent shadow-none border-none pointer-events-none z-10!;
       
