@@ -17,18 +17,12 @@
   --card-shadow: none;
   --card-radius: 0px;
   --selected-border-color: #1ba1e2;
-  --victory-border: #E3A21A;
+  --victory-border: transparent;
   --victory-accent: #E3A21A;
   --victory-piece-1: #E3A21A;
   --victory-piece-2: #B91D47;
   --victory-piece-3: #00befc;
   --victory-piece-4: #00A300;
-  --victory-pattern-opacity: 0.12;
-  --victory-pattern-image:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 18%, transparent 18% 100%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0 18%, transparent 18% 100%);
-  --victory-pattern-size: 24px 24px;
-  --victory-pattern-drift-to: 24px 24px;
 
   --skipbo-text: hsl(0 0% 85%);
   --skipbo-bg: #1d1d1d;
@@ -58,7 +52,7 @@
   .card {
     @apply border-0 text-white;
     font-family: "Segoe UI", "Segoe UI Light", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-    
+
     &.normal-card:not(.skipbo-text) .card-number {
       position: absolute !important;
       left: 6px;
@@ -74,6 +68,7 @@
         bottom: 6px;
       }
     }
+
     .card-corner-number {
       @apply font-semibold absolute flex items-center justify-center text-2xs lg:text-xs;
       letter-spacing: 0;
@@ -93,6 +88,7 @@
 
     .back {
       @apply before:absolute before:inset-0 before:bg-no-repeat before:bg-center before:bg-size-[100%_100%];
+
       &::before {
         background-image: url("./textures/metro.svg");
       }
@@ -115,9 +111,11 @@
 
     &.skipbo-text {
       background-image: url("./textures/metro-skipbo.svg");
+
       .card-corner-number {
         @apply hidden;
       }
+
       .card-number {
         @apply lowercase font-normal text-sm top-3.5;
       }
@@ -130,11 +128,13 @@
   }
 
   /* #7 Left-align game-message prompt */
+
   [data-testid="game-message"] {
     text-align: left;
   }
 
   /* #4 Top toolbar as a full-width accent stripe */
+
   [data-testid="app-toolbar"] {
     background: hsl(0 0% 0% / 0.25);
     margin: -1rem -1rem 1rem;
@@ -143,10 +143,12 @@
   }
 
   /* #5 Tile-tilt press animation */
+
   .card.normal-card, .card.skip-bo, .card .back {
     transition: transform 0.15s ease-out;
     transform-origin: center;
   }
+
   .card.normal-card:active, .card.skip-bo:active {
     transform: perspective(600px) rotateX(18deg) scale(0.98);
   }
@@ -154,12 +156,14 @@
   /* Flip-animation polish: drop the parent box-shadow that lingers behind
      the rotated child, and give the card itself a 1px dark edge so it has
      visible thickness during the rotateY. */
+
   .animated-card {
     box-shadow: none !important;
     filter: none !important;
   }
 
   /* #6 Build pile empty state — show a "+" hint */
+
   .build-piles .empty-card::after,
   .center-area .empty-card::after,
   .player-area .empty-card::after {
@@ -190,10 +194,13 @@
   }
 
   .discard-pile-stack {
-    .card.normal-card { position: absolute; }
+    .card.normal-card {
+      position: absolute;
+    }
+
     .card.normal-card:not(:nth-last-child(1 of .normal-card)) {
       @apply bg-transparent shadow-none border-none pointer-events-none z-10!;
-      
+
       .card-corner-number {
         @apply top-0;
       }
@@ -223,6 +230,7 @@
 
   .player-area.winner {
     box-shadow: none;
+    animation: metroVictorySpin 10s linear infinite;
   }
 
   .victory-pattern {
@@ -234,4 +242,16 @@
     height: 11px;
     border-radius: 0;
   }
+}
+
+@keyframes metroVictorySpin {
+  0%, 16%  { transform: rotateX(0deg); background: var(--metro-tile-5); }
+  19%      { transform: rotateX(-90deg); }
+  22%, 42% { transform: rotateX(0deg); background: var(--metro-tile-10); }
+  45%      { transform: rotateX(-90deg); }
+  48%, 68% { transform: rotateX(0deg); background: var(--metro-tile-1); }
+  71%      { transform: rotateX(-90deg); }
+  74%, 94% { transform: rotateX(0deg); background: var(--metro-tile-8); }
+  97%      { transform: rotateX(-90deg); }
+  100%     { transform: rotateX(0deg); background: var(--metro-tile-5); }
 }
