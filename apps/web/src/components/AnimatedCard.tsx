@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { createPortal, flushSync } from 'react-dom';
 import { Card } from '@/components/Card';
 import type { CardAnimationData } from '@/contexts/CardAnimationContext';
 import { useCardAnimation } from '@/contexts/useCardAnimation';
@@ -113,8 +113,11 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
       firstHalfAnim.finished.then(() => {
         // Guard: cleanup may have run between firstHalf finishing and this callback
         if (flipCancelled) return;
-        // Card is edge-on (invisible) — swap the face; the re-render is imperceptible
-        setIsRevealed(animation.targetRevealed);
+        // Card is edge-on (invisible) — swap the face synchronously so the
+        // second-half animation starts with the NEW face already in the DOM.
+        // Without flushSync, React commits during phase 2 and the user sees the
+        // OLD face for 3-4 frames after the rotation has started unfolding.
+        flushSync(() => setIsRevealed(animation.targetRevealed));
         // Second half: start from the opposite edge so the card "unfolds" forward
         secondHalfRef.current = flipRef.current!.animate(
           [{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg)' }],
