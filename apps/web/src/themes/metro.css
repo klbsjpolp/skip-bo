@@ -10,6 +10,8 @@
   --foreground: hsl(0 0% 90%);
   --popover: var(--secondary);
   --popover-foreground: hsl(0 0% 90%);
+  --muted: hsl(0 0% 100% / 0.08);
+  --muted-foreground: hsl(0 0% 100% / 0.7);
   --text-color: #ffffff;
   --title-color: #ffffff;
   --card-back-color: #000;
@@ -69,36 +71,14 @@
     }
 
     &.normal-card:not(.skipbo-text) .card-number {
-      position: absolute !important;
-      left: 6px;
-      bottom: 4px;
-      top: auto;
-      right: auto;
-      z-index: 2;
-      font-weight: 300;
+      @apply absolute! top-auto right-auto z-2 left-1.5 lg:left-2 bottom-1 lg:bottom-1.5 font-light leading-none;
       letter-spacing: -0.02em;
-      line-height: 1;
-      @media (width >= 64rem) {
-        left: 8px;
-        bottom: 6px;
-      }
     }
 
     .card-corner-number {
-      @apply font-semibold absolute flex items-center justify-center text-2xs lg:text-xs;
+      @apply font-semibold absolute flex items-center justify-center text-2xs lg:text-xs text-white bg-black/35
+        w-4 lg:w-4.5 h-4 lg:h-4.5 top-0.5 lg:top-0.75 left-0.5 lg:left-0.75;
       letter-spacing: 0;
-      width: 16px;
-      height: 16px;
-      top: 2px;
-      left: 2px;
-      color: white;
-      background: hsl(0 0% 0% / 0.35);
-      @media (width >= 64rem) {
-        width: 18px;
-        height: 18px;
-        top: 3px;
-        left: 3px;
-      }
     }
 
     .back {
@@ -130,23 +110,20 @@
   /* #7 Left-align game-message prompt */
 
   [data-testid="game-message"] {
-    text-align: left;
+    @apply text-left;
   }
 
   /* #4 Top toolbar as a full-width accent stripe */
 
   [data-testid="app-toolbar"] {
-    background: hsl(0 0% 0% / 0.25);
-    margin: -1rem -1rem 1rem;
-    padding: 0.75rem 1rem;
-    align-items: center;
+    @apply bg-black/25 -mx-4 -mt-4 mb-4 px-4 py-3 items-center;
   }
 
   /* #5 Tile-tilt press animation */
 
   .card.normal-card, .card.skip-bo, .card .back {
+    @apply origin-center;
     transition: transform 0.15s ease-out;
-    transform-origin: center;
   }
 
   .card.normal-card:active, .card.skip-bo:active {
@@ -158,8 +135,7 @@
      visible thickness during the rotateY. */
 
   .animated-card {
-    box-shadow: none !important;
-    filter: none !important;
+    @apply shadow-none! filter-none!;
   }
 
   /* #6 Build pile empty state — show a "+" hint */
@@ -167,30 +143,15 @@
   .build-piles .empty-card::after,
   .center-area .empty-card::after,
   .player-area .empty-card::after {
-    content: "+";
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    font-weight: 200;
-    color: hsl(0 0% 100% / 0.35);
-  }
-
-  .app-version-badge {
-    color: hsl(0 0% 100% / 0.7);
+    @apply absolute inset-0 flex items-center justify-center text-2xl font-extralight text-white/35 content-["+"];
   }
 
   .empty-card {
-    background: hsl(0 0% 100% / 0.08);
-    border: 1px dashed hsl(0 0% 100% / 0.25);
-    font-size: 0;
-    opacity: 1;
+    @apply bg-white/8 border border-dashed border-white/25 opacity-100 text-[0em];
   }
 
   .stock-pile-indicator {
-    background-color: hsl(0 0% 100% / 0.3);
+    @apply bg-white/30;
   }
 
   /* Active-turn fill: a tinted overlay that wipes in from the left like a
@@ -201,22 +162,15 @@
   }
 
   .player-area::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: var(--active-turn-color);
-    opacity: 0;
+    @apply absolute inset-0 opacity-0 pointer-events-none z-1 content-[""] rounded-[inherit] bg-(--active-turn-color);
     clip-path: inset(0 100% 0 0);
-    pointer-events: none;
-    z-index: 1;
-    border-radius: inherit;
     transition:
       opacity 0.35s ease,
       clip-path 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
   .player-area.active-turn::before {
-    opacity: 0.32;
+    @apply opacity-[0.32];
     clip-path: inset(0 0 0 0);
   }
 
@@ -229,7 +183,7 @@
 
   .discard-pile-stack {
     .card.normal-card {
-      position: absolute;
+      @apply absolute;
     }
 
     .card.normal-card:not(:nth-last-child(1 of .normal-card)) {
@@ -259,7 +213,7 @@
   }
 
   .player-area.winner {
-    box-shadow: none;
+    @apply shadow-none;
     animation: metroVictorySpin 10s linear infinite;
   }
 
@@ -268,9 +222,7 @@
   }
 
   .victory-burst-piece {
-    width: 11px;
-    height: 11px;
-    border-radius: 0;
+    @apply rounded-none w-2.75 h-2.75;
   }
 }
 
