@@ -193,6 +193,40 @@
     background-color: hsl(0 0% 100% / 0.3);
   }
 
+  /* Active-turn fill: a tinted overlay that wipes in from the left like a
+     Metro tile reveal. Sits between .bg-layer (z-0) and .content-layer (z-2)
+     so cards and text remain readable. */
+  .player-area {
+    @apply ring-0;
+  }
+
+  .player-area::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--active-turn-color);
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+    pointer-events: none;
+    z-index: 1;
+    border-radius: inherit;
+    transition:
+      opacity 0.35s ease,
+      clip-path 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .player-area.active-turn::before {
+    opacity: 0.32;
+    clip-path: inset(0 0 0 0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .player-area::before {
+      transition: opacity 0.2s ease;
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
   .discard-pile-stack {
     .card.normal-card {
       position: absolute;
