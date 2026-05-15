@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.32.6](https://github.com/klbsjpolp/skip-bo/compare/v1.32.5...v1.32.6) (2026-05-15)
+
+
+### Bug Fixes
+
+* **web:** ensure synchronous face swap during card flip transition ([caf56cd](https://github.com/klbsjpolp/skip-bo/commit/caf56cd61792d51a8d49fa6c0a99672ac7d73b68))
+
+
+
 ## [1.32.5](https://github.com/klbsjpolp/skip-bo/compare/v1.32.4...v1.32.5) (2026-05-13)
 
 
