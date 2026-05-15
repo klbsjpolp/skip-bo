@@ -151,6 +151,14 @@
     transform: perspective(600px) rotateX(18deg) scale(0.98);
   }
 
+  /* Flip-animation polish: drop the parent box-shadow that lingers behind
+     the rotated child, and give the card itself a 1px dark edge so it has
+     visible thickness during the rotateY. */
+  .animated-card {
+    box-shadow: none !important;
+    filter: none !important;
+  }
+
   /* #6 Build pile empty state — show a "+" hint */
   .build-piles .empty-card::after,
   .center-area .empty-card::after,
@@ -183,7 +191,7 @@
 
   .discard-pile-stack {
     .card.normal-card { position: absolute; }
-    .card.normal-card:not(:last-child) {
+    .card.normal-card:not(:nth-last-child(1 of .normal-card)) {
       @apply bg-transparent shadow-none border-none pointer-events-none z-10!;
       
       .card-corner-number {
