@@ -684,7 +684,7 @@
   @apply absolute top-0 left-0 z-2;
 }
 
-.discard-pile-stack .card:not(:last-child) .card-corner-number {
+.discard-pile-stack .card.normal-card:not(:nth-last-child(1 of .normal-card)) .card-corner-number {
   @apply visible;
 }
 
