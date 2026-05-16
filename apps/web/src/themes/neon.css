@@ -17,7 +17,7 @@
   --title-color: #ff0099;
   --card-front-color: #1a1a1a;
   --card-border-color: #00ff88;
-  --card-shadow: 0 0 10px rgba(0,255,136,0.3);
+  --card-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
   --card-radius: 12px;
   --card-back-color: #0066ff;
   --selected-border-color: #00ff88;
@@ -43,38 +43,32 @@
 
       /* Animated neon glow overlay */
       &::before {
-        content: "";
+        content: '';
         position: absolute;
         inset: -8%;
         border-radius: calc(var(--card-radius) + 10px);
-        background: linear-gradient(
-            120deg,
-            #ff0099 0%,
-            #00ff88 40%,
-            #0066ff 70%,
-            #ff0099 100%
-        );
+        background: linear-gradient(120deg, #ff0099 0%, #00ff88 40%, #0066ff 70%, #ff0099 100%);
         background-size: 250% 250%;
         filter: blur(10px) saturate(1.1);
-        opacity: 0.30;          /* subtle; tune to 0.25–0.45 */
+        opacity: 0.3; /* subtle; tune to 0.25–0.45 */
         z-index: 0;
         animation: neonDrift 9s linear infinite alternate;
       }
 
       /* Optional: very subtle scanlines for texture */
       &::after {
-        content: "";
+        content: '';
         position: absolute;
         inset: 0;
         border-radius: var(--card-radius);
         pointer-events: none;
         z-index: 0;
         background: repeating-linear-gradient(
-            to bottom,
-            rgba(255,255,255,0.03) 0px,
-            rgba(255,255,255,0.03) 1px,
-            transparent 2px,
-            transparent 4px
+          to bottom,
+          rgba(255, 255, 255, 0.03) 0px,
+          rgba(255, 255, 255, 0.03) 1px,
+          transparent 2px,
+          transparent 4px
         );
         opacity: 0.4; /* softer than front */
       }
@@ -90,32 +84,26 @@
       --shadow-color: color-mix(in srgb, currentColor 80%, black);
       /* VHS chromatic aberration: R (magenta) left, B (cyan) right, then neon glow */
       text-shadow:
-          -2px 0 0 rgba(255, 0, 153, 0.85),
-          2px 0 0 rgba(0, 212, 255, 0.85),
-          0 0 2px var(--shadow-color),
-          0 0 4px var(--shadow-color),
-          0 0 8px var(--shadow-color);
+        -2px 0 0 rgba(255, 0, 153, 0.85),
+        2px 0 0 rgba(0, 212, 255, 0.85),
+        0 0 2px var(--shadow-color),
+        0 0 4px var(--shadow-color),
+        0 0 8px var(--shadow-color);
 
       &:not(.selected) {
         /* Outer and inner neon glow */
         box-shadow:
-            0 0 12px var(--secondary), /* magenta outer */
-            inset 0 0 14px rgba(0, 255, 136, .25); /* green inner */
+          0 0 12px var(--secondary),
+          /* magenta outer */ inset 0 0 14px rgba(0, 255, 136, 0.25); /* green inner */
       }
 
       /* Decorative animated neon gradient layer */
       &::before {
-        content: "";
+        content: '';
         position: absolute;
         inset: -6%;
         border-radius: calc(var(--card-radius) + 8px);
-        background: linear-gradient(
-            120deg,
-            #ff0099 0%,
-            #00ff88 40%,
-            #0066ff 70%,
-            #ff0099 100%
-        );
+        background: linear-gradient(120deg, #ff0099 0%, #00ff88 40%, #0066ff 70%, #ff0099 100%);
         filter: blur(8px) saturate(1.2);
         opacity: 0.55;
         z-index: 0;
@@ -125,18 +113,17 @@
 
       /* Subtle scanlines for a retro-futuristic vibe */
       &::after {
-        content: "";
+        content: '';
         position: absolute;
         inset: 0;
         z-index: 0;
-        background:
-            repeating-linear-gradient(
-                to bottom,
-                rgba(255,255,255,0.05) 0px,
-                rgba(255,255,255,0.05) 1px,
-                transparent 2px,
-                transparent 4px
-            );
+        background: repeating-linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.05) 0px,
+          rgba(255, 255, 255, 0.05) 1px,
+          transparent 2px,
+          transparent 4px
+        );
         border-radius: var(--card-radius);
         pointer-events: none;
       }
@@ -154,7 +141,7 @@
 
   /* Synthwave perspective grid floor */
   body::before {
-    content: "";
+    content: '';
     position: fixed;
     left: -60%;
     right: -60%;
@@ -184,7 +171,7 @@
 
   /* Fade the grid into the background at the very bottom of the viewport */
   body::after {
-    content: "";
+    content: '';
     position: fixed;
     bottom: -2px;
     left: 0;
@@ -218,9 +205,9 @@
 @keyframes neonCardTrail {
   0% {
     box-shadow:
-            0 0 0 2px #00ff88,
-            0 0 24px 8px rgba(0, 255, 136, 0.8),
-            0 0 60px 16px rgba(0, 255, 136, 0.3);
+      0 0 0 2px #00ff88,
+      0 0 24px 8px rgba(0, 255, 136, 0.8),
+      0 0 60px 16px rgba(0, 255, 136, 0.3);
   }
   100% {
     box-shadow: 0 0 20px #00ff88;
