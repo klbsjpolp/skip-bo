@@ -1,0 +1,117 @@
+/*
+  Base layer: Tailwind v3→v4 border-color compatibility, :root design tokens,
+  safe-area padding, body/h1/h2 typography, and global reduced-motion rules.
+*/
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  :root {
+    --background: hsl(0 0% 100%);
+    --foreground: hsl(0 0% 3.9%);
+
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(0 0% 3.9%);
+
+    --muted: hsl(0 0% 96.1%);
+    --muted-foreground: hsl(0 0% 45.1%);
+    --accent: hsl(0 0% 96.1%);
+    --accent-foreground: hsl(0 0% 9%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(0 0% 3.9%);
+    --destructive: hsl(0 84.2% 60.2%);
+    --destructive-foreground: hsl(0 0% 98%);
+    --success: hsl(142 72% 42%);
+    --success-foreground: hsl(0 0% 98%);
+    --border: hsl(0 0% 89.8%);
+    --ring: hsl(0 0% 3.9%);
+    --input: var(--primary);
+    --input-foreground: var(--primary-foreground);
+
+    --radius: 0.5rem;
+    --stripes-bg: none;
+
+    --card-width: 46px;
+    --card-height: 66px;
+    --stack-diff: 16px;
+    --active-turn-color: var(--primary);
+    --card-front-color: white;
+    --skipbo-bg: var(--card-front-color);
+    --selected-border-color: #f59e0b;
+    --drop-indicator-color: var(--selected-border-color);
+    --selected-shadow: 0 0 20px var(--selected-border-color);
+    --can-drop-shadow: 0 0 15px var(--selected-border-color);
+    --victory-border: #d8b657;
+    --victory-accent: #f4cf6a;
+    --victory-accent-soft: color-mix(in srgb, var(--victory-accent) 22%, transparent);
+    --victory-piece-1: #f59e0b;
+    --victory-piece-2: #ef4444;
+    --victory-piece-3: #22c55e;
+    --victory-piece-4: #3b82f6;
+    --victory-burst-size: 11px;
+    --victory-burst-distance-scale: 0.88;
+    --victory-accent-opacity: 0;
+    --victory-pattern-opacity: 0;
+    --victory-pattern-image: none;
+    --victory-pattern-size: 48px 48px;
+    --victory-pattern-drift-to: 24px 24px;
+    --victory-pattern-animation: victoryPatternDrift 2s linear infinite;
+    --victory-shine-opacity: 0;
+    --victory-shine-duration: 3.8s;
+    --victory-flyby-opacity: 0;
+
+    --card-g1: #0f0; /* 1‑4 */
+    --card-g2: #f00; /* 5‑8 */
+    --card-g3: #f0f; /* 9‑12 */
+  }
+
+  #root {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  @media (width >= 64rem) {
+    :root {
+      --card-width: 70px;
+      --card-height: 100px;
+      --stack-diff: 20px;
+    }
+  }
+
+  body {
+    @apply bg-background;
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1 {
+    @apply text-center font-bold text-lg lg:text-xl;
+    color: var(--title-color);
+  }
+
+  h2 {
+    @apply text-xs lg:text-base;
+    color: var(--title-color);
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .victory-burst-layer,
+    .victory-flyby-layer {
+      display: none;
+    }
+
+    .victory-pattern,
+    .victory-shine {
+      animation: none !important;
+    }
+  }
+}

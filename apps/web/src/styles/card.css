@@ -1,0 +1,148 @@
+/*
+  Card surface: the .card utility (and its descendants), stack positioning,
+  hover lift, the number/range color classes, the Skip-Bo special card, and
+  the corner-number affordances.
+*/
+
+@layer base {
+  .discard-pile-stack {
+    position: relative;
+    width: var(--card-width);
+  }
+
+  .discard-pile-stack .card,
+  .discard-pile-stack .placeholder {
+    position: absolute;
+    left: 0;
+    top: 0;
+    box-shadow: var(--card-shadow);
+  }
+
+  .hoverable-card:hover {
+    --card-translate-y: -2px;
+    --card-scale: 1.05;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Cards never need text-selection — keep this on always so the user can't
+     accidentally start a text-selection drag from a card label. */
+  .card {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+}
+
+@utility card-height {
+  height: var(--card-height);
+}
+
+@utility card {
+  @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer card-height
+  text-3xl text-shadow-sm select-none will-change-auto;
+  width: var(--card-width);
+  color: var(--card-color);
+  background-color: var(--card-front-color);
+  border: 1px solid var(--card-border-color);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  transform-origin: bottom center;
+  --card-rotate: inherit;
+  --card-translate-y: 0px;
+  --card-scale: 1;
+  transform: translate3d(0, var(--card-translate-y), 0) scale(var(--card-scale)) rotate(var(--card-rotate));
+
+  &::before,
+  &::after {
+    will-change: auto;
+  }
+
+  .back {
+    @apply relative w-full h-full bg-cover card-back rounded-[inherit];
+    * {
+      @apply text-4xl;
+    }
+  }
+
+  .card-inner,
+  .card-inner-2 {
+    @apply z-1 w-full h-full rounded-[inherit] overflow-hidden flex items-center justify-center absolute will-change-transform;
+
+    & > * {
+      @apply relative z-1 will-change-transform;
+    }
+  }
+
+  &.selected {
+    border-color: var(--selected-border-color);
+    box-shadow: var(--selected-shadow);
+    --card-translate-y: -5px;
+  }
+
+  &.normal-card {
+    @apply isolate;
+  }
+
+  &.empty-card {
+    @apply lg:text-2xl text-xl;
+  }
+
+  .card-number {
+    @apply relative z-2;
+  }
+}
+
+@utility animated-card {
+  @apply shadow-2xl fixed pointer-events-none will-change-auto;
+}
+
+@utility card-range-1 {
+  color: var(--card-g1);
+}
+
+@utility card-range-2 {
+  color: var(--card-g2);
+}
+
+@utility card-range-3 {
+  color: var(--card-g3);
+}
+
+@utility skipbo-text {
+  @apply text-base lg:text-2xl;
+  color: var(--skipbo-text);
+  background-color: var(--skipbo-bg);
+}
+
+@utility card-back {
+  background: var(--card-back-bg, var(--card-back-color));
+}
+
+@utility placeholder {
+  @apply cursor-pointer card-height flex items-center justify-center;
+  width: var(--card-width);
+  color: var(--card-border-color);
+  border: 2px dashed var(--card-border-color);
+  border-radius: var(--card-radius);
+}
+
+@utility card-corner-number {
+  @apply absolute top-0.5 lg:top-1 left-1 lg:left-1.5 text-xs font-bold invisible lg:visible z-4;
+}
+
+@utility card-corner-inset {
+  @apply absolute top-0 left-0 z-2;
+}
+
+.discard-pile-stack .card.normal-card:not(:nth-last-child(1 of .normal-card)) .card-corner-number {
+  @apply visible;
+}
+
+@utility card-morph-wrapper {
+  @apply relative card-height;
+  width: var(--card-width);
+}
+
+@utility card-morph-layer {
+  @apply absolute pointer-events-none transition-opacity duration-800;
+}

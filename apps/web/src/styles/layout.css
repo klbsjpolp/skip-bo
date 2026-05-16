@@ -1,0 +1,133 @@
+/*
+  Layout: player and center areas, hand/discard/build pile containers, and the
+  responsive overrides that govern how those sections shrink on mobile.
+*/
+
+@layer base {
+  .hand,
+  .discard-piles,
+  .build-piles {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: calc(var(--card-width) / 7);
+    justify-content: center;
+  }
+
+  .discard-piles {
+    @apply card-height;
+    flex-wrap: nowrap;
+  }
+
+  .retreat-pile-stack {
+    position: relative;
+    width: var(--card-width);
+    height: var(--card-height);
+    flex: 0 0 auto;
+  }
+
+  .retreat-card-shell {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transform-origin: center;
+  }
+
+  .hand-area {
+    --hand-area-width: calc(var(--card-width) * (4 + 3 * 1 / 7)); /* 4 cards + gaps */
+    width: var(--hand-area-width);
+    height: var(--card-height); /* 1 card */
+
+    &:not(.overlap-hand) {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    &.overlap-hand {
+      position: relative;
+      /* Stacking context above the stock pile (z=10) so a draw animation
+         portaled into the hand-area renders above the talon as it flies in.
+         Stays well below .card-animation-layer (z=1000) so play/discard
+         animations still float above the hand. */
+      z-index: 11;
+      /* Remove flexbox properties that conflict with absolute positioning */
+      .card {
+        position: absolute;
+        top: 0;
+        /* Left positioning is handled by inline styles from Card component */
+        transition: all 0.2s ease-in-out;
+
+        &.selected {
+          z-index: 101 !important;
+          --card-translate-y: -8px;
+
+          &.hoverable-card:hover {
+            z-index: 999;
+            --card-translate-y: -10px;
+          }
+        }
+
+        &.hoverable-card:hover {
+          z-index: 999;
+          --card-translate-y: -8px;
+          --card-scale: 1.08;
+        }
+      }
+    }
+
+    &:not(.overlap-hand) {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+  }
+
+  .player-area,
+  .center-area {
+    @apply ring-transparent relative lg:p-5 p-3 rounded-lg lg:mb-5 mb-3 bg-secondary text-secondary-foreground isolate;
+    border: 2px solid transparent;
+
+    .bg-layer {
+      @apply absolute w-full h-full top-0 left-0 overflow-hidden pointer-events-none z-0 rounded-[inherit];
+    }
+  }
+
+  .player-area {
+    @apply z-20;
+    transition:
+      border-color 0.6s,
+      background-color 0.6s,
+      box-shadow 0.6s;
+  }
+
+  .center-area {
+    @apply z-10;
+  }
+
+  .content-layer {
+    @apply relative z-2;
+  }
+
+  .game-board {
+    @apply relative;
+  }
+
+  .game-status {
+    @apply flex flex-col items-center justify-center gap-2;
+  }
+
+  .player-area.active-turn,
+  .center-area.active-turn {
+    @apply ring-(--active-turn-color);
+  }
+
+  @media (max-width: 640px) {
+    .player-area .discard-piles {
+      width: 100%;
+      margin-top: 20px;
+    }
+  }
+}

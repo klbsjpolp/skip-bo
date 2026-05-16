@@ -1,0 +1,124 @@
+/*
+  Drag & drop: the drop-indicator utility, drop-target-hover utility, the
+  body-level cursor/select tweaks during a drag, the touch-action lockdown on
+  drag sources, the floating ghost styling, and the visibility override that
+  hides the source card while the ghost follows the pointer.
+*/
+
+@utility drop-indicator {
+  @apply relative;
+  border-radius: var(--card-radius);
+  transition: all 0.2s ease-in-out;
+
+  &.can-drop:hover {
+    @apply cursor-pointer -translate-y-0.5;
+    box-shadow: var(--can-drop-shadow);
+
+    &::after {
+      @apply content-['↓'] absolute -top-6.25 left-1/2 text-lg -translate-x-1/2 font-bold z-20 animate-bounce;
+      color: var(--drop-indicator-color);
+    }
+
+    &::before {
+      @apply content-[''] absolute z-10 opacity-80 -inset-0.5 animate-pulse border-dashed border-2;
+      border-color: var(--drop-indicator-color);
+      border-radius: calc(var(--card-radius) + 2px);
+    }
+  }
+
+  /* While a drag is in progress, every valid target lights up — even without a hover. */
+  body[data-drag-active='true'] &.can-drop {
+    @apply -translate-y-0.5;
+    box-shadow: var(--can-drop-shadow);
+
+    &::before {
+      @apply content-[''] absolute z-10 opacity-80 -inset-0.5 animate-pulse border-dashed border-2;
+      border-color: var(--drop-indicator-color);
+      border-radius: calc(var(--card-radius) + 2px);
+    }
+  }
+
+  /* Stronger highlight on the target the dragged card is currently over. */
+  &.is-drag-over {
+    @apply -translate-y-1;
+    box-shadow: var(--can-drop-shadow);
+
+    &::after {
+      @apply content-['↓'] absolute -top-6.25 left-1/2 text-lg -translate-x-1/2 font-bold z-20 animate-bounce;
+      color: var(--drop-indicator-color);
+    }
+
+    &::before {
+      @apply content-[''] absolute z-10 opacity-100 -inset-1 border-solid border-2;
+      border-color: var(--drop-indicator-color);
+      border-radius: calc(var(--card-radius) + 4px);
+    }
+  }
+}
+
+@utility drop-target-hover {
+  @apply relative;
+
+  /* Drop target indicator should only show on hover */
+  &:hover::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: var(--selected-border-color);
+    border-radius: 2px;
+    opacity: 0.8;
+    z-index: 10;
+  }
+}
+
+/* Suppress hover-effects on the source card while a drag is active so the
+   under-pointer card doesn't flash hoverable states. */
+body[data-drag-active='true'] {
+  cursor: grabbing;
+  /* Stop the browser from selecting page text when the user drags a card. */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body[data-drag-active='true'] .hoverable-card:hover {
+  transform: none;
+  box-shadow: var(--card-shadow);
+}
+
+/* On touch devices, the default `touch-action` lets the browser scroll the
+   page when the finger moves vertically on a card — which cancels the
+   pointer event stream and kills our drag (the user can only drag
+   horizontally because horizontal pan-x isn't a default scroll axis). With
+   `touch-action: none` we own every touch gesture that originates on a
+   draggable card; the user can still scroll the page by starting the touch
+   on any non-draggable area. */
+[data-drag-source] {
+  touch-action: none;
+}
+
+.card-drag-ghost {
+  cursor: grabbing;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35) !important;
+  transform: scale(1.05) rotate(-2deg);
+}
+
+/* The card the user is currently holding is rendered in the floating ghost —
+   hide the original in place so its slot stays the right size but the card
+   visually "leaves" the source. Lives inside `@layer utilities` so it
+   participates in the Tailwind utilities cascade alongside `.card` and the
+   layered `!important` reliably beats it. */
+@layer utilities {
+  /* Hide the source card while the ghost follows the pointer. The descendant
+     selector is needed because `.card-corner-number` declares `lg:visible`,
+     which would otherwise re-show the corner number even when the parent is
+     hidden. */
+  .card.is-drag-source,
+  .card.is-drag-source * {
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: none !important;
+  }
+}
