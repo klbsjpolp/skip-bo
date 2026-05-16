@@ -88,6 +88,9 @@
     animation:
       clouds-drift 90s linear infinite,
       sky-time-drift 180s ease-in-out infinite alternate;
+    @variant motion-reduce {
+      animation: none;
+    }
   }
 
   .back {
@@ -121,6 +124,9 @@
       pointer-events: none;
       animation: rainbow-lightning 20s ease-in-out infinite;
       animation-delay: -17s;
+      @variant motion-reduce {
+        animation: none;
+      }
     }
 
     /* Flash overlay — briefly lifts the whole card during a strike */
@@ -134,13 +140,9 @@
       animation: rainbow-lightning-flash 20s ease-in-out infinite;
       animation-delay: -17s;
       mix-blend-mode: screen;
-    }
-  }
-
-  .back::before,
-  .back::after {
-    @variant motion-reduce {
-      animation: none;
+      @variant motion-reduce {
+        animation: none;
+      }
     }
   }
 
@@ -297,12 +299,6 @@
   .victory-sunburst,
   .victory-shine {
     display: none;
-  }
-
-  body {
-    @variant motion-reduce {
-      animation: none;
-    }
   }
 }
 

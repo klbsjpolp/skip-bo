@@ -104,6 +104,10 @@
     opacity: 0;
     will-change: transform, opacity;
     animation: retroSpaceShootingStar 9s ease-in infinite;
+    @variant motion-reduce {
+      animation: none;
+      display: none;
+    }
   }
 
   /* Étoile filante secondaire — streak chaud, trajet NW → SE, décalée dans le temps */
@@ -127,6 +131,10 @@
     opacity: 0;
     will-change: transform, opacity;
     animation: retroSpaceShootingStarAlt 13s ease-in 4s infinite;
+    @variant motion-reduce {
+      animation: none;
+      display: none;
+    }
   }
 
   /* Étoile filante tertiaire — la plus discrète et la plus rapide (E → W, légèrement inclinée) */
@@ -149,6 +157,10 @@
     opacity: 0;
     will-change: transform, opacity;
     animation: retroSpaceShootingStarFaint 7s linear 6.5s infinite;
+    @variant motion-reduce {
+      animation: none;
+      display: none;
+    }
   }
 
   h1,
@@ -638,15 +650,6 @@
       --retro-space-corner-top: 5px;
       --retro-space-corner-left: 7px;
       --retro-space-corner-font-size: 9px;
-    }
-  }
-
-  @variant motion-reduce {
-    body::after,
-    &::before,
-    &::after {
-      animation: none;
-      display: none;
     }
   }
 }

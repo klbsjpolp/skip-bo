@@ -384,6 +384,9 @@
       0 0 32px rgb(244 220 160 / 0.28),
       0 0 64px rgb(165 180 252 / 0.18);
     animation: midnightHalo 2.4s ease-in-out infinite;
+    @variant motion-reduce {
+      animation: none;
+    }
   }
 
   --victory-burst-distance-scale: 1.3;
@@ -429,12 +432,6 @@
         transparent 100%
       );
       border-radius: 1px;
-    }
-  }
-
-  .player-area.winner {
-    @variant motion-reduce {
-      animation: none;
     }
   }
 }

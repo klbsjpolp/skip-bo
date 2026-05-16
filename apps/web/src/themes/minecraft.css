@@ -102,6 +102,9 @@
       40% 10%,
       92% 44%;
     animation: minecraftAmbientDriftNear 78s linear infinite;
+    @variant motion-reduce {
+      animation: none;
+    }
   }
 
   body::after {
@@ -129,6 +132,9 @@
       94% 12%,
       60% 6%;
     animation: minecraftAmbientDriftFar 112s linear infinite reverse;
+    @variant motion-reduce {
+      animation: none;
+    }
   }
 
   #main {
@@ -183,6 +189,9 @@
       58% 62%,
       90% 48%;
     animation: minecraftAmbientDriftNear 5s linear infinite;
+    @variant motion-reduce {
+      animation: none;
+    }
   }
 
   .player-area .bg-layer::after,
@@ -212,6 +221,9 @@
       94% 10%,
       62% 8%;
     animation: minecraftAmbientDriftFar 8s linear infinite reverse;
+    @variant motion-reduce {
+      animation: none;
+    }
   }
 
   .player-area {
@@ -354,6 +366,9 @@
     animation-name: minecraftFireworkLaunch;
     animation-timing-function: linear;
     animation-delay: var(--burst-delay, 0ms);
+    @variant motion-reduce {
+      animation: none;
+    }
   }
 
   .victory-badge {
@@ -378,18 +393,6 @@
       0 1px 0 var(--minecraft-text-outline),
       0 -1px 0 var(--minecraft-text-outline),
       1px 1px 0 var(--minecraft-text-outline);
-  }
-
-  @variant motion-reduce {
-    body::before,
-    body::after,
-    .player-area .bg-layer::before,
-    .player-area .bg-layer::after,
-    .center-area .bg-layer::before,
-    .center-area .bg-layer::after,
-    .victory-burst-piece {
-      animation: none;
-    }
   }
 }
 

@@ -30,6 +30,9 @@
   .victory-burst-layer {
     z-index: 1;
     overflow: hidden;
+    @variant motion-reduce {
+      display: none;
+    }
   }
 
   .victory-burst-group {
@@ -58,6 +61,9 @@
     background-size: var(--victory-pattern-size);
     opacity: var(--victory-pattern-opacity);
     animation: var(--victory-pattern-animation);
+    @variant motion-reduce {
+      animation: none !important;
+    }
   }
 
   .victory-emblem {
