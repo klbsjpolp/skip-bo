@@ -1,289 +1,370 @@
 .theme-rainbow {
-    --primary: hsl(32 88% 52%);
-    --primary-foreground: hsl(0 0% 100%);
-    --secondary: #ffffff88;
-    --secondary-foreground: #333333;
-    --success: #4caf50;
-    --success-foreground: hsl(0 0% 100%);
-    --border: hsl(32 78% 62%);
+  --primary: hsl(32 88% 52%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: #ffffff88;
+  --secondary-foreground: #333333;
+  --success: #4caf50;
+  --success-foreground: hsl(0 0% 100%);
+  --border: hsl(32 78% 62%);
 
-    --background: #87ceeb; /* Sky Blue */
-    --text-color: #333333;
-    --title-color: #c2410c;
-    --card-front-color: #ffffff;
-    --card-border-color: #9381ff;
-    --card-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
-    --card-radius: 12px;
-    --card-back-color: #6a5acd;
-    --selected-border-color: #ff8000;
-    --victory-border: #ffb347;
-    --victory-accent: #ffd166;
-    --victory-piece-1: #fff176;
-    --victory-piece-2: #ffb347;
-    --victory-piece-3: #5d9cec;
-    --victory-piece-4: #9381ff;
-    --victory-pattern-opacity: 0.3;
-    --victory-pattern-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round' stroke-width='4'%3E%3Cpath d='M16 18 28 6l-5 13h10L19 38l4-12H13z' stroke='%23fff6b7'/%3E%3Cpath d='M49 44 58 34l-4 10h8L51 58l3-8h-8z' stroke='%239381ff'/%3E%3Cpath d='M42 16 49 8l-3 8h7L44 27l2-6h-6z' stroke='%235d9cec'/%3E%3C/g%3E%3C/svg%3E");
-    --victory-pattern-size: 48px 48px;
-    --victory-pattern-drift-to: 48px 48px;
-    --victory-pattern-animation: victoryPatternDrift 6s linear infinite;
-    --victory-emblem-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Cpath fill='%23ffc515' d='M64 4c3.4 10.8 7.6 17.5 12.5 20.1 5.6 3 13.9 2.4 24.9-1.6-4 10.6-4.3 18.5-.8 23.7 3.6 5.4 10.2 10 19.9 13.8-9.7 3.8-16.3 8.4-19.9 13.8-3.5 5.2-3.2 13.1.8 23.7-11-4-19.3-4.6-24.9-1.6-4.9 2.6-9.1 9.3-12.5 20.1-3.4-10.8-7.6-17.5-12.5-20.1-5.6-3-13.9-2.4-24.9 1.6 4-10.6 4.3-18.5.8-23.7C23.3 68.4 16.7 63.8 7 60c9.7-3.8 16.3-8.4 19.9-13.8 3.5-5.2 3.2-13.1-.8-23.7 11 4 19.3 4.6 24.9 1.6C56.4 21.5 60.6 14.8 64 4Z'/%3E%3Ccircle cx='64' cy='60' r='28' fill='%23f9a51a'/%3E%3C/svg%3E");
-    --victory-emblem-opacity: 0.9;
-    --card-back-bg:
+  --background: #87ceeb; /* Sky Blue */
+  --text-color: #333333;
+  --title-color: #c2410c;
+  --card-front-color: #ffffff;
+  --card-border-color: #9381ff;
+  --card-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+  --card-radius: 12px;
+  --card-back-color: #6a5acd;
+  --selected-border-color: #ff8000;
+  --victory-border: #ffb347;
+  --victory-accent: #ffd166;
+  --victory-piece-1: #fff176;
+  --victory-piece-2: #ffb347;
+  --victory-piece-3: #5d9cec;
+  --victory-piece-4: #9381ff;
+  --victory-pattern-opacity: 0.3;
+  --victory-pattern-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round' stroke-width='4'%3E%3Cpath d='M16 18 28 6l-5 13h10L19 38l4-12H13z' stroke='%23fff6b7'/%3E%3Cpath d='M49 44 58 34l-4 10h8L51 58l3-8h-8z' stroke='%239381ff'/%3E%3Cpath d='M42 16 49 8l-3 8h7L44 27l2-6h-6z' stroke='%235d9cec'/%3E%3C/g%3E%3C/svg%3E");
+  --victory-pattern-size: 48px 48px;
+  --victory-pattern-drift-to: 48px 48px;
+  --victory-pattern-animation: victoryPatternDrift 6s linear infinite;
+  --victory-emblem-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Cpath fill='%23ffc515' d='M64 4c3.4 10.8 7.6 17.5 12.5 20.1 5.6 3 13.9 2.4 24.9-1.6-4 10.6-4.3 18.5-.8 23.7 3.6 5.4 10.2 10 19.9 13.8-9.7 3.8-16.3 8.4-19.9 13.8-3.5 5.2-3.2 13.1.8 23.7-11-4-19.3-4.6-24.9-1.6-4.9 2.6-9.1 9.3-12.5 20.1-3.4-10.8-7.6-17.5-12.5-20.1-5.6-3-13.9-2.4-24.9 1.6 4-10.6 4.3-18.5.8-23.7C23.3 68.4 16.7 63.8 7 60c9.7-3.8 16.3-8.4 19.9-13.8 3.5-5.2 3.2-13.1-.8-23.7 11 4 19.3 4.6 24.9 1.6C56.4 21.5 60.6 14.8 64 4Z'/%3E%3Ccircle cx='64' cy='60' r='28' fill='%23f9a51a'/%3E%3C/svg%3E");
+  --victory-emblem-opacity: 0.9;
+  --card-back-bg:
       /* giant cloud — puffs centred near the top edge with large radii so the
          cloud spills out beyond the left, right and top of the card and only
          its underside shows, covering ~top 2/5 with a lumpy bottom edge */
-      radial-gradient(ellipse 80% 60% at 25% -5%,  rgba(170, 178, 190, 1),    rgba(170, 178, 190, 0.95) 45%, rgba(170, 178, 190, 0) 82%),
-      radial-gradient(ellipse 85% 65% at 65% -10%, rgba(170, 178, 190, 1),    rgba(170, 178, 190, 0.92) 45%, rgba(170, 178, 190, 0) 82%),
-      radial-gradient(ellipse 60% 50% at 50% 5%,   rgba(155, 164, 178, 1),    rgba(155, 164, 178, 0.9)  45%, rgba(155, 164, 178, 0) 82%),
-      radial-gradient(ellipse 50% 42% at 88% 0%,   rgba(155, 164, 178, 1),    rgba(155, 164, 178, 0.88) 45%, rgba(155, 164, 178, 0) 82%),
-      /* irregular rain droplets — falling behind the cloud, visible below it */
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg stroke='%23e8f1ff' stroke-width='1.1' stroke-linecap='round' fill='none'%3E%3Cline x1='10' y1='2' x2='6' y2='14' opacity='.55'/%3E%3Cline x1='30' y1='8' x2='26' y2='22' opacity='.4'/%3E%3Cline x1='52' y1='4' x2='48' y2='16' opacity='.5'/%3E%3Cline x1='68' y1='14' x2='64' y2='28' opacity='.45'/%3E%3Cline x1='18' y1='30' x2='14' y2='44' opacity='.5'/%3E%3Cline x1='42' y1='28' x2='38' y2='42' opacity='.6'/%3E%3Cline x1='60' y1='38' x2='56' y2='52' opacity='.4'/%3E%3Cline x1='4' y1='52' x2='0' y2='66' opacity='.5'/%3E%3Cline x1='26' y1='56' x2='22' y2='70' opacity='.55'/%3E%3Cline x1='50' y1='60' x2='46' y2='74' opacity='.45'/%3E%3Cline x1='72' y1='52' x2='68' y2='66' opacity='.5'/%3E%3C/g%3E%3C/svg%3E"),
-      /* warm sun peeking out from behind the cloud, top-right */
-      radial-gradient(circle at 96% 4%, rgba(255, 215, 140, 0.55), rgba(255, 200, 140, 0) 48%),
-      /* base stormy sky */
-      linear-gradient(180deg, #2d3a58 0%, #1a2342 100%);
+    radial-gradient(
+      ellipse 80% 60% at 25% -5%,
+      rgba(170, 178, 190, 1),
+      rgba(170, 178, 190, 0.95) 45%,
+      rgba(170, 178, 190, 0) 82%
+    ),
+    radial-gradient(
+      ellipse 85% 65% at 65% -10%,
+      rgba(170, 178, 190, 1),
+      rgba(170, 178, 190, 0.92) 45%,
+      rgba(170, 178, 190, 0) 82%
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 50% 5%,
+      rgba(155, 164, 178, 1),
+      rgba(155, 164, 178, 0.9) 45%,
+      rgba(155, 164, 178, 0) 82%
+    ),
+    radial-gradient(
+      ellipse 50% 42% at 88% 0%,
+      rgba(155, 164, 178, 1),
+      rgba(155, 164, 178, 0.88) 45%,
+      rgba(155, 164, 178, 0) 82%
+    ),
+    /* irregular rain droplets — falling behind the cloud, visible below it */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg stroke='%23e8f1ff' stroke-width='1.1' stroke-linecap='round' fill='none'%3E%3Cline x1='10' y1='2' x2='6' y2='14' opacity='.55'/%3E%3Cline x1='30' y1='8' x2='26' y2='22' opacity='.4'/%3E%3Cline x1='52' y1='4' x2='48' y2='16' opacity='.5'/%3E%3Cline x1='68' y1='14' x2='64' y2='28' opacity='.45'/%3E%3Cline x1='18' y1='30' x2='14' y2='44' opacity='.5'/%3E%3Cline x1='42' y1='28' x2='38' y2='42' opacity='.6'/%3E%3Cline x1='60' y1='38' x2='56' y2='52' opacity='.4'/%3E%3Cline x1='4' y1='52' x2='0' y2='66' opacity='.5'/%3E%3Cline x1='26' y1='56' x2='22' y2='70' opacity='.55'/%3E%3Cline x1='50' y1='60' x2='46' y2='74' opacity='.45'/%3E%3Cline x1='72' y1='52' x2='68' y2='66' opacity='.5'/%3E%3C/g%3E%3C/svg%3E"),
+    /* warm sun peeking out from behind the cloud, top-right */
+    radial-gradient(circle at 96% 4%, rgba(255, 215, 140, 0.55), rgba(255, 200, 140, 0) 48%),
+    /* base stormy sky */ linear-gradient(180deg, #2d3a58 0%, #1a2342 100%);
 
-    --skipbo-text: white;
-    --card-g1: #ff6b6b; /* Red band from back gradient */
-    --card-g2: #4caf50; /* Green band from back gradient */
-    --card-g3: #9381ff; /* Indigo/Purple band from back gradient */
+  --skipbo-text: white;
+  --card-g1: #ff6b6b; /* Red band from back gradient */
+  --card-g2: #4caf50; /* Green band from back gradient */
+  --card-g3: #9381ff; /* Indigo/Purple band from back gradient */
 
-    body {
-      background-color: var(--background);
-      background-image:
+  body {
+    background-color: var(--background);
+    background-image:
         /* Cloud Set 1 */
-        radial-gradient(ellipse at 15% 25%, white 0%, transparent 8%),
-        radial-gradient(ellipse at 25% 50%, white 0%, transparent 10%),
-        radial-gradient(ellipse at 45% 20%, white 0%, transparent 7%),
-        radial-gradient(ellipse at 50% 40%, white 0%, transparent 9%),
-        radial-gradient(ellipse at 35% 80%, white 0%, transparent 11%),
-        radial-gradient(ellipse at 40% 70%, white 0%, transparent 10%),
-        /* Cloud Set 2 (Mirrored for seamless loop) */
-        radial-gradient(ellipse at 60% 70%, white 0%, transparent 10%),
-        radial-gradient(ellipse at 65% 80%, white 0%, transparent 11%),
-        radial-gradient(ellipse at 75% 20%, white 0%, transparent 7%),
-        radial-gradient(ellipse at 80% 40%, white 0%, transparent 9%),
-        radial-gradient(ellipse at 88% 60%, white 0%, transparent 4%),
-        radial-gradient(ellipse at 90% 65%, white 0%, transparent 6%);
-      background-size: 2000px 500px;
-      animation:
-        clouds-drift 90s linear infinite,
-        sky-time-drift 180s ease-in-out infinite alternate;
+      radial-gradient(ellipse at 15% 25%, white 0%, transparent 8%),
+      radial-gradient(ellipse at 25% 50%, white 0%, transparent 10%),
+      radial-gradient(ellipse at 45% 20%, white 0%, transparent 7%),
+      radial-gradient(ellipse at 50% 40%, white 0%, transparent 9%),
+      radial-gradient(ellipse at 35% 80%, white 0%, transparent 11%),
+      radial-gradient(ellipse at 40% 70%, white 0%, transparent 10%),
+      /* Cloud Set 2 (Mirrored for seamless loop) */ radial-gradient(ellipse at 60% 70%, white 0%, transparent 10%),
+      radial-gradient(ellipse at 65% 80%, white 0%, transparent 11%),
+      radial-gradient(ellipse at 75% 20%, white 0%, transparent 7%),
+      radial-gradient(ellipse at 80% 40%, white 0%, transparent 9%),
+      radial-gradient(ellipse at 88% 60%, white 0%, transparent 4%),
+      radial-gradient(ellipse at 90% 65%, white 0%, transparent 6%);
+    background-size: 2000px 500px;
+    animation:
+      clouds-drift 90s linear infinite,
+      sky-time-drift 180s ease-in-out infinite alternate;
+  }
+
+  .back {
+    background-image: var(--card-back-bg);
+    background-size:
+      auto,
+      auto,
+      auto,
+      auto,
+      36px 36px,
+      auto,
+      auto;
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat, no-repeat;
+    position: relative;
+    overflow: hidden;
+
+    /* Lightning bolt — zigzag streaking from the cloud's underside */
+    &::after {
+      content: '';
+      position: absolute;
+      top: 28%;
+      left: 38%;
+      width: 28%;
+      height: 60%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 60' fill='none'%3E%3Cpath d='M15 0 L7 26 L13 26 L5 60 L13 32 L8 32 Z' fill='%23fff8d0' stroke='%23ffffff' stroke-width='0.6' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-size: contain;
+      background-position: center top;
+      filter: drop-shadow(0 0 4px rgba(255, 245, 180, 0.9)) drop-shadow(0 0 10px rgba(255, 235, 140, 0.6));
+      opacity: 0;
+      pointer-events: none;
+      animation: rainbow-lightning 20s ease-in-out infinite;
+      animation-delay: -17s;
     }
 
-    .back {
-      background-image: var(--card-back-bg);
-      background-size: auto, auto, auto, auto, 36px 36px, auto, auto;
-      background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat, no-repeat;
-      position: relative;
-      overflow: hidden;
+    /* Flash overlay — briefly lifts the whole card during a strike */
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 25%, rgba(255, 250, 220, 0.85), rgba(255, 245, 200, 0) 70%);
+      opacity: 0;
+      pointer-events: none;
+      animation: rainbow-lightning-flash 20s ease-in-out infinite;
+      animation-delay: -17s;
+      mix-blend-mode: screen;
+    }
+  }
 
-      /* Lightning bolt — zigzag streaking from the cloud's underside */
-      &::after {
-        content: "";
-        position: absolute;
-        top: 28%;
-        left: 38%;
-        width: 28%;
-        height: 60%;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 60' fill='none'%3E%3Cpath d='M15 0 L7 26 L13 26 L5 60 L13 32 L8 32 Z' fill='%23fff8d0' stroke='%23ffffff' stroke-width='0.6' stroke-linejoin='round'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-size: contain;
-        background-position: center top;
-        filter: drop-shadow(0 0 4px rgba(255, 245, 180, 0.9)) drop-shadow(0 0 10px rgba(255, 235, 140, 0.6));
-        opacity: 0;
-        pointer-events: none;
-        animation: rainbow-lightning 20s ease-in-out infinite;
-        animation-delay: -17s;
-      }
+  @media (prefers-reduced-motion: reduce) {
+    .back::before,
+    .back::after {
+      animation: none;
+    }
+  }
 
-      /* Flash overlay — briefly lifts the whole card during a strike */
-      &::before {
-        content: "";
+  .discard-pile-stack {
+    .hoverable-card:hover {
+      box-shadow: 0 0 15px rgba(147, 129, 255, 0.4);
+    }
+    .card.selected.hoverable-card:hover {
+      box-shadow: 0 0 20px var(--selected-border-color);
+    }
+  }
+
+  /* 14 evenly-spaced rainbow stops (HSL hue 0..360 / 14 steps) */
+  --rainbow-0: hsl(0 85% 58%);
+  --rainbow-1: hsl(25.7 85% 58%);
+  --rainbow-2: hsl(51.4 85% 55%);
+  --rainbow-3: hsl(77.1 72% 50%);
+  --rainbow-4: hsl(102.9 65% 48%);
+  --rainbow-5: hsl(128.6 60% 48%);
+  --rainbow-6: hsl(154.3 65% 45%);
+  --rainbow-7: hsl(180 70% 45%);
+  --rainbow-8: hsl(205.7 80% 55%);
+  --rainbow-9: hsl(231.4 78% 62%);
+  --rainbow-10: hsl(257.1 70% 65%);
+  --rainbow-11: hsl(282.9 65% 62%);
+  --rainbow-12: hsl(308.6 70% 60%);
+  --rainbow-13: hsl(334.3 80% 62%);
+
+  .card.normal-card {
+    &[data-value='1'] {
+      background-image: linear-gradient(90deg, var(--rainbow-0), var(--rainbow-1), var(--rainbow-2));
+    }
+    &[data-value='2'] {
+      background-image: linear-gradient(106deg, var(--rainbow-1), var(--rainbow-2), var(--rainbow-3));
+    }
+    &[data-value='3'] {
+      background-image: linear-gradient(123deg, var(--rainbow-2), var(--rainbow-3), var(--rainbow-4));
+    }
+    &[data-value='4'] {
+      background-image: linear-gradient(139deg, var(--rainbow-3), var(--rainbow-4), var(--rainbow-5));
+    }
+    &[data-value='5'] {
+      background-image: linear-gradient(155deg, var(--rainbow-4), var(--rainbow-5), var(--rainbow-6));
+    }
+    &[data-value='6'] {
+      background-image: linear-gradient(172deg, var(--rainbow-5), var(--rainbow-6), var(--rainbow-7));
+    }
+    &[data-value='7'] {
+      background-image: linear-gradient(188deg, var(--rainbow-6), var(--rainbow-7), var(--rainbow-8));
+    }
+    &[data-value='8'] {
+      background-image: linear-gradient(205deg, var(--rainbow-7), var(--rainbow-8), var(--rainbow-9));
+    }
+    &[data-value='9'] {
+      background-image: linear-gradient(221deg, var(--rainbow-8), var(--rainbow-9), var(--rainbow-10));
+    }
+    &[data-value='10'] {
+      background-image: linear-gradient(237deg, var(--rainbow-9), var(--rainbow-10), var(--rainbow-11));
+    }
+    &[data-value='11'] {
+      background-image: linear-gradient(254deg, var(--rainbow-10), var(--rainbow-11), var(--rainbow-12));
+    }
+    &[data-value='12'] {
+      background-image: linear-gradient(270deg, var(--rainbow-11), var(--rainbow-12), var(--rainbow-13));
+    }
+
+    .card-number {
+      color: #ffffff;
+      text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.45),
+        0 0 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-corner-number {
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  .card {
+    &.skipbo-text {
+      @apply text-shadow-black;
+      /* Big rainbow arc seen edge-on: center far past the bottom-right of the card,
+           bands tuned so only the bottom-left → top-right diagonal slice falls on the card. */
+      --inner: 70%;
+      --band: 3%;
+
+      .card-inner::before {
+        content: '';
         position: absolute;
         inset: 0;
-        background: radial-gradient(ellipse 80% 60% at 50% 25%, rgba(255, 250, 220, 0.85), rgba(255, 245, 200, 0) 70%);
-        opacity: 0;
         pointer-events: none;
-        animation: rainbow-lightning-flash 20s ease-in-out infinite;
-        animation-delay: -17s;
-        mix-blend-mode: screen;
-      }
-    }
+        border-radius: inherit;
+        z-index: 0;
+        overflow: hidden;
 
-    @media (prefers-reduced-motion: reduce) {
-      .back::before,
-      .back::after {
-        animation: none;
+        background-image:
+          linear-gradient(#ffffff40, #ffffff40),
+          radial-gradient(
+            circle at 250% 250%,
+            var(--card-front-color) 0 var(--inner),
+            #ff0000 var(--inner) calc(var(--inner) + var(--band)),
+            #ff7f00 calc(var(--inner) + var(--band)) calc(var(--inner) + var(--band) * 2),
+            #ffff00 calc(var(--inner) + var(--band) * 2) calc(var(--inner) + var(--band) * 3),
+            #00ff00 calc(var(--inner) + var(--band) * 3) calc(var(--inner) + var(--band) * 4),
+            #0077ff calc(var(--inner) + var(--band) * 4) calc(var(--inner) + var(--band) * 5),
+            #4b0082 calc(var(--inner) + var(--band) * 5) calc(var(--inner) + var(--band) * 6),
+            #8f00ff calc(var(--inner) + var(--band) * 6) calc(var(--inner) + var(--band) * 7),
+            transparent calc(var(--inner) + var(--band) * 7) 100%
+          );
+        background-size:
+          100% 100%,
+          100% 100%;
+        background-repeat: no-repeat;
+        background-position: center, center;
+        filter: saturate(1.15);
+        opacity: 0.85;
       }
-    }
-
-    .discard-pile-stack {
-      .hoverable-card:hover {
-        box-shadow: 0 0 15px rgba(147, 129, 255, 0.4);
-      }
-      .card.selected.hoverable-card:hover {
-        box-shadow: 0 0 20px var(--selected-border-color);
-      }
-    }
-
-    /* 14 evenly-spaced rainbow stops (HSL hue 0..360 / 14 steps) */
-    --rainbow-0:  hsl(0     85% 58%);
-    --rainbow-1:  hsl(25.7  85% 58%);
-    --rainbow-2:  hsl(51.4  85% 55%);
-    --rainbow-3:  hsl(77.1  72% 50%);
-    --rainbow-4:  hsl(102.9 65% 48%);
-    --rainbow-5:  hsl(128.6 60% 48%);
-    --rainbow-6:  hsl(154.3 65% 45%);
-    --rainbow-7:  hsl(180   70% 45%);
-    --rainbow-8:  hsl(205.7 80% 55%);
-    --rainbow-9:  hsl(231.4 78% 62%);
-    --rainbow-10: hsl(257.1 70% 65%);
-    --rainbow-11: hsl(282.9 65% 62%);
-    --rainbow-12: hsl(308.6 70% 60%);
-    --rainbow-13: hsl(334.3 80% 62%);
-
-    .card.normal-card {
-      &[data-value="1"]  { background-image: linear-gradient( 90deg, var(--rainbow-0),  var(--rainbow-1),  var(--rainbow-2)); }
-      &[data-value="2"]  { background-image: linear-gradient(106deg, var(--rainbow-1),  var(--rainbow-2),  var(--rainbow-3)); }
-      &[data-value="3"]  { background-image: linear-gradient(123deg, var(--rainbow-2),  var(--rainbow-3),  var(--rainbow-4)); }
-      &[data-value="4"]  { background-image: linear-gradient(139deg, var(--rainbow-3),  var(--rainbow-4),  var(--rainbow-5)); }
-      &[data-value="5"]  { background-image: linear-gradient(155deg, var(--rainbow-4),  var(--rainbow-5),  var(--rainbow-6)); }
-      &[data-value="6"]  { background-image: linear-gradient(172deg, var(--rainbow-5),  var(--rainbow-6),  var(--rainbow-7)); }
-      &[data-value="7"]  { background-image: linear-gradient(188deg, var(--rainbow-6),  var(--rainbow-7),  var(--rainbow-8)); }
-      &[data-value="8"]  { background-image: linear-gradient(205deg, var(--rainbow-7),  var(--rainbow-8),  var(--rainbow-9)); }
-      &[data-value="9"]  { background-image: linear-gradient(221deg, var(--rainbow-8),  var(--rainbow-9),  var(--rainbow-10)); }
-      &[data-value="10"] { background-image: linear-gradient(237deg, var(--rainbow-9),  var(--rainbow-10), var(--rainbow-11)); }
-      &[data-value="11"] { background-image: linear-gradient(254deg, var(--rainbow-10), var(--rainbow-11), var(--rainbow-12)); }
-      &[data-value="12"] { background-image: linear-gradient(270deg, var(--rainbow-11), var(--rainbow-12), var(--rainbow-13)); }
 
       .card-number {
-        color: #ffffff;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 0 6px rgba(0, 0, 0, 0.25);
-      }
-
-      .card-corner-number {
-        color: #ffffff;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-      }
-    }
-
-    .card {
-      &.skipbo-text {
-        @apply text-shadow-black;
-        /* Big rainbow arc seen edge-on: center far past the bottom-right of the card,
-           bands tuned so only the bottom-left → top-right diagonal slice falls on the card. */
-        --inner: 70%;
-        --band: 3%;
-
-        .card-inner::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          border-radius: inherit;
-          z-index: 0;
-          overflow: hidden;
-
-          background-image:
-            linear-gradient(#ffffff40, #ffffff40),
-            radial-gradient(circle at 250% 250%,
-              var(--card-front-color) 0 var(--inner),
-
-              #ff0000 var(--inner) calc(var(--inner) + var(--band)),
-              #ff7f00 calc(var(--inner) + var(--band)) calc(var(--inner) + var(--band) * 2),
-              #ffff00 calc(var(--inner) + var(--band) * 2) calc(var(--inner) + var(--band) * 3),
-              #00ff00 calc(var(--inner) + var(--band) * 3) calc(var(--inner) + var(--band) * 4),
-              #0077ff calc(var(--inner) + var(--band) * 4) calc(var(--inner) + var(--band) * 5),
-              #4b0082 calc(var(--inner) + var(--band) * 5) calc(var(--inner) + var(--band) * 6),
-              #8f00ff calc(var(--inner) + var(--band) * 6) calc(var(--inner) + var(--band) * 7),
-
-              transparent calc(var(--inner) + var(--band) * 7) 100%
-            );
-          background-size: 100% 100%, 100% 100%;
-          background-repeat: no-repeat;
-          background-position: center, center;
-          filter: saturate(1.15);
-          opacity: 0.85;
-        }
-
-          .card-number {
-          position: relative;
-          z-index: 1; /* au-dessus des gradients */
-        }
-      }
-
-      .corner-top .card-corner-number,
-      .corner-bottom .card-corner-number {
-        text-shadow: 0 0 4px rgba(0,0,0,0.3);
         position: relative;
-        z-index: 1; /* for sure above the rainbow overlay */
+        z-index: 1; /* au-dessus des gradients */
       }
     }
 
-    .player-area.winner {
-      box-shadow:
-        0 0 0 1px rgba(255, 179, 71, 0.5),
-        0 16px 28px rgba(255, 107, 107, 0.2);
+    .corner-top .card-corner-number,
+    .corner-bottom .card-corner-number {
+      text-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+      position: relative;
+      z-index: 1; /* for sure above the rainbow overlay */
     }
+  }
 
-    .victory-accent {
-      z-index: 1;
-      inset: auto;
-      top: 50%;
-      left: 50%;
-      width: clamp(80px, 15vw, 140px);
-      height: clamp(80px, 15vw, 140px);
-      opacity: 0.92;
-      transform: translate(-50%, -50%);
-      background:
-        radial-gradient(circle, rgba(255, 210, 78, 0.14) 0 44%, rgba(255, 210, 78, 0) 62%);
-      filter: drop-shadow(0 10px 16px rgba(255, 179, 71, 0.16));
-    }
+  .player-area.winner {
+    box-shadow:
+      0 0 0 1px rgba(255, 179, 71, 0.5),
+      0 16px 28px rgba(255, 107, 107, 0.2);
+  }
 
-    .victory-burst-layer,
-    .victory-sunburst,
-    .victory-shine {
-      display: none;
+  .victory-accent {
+    z-index: 1;
+    inset: auto;
+    top: 50%;
+    left: 50%;
+    width: clamp(80px, 15vw, 140px);
+    height: clamp(80px, 15vw, 140px);
+    opacity: 0.92;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255, 210, 78, 0.14) 0 44%, rgba(255, 210, 78, 0) 62%);
+    filter: drop-shadow(0 10px 16px rgba(255, 179, 71, 0.16));
+  }
+
+  .victory-burst-layer,
+  .victory-sunburst,
+  .victory-shine {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body {
+      animation: none;
     }
+  }
 }
 
 @keyframes sky-time-drift {
-    0% {
-      /* Dawn Warm */
-      background-color: #ffb59d;
-    }
-    50% {
-      /* Midday Blue */
-      background-color: #87ceeb;
-    }
-    100% {
-      /* Dusk Pink */
-      background-color: #f4a8c0;
-    }
+  0% {
+    /* Dawn Warm */
+    background-color: #ffb59d;
+  }
+  50% {
+    /* Midday Blue */
+    background-color: #87ceeb;
+  }
+  100% {
+    /* Dusk Pink */
+    background-color: #f4a8c0;
+  }
 }
 
 @keyframes rainbow-lightning {
-    0%, 92%   { opacity: 0; }
-    93%, 94%  { opacity: 1; }
-    95%       { opacity: 0.1; }
-    96%       { opacity: 1; }
-    97.5%     { opacity: 0.3; }
-    99%, 100% { opacity: 0; }
+  0%,
+  92% {
+    opacity: 0;
+  }
+  93%,
+  94% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 0.1;
+  }
+  96% {
+    opacity: 1;
+  }
+  97.5% {
+    opacity: 0.3;
+  }
+  99%,
+  100% {
+    opacity: 0;
+  }
 }
 
 @keyframes rainbow-lightning-flash {
-    0%, 92%   { opacity: 0; }
-    93%, 94%  { opacity: 1; }
-    95%       { opacity: 0.15; }
-    96%       { opacity: 0.9; }
-    97.5%     { opacity: 0.25; }
-    99%, 100% { opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-.theme-rainbow body {
-  animation: none;
-}
+  0%,
+  92% {
+    opacity: 0;
+  }
+  93%,
+  94% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 0.15;
+  }
+  96% {
+    opacity: 0.9;
+  }
+  97.5% {
+    opacity: 0.25;
+  }
+  99%,
+  100% {
+    opacity: 0;
+  }
 }

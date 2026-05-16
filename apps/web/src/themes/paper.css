@@ -21,7 +21,7 @@
   --card-back-color: #1e3a8a;
   --card-back-color-2: #0f1f4a;
   --card-border-color: #c9bfa8;
-  --card-shadow: 1px 2px 0 rgba(44, 37, 23, 0.18), 0 6px 14px rgba(44, 37, 23, 0.10);
+  --card-shadow: 1px 2px 0 rgba(44, 37, 23, 0.18), 0 6px 14px rgba(44, 37, 23, 0.1);
   --card-radius: 6px;
 
   --victory-border: #b5121b;
@@ -46,11 +46,7 @@
   --card-g2: hsl(355 70% 40%);
   --card-g3: hsl(225 65% 32%);
 
-  --card-back-bg: linear-gradient(
-    135deg,
-    var(--card-back-color-2) 0%,
-    var(--card-back-color) 100%
-  );
+  --card-back-bg: linear-gradient(135deg, var(--card-back-color-2) 0%, var(--card-back-color) 100%);
 
   body {
     font-family: 'Caveat', 'Kalam', 'Bradley Hand', 'Comic Sans MS', cursive;
@@ -77,32 +73,33 @@
         transparent 80%
       ),
       /* binding holes highlight */
-      radial-gradient(
-        circle at 17px 14px,
-        rgba(255, 255, 255, 0.35) 0 1.5px,
-        transparent 2px
-      ),
+      radial-gradient(circle at 17px 14px, rgba(255, 255, 255, 0.35) 0 1.5px, transparent 2px),
       /* red margin line on the left */
       linear-gradient(
-        to right,
-        transparent 0,
-        transparent 44px,
-        rgba(181, 18, 27, 0.55) 44px,
-        rgba(181, 18, 27, 0.55) 45px,
-        transparent 46px
-      ),
+          to right,
+          transparent 0,
+          transparent 44px,
+          rgba(181, 18, 27, 0.55) 44px,
+          rgba(181, 18, 27, 0.55) 45px,
+          transparent 46px
+        ),
       /* horizontal ruled lines */
       repeating-linear-gradient(
-        to bottom,
-        transparent 0,
-        transparent 31px,
-        rgba(30, 58, 138, 0.18) 31px,
-        rgba(30, 58, 138, 0.18) 32px
-      ),
+          to bottom,
+          transparent 0,
+          transparent 31px,
+          rgba(30, 58, 138, 0.18) 31px,
+          rgba(30, 58, 138, 0.18) 32px
+        ),
       /* paper grain noise */
       url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.46 0 0 0 0 0.28 0 0 0 0.20 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
     background-repeat: repeat-y, repeat-y, repeat, repeat, repeat;
-    background-size: 18px 30px, 18px 30px, auto, auto, 240px 240px;
+    background-size:
+      18px 30px,
+      18px 30px,
+      auto,
+      auto,
+      240px 240px;
   }
 
   /* Ink blot in the bottom-right corner — fixed with the paper sheet. */
@@ -142,14 +139,13 @@
 
     &.normal-card {
       background-color: var(--card-front-color);
-      background-image:
-        repeating-linear-gradient(
-          to bottom,
-          transparent 0,
-          transparent 14px,
-          rgba(30, 58, 138, 0.12) 14px,
-          rgba(30, 58, 138, 0.12) 15px
-        );
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 14px,
+        rgba(30, 58, 138, 0.12) 14px,
+        rgba(30, 58, 138, 0.12) 15px
+      );
       box-shadow: var(--card-shadow);
 
       .card-number {
@@ -169,12 +165,7 @@
     &.skipbo-text {
       color: var(--skipbo-text);
       background-color: var(--card-back-color-2);
-      background-image:
-        radial-gradient(
-          ellipse at 50% 55%,
-          rgba(255, 255, 255, 0.10) 0%,
-          transparent 60%
-        );
+      background-image: radial-gradient(ellipse at 50% 55%, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
 
       &::after {
         content: '';
@@ -195,13 +186,15 @@
         var(--card-back-bg);
       background-repeat: no-repeat, no-repeat;
       background-position: center, center;
-      background-size: 78% 78%, cover;
+      background-size:
+        78% 78%,
+        cover;
     }
   }
-}
 
-@media (max-width: 640px) {
-  .theme-paper body::before {
-    display: none;
+  @media (max-width: 640px) {
+    body::before {
+      display: none;
+    }
   }
 }

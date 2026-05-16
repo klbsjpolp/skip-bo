@@ -15,20 +15,13 @@
   --title-color: #f5ecdc;
   --card-front-color: #e7ddcf;
   --card-border-color: #8d98a1;
-  --card-shadow:
-    0 10px 22px rgb(0 0 0 / 0.34),
-    0 1px 0 rgb(255 255 255 / 0.12);
+  --card-shadow: 0 10px 22px rgb(0 0 0 / 0.34), 0 1px 0 rgb(255 255 255 / 0.12);
   --card-radius: 14px;
   --card-back-color: #10263c;
   --selected-border-color: #f1954d;
-  --selected-shadow:
-    0 0 0 2px rgb(241 149 77 / 0.34),
-    0 0 18px rgb(241 149 77 / 0.4),
-    0 12px 22px rgb(0 0 0 / 0.3);
+  --selected-shadow: 0 0 0 2px rgb(241 149 77 / 0.34), 0 0 18px rgb(241 149 77 / 0.4), 0 12px 22px rgb(0 0 0 / 0.3);
   --drop-indicator-color: #7fd4d7;
-  --can-drop-shadow:
-    0 0 0 2px rgb(127 212 215 / 0.34),
-    0 0 18px rgb(127 212 215 / 0.3);
+  --can-drop-shadow: 0 0 0 2px rgb(127 212 215 / 0.34), 0 0 18px rgb(127 212 215 / 0.3);
   --active-turn-color: #7fd4d7;
   --retro-space-corner-top: 8px;
   --retro-space-corner-left: 8px;
@@ -57,7 +50,7 @@
   --card-g3: #c76758;
 
   body {
-    font-family: "Segoe UI", sans-serif;
+    font-family: 'Segoe UI', sans-serif;
     background-image:
       radial-gradient(circle at 15% 12%, rgb(127 212 215 / 0.12) 0, transparent 18%),
       radial-gradient(circle at 84% 6%, rgb(241 149 77 / 0.12) 0, transparent 20%),
@@ -66,7 +59,7 @@
   }
 
   body::before {
-    content: "";
+    content: '';
     position: fixed;
     inset: 0;
     pointer-events: none;
@@ -78,14 +71,21 @@
       radial-gradient(circle at 76% 74%, rgb(255 255 255 / 0.7) 0 1px, transparent 1.5px),
       linear-gradient(rgb(127 212 215 / 0.06) 1px, transparent 1px),
       linear-gradient(90deg, rgb(127 212 215 / 0.06) 1px, transparent 1px);
-    background-size: auto, auto, auto, auto, auto, 32px 32px, 32px 32px;
+    background-size:
+      auto,
+      auto,
+      auto,
+      auto,
+      auto,
+      32px 32px,
+      32px 32px;
     mask-image: linear-gradient(180deg, rgb(0 0 0 / 0.8), rgb(0 0 0 / 0.5));
     opacity: 0.55;
   }
 
   /* Étoile filante primaire — streak cyan, trajet NE → SW */
   body::after {
-    content: "";
+    content: '';
     position: fixed;
     top: 0;
     left: 0;
@@ -100,9 +100,7 @@
       rgb(255 244 216 / 0.6) 76%,
       rgb(255 255 255 / 0.78) 100%
     );
-    filter:
-      drop-shadow(0 0 4px rgb(127 212 215 / 0.34))
-      drop-shadow(0 0 10px rgb(241 149 77 / 0.16));
+    filter: drop-shadow(0 0 4px rgb(127 212 215 / 0.34)) drop-shadow(0 0 10px rgb(241 149 77 / 0.16));
     opacity: 0;
     will-change: transform, opacity;
     animation: retroSpaceShootingStar 9s ease-in infinite;
@@ -110,7 +108,7 @@
 
   /* Étoile filante secondaire — streak chaud, trajet NW → SE, décalée dans le temps */
   &::before {
-    content: "";
+    content: '';
     position: fixed;
     top: 0;
     left: 0;
@@ -125,9 +123,7 @@
       rgb(255 244 216 / 0.58) 76%,
       rgb(255 255 255 / 0.74) 100%
     );
-    filter:
-      drop-shadow(0 0 3.5px rgb(241 149 77 / 0.32))
-      drop-shadow(0 0 9px rgb(127 212 215 / 0.14));
+    filter: drop-shadow(0 0 3.5px rgb(241 149 77 / 0.32)) drop-shadow(0 0 9px rgb(127 212 215 / 0.14));
     opacity: 0;
     will-change: transform, opacity;
     animation: retroSpaceShootingStarAlt 13s ease-in 4s infinite;
@@ -135,7 +131,7 @@
 
   /* Étoile filante tertiaire — la plus discrète et la plus rapide (E → W, légèrement inclinée) */
   &::after {
-    content: "";
+    content: '';
     position: fixed;
     top: 0;
     left: 0;
@@ -172,9 +168,7 @@
 
   .player-area,
   .center-area {
-    background:
-      linear-gradient(180deg, rgb(20 35 54 / 0.96), rgb(11 20 31 / 0.96)),
-      var(--zone-bg-color);
+    background: linear-gradient(180deg, rgb(20 35 54 / 0.96), rgb(11 20 31 / 0.96)), var(--zone-bg-color);
     border-color: rgb(141 152 161 / 0.42);
     box-shadow:
       0 18px 34px rgb(0 0 0 / 0.42),
@@ -182,7 +176,7 @@
       inset 0 0 0 1px rgb(44 76 102 / 0.42);
 
     &::before {
-      content: "";
+      content: '';
       position: absolute;
       inset: 0;
       border-radius: inherit;
@@ -208,31 +202,43 @@
         linear-gradient(90deg, rgb(127 212 215 / 0.07) 1px, transparent 1px),
         linear-gradient(180deg, rgb(255 255 255 / 0.08), transparent 24%),
         linear-gradient(90deg, rgb(241 149 77 / 0.08), transparent 26%, transparent 74%, rgb(127 212 215 / 0.08));
-      background-size: 28px 28px, 28px 28px, auto, auto;
+      background-size:
+        28px 28px,
+        28px 28px,
+        auto,
+        auto;
       opacity: 0.95;
     }
   }
 
   .player-area {
-    &[data-player-type="ai"] {
+    &[data-player-type='ai'] {
       .bg-layer {
         background:
           linear-gradient(rgb(127 212 215 / 0.07) 1px, transparent 1px),
           linear-gradient(90deg, rgb(127 212 215 / 0.07) 1px, transparent 1px),
           linear-gradient(180deg, rgb(127 212 215 / 0.18), transparent 18%),
           linear-gradient(90deg, rgb(127 212 215 / 0.14), transparent 22%, transparent 78%, rgb(255 255 255 / 0.03));
-        background-size: 28px 28px, 28px 28px, auto, auto;
+        background-size:
+          28px 28px,
+          28px 28px,
+          auto,
+          auto;
       }
     }
 
-    &[data-player-type="human"] {
+    &[data-player-type='human'] {
       .bg-layer {
         background:
           linear-gradient(rgb(127 212 215 / 0.07) 1px, transparent 1px),
           linear-gradient(90deg, rgb(127 212 215 / 0.07) 1px, transparent 1px),
           linear-gradient(180deg, rgb(241 149 77 / 0.14), transparent 18%),
           linear-gradient(90deg, rgb(255 255 255 / 0.03), transparent 22%, transparent 78%, rgb(241 149 77 / 0.14));
-        background-size: 28px 28px, 28px 28px, auto, auto;
+        background-size:
+          28px 28px,
+          28px 28px,
+          auto,
+          auto;
       }
     }
   }
@@ -242,14 +248,13 @@
       background:
         linear-gradient(rgb(127 212 215 / 0.07) 1px, transparent 1px),
         linear-gradient(90deg, rgb(127 212 215 / 0.07) 1px, transparent 1px),
-        repeating-linear-gradient(
-          90deg,
-          transparent 0 13%,
-          rgb(241 149 77 / 0.14) 13% 13.4%,
-          transparent 13.4% 25%
-        ),
+        repeating-linear-gradient(90deg, transparent 0 13%, rgb(241 149 77 / 0.14) 13% 13.4%, transparent 13.4% 25%),
         linear-gradient(180deg, rgb(255 255 255 / 0.08), transparent 22%);
-      background-size: 28px 28px, 28px 28px, 100% 100%, auto;
+      background-size:
+        28px 28px,
+        28px 28px,
+        100% 100%,
+        auto;
     }
 
     .build-pile {
@@ -285,7 +290,14 @@
     .back {
       background:
         radial-gradient(circle at center, rgb(245 236 220 / 0.15) 0 17%, transparent 17.4%),
-        radial-gradient(circle at center, transparent 0 31%, rgb(127 212 215 / 0.56) 31% 32.8%, transparent 33.2% 44%, rgb(241 149 77 / 0.52) 44% 45.8%, transparent 46.2%),
+        radial-gradient(
+          circle at center,
+          transparent 0 31%,
+          rgb(127 212 215 / 0.56) 31% 32.8%,
+          transparent 33.2% 44%,
+          rgb(241 149 77 / 0.52) 44% 45.8%,
+          transparent 46.2%
+        ),
         linear-gradient(180deg, rgb(255 255 255 / 0.08), transparent 26%),
         linear-gradient(145deg, #16324a 0%, #0b1a2c 100%);
       box-shadow:
@@ -293,7 +305,7 @@
         inset 0 0 28px rgb(0 0 0 / 0.34);
 
       &::before {
-        content: "";
+        content: '';
         position: absolute;
         inset: 11%;
         border-radius: inherit;
@@ -308,7 +320,7 @@
       }
 
       &::after {
-        content: "";
+        content: '';
         position: absolute;
         inset: 24%;
         border-radius: 50%;
@@ -329,7 +341,7 @@
         linear-gradient(180deg, #ece4d8 0%, #d4c9bb 100%);
 
       .card-inner::after {
-        content: "";
+        content: '';
         position: absolute;
         inset: 6% 5%;
         border-radius: calc(var(--card-radius) - 4px);
@@ -345,7 +357,7 @@
       }
 
       .card-inner::before {
-        content: "";
+        content: '';
         position: absolute;
         inset: 14%;
         border-radius: 50%;
@@ -359,8 +371,7 @@
     }
 
     &.skipbo-text {
-      background:
-        linear-gradient(180deg, #183752 0%, #0c1b2d 100%);
+      background: linear-gradient(180deg, #183752 0%, #0c1b2d 100%);
       border-color: #9cacb7;
       box-shadow:
         0 10px 22px rgb(0 0 0 / 0.38),
@@ -388,7 +399,7 @@
       }
 
       &::before {
-        content: "";
+        content: '';
         position: absolute;
         inset: 8% 10%;
         border-radius: calc(var(--card-radius) - 4px);
@@ -403,7 +414,7 @@
       }
 
       .card-inner::before {
-        content: "";
+        content: '';
         position: absolute;
         top: 14%;
         left: 50%;
@@ -412,8 +423,20 @@
         aspect-ratio: 1;
         border-radius: 50%;
         background:
-          radial-gradient(circle at center, rgb(245 236 220 / 0.92) 0 9%, rgb(245 236 220 / 0.24) 9.4% 16%, transparent 16.4%),
-          radial-gradient(circle at center, transparent 0 34%, rgb(127 212 215 / 0.56) 34% 36%, transparent 36.4% 49%, rgb(241 149 77 / 0.56) 49% 51%, transparent 51.4%),
+          radial-gradient(
+            circle at center,
+            rgb(245 236 220 / 0.92) 0 9%,
+            rgb(245 236 220 / 0.24) 9.4% 16%,
+            transparent 16.4%
+          ),
+          radial-gradient(
+            circle at center,
+            transparent 0 34%,
+            rgb(127 212 215 / 0.56) 34% 36%,
+            transparent 36.4% 49%,
+            rgb(241 149 77 / 0.56) 49% 51%,
+            transparent 51.4%
+          ),
           linear-gradient(90deg, transparent 0 48%, rgb(245 236 220 / 0.18) 48% 52%, transparent 52%),
           linear-gradient(0deg, transparent 0 48%, rgb(245 236 220 / 0.18) 48% 52%, transparent 52%);
         box-shadow: 0 0 22px rgb(127 212 215 / 0.18);
@@ -421,15 +444,19 @@
       }
 
       .card-inner::after {
-        content: "";
+        content: '';
         position: absolute;
         left: 18%;
         right: 18%;
         bottom: 14%;
         height: 18%;
         border-radius: 999px;
-        background:
-          linear-gradient(90deg, rgb(241 149 77 / 0.92), rgb(245 236 220 / 0.94) 50%, rgb(127 212 215 / 0.92));
+        background: linear-gradient(
+          90deg,
+          rgb(241 149 77 / 0.92),
+          rgb(245 236 220 / 0.94) 50%,
+          rgb(127 212 215 / 0.92)
+        );
         box-shadow:
           0 0 0 1px rgb(255 255 255 / 0.14),
           0 0 16px rgb(241 149 77 / 0.14);
@@ -455,7 +482,7 @@
       text-shadow: 0 0 8px rgb(127 212 215 / 0.16);
 
       &::before {
-        content: "";
+        content: '';
         position: absolute;
         inset: 18%;
         border-radius: calc(var(--card-radius) - 6px);
@@ -524,36 +551,29 @@
   }
 
   .victory-shine::before {
-    content: "";
+    content: '';
     position: absolute;
     inset: 28% 44% 28% 0;
     border-radius: 999px;
-    background:
-      linear-gradient(
-        90deg,
-        transparent 0%,
-        rgb(127 212 215 / 0.04) 18%,
-        rgb(127 212 215 / 0.2) 36%,
-        rgb(255 244 216 / 0.82) 66%,
-        rgb(241 149 77 / 0.94) 100%
-      );
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(127 212 215 / 0.04) 18%,
+      rgb(127 212 215 / 0.2) 36%,
+      rgb(255 244 216 / 0.82) 66%,
+      rgb(241 149 77 / 0.94) 100%
+    );
     filter: blur(0.6px);
   }
 
   .victory-shine::after {
-    content: "";
+    content: '';
     position: absolute;
     inset: 8% 0 8% 34%;
     clip-path: polygon(0% 50%, 18% 18%, 70% 18%, 100% 50%, 70% 82%, 18% 82%);
     background:
       radial-gradient(circle at 68% 50%, rgb(255 255 255 / 0.9) 0 10%, transparent 11%),
-      linear-gradient(
-        90deg,
-        #7fd4d7 0 18%,
-        #f1954d 18% 72%,
-        #ffd59d 72% 86%,
-        rgb(252 244 232 / 0.98) 86% 100%
-      );
+      linear-gradient(90deg, #7fd4d7 0 18%, #f1954d 18% 72%, #ffd59d 72% 86%, rgb(252 244 232 / 0.98) 86% 100%);
     box-shadow:
       0 0 0 1px rgb(255 255 255 / 0.1),
       0 0 16px rgb(127 212 215 / 0.16),
@@ -574,36 +594,29 @@
   }
 
   .victory-shine-inbound::before {
-    content: "";
+    content: '';
     position: absolute;
     inset: 28% 44% 28% 0;
     border-radius: 999px;
-    background:
-      linear-gradient(
-        90deg,
-        transparent 0%,
-        rgb(127 212 215 / 0.04) 18%,
-        rgb(127 212 215 / 0.2) 36%,
-        rgb(255 244 216 / 0.82) 66%,
-        rgb(241 149 77 / 0.94) 100%
-      );
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(127 212 215 / 0.04) 18%,
+      rgb(127 212 215 / 0.2) 36%,
+      rgb(255 244 216 / 0.82) 66%,
+      rgb(241 149 77 / 0.94) 100%
+    );
     filter: blur(0.6px);
   }
 
   .victory-shine-inbound::after {
-    content: "";
+    content: '';
     position: absolute;
     inset: 8% 0 8% 34%;
     clip-path: polygon(0% 50%, 18% 18%, 70% 18%, 100% 50%, 70% 82%, 18% 82%);
     background:
       radial-gradient(circle at 68% 50%, rgb(255 255 255 / 0.9) 0 10%, transparent 11%),
-      linear-gradient(
-        90deg,
-        #7fd4d7 0 18%,
-        #f1954d 18% 72%,
-        #ffd59d 72% 86%,
-        rgb(252 244 232 / 0.98) 86% 100%
-      );
+      linear-gradient(90deg, #7fd4d7 0 18%, #f1954d 18% 72%, #ffd59d 72% 86%, rgb(252 244 232 / 0.98) 86% 100%);
     box-shadow:
       0 0 0 1px rgb(255 255 255 / 0.1),
       0 0 16px rgb(127 212 215 / 0.16),
@@ -625,6 +638,15 @@
       --retro-space-corner-top: 5px;
       --retro-space-corner-left: 7px;
       --retro-space-corner-font-size: 9px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body::after,
+    &::before,
+    &::after {
+      animation: none;
+      display: none;
     }
   }
 }
@@ -711,14 +733,5 @@
   100% {
     transform: translate3d(-22vw, 52vh, 0) rotate(-8deg);
     opacity: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .theme-retro-space body::after,
-  .theme-retro-space::before,
-  .theme-retro-space::after {
-    animation: none;
-    display: none;
   }
 }
