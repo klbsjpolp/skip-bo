@@ -9,7 +9,7 @@ export interface Player {
   kind?: 'human' | 'ai';
   seatIndex?: number;
   stockPile: Card[];
-  hand: (Card | null)[];  // length always 5
+  hand: (Card | null)[]; // length always 5
   discardPiles: Card[][];
 }
 
@@ -46,19 +46,19 @@ export const themes = [
   { value: 'theme-paper' as const, label: 'Papier', icon: 'NotebookPen' },
   { value: 'theme-midnight' as const, label: 'Minuit', icon: 'Moon' },
   { value: 'theme-origami' as const, label: 'Origami', icon: 'Bird' },
-  { value: 'theme-bonbon' as const, label: 'Bonbon', icon: 'Candy' },
+  { value: 'theme-candy' as const, label: 'Bonbon', icon: 'Candy' },
   { value: 'theme-rainbow' as const, label: 'Arc-en-ciel', icon: 'Rainbow' },
   { value: 'theme-metro' as const, label: 'Metro', icon: 'Building2' },
   { value: 'theme-neon' as const, label: 'Néon', icon: 'Zap' },
   { value: 'theme-retro' as const, label: 'Rétro', icon: 'Radio' },
-  { value: 'theme-retro-space' as const, label: "Espace", icon: 'Rocket' },
+  { value: 'theme-retro-space' as const, label: 'Espace', icon: 'Rocket' },
   { value: 'theme-glass' as const, label: 'Verre', icon: 'Squircle' },
   { value: 'theme-wool' as const, label: 'Laine', icon: 'Spool' },
   { value: 'theme-minecraft' as const, label: 'Minecraft', icon: 'Blocks' },
   { value: 'theme-steampunk' as const, label: 'Steampunk', icon: 'Cog' },
 ] as const;
 
-export type ThemeDetail = typeof themes[number];
+export type ThemeDetail = (typeof themes)[number];
 export type Theme = ThemeDetail['value'];
 
 export interface GameConfig {
