@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.33.0](https://github.com/klbsjpolp/skip-bo/compare/v1.32.11...v1.33.0) (2026-05-16)
+
+
+### Features
+
+* **theme:** rework rainbow theme with stormy back and gradients ([421f1be](https://github.com/klbsjpolp/skip-bo/commit/421f1be2a4936376c620e71b915a65074f096c92))
+
+
+
 ## [1.32.11](https://github.com/klbsjpolp/skip-bo/compare/v1.32.10...v1.32.11) (2026-05-16)
 
 
