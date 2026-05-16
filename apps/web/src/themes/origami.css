@@ -64,7 +64,7 @@
   --victory-shine-opacity: 0.28;
 
   --plied-corner-size: 12px;
-  @media (width >= 64rem) {
+  @variant lg {
     --plied-corner-size: 16px;
   }
 

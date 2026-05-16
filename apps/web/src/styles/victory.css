@@ -84,12 +84,14 @@
     will-change: transform, opacity;
   }
 
-  @media (max-width: 640px) {
-    :root {
+  :root {
+    @variant max-sm {
       --victory-burst-distance-scale: 0.72;
     }
+  }
 
-    .victory-burst-piece:nth-child(n + 9) {
+  .victory-burst-piece:nth-child(n + 9) {
+    @variant max-sm {
       display: none;
     }
   }

@@ -124,8 +124,8 @@
     @apply ring-(--active-turn-color);
   }
 
-  @media (max-width: 640px) {
-    .player-area .discard-piles {
+  .player-area .discard-piles {
+    @variant max-sm {
       width: 100%;
       margin-top: 20px;
     }

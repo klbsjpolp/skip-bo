@@ -192,8 +192,8 @@
     }
   }
 
-  @media (max-width: 640px) {
-    body::before {
+  body::before {
+    @variant max-sm {
       display: none;
     }
   }

@@ -111,8 +111,8 @@ Every selector for a theme lives inside one `.theme-<name>` block. The only exce
     /* Skip-Bo */
   }
 
-  @media (max-width: 640px) {
-    & body::before {
+  & body::before {
+    @variant max-sm {
       display: none;
     }
   }
@@ -144,7 +144,7 @@ Every selector for a theme lives inside one `.theme-<name>` block. The only exce
   }
   ```
 
-  Same idea for `motion-safe`, `dark`, `lg`, `max-lg`, etc. — anything Tailwind already names as a variant.
+  Same idea for `motion-safe`, `dark`, `sm` / `md` / `lg` / `xl` / `2xl` and their `max-*` counterparts — anything Tailwind already names as a variant. Prefer `@variant lg` over `@media (width >= 64rem)` and `@variant max-sm` over `@media (max-width: 640px)`. The one exception in this repo is the `container` utility, which gates a custom `max-width: 1400px` that falls between Tailwind's `xl` (1280px) and `2xl` (1536px) — that one stays a raw `@media (min-width: 1400px)` query because no built-in variant matches.
 
 ### 3.6 `@layer`
 
@@ -234,8 +234,10 @@ These come from incidents that shipped to production. Don't relax them without u
   /* === Player / center area overrides === */
   & .player-area, & .center-area { ... }
 
-  /* === Responsive overrides === */
-  @media (max-width: 640px) { ... }
+  /* === Responsive overrides (use @variant <breakpoint>, not raw @media) === */
+  & .player-area .discard-piles {
+    @variant max-sm { ... }
+  }
 }
 
 /* === Theme-local keyframes (top-level by CSS spec) === */
