@@ -154,27 +154,22 @@
     @apply bg-white/30;
   }
 
-  .player-area.active-turn {
-    @apply ring-0 border border-white/15;
-  }
+  .player-area {
+    @apply ring-0 border-0;
 
-  .player-area::before {
-    @apply absolute inset-0 opacity-0 pointer-events-none z-1 content-[""] rounded-[inherit] bg-(--active-turn-color);
-    clip-path: inset(0 100% 0 0);
-    transition:
-      opacity 0.35s ease,
-      clip-path 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
-  }
+    &.active-turn {
+      @apply before:opacity-[0.32] before:[clip-path:inset(0_0_0_0)] before:border-white/15;
+    }
 
-  .player-area.active-turn::before {
-    @apply opacity-[0.32];
-    clip-path: inset(0 0 0 0);
-  }
+    &::before {
+      @apply absolute ring-0 border border-transparent inset-0 opacity-0 pointer-events-none z-1 rounded-[inherit] bg-(--active-turn-color);
+      clip-path: inset(0 100% 0 0);
+      transition: clip-path 0.6s cubic-bezier(0.1, 0.9, 0.2, 1);
 
-  @media (prefers-reduced-motion: reduce) {
-    .player-area::before {
-      transition: opacity 0.2s ease;
-      clip-path: inset(0 0 0 0);
+      @media (prefers-reduced-motion: reduce) {
+        transition: opacity 0.2s ease;
+        clip-path: inset(0 0 0 0);
+      }
     }
   }
 
