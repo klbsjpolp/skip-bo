@@ -1,12 +1,7 @@
-import {
-  type CreateRoomRequest,
-  type CreateRoomResponse,
-  type JoinRoomResponse,
-} from '@skipbo/multiplayer-protocol';
-import {clearRuntimeConfigCache, fetchRuntimeConfig} from '@/lib/runtimeConfig';
+import { type CreateRoomRequest, type CreateRoomResponse, type JoinRoomResponse } from '@skipbo/multiplayer-protocol';
+import { clearRuntimeConfigCache, fetchRuntimeConfig } from '@/lib/runtimeConfig';
 
-const ONLINE_CONFIGURATION_ERROR =
-  'Le jeu en ligne n’est pas configuré pour cette installation.';
+const ONLINE_CONFIGURATION_ERROR = 'Le jeu en ligne n’est pas configuré pour cette installation.';
 
 const normalizeApiBaseUrl = (apiBaseUrl: string | undefined | null): string | null => {
   const normalizedValue = apiBaseUrl?.trim();

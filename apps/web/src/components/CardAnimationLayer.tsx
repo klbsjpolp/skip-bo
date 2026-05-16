@@ -1,6 +1,6 @@
 import React from 'react';
 import { AnimatedCard } from '@/components/AnimatedCard';
-import {useCardAnimation} from "@/contexts/useCardAnimation.ts";
+import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
 
 /**
  * CardAnimationLayer renders all active card animations as an overlay
@@ -13,10 +13,7 @@ export const CardAnimationLayer: React.FC = () => {
   return (
     <div className="card-animation-layer">
       {activeAnimations.map((animation) => (
-        <AnimatedCard
-          key={animation.id}
-          animation={animation}
-        />
+        <AnimatedCard key={animation.id} animation={animation} />
       ))}
     </div>
   );

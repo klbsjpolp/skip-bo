@@ -18,36 +18,42 @@ export class DynamoRoomRepository implements RoomRepository {
   }
 
   async create(room: RoomRecord): Promise<void> {
-    await this.client.send(new PutCommand({
-      TableName: this.tableName,
-      Item: room,
-      ConditionExpression: 'attribute_not_exists(roomCode)',
-    }));
+    await this.client.send(
+      new PutCommand({
+        TableName: this.tableName,
+        Item: room,
+        ConditionExpression: 'attribute_not_exists(roomCode)',
+      }),
+    );
   }
 
   async get(roomCode: string): Promise<RoomRecord | null> {
-    const result = await this.client.send(new GetCommand({
-      TableName: this.tableName,
-      Key: { roomCode },
-    }));
+    const result = await this.client.send(
+      new GetCommand({
+        TableName: this.tableName,
+        Key: { roomCode },
+      }),
+    );
 
     return (result.Item as RoomRecord | undefined) ?? null;
   }
 
   async update(room: RoomRecord, expectedVersion?: number): Promise<void> {
     try {
-      await this.client.send(new PutCommand({
-        TableName: this.tableName,
-        Item: room,
-        ...(expectedVersion === undefined
-          ? {}
-          : {
-              ConditionExpression: 'version = :expectedVersion',
-              ExpressionAttributeValues: {
-                ':expectedVersion': expectedVersion,
-              },
-            }),
-      }));
+      await this.client.send(
+        new PutCommand({
+          TableName: this.tableName,
+          Item: room,
+          ...(expectedVersion === undefined
+            ? {}
+            : {
+                ConditionExpression: 'version = :expectedVersion',
+                ExpressionAttributeValues: {
+                  ':expectedVersion': expectedVersion,
+                },
+              }),
+        }),
+      );
     } catch (error) {
       if (
         expectedVersion !== undefined &&

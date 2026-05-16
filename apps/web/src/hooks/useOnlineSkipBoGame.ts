@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   canPlayCard,
@@ -7,7 +7,7 @@ import {
   type GameState,
   getCompletedBuildPileCards,
   initialGameState,
-  type MoveResult
+  type MoveResult,
 } from '@skipbo/game-core';
 import {
   type ClientGameView,
@@ -16,11 +16,11 @@ import {
   type LobbyReadyState,
   type LobbySeatInfo,
   serializeClientGameView,
-  type ServerMessage
+  type ServerMessage,
 } from '@skipbo/multiplayer-protocol';
 
-import type {GameAction} from '@/state/gameActions';
-import {useCardAnimation} from '@/contexts/useCardAnimation';
+import type { GameAction } from '@/state/gameActions';
+import { useCardAnimation } from '@/contexts/useCardAnimation';
 import {
   setGlobalCompletedPileAnimationContext,
   triggerCompletedBuildPileAnimation,
@@ -30,8 +30,8 @@ import {
   setGlobalDrawAnimationContext,
   triggerMultipleDrawAnimations,
 } from '@/services/drawAnimationService';
-import {setGlobalAnimationContext, triggerAIAnimation} from '@/services/aiAnimationService';
-import {consumeDragCommitOverride} from '@/services/dragCommitOverride';
+import { setGlobalAnimationContext, triggerAIAnimation } from '@/services/aiAnimationService';
+import { consumeDragCommitOverride } from '@/services/dragCommitOverride';
 import {
   calculateAnimationDuration,
   getBuildPilePosition,
@@ -41,7 +41,7 @@ import {
   getNextDiscardCardPosition,
   getStockCardPosition,
 } from '@/utils/cardPositions';
-import {clearOnlineSession} from '@/state/sessionPersistence';
+import { clearOnlineSession } from '@/state/sessionPersistence';
 
 type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
@@ -145,24 +145,21 @@ const applyOptimisticPlayView = (
   const optimisticStateForView = shouldHideRefilledHand
     ? {
         ...optimisticState,
-        players: optimisticState.players.map((player, index) => (
+        players: optimisticState.players.map((player, index) =>
           index === 0
             ? {
                 ...player,
                 hand: player.hand.map(() => null),
               }
-            : player
-        )),
+            : player,
+        ),
       }
     : optimisticState;
 
   return serializeLocalView(optimisticStateForView, currentView);
 };
 
-const applyOptimisticDiscardView = (
-  currentView: ClientGameView,
-  discardPile: number,
-): ClientGameView =>
+const applyOptimisticDiscardView = (currentView: ClientGameView, discardPile: number): ClientGameView =>
   serializeLocalView(
     gameReducer(cloneGameStateFromView(currentView), {
       type: 'DISCARD_CARD',
@@ -171,10 +168,7 @@ const applyOptimisticDiscardView = (
     currentView,
   );
 
-const collectDrawTransitions = (
-  previousState: GameState,
-  nextState: GameState,
-): DrawTransition[] => {
+const collectDrawTransitions = (previousState: GameState, nextState: GameState): DrawTransition[] => {
   if (previousState.players.length !== nextState.players.length) {
     return [];
   }
@@ -191,19 +185,18 @@ const collectDrawTransitions = (
     });
 
     return cards.length > 0
-      ? [{
-          cards,
-          handIndices,
-          playerIndex,
-        }]
+      ? [
+          {
+            cards,
+            handIndices,
+            playerIndex,
+          },
+        ]
       : [];
   });
 };
 
-const inferOpponentTransition = (
-  previousState: GameState,
-  nextState: GameState,
-): OpponentTransition | null => {
+const inferOpponentTransition = (previousState: GameState, nextState: GameState): OpponentTransition | null => {
   if (previousState.players.length !== nextState.players.length) {
     return null;
   }
@@ -215,9 +208,7 @@ const inferOpponentTransition = (
   const opponentPlayerIndex = previousState.currentPlayerIndex;
   const sourceRevealed = previousState.selectedCard.source !== 'hand';
   const previousCompletedCount = previousState.completedBuildPiles.length;
-  const completedCards = nextState.completedBuildPiles
-    .slice(previousCompletedCount)
-    .map((card) => ({ ...card }));
+  const completedCards = nextState.completedBuildPiles.slice(previousCompletedCount).map((card) => ({ ...card }));
 
   const discardPile = nextState.players[opponentPlayerIndex].discardPiles.findIndex(
     (pile, index) => pile.length === previousState.players[opponentPlayerIndex].discardPiles[index].length + 1,
@@ -241,11 +232,9 @@ const inferOpponentTransition = (
 
     return (
       pile.length === previousPile.length + 1 ||
-      (
-        previousPile.length === previousState.config.CARD_VALUES_MAX - 1 &&
+      (previousPile.length === previousState.config.CARD_VALUES_MAX - 1 &&
         pile.length === 0 &&
-        completedCards.length > 0
-      )
+        completedCards.length > 0)
     );
   });
 
@@ -268,10 +257,7 @@ const inferOpponentTransition = (
   };
 };
 
-const scheduleDrawAnimations = (
-  drawTransitions: DrawTransition[],
-  baseDelay: number = 0,
-): void => {
+const scheduleDrawAnimations = (drawTransitions: DrawTransition[], baseDelay: number = 0): void => {
   drawTransitions.forEach((drawTransition) => {
     void triggerMultipleDrawAnimations(
       drawTransition.playerIndex,
@@ -285,21 +271,15 @@ const scheduleDrawAnimations = (
   });
 };
 
-const getMaxDrawAnimationDuration = (
-  drawTransitions: DrawTransition[],
-  baseDelay: number = 0,
-): number =>
-  drawTransitions.reduce((maxDuration, drawTransition) => (
-    Math.max(
-      maxDuration,
-      calculateMultipleDrawAnimationDuration(
-        drawTransition.playerIndex,
-        drawTransition.handIndices,
-        500,
-        baseDelay,
+const getMaxDrawAnimationDuration = (drawTransitions: DrawTransition[], baseDelay: number = 0): number =>
+  drawTransitions.reduce(
+    (maxDuration, drawTransition) =>
+      Math.max(
+        maxDuration,
+        calculateMultipleDrawAnimationDuration(drawTransition.playerIndex, drawTransition.handIndices, 500, baseDelay),
       ),
-    )
-  ), 0);
+    0,
+  );
 
 export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const [view, setView] = useState<ClientGameView | null>(null);
@@ -324,9 +304,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   // `interactionLockRef` is only held for the synchronous body of
   // playCard/discardCard so two concurrent dispatches can't race on the same
   // selectedCard.
-  const isInteractionBlocked = useCallback(() => (
-    interactionLockRef.current
-  ), []);
+  const isInteractionBlocked = useCallback(() => interactionLockRef.current, []);
   const commitView = useCallback((nextView: ClientGameView | null) => {
     viewRef.current = nextView;
     setView(nextView);
@@ -424,12 +402,14 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         }
 
         reconnectAttempt = 0;
-        currentSocket.send(JSON.stringify({
-          type: 'auth',
-          roomCode: session.roomCode,
-          seatIndex: session.seatIndex,
-          seatToken: session.seatToken,
-        }));
+        currentSocket.send(
+          JSON.stringify({
+            type: 'auth',
+            roomCode: session.roomCode,
+            seatIndex: session.seatIndex,
+            seatToken: session.seatToken,
+          }),
+        );
         startPingLoop(currentSocket);
       });
 
@@ -540,10 +520,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                     targetPileLengthOverride: opponentTransition.targetPileLength,
                     targetRevealedOverride: true,
                   }).then((opponentAnimationDuration) => {
-                    if (
-                      opponentTransition.completedCards &&
-                      opponentTransition.completedBuildPileIndex !== undefined
-                    ) {
+                    if (opponentTransition.completedCards && opponentTransition.completedBuildPileIndex !== undefined) {
                       // Register completion animations immediately with
                       // baseDelay=opponentAnimationDuration so the cards are
                       // tracked as in-flight as soon as state lands. Otherwise
@@ -561,10 +538,12 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                     }
 
                     scheduleDrawAnimations(drawTransitions, opponentAnimationDuration);
-                    applyTurnPresentationDelay(Math.max(
-                      opponentAnimationDuration,
-                      getMaxDrawAnimationDuration(drawTransitions, opponentAnimationDuration),
-                    ));
+                    applyTurnPresentationDelay(
+                      Math.max(
+                        opponentAnimationDuration,
+                        getMaxDrawAnimationDuration(drawTransitions, opponentAnimationDuration),
+                      ),
+                    );
                   });
                 } else {
                   const drawAnimationDuration = getMaxDrawAnimationDuration(drawTransitions);
@@ -597,8 +576,8 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                   ? {
                       ...previousView,
                       room: message.room,
-                  }
-                : previousView,
+                    }
+                  : previousView,
               );
               break;
             case 'actionRejected':
@@ -620,7 +599,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
             case 'roomClosed':
               setInteractionLocked(false);
               clearOnlineSession();
-              if (message.status === 'WAITING' || (authoritativeViewRef.current?.room.status === 'WAITING')) {
+              if (message.status === 'WAITING' || authoritativeViewRef.current?.room.status === 'WAITING') {
                 setLobbyRemovalReason('host-left');
               }
               authoritativeViewRef.current = authoritativeViewRef.current
@@ -700,40 +679,42 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     };
   }, [commitView, session, setInteractionLocked, updateView]);
 
-  const gameState = useMemo(
-    () => {
-      const baseState = view
-        ? cloneGameStateFromView(view)
-        : createPlaceholderGameState(session?.roomCode ?? '', session?.seatCapacity ?? 4);
+  const gameState = useMemo(() => {
+    const baseState = view
+      ? cloneGameStateFromView(view)
+      : createPlaceholderGameState(session?.roomCode ?? '', session?.seatCapacity ?? 4);
 
-      if (!turnPresentationOverride) {
-        return baseState;
-      }
+    if (!turnPresentationOverride) {
+      return baseState;
+    }
 
-      return {
-        ...baseState,
-        currentPlayerIndex: turnPresentationOverride.currentPlayerIndex,
-        message: turnPresentationOverride.message,
-      };
-    },
-    [session?.roomCode, session?.seatCapacity, turnPresentationOverride, view],
-  );
+    return {
+      ...baseState,
+      currentPlayerIndex: turnPresentationOverride.currentPlayerIndex,
+      message: turnPresentationOverride.message,
+    };
+  }, [session?.roomCode, session?.seatCapacity, turnPresentationOverride, view]);
 
   const sendAction = useCallback((action: GameAction): void => {
     if (!websocketRef.current || websocketRef.current.readyState !== WebSocket.OPEN) {
       return;
     }
 
-    websocketRef.current.send(JSON.stringify({
-      type: 'action',
-      action,
-      clientVersion: viewRef.current?.room.version,
-    }));
+    websocketRef.current.send(
+      JSON.stringify({
+        type: 'action',
+        action,
+        clientVersion: viewRef.current?.room.version,
+      }),
+    );
   }, []);
 
-  const debugFillBuildPile = useCallback((buildPile: number): void => {
-    sendAction({ type: 'DEBUG_FILL_BUILD_PILE', buildPile });
-  }, [sendAction]);
+  const debugFillBuildPile = useCallback(
+    (buildPile: number): void => {
+      sendAction({ type: 'DEBUG_FILL_BUILD_PILE', buildPile });
+    },
+    [sendAction],
+  );
 
   const debugWin = useCallback((): void => {
     sendAction({ type: 'DEBUG_WIN' });
@@ -744,55 +725,60 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       return;
     }
 
-    websocketRef.current.send(JSON.stringify({
-      type: 'startGame',
-      clientVersion: viewRef.current?.room.version,
-    }));
+    websocketRef.current.send(
+      JSON.stringify({
+        type: 'startGame',
+        clientVersion: viewRef.current?.room.version,
+      }),
+    );
   }, []);
 
-  const selectCard = useCallback((source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => {
-    const currentState = gameState;
-    const player = currentState.players[currentState.currentPlayerIndex];
+  const selectCard = useCallback(
+    (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => {
+      const currentState = gameState;
+      const player = currentState.players[currentState.currentPlayerIndex];
 
-    if (
-      currentState.currentPlayerIndex !== 0 ||
-      !player ||
-      connectionStatus !== 'connected' ||
-      isInteractionBlocked()
-    ) {
-      return;
-    }
+      if (
+        currentState.currentPlayerIndex !== 0 ||
+        !player ||
+        connectionStatus !== 'connected' ||
+        isInteractionBlocked()
+      ) {
+        return;
+      }
 
-    let card: Card | null | undefined;
-    if (source === 'hand') {
-      card = player.hand[index];
-    } else if (source === 'stock') {
-      card = player.stockPile[player.stockPile.length - 1];
-    } else {
-      card = discardPileIndex === undefined ? null : player.discardPiles[discardPileIndex]?.at(-1);
-    }
+      let card: Card | null | undefined;
+      if (source === 'hand') {
+        card = player.hand[index];
+      } else if (source === 'stock') {
+        card = player.stockPile[player.stockPile.length - 1];
+      } else {
+        card = discardPileIndex === undefined ? null : player.discardPiles[discardPileIndex]?.at(-1);
+      }
 
-    if (!card) {
-      return;
-    }
+      if (!card) {
+        return;
+      }
 
-    updateView((previousView) =>
-      previousView
-        ? {
-            ...previousView,
-            message: 'Sélectionnez une destination',
-            selectedCard: {
-              card,
-              source,
-              index,
-              discardPileIndex,
-            },
-          }
-        : previousView,
-    );
+      updateView((previousView) =>
+        previousView
+          ? {
+              ...previousView,
+              message: 'Sélectionnez une destination',
+              selectedCard: {
+                card,
+                source,
+                index,
+                discardPileIndex,
+              },
+            }
+          : previousView,
+      );
 
-    sendAction({ type: 'SELECT_CARD', source, index, discardPileIndex });
-  }, [connectionStatus, gameState, isInteractionBlocked, sendAction, updateView]);
+      sendAction({ type: 'SELECT_CARD', source, index, discardPileIndex });
+    },
+    [connectionStatus, gameState, isInteractionBlocked, sendAction, updateView],
+  );
 
   const clearSelection = useCallback(() => {
     if (isInteractionBlocked()) {
@@ -812,191 +798,87 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     sendAction({ type: 'CLEAR_SELECTION' });
   }, [isInteractionBlocked, sendAction, updateView]);
 
-  const playCard = useCallback(async (buildPile: number): Promise<MoveResult> => {
-    const currentState = gameState;
-    const completedBuildPileCards = getCompletedBuildPileCards(currentState, buildPile);
+  const playCard = useCallback(
+    async (buildPile: number): Promise<MoveResult> => {
+      const currentState = gameState;
+      const completedBuildPileCards = getCompletedBuildPileCards(currentState, buildPile);
 
-    if (isInteractionBlocked()) {
-      return { success: false, message: 'Action en cours' };
-    }
-
-    if (!currentState.selectedCard) {
-      return { success: false, message: 'Aucune carte sélectionnée' };
-    }
-
-    if (!canPlayCard(currentState.selectedCard.card, buildPile, currentState)) {
-      return { success: false, message: 'Vous ne pouvez pas jouer cette carte' };
-    }
-
-    setInteractionLocked(true);
-
-    const willEmptyHand = willPlayCardEmptyHand(currentState);
-
-    // Trigger play animation. The completion animation is queued with a
-    // baseDelay so it lands once the play card has reached the build pile.
-    // The optimistic view is committed immediately afterwards so the user can
-    // continue selecting / playing while everything animates in parallel.
-    let playAnimationDuration = 0;
-    const dragOverride = consumeDragCommitOverride();
-    try {
-      const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
-      const centerAreaElement = document.querySelector('.center-area') as HTMLElement;
-      let startAngleDeg: number | undefined;
-
-      if (playerAreaElement && centerAreaElement) {
-        let startPosition;
-
-        if (currentState.selectedCard.source === 'hand') {
-          const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
-          if (handContainer) {
-            startPosition = getHandCardPosition(handContainer, currentState.selectedCard.index);
-            startAngleDeg = getHandCardAngle(handContainer, currentState.selectedCard.index);
-          }
-        } else if (currentState.selectedCard.source === 'stock') {
-          const stockContainer = playerAreaElement.querySelector('.stock-pile') as HTMLElement;
-          if (stockContainer) {
-            startPosition = getStockCardPosition(stockContainer);
-          }
-        } else if (currentState.selectedCard.source === 'discard') {
-          const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
-          if (discardContainer && currentState.selectedCard.discardPileIndex !== undefined) {
-            startPosition = getDiscardTopCardPosition(discardContainer, currentState.selectedCard.discardPileIndex);
-          }
-        }
-
-        // Drag-and-drop commit: start the play animation from the drop point.
-        if (dragOverride?.startPosition) {
-          startPosition = dragOverride.startPosition;
-          startAngleDeg = undefined;
-        }
-
-        const endPosition = getBuildPilePosition(centerAreaElement, buildPile);
-
-        if (startPosition) {
-          playAnimationDuration = calculateAnimationDuration(startPosition, endPosition) * 1.2;
-          // Mask the freshly-committed card at the build pile until the play
-          // animation has actually landed. Without targetSettledInState the
-          // optimistic view would render the new card immediately on top of
-          // the pile, making it appear teleported to its destination before
-          // flying there.
-          const previousBuildPileLength = currentState.buildPiles[buildPile].length;
-          startAnimation({
-            card: currentState.selectedCard.card,
-            startPosition,
-            endPosition,
-            startAngleDeg,
-            animationType: 'play',
-            sourceRevealed: true,
-            targetRevealed: true,
-            initialDelay: 0,
-            duration: playAnimationDuration,
-            targetSettledInState: true,
-            targetPileLength: previousBuildPileLength + 1,
-            sourceInfo: {
-              playerIndex: currentState.currentPlayerIndex,
-              source: currentState.selectedCard.source,
-              index: currentState.selectedCard.index,
-              discardPileIndex: currentState.selectedCard.discardPileIndex,
-            },
-            targetInfo: {
-              playerIndex: currentState.currentPlayerIndex,
-              source: 'build',
-              index: buildPile,
-            },
-          });
-        }
+      if (isInteractionBlocked()) {
+        return { success: false, message: 'Action en cours' };
       }
-    } catch (error) {
-      console.warn('Play animation failed, continuing with online game logic:', error);
-    }
 
-    // Register the build→retreat animation BEFORE committing the optimistic
-    // view. CenterArea relies on activeAnimations to mask completed cards at
-    // their destination; if we committed first, the cards would render on the
-    // retreat pile for one frame before the animation starts.
-    if (completedBuildPileCards) {
-      triggerCompletedBuildPileAnimation(
-        currentState,
-        buildPile,
-        completedBuildPileCards,
-        currentState.completedBuildPiles.length,
-        100,
-        playAnimationDuration,
-      );
-    }
+      if (!currentState.selectedCard) {
+        return { success: false, message: 'Aucune carte sélectionnée' };
+      }
 
-    if (viewRef.current) {
-      commitView(applyOptimisticPlayView(viewRef.current, buildPile, willEmptyHand));
-    }
+      if (!canPlayCard(currentState.selectedCard.card, buildPile, currentState)) {
+        return { success: false, message: 'Vous ne pouvez pas jouer cette carte' };
+      }
 
-    sendAction({ type: 'PLAY_CARD', buildPile });
-    setInteractionLocked(false);
-    return { success: true, message: 'Carte jouée' };
-  }, [commitView, gameState, isInteractionBlocked, sendAction, setInteractionLocked, startAnimation]);
+      setInteractionLocked(true);
 
-  const discardCard = useCallback((discardPile: number): Promise<MoveResult> => new Promise((resolve) => {
-    const currentState = gameState;
+      const willEmptyHand = willPlayCardEmptyHand(currentState);
 
-    if (isInteractionBlocked()) {
-      resolve({ success: false, message: 'Action en cours' });
-      return;
-    }
+      // Trigger play animation. The completion animation is queued with a
+      // baseDelay so it lands once the play card has reached the build pile.
+      // The optimistic view is committed immediately afterwards so the user can
+      // continue selecting / playing while everything animates in parallel.
+      let playAnimationDuration = 0;
+      const dragOverride = consumeDragCommitOverride();
+      try {
+        const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
+        const centerAreaElement = document.querySelector('.center-area') as HTMLElement;
+        let startAngleDeg: number | undefined;
 
-    if (!currentState.selectedCard) {
-      resolve({ success: false, message: 'Aucune carte sélectionnée' });
-      return;
-    }
+        if (playerAreaElement && centerAreaElement) {
+          let startPosition;
 
-    if (currentState.selectedCard.source !== 'hand') {
-      resolve({ success: false, message: 'Vous devez défausser une carte de votre main' });
-      return;
-    }
+          if (currentState.selectedCard.source === 'hand') {
+            const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
+            if (handContainer) {
+              startPosition = getHandCardPosition(handContainer, currentState.selectedCard.index);
+              startAngleDeg = getHandCardAngle(handContainer, currentState.selectedCard.index);
+            }
+          } else if (currentState.selectedCard.source === 'stock') {
+            const stockContainer = playerAreaElement.querySelector('.stock-pile') as HTMLElement;
+            if (stockContainer) {
+              startPosition = getStockCardPosition(stockContainer);
+            }
+          } else if (currentState.selectedCard.source === 'discard') {
+            const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
+            if (discardContainer && currentState.selectedCard.discardPileIndex !== undefined) {
+              startPosition = getDiscardTopCardPosition(discardContainer, currentState.selectedCard.discardPileIndex);
+            }
+          }
 
-    if (currentState.selectedCard.card.isSkipBo) {
-      resolve({ success: false, message: 'Vous ne pouvez pas défausser une carte Skip-Bo' });
-      return;
-    }
+          // Drag-and-drop commit: start the play animation from the drop point.
+          if (dragOverride?.startPosition) {
+            startPosition = dragOverride.startPosition;
+            startAngleDeg = undefined;
+          }
 
-    setInteractionLocked(true);
+          const endPosition = getBuildPilePosition(centerAreaElement, buildPile);
 
-    // Trigger discard animation, then commit the optimistic view and send the
-    // action immediately. The animation runs in parallel with the next user
-    // input — they can already select / play another card while this discard
-    // is still flying. The discard ends the human turn server-side, so any
-    // further play attempt is rejected (and the snapshot reconciles).
-    const dragOverride = consumeDragCommitOverride();
-
-    try {
-      const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
-
-      if (playerAreaElement) {
-        const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
-        if (handContainer) {
-          const startPosition = dragOverride?.startPosition
-              ?? getHandCardPosition(handContainer, currentState.selectedCard.index);
-          const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
-          if (discardContainer) {
-            const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
-            const animationDuration = calculateAnimationDuration(startPosition, endPosition);
-            // Mask the freshly-committed card on the discard pile until the
-            // animation lands — the optimistic view applies immediately, so
-            // without this the card would teleport to the pile and then
-            // re-animate.
-            const previousDiscardPileLength = currentState.players[currentState.currentPlayerIndex].discardPiles[discardPile].length;
+          if (startPosition) {
+            playAnimationDuration = calculateAnimationDuration(startPosition, endPosition) * 1.2;
+            // Mask the freshly-committed card at the build pile until the play
+            // animation has actually landed. Without targetSettledInState the
+            // optimistic view would render the new card immediately on top of
+            // the pile, making it appear teleported to its destination before
+            // flying there.
+            const previousBuildPileLength = currentState.buildPiles[buildPile].length;
             startAnimation({
               card: currentState.selectedCard.card,
               startPosition,
               endPosition,
-              animationType: 'discard',
+              startAngleDeg,
+              animationType: 'play',
               sourceRevealed: true,
               targetRevealed: true,
               initialDelay: 0,
-              duration: animationDuration,
-              startAngleDeg: dragOverride?.startPosition
-                  ? undefined
-                  : getHandCardAngle(handContainer, currentState.selectedCard.index),
+              duration: playAnimationDuration,
               targetSettledInState: true,
-              targetPileLength: previousDiscardPileLength + 1,
+              targetPileLength: previousBuildPileLength + 1,
               sourceInfo: {
                 playerIndex: currentState.currentPlayerIndex,
                 source: currentState.selectedCard.source,
@@ -1005,26 +887,138 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
               },
               targetInfo: {
                 playerIndex: currentState.currentPlayerIndex,
-                source: 'discard',
-                index: discardPile,
-                discardPileIndex: discardPile,
+                source: 'build',
+                index: buildPile,
               },
             });
           }
         }
+      } catch (error) {
+        console.warn('Play animation failed, continuing with online game logic:', error);
       }
-    } catch (error) {
-      console.warn('Discard animation failed, continuing with online game logic:', error);
-    }
 
-    if (viewRef.current) {
-      commitView(applyOptimisticDiscardView(viewRef.current, discardPile));
-    }
+      // Register the build→retreat animation BEFORE committing the optimistic
+      // view. CenterArea relies on activeAnimations to mask completed cards at
+      // their destination; if we committed first, the cards would render on the
+      // retreat pile for one frame before the animation starts.
+      if (completedBuildPileCards) {
+        triggerCompletedBuildPileAnimation(
+          currentState,
+          buildPile,
+          completedBuildPileCards,
+          currentState.completedBuildPiles.length,
+          100,
+          playAnimationDuration,
+        );
+      }
 
-    sendAction({ type: 'DISCARD_CARD', discardPile });
-    setInteractionLocked(false);
-    resolve({ success: true, message: 'Carte défaussée' });
-  }), [commitView, gameState, isInteractionBlocked, sendAction, setInteractionLocked, startAnimation]);
+      if (viewRef.current) {
+        commitView(applyOptimisticPlayView(viewRef.current, buildPile, willEmptyHand));
+      }
+
+      sendAction({ type: 'PLAY_CARD', buildPile });
+      setInteractionLocked(false);
+      return { success: true, message: 'Carte jouée' };
+    },
+    [commitView, gameState, isInteractionBlocked, sendAction, setInteractionLocked, startAnimation],
+  );
+
+  const discardCard = useCallback(
+    (discardPile: number): Promise<MoveResult> =>
+      new Promise((resolve) => {
+        const currentState = gameState;
+
+        if (isInteractionBlocked()) {
+          resolve({ success: false, message: 'Action en cours' });
+          return;
+        }
+
+        if (!currentState.selectedCard) {
+          resolve({ success: false, message: 'Aucune carte sélectionnée' });
+          return;
+        }
+
+        if (currentState.selectedCard.source !== 'hand') {
+          resolve({ success: false, message: 'Vous devez défausser une carte de votre main' });
+          return;
+        }
+
+        if (currentState.selectedCard.card.isSkipBo) {
+          resolve({ success: false, message: 'Vous ne pouvez pas défausser une carte Skip-Bo' });
+          return;
+        }
+
+        setInteractionLocked(true);
+
+        // Trigger discard animation, then commit the optimistic view and send the
+        // action immediately. The animation runs in parallel with the next user
+        // input — they can already select / play another card while this discard
+        // is still flying. The discard ends the human turn server-side, so any
+        // further play attempt is rejected (and the snapshot reconciles).
+        const dragOverride = consumeDragCommitOverride();
+
+        try {
+          const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
+
+          if (playerAreaElement) {
+            const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
+            if (handContainer) {
+              const startPosition =
+                dragOverride?.startPosition ?? getHandCardPosition(handContainer, currentState.selectedCard.index);
+              const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
+              if (discardContainer) {
+                const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
+                const animationDuration = calculateAnimationDuration(startPosition, endPosition);
+                // Mask the freshly-committed card on the discard pile until the
+                // animation lands — the optimistic view applies immediately, so
+                // without this the card would teleport to the pile and then
+                // re-animate.
+                const previousDiscardPileLength =
+                  currentState.players[currentState.currentPlayerIndex].discardPiles[discardPile].length;
+                startAnimation({
+                  card: currentState.selectedCard.card,
+                  startPosition,
+                  endPosition,
+                  animationType: 'discard',
+                  sourceRevealed: true,
+                  targetRevealed: true,
+                  initialDelay: 0,
+                  duration: animationDuration,
+                  startAngleDeg: dragOverride?.startPosition
+                    ? undefined
+                    : getHandCardAngle(handContainer, currentState.selectedCard.index),
+                  targetSettledInState: true,
+                  targetPileLength: previousDiscardPileLength + 1,
+                  sourceInfo: {
+                    playerIndex: currentState.currentPlayerIndex,
+                    source: currentState.selectedCard.source,
+                    index: currentState.selectedCard.index,
+                    discardPileIndex: currentState.selectedCard.discardPileIndex,
+                  },
+                  targetInfo: {
+                    playerIndex: currentState.currentPlayerIndex,
+                    source: 'discard',
+                    index: discardPile,
+                    discardPileIndex: discardPile,
+                  },
+                });
+              }
+            }
+          }
+        } catch (error) {
+          console.warn('Discard animation failed, continuing with online game logic:', error);
+        }
+
+        if (viewRef.current) {
+          commitView(applyOptimisticDiscardView(viewRef.current, discardPile));
+        }
+
+        sendAction({ type: 'DISCARD_CARD', discardPile });
+        setInteractionLocked(false);
+        resolve({ success: true, message: 'Carte défaussée' });
+      }),
+    [commitView, gameState, isInteractionBlocked, sendAction, setInteractionLocked, startAnimation],
+  );
 
   const sendSetReady = useCallback((playerName?: string): void => {
     if (!websocketRef.current || websocketRef.current.readyState !== WebSocket.OPEN) {
@@ -1077,14 +1071,13 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const lobbySeats: LobbySeatInfo[] = view?.room.lobbySeats ?? [];
   const roomStatus = view?.room.status ?? 'WAITING';
   const isLocalHost = session?.seatIndex === hostSeatIndex;
-  const myReadyState: LobbyReadyState = lobbySeats.find((s) => s.seatIndex === session?.seatIndex)?.readyState ?? 'never-ready';
+  const myReadyState: LobbyReadyState =
+    lobbySeats.find((s) => s.seatIndex === session?.seatIndex)?.readyState ?? 'never-ready';
   const canStartGame = Boolean(
     isLocalHost &&
     roomStatus === 'WAITING' &&
     connectedSeats.length >= 2 &&
-    connectedSeats.every((seatIndex) =>
-      lobbySeats.find((s) => s.seatIndex === seatIndex)?.readyState === 'ready'
-    ),
+    connectedSeats.every((seatIndex) => lobbySeats.find((s) => s.seatIndex === seatIndex)?.readyState === 'ready'),
   );
 
   return {

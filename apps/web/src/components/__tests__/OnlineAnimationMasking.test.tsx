@@ -1,11 +1,11 @@
-import {render, screen} from '@testing-library/react';
-import {describe, expect, test, vi} from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, test, vi } from 'vitest';
 
-import {CenterArea} from '@/components/CenterArea';
-import {PlayerArea} from '@/components/PlayerArea';
-import type {AnimationContextType, CardAnimationData} from '@/contexts/CardAnimationContext';
-import {CardAnimationContext} from '@/contexts/useCardAnimation';
-import type {Card, GameConfig, GameState, Player} from '@/types';
+import { CenterArea } from '@/components/CenterArea';
+import { PlayerArea } from '@/components/PlayerArea';
+import type { AnimationContextType, CardAnimationData } from '@/contexts/CardAnimationContext';
+import { CardAnimationContext } from '@/contexts/useCardAnimation';
+import type { Card, GameConfig, GameState, Player } from '@/types';
 
 const FIXTURE_CONFIG: GameConfig = {
   DECK_SIZE: 162,
@@ -41,9 +41,7 @@ const createGameState = (): GameState => ({
   config: FIXTURE_CONFIG,
 });
 
-const createAnimationContext = (
-  activeAnimations: CardAnimationData[] = [],
-): AnimationContextType => ({
+const createAnimationContext = (activeAnimations: CardAnimationData[] = []): AnimationContextType => ({
   activeAnimations,
   startAnimation: vi.fn(),
   removeAnimation: vi.fn(),
@@ -74,10 +72,7 @@ const createIncomingBuildAnimation = (buildPileIndex: number): CardAnimationData
   },
 });
 
-const createSettledIncomingBuildAnimation = (
-  buildPileIndex: number,
-  targetPileLength?: number,
-): CardAnimationData => ({
+const createSettledIncomingBuildAnimation = (buildPileIndex: number, targetPileLength?: number): CardAnimationData => ({
   ...createIncomingBuildAnimation(buildPileIndex),
   id: `settled-build-${buildPileIndex}`,
   card: card(8),
@@ -97,10 +92,7 @@ const createSettledIncomingDiscardAnimation = (
   targetPileLength,
 });
 
-const createIncomingDiscardAnimation = (
-  playerIndex: number,
-  discardPileIndex: number,
-): CardAnimationData => ({
+const createIncomingDiscardAnimation = (playerIndex: number, discardPileIndex: number): CardAnimationData => ({
   id: `discard-${playerIndex}-${discardPileIndex}`,
   card: card(7),
   startPosition: { x: 0, y: 0 },
@@ -123,18 +115,14 @@ const createIncomingDiscardAnimation = (
   },
 });
 
-const createStockAnimationContext = (
-  playerIndex: number,
-  stockIndex: number,
-): AnimationContextType => ({
+const createStockAnimationContext = (playerIndex: number, stockIndex: number): AnimationContextType => ({
   activeAnimations: [],
   startAnimation: vi.fn(),
   removeAnimation: vi.fn(),
   markAnimationStarted: vi.fn(),
-  isCardBeingAnimated: vi.fn((candidatePlayerIndex, source, index) =>
-    candidatePlayerIndex === playerIndex &&
-    source === 'stock' &&
-    index === stockIndex,
+  isCardBeingAnimated: vi.fn(
+    (candidatePlayerIndex, source, index) =>
+      candidatePlayerIndex === playerIndex && source === 'stock' && index === stockIndex,
   ),
   waitForAnimations: vi.fn(async () => undefined),
 });
@@ -194,7 +182,7 @@ describe('Online animation masking', () => {
           isWinner={false}
           gameState={gameState}
           selectCard={vi.fn()}
-          playCard={vi.fn(async () => ({success: true, message: 'ok'}))}
+          playCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
           discardCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
           clearSelection={vi.fn()}
         />
@@ -202,9 +190,9 @@ describe('Online animation masking', () => {
     );
 
     const discardPile = screen.getByLabelText('Défausse 1');
-    const visibleCardValues = Array.from(
-      discardPile.querySelectorAll<HTMLElement>('.card[data-value]'),
-    ).map((element) => element.dataset.value);
+    const visibleCardValues = Array.from(discardPile.querySelectorAll<HTMLElement>('.card[data-value]')).map(
+      (element) => element.dataset.value,
+    );
 
     expect(visibleCardValues).toEqual(['3', '7']);
   });
@@ -222,7 +210,7 @@ describe('Online animation masking', () => {
           isWinner={false}
           gameState={gameState}
           selectCard={vi.fn()}
-          playCard={vi.fn(async () => ({success: true, message: 'ok'}))}
+          playCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
           discardCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
           clearSelection={vi.fn()}
         />
@@ -230,9 +218,9 @@ describe('Online animation masking', () => {
     );
 
     const discardPile = screen.getByLabelText('Défausse 1');
-    const visibleCardValues = Array.from(
-      discardPile.querySelectorAll<HTMLElement>('.card[data-value]'),
-    ).map((element) => element.dataset.value);
+    const visibleCardValues = Array.from(discardPile.querySelectorAll<HTMLElement>('.card[data-value]')).map(
+      (element) => element.dataset.value,
+    );
 
     expect(visibleCardValues).toEqual(['3', '7']);
   });
@@ -250,7 +238,7 @@ describe('Online animation masking', () => {
           isWinner={false}
           gameState={gameState}
           selectCard={vi.fn()}
-          playCard={vi.fn(async () => ({success: true, message: 'ok'}))}
+          playCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
           discardCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
           clearSelection={vi.fn()}
         />
@@ -258,9 +246,9 @@ describe('Online animation masking', () => {
     );
 
     const discardPile = screen.getByLabelText('Défausse 1');
-    const visibleCardValues = Array.from(
-      discardPile.querySelectorAll<HTMLElement>('.card[data-value]'),
-    ).map((element) => element.dataset.value);
+    const visibleCardValues = Array.from(discardPile.querySelectorAll<HTMLElement>('.card[data-value]')).map(
+      (element) => element.dataset.value,
+    );
 
     expect(visibleCardValues).toEqual(['3', '7']);
   });
@@ -278,7 +266,7 @@ describe('Online animation masking', () => {
           isWinner={false}
           gameState={gameState}
           selectCard={vi.fn()}
-          playCard={vi.fn(async () => ({success: true, message: 'ok'}))}
+          playCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
           discardCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
           clearSelection={vi.fn()}
         />

@@ -1,15 +1,17 @@
-import { dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import js from '@eslint/js';
+import globals from 'globals';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import tseslint from 'typescript-eslint';
 
-const tsconfigRootDir = dirname(fileURLToPath(import.meta.url))
+const tsconfigRootDir = dirname(fileURLToPath(import.meta.url));
 
 export default tseslint.config(
-  { ignores: ['coverage', 'dist', 'playwright-report', 'test-results', 'vite.config.d.ts', '**/dist', '**/dist-types'] },
+  {
+    ignores: ['coverage', 'dist', 'playwright-report', 'test-results', 'vite.config.d.ts', '**/dist', '**/dist-types'],
+  },
   {
     files: ['apps/**/*.{ts,tsx}', 'packages/**/*.{ts,tsx}'],
     ignores: [
@@ -18,10 +20,7 @@ export default tseslint.config(
       '**/__tests__/**/*.{ts,tsx}',
       '**/*.{test,spec}.{ts,tsx}',
     ],
-    extends: [
-      js.configs.recommended,
-      ...tseslint.configs.recommendedTypeChecked,
-    ],
+    extends: [js.configs.recommended, ...tseslint.configs.recommendedTypeChecked],
     languageOptions: {
       ecmaVersion: 'latest',
       globals: {
@@ -46,10 +45,7 @@ export default tseslint.config(
       '@typescript-eslint/require-await': 'off',
       '@typescript-eslint/switch-exhaustiveness-check': 'error',
       'no-console': ['error', { allow: ['error', 'info', 'warn'] }],
-      'react-refresh/only-export-components': [
-        'error',
-        { allowConstantExport: true },
-      ],
+      'react-refresh/only-export-components': ['error', { allowConstantExport: true }],
     },
   },
   {
@@ -79,4 +75,4 @@ export default tseslint.config(
       '@typescript-eslint/unbound-method': 'off',
     },
   },
-)
+);

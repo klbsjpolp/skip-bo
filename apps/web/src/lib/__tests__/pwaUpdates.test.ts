@@ -1,4 +1,4 @@
-import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 interface RegistrationCallbacks {
   onNeedRefresh?: () => void;
@@ -58,7 +58,7 @@ describe('pwaUpdates', () => {
   });
 
   it('does not call updateServiceWorker when no installing or waiting worker is found', async () => {
-    const {initializePwaUpdates, applyServiceWorkerUpdate} = await loadPwaUpdates();
+    const { initializePwaUpdates, applyServiceWorkerUpdate } = await loadPwaUpdates();
     initializePwaUpdates();
 
     const registration = buildFakeRegistration();
@@ -72,7 +72,7 @@ describe('pwaUpdates', () => {
   });
 
   it('waits for an installing worker to finish before applying the update', async () => {
-    const {initializePwaUpdates, applyServiceWorkerUpdate} = await loadPwaUpdates();
+    const { initializePwaUpdates, applyServiceWorkerUpdate } = await loadPwaUpdates();
     initializePwaUpdates();
 
     const registration = buildFakeRegistration();
@@ -98,7 +98,7 @@ describe('pwaUpdates', () => {
   });
 
   it('falls through gracefully when the installing worker becomes redundant', async () => {
-    const {initializePwaUpdates, applyServiceWorkerUpdate} = await loadPwaUpdates();
+    const { initializePwaUpdates, applyServiceWorkerUpdate } = await loadPwaUpdates();
     initializePwaUpdates();
 
     const registration = buildFakeRegistration();
@@ -119,7 +119,7 @@ describe('pwaUpdates', () => {
   });
 
   it('applies the update immediately when a waiting worker is already present', async () => {
-    const {initializePwaUpdates, applyServiceWorkerUpdate} = await loadPwaUpdates();
+    const { initializePwaUpdates, applyServiceWorkerUpdate } = await loadPwaUpdates();
     initializePwaUpdates();
 
     const registration = buildFakeRegistration();
@@ -137,7 +137,7 @@ describe('pwaUpdates', () => {
   it('times out the install wait so the promise never hangs forever', async () => {
     vi.useFakeTimers();
 
-    const {initializePwaUpdates, applyServiceWorkerUpdate} = await loadPwaUpdates();
+    const { initializePwaUpdates, applyServiceWorkerUpdate } = await loadPwaUpdates();
     initializePwaUpdates();
 
     const registration = buildFakeRegistration();

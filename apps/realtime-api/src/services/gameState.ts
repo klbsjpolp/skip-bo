@@ -1,10 +1,17 @@
-import { canPlayCard, gameReducer, initialGameState, type Card, type GameAction, type GameState, type Player, type SelectedCard } from '@skipbo/game-core';
+import {
+  canPlayCard,
+  gameReducer,
+  initialGameState,
+  type Card,
+  type GameAction,
+  type GameState,
+  type Player,
+  type SelectedCard,
+} from '@skipbo/game-core';
 import { resolvePlayerName } from '@skipbo/multiplayer-protocol';
 
 const cardsMatch = (candidate: Card | null | undefined, selectedCard: Card): boolean =>
-  !!candidate &&
-  candidate.value === selectedCard.value &&
-  candidate.isSkipBo === selectedCard.isSkipBo;
+  !!candidate && candidate.value === selectedCard.value && candidate.isSkipBo === selectedCard.isSkipBo;
 
 const hasValidDiscardPileIndex = (player: Player, discardPileIndex: number): boolean =>
   discardPileIndex >= 0 && discardPileIndex < player.discardPiles.length;
@@ -57,12 +64,15 @@ const isCardSelectable = (gameState: GameState, action: Extract<GameAction, { ty
 };
 
 export const isDebugAction = (action: GameAction): boolean =>
-  action.type === 'DEBUG_SET_AI_HAND' ||
-  action.type === 'DEBUG_FILL_BUILD_PILE' ||
-  action.type === 'DEBUG_WIN';
+  action.type === 'DEBUG_SET_AI_HAND' || action.type === 'DEBUG_FILL_BUILD_PILE' || action.type === 'DEBUG_WIN';
 
 const isSupportedOnlineAction = (action: GameAction): boolean => {
-  if (action.type === 'INIT' || action.type === 'DRAW' || action.type === 'DRAW_SINGLE_CARD' || action.type === 'RESET') {
+  if (
+    action.type === 'INIT' ||
+    action.type === 'DRAW' ||
+    action.type === 'DRAW_SINGLE_CARD' ||
+    action.type === 'RESET'
+  ) {
     return false;
   }
 

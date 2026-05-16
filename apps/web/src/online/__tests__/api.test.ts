@@ -1,4 +1,4 @@
-import {afterEach, describe, expect, it, vi} from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const makeJsonResponse = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -18,52 +18,64 @@ describe('online api configuration', () => {
     vi.resetModules();
     vi.stubEnv('VITE_SKIPBO_API_URL', 'https://api.example.com/');
 
-    const fetchMock = vi.fn<typeof fetch>()
-      .mockResolvedValueOnce(makeJsonResponse({roomCode: 'ABC', seatToken: 'seat-token'}));
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(makeJsonResponse({ roomCode: 'ABC', seatToken: 'seat-token' }));
     vi.stubGlobal('fetch', fetchMock);
 
-    const {createOnlineRoom} = await import('../api.ts');
+    const { createOnlineRoom } = await import('../api.ts');
 
     await createOnlineRoom(30);
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith('https://api.example.com/rooms', expect.objectContaining({
-      body: JSON.stringify({ stockSize: 30 }),
-      method: 'POST',
-    }));
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api.example.com/rooms',
+      expect.objectContaining({
+        body: JSON.stringify({ stockSize: 30 }),
+        method: 'POST',
+      }),
+    );
   });
 
   it('falls back to runtime-config.json when the build env is missing', async () => {
     vi.resetModules();
     vi.stubEnv('VITE_SKIPBO_API_URL', '');
 
-    const fetchMock = vi.fn<typeof fetch>()
-      .mockResolvedValueOnce(makeJsonResponse({apiBaseUrl: 'https://runtime.example.com/'}))
-      .mockResolvedValueOnce(makeJsonResponse({roomCode: 'ABC', seatToken: 'seat-token'}));
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(makeJsonResponse({ apiBaseUrl: 'https://runtime.example.com/' }))
+      .mockResolvedValueOnce(makeJsonResponse({ roomCode: 'ABC', seatToken: 'seat-token' }));
     vi.stubGlobal('fetch', fetchMock);
 
-    const {createOnlineRoom} = await import('../api.ts');
+    const { createOnlineRoom } = await import('../api.ts');
 
     await createOnlineRoom(30);
 
-    expect(fetchMock).toHaveBeenNthCalledWith(1, '/runtime-config.json', expect.objectContaining({
-      cache: 'no-store',
-    }));
-    expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://runtime.example.com/rooms', expect.objectContaining({
-      body: JSON.stringify({ stockSize: 30 }),
-      method: 'POST',
-    }));
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      '/runtime-config.json',
+      expect.objectContaining({
+        cache: 'no-store',
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      'https://runtime.example.com/rooms',
+      expect.objectContaining({
+        body: JSON.stringify({ stockSize: 30 }),
+        method: 'POST',
+      }),
+    );
   });
 
   it('returns a user-facing error when online play is not configured', async () => {
     vi.resetModules();
     vi.stubEnv('VITE_SKIPBO_API_URL', '');
 
-    const fetchMock = vi.fn<typeof fetch>()
-      .mockResolvedValueOnce(makeJsonResponse({apiBaseUrl: ''}));
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValueOnce(makeJsonResponse({ apiBaseUrl: '' }));
     vi.stubGlobal('fetch', fetchMock);
 
-    const {joinOnlineRoom} = await import('../api.ts');
+    const { joinOnlineRoom } = await import('../api.ts');
 
     await expect(joinOnlineRoom('ABC')).rejects.toThrow('Le jeu en ligne n’est pas configuré pour cette installation.');
   });
@@ -72,7 +84,8 @@ describe('online api configuration', () => {
     vi.resetModules();
     vi.stubEnv('VITE_SKIPBO_API_URL', 'https://api.example.com');
 
-    const fetchMock = vi.fn<typeof fetch>()
+    const fetchMock = vi
+      .fn<typeof fetch>()
       .mockResolvedValueOnce(makeJsonResponse({ roomCode: 'ABC', seatToken: 'seat-token' }));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -80,9 +93,12 @@ describe('online api configuration', () => {
 
     await joinOnlineRoom('ABC');
 
-    expect(fetchMock).toHaveBeenCalledWith('https://api.example.com/rooms/join', expect.objectContaining({
-      body: JSON.stringify({ roomCode: 'ABC' }),
-      method: 'POST',
-    }));
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api.example.com/rooms/join',
+      expect.objectContaining({
+        body: JSON.stringify({ roomCode: 'ABC' }),
+        method: 'POST',
+      }),
+    );
   });
 });

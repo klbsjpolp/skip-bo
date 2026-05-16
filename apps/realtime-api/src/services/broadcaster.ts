@@ -1,4 +1,8 @@
-import { ApiGatewayManagementApiClient, DeleteConnectionCommand, PostToConnectionCommand } from '@aws-sdk/client-apigatewaymanagementapi';
+import {
+  ApiGatewayManagementApiClient,
+  DeleteConnectionCommand,
+  PostToConnectionCommand,
+} from '@aws-sdk/client-apigatewaymanagementapi';
 import type { ServerMessage } from '@skipbo/multiplayer-protocol';
 
 export interface RealtimeBroadcaster {
@@ -18,9 +22,11 @@ export class ApiGatewayRealtimeBroadcaster implements RealtimeBroadcaster {
   }
 
   async send(connectionId: string, message: ServerMessage): Promise<void> {
-    await this.client.send(new PostToConnectionCommand({
-      ConnectionId: connectionId,
-      Data: Buffer.from(JSON.stringify(message)),
-    }));
+    await this.client.send(
+      new PostToConnectionCommand({
+        ConnectionId: connectionId,
+        Data: Buffer.from(JSON.stringify(message)),
+      }),
+    );
   }
 }

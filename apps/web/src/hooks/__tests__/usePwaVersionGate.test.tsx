@@ -1,5 +1,5 @@
-import {act, renderHook, waitFor} from '@testing-library/react';
-import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const fetchRuntimeConfigMock = vi.fn();
 const applyServiceWorkerUpdateMock = vi.fn();
@@ -43,7 +43,7 @@ vi.mock('@/lib/pwaUpdates', () => ({
   },
 }));
 
-import {AUTO_RELOAD_SESSION_STORAGE_KEY, usePwaVersionGate} from '../usePwaVersionGate';
+import { AUTO_RELOAD_SESSION_STORAGE_KEY, usePwaVersionGate } from '../usePwaVersionGate';
 
 describe('usePwaVersionGate', () => {
   beforeEach(() => {
@@ -80,7 +80,7 @@ describe('usePwaVersionGate', () => {
       appVersion: 'v1.1.0',
     });
 
-    const {result} = renderHook(() => usePwaVersionGate());
+    const { result } = renderHook(() => usePwaVersionGate());
 
     await waitFor(() => {
       expect(result.current.shouldShowSoftUpdate).toBe(true);
@@ -88,7 +88,7 @@ describe('usePwaVersionGate', () => {
 
     expect(result.current.latestAppVersion).toBe('v1.1.0');
     expect(refreshServiceWorkerRegistrationMock).toHaveBeenCalledTimes(1);
-    expect(fetchRuntimeConfigMock).toHaveBeenCalledWith({force: true});
+    expect(fetchRuntimeConfigMock).toHaveBeenCalledWith({ force: true });
 
     act(() => {
       result.current.dismissSoftUpdate();
@@ -98,14 +98,14 @@ describe('usePwaVersionGate', () => {
   });
 
   it('shows a soft update banner when a waiting service worker is discovered', async () => {
-    const {result} = renderHook(() => usePwaVersionGate());
+    const { result } = renderHook(() => usePwaVersionGate());
 
     await waitFor(() => {
       expect(fetchRuntimeConfigMock).toHaveBeenCalledTimes(1);
     });
 
     act(() => {
-      emitPwaSnapshot({needRefresh: true});
+      emitPwaSnapshot({ needRefresh: true });
     });
 
     expect(result.current.hasPendingServiceWorkerUpdate).toBe(true);
@@ -119,7 +119,7 @@ describe('usePwaVersionGate', () => {
     });
     applyServiceWorkerUpdateMock.mockResolvedValue(true);
 
-    const {result} = renderHook(() => usePwaVersionGate());
+    const { result } = renderHook(() => usePwaVersionGate());
 
     await waitFor(() => {
       expect(result.current.isHardUpdateRequired).toBe(true);
@@ -138,7 +138,7 @@ describe('usePwaVersionGate', () => {
       minimumSupportedVersion: 'v1.1.0',
     });
 
-    const {result} = renderHook(() => usePwaVersionGate());
+    const { result } = renderHook(() => usePwaVersionGate());
 
     await waitFor(() => {
       expect(result.current.isHardUpdateRequired).toBe(true);
@@ -166,11 +166,9 @@ describe('usePwaVersionGate', () => {
   });
 
   it('rechecks runtime config when the document becomes visible again', async () => {
-    fetchRuntimeConfigMock
-      .mockResolvedValueOnce({})
-      .mockResolvedValueOnce({appVersion: 'v1.1.0'});
+    fetchRuntimeConfigMock.mockResolvedValueOnce({}).mockResolvedValueOnce({ appVersion: 'v1.1.0' });
 
-    const {result} = renderHook(() => usePwaVersionGate());
+    const { result } = renderHook(() => usePwaVersionGate());
 
     await waitFor(() => {
       expect(fetchRuntimeConfigMock).toHaveBeenCalledTimes(1);

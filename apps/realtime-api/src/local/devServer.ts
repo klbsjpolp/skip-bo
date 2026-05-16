@@ -76,11 +76,7 @@ const readJsonBody = async (request: IncomingMessage): Promise<unknown> => {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 };
 
-const sendJson = (
-  response: ServerResponse,
-  statusCode: number,
-  body: unknown,
-): void => {
+const sendJson = (response: ServerResponse, statusCode: number, body: unknown): void => {
   response.writeHead(statusCode, {
     ...CORS_HEADERS,
     'content-type': 'application/json',

@@ -11,5 +11,7 @@ export const getStoredPlayerName = (): string => {
 export const storePlayerName = (name: string): void => {
   try {
     localStorage.setItem(PLAYER_NAME_KEY, name);
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 };

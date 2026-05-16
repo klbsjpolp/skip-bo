@@ -1,10 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
 import { CenterArea } from '@/components/CenterArea';
-import type {
-  AnimationContextType,
-  CardAnimationData,
-} from '@/contexts/CardAnimationContext';
+import type { AnimationContextType, CardAnimationData } from '@/contexts/CardAnimationContext';
 import { CardAnimationContext } from '@/contexts/useCardAnimation.ts';
 import type { Card, GameConfig, GameState, Player } from '@/types';
 
@@ -42,9 +39,7 @@ const createGameState = (completedBuildPiles: Card[]): GameState => ({
   config: FIXTURE_CONFIG,
 });
 
-const createAnimationContext = (
-  activeAnimations: CardAnimationData[] = [],
-): AnimationContextType => ({
+const createAnimationContext = (activeAnimations: CardAnimationData[] = []): AnimationContextType => ({
   activeAnimations,
   startAnimation: vi.fn(),
   removeAnimation: vi.fn(),
@@ -93,20 +88,14 @@ const createIncomingBuildAnimation = (buildPileIndex: number): CardAnimationData
   },
 });
 
-const createSettledIncomingBuildAnimation = (
-  buildPileIndex: number,
-  targetPileLength: number,
-): CardAnimationData => ({
+const createSettledIncomingBuildAnimation = (buildPileIndex: number, targetPileLength: number): CardAnimationData => ({
   ...createIncomingBuildAnimation(buildPileIndex),
   id: `settled-build-${buildPileIndex}`,
   targetSettledInState: true,
   targetPileLength,
 });
 
-const renderCenterArea = (
-  gameState: GameState,
-  activeAnimations: CardAnimationData[] = [],
-) =>
+const renderCenterArea = (gameState: GameState, activeAnimations: CardAnimationData[] = []) =>
   render(
     <CardAnimationContext.Provider value={createAnimationContext(activeAnimations)}>
       <CenterArea
@@ -119,9 +108,7 @@ const renderCenterArea = (
 
 describe('CenterArea', () => {
   test('hides newly completed cards from the retreat preview while completion animation is active', () => {
-    const gameState = createGameState(
-      Array.from({ length: 12 }, (_, index) => card(index + 1)),
-    );
+    const gameState = createGameState(Array.from({ length: 12 }, (_, index) => card(index + 1)));
 
     renderCenterArea(gameState, createCompletionAnimations(12));
 
@@ -142,9 +129,7 @@ describe('CenterArea', () => {
     renderCenterArea(gameState, createCompletionAnimations(12));
 
     const retreatCards = Array.from(
-      screen
-        .getByTestId('retreat-pile')
-        .querySelectorAll<HTMLElement>('.retreat-card-shell .card[data-value]'),
+      screen.getByTestId('retreat-pile').querySelectorAll<HTMLElement>('.retreat-card-shell .card[data-value]'),
     ).map((element) => Number(element.dataset.value));
 
     expect(retreatCards).toEqual([5, 7, 9]);

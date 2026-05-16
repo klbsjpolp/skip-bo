@@ -5,9 +5,11 @@ import {
   getHandCardPosition,
   getStockCardPosition,
   getBuildPilePosition,
-  calculateAnimationDuration, getHandCardAngle, getNextDiscardCardPosition
+  calculateAnimationDuration,
+  getHandCardAngle,
+  getNextDiscardCardPosition,
 } from '@/utils/cardPositions';
-import type {CardAnimationData} from "@/contexts/CardAnimationContext.tsx";
+import type { CardAnimationData } from '@/contexts/CardAnimationContext.tsx';
 
 interface TriggerAIAnimationOptions {
   cardOverride?: Card;
@@ -30,7 +32,7 @@ export const setGlobalAnimationContext = (context: typeof globalAnimationContext
 
 // Function to trigger AI animations
 export const triggerAIAnimation = async (
-  gameState: GameState, 
+  gameState: GameState,
   action: GameAction,
   options: TriggerAIAnimationOptions = {},
 ): Promise<number> => {
@@ -45,7 +47,9 @@ export const triggerAIAnimation = async (
   }
 
   try {
-    const playerAreaElement = document.querySelector<HTMLElement>(`.player-area[data-player-index="${gameState.currentPlayerIndex}"]`);
+    const playerAreaElement = document.querySelector<HTMLElement>(
+      `.player-area[data-player-index="${gameState.currentPlayerIndex}"]`,
+    );
     const centerAreaElement = document.querySelector('.center-area') as HTMLElement;
 
     if (!playerAreaElement || !centerAreaElement) {
@@ -130,14 +134,17 @@ export const triggerAIAnimation = async (
 
     if (startPosition && endPosition && animationCard) {
       const duration = calculateAnimationDuration(startPosition, endPosition);
-      
+
       globalAnimationContext.startAnimation({
         card: animationCard,
         startPosition,
         endPosition,
         startAngleDeg,
         animationType,
-        sourceRevealed: options.sourceRevealedOverride ?? ((animationType === 'play' && gameState.selectedCard?.source !== 'hand') || (animationType === 'discard' && false)), // Hand cards are revealed, stock/discard are not
+        sourceRevealed:
+          options.sourceRevealedOverride ??
+          ((animationType === 'play' && gameState.selectedCard?.source !== 'hand') ||
+            (animationType === 'discard' && false)), // Hand cards are revealed, stock/discard are not
         targetSettledInState: options.targetSettledInStateOverride ?? false,
         targetPileLength: options.targetPileLengthOverride,
         targetRevealed: options.targetRevealedOverride ?? true, // Cards played or discarded by AI are revealed to human

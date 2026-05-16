@@ -10,7 +10,7 @@ export const uiFixtureNames = [
   'one-of-each',
 ] as const;
 
-export type UiFixtureName = typeof uiFixtureNames[number];
+export type UiFixtureName = (typeof uiFixtureNames)[number];
 
 const FIXTURE_CONFIG: GameConfig = {
   DECK_SIZE: 162,
@@ -100,13 +100,7 @@ const createAiTurnFixture = (): GameState => ({
 
 const createRetreatFilledFixture = (): GameState => ({
   ...createBaseState(),
-  completedBuildPiles: [
-    card(2),
-    card(5),
-    card(7, true),
-    card(9),
-    card(11),
-  ],
+  completedBuildPiles: [card(2), card(5), card(7, true), card(9), card(11)],
   message: MESSAGES.SELECT_CARD,
 });
 
@@ -121,12 +115,22 @@ const createVictoryHumanFixture = (): GameState => {
 
 const createOneOfEachFixture = (): GameState => {
   const state = createBaseState();
-  state.buildPiles = [[card(1)], [card(1),card(2)], [card(1),card(2),card(3)], [card(1),card(2),card(3),card(4)]];
-  state.completedBuildPiles = [card(0, true)]
+  state.buildPiles = [[card(1)], [card(1), card(2)], [card(1), card(2), card(3)], [card(1), card(2), card(3), card(4)]];
+  state.completedBuildPiles = [card(0, true)];
   state.players[0].hand = [card(5), card(6), card(7), card(8), card(0, true)];
-  state.players[0].discardPiles = [[card(1), card(5),card(9)], [card(2), card(6),card(10)], [card(3), card(7),card(11)], [card(4), card(8),card(12)]]
-  state.players[1].discardPiles = [[card(1), card(2),card(3)], [card(4), card(5),card(6)], [card(7), card(8),card(9)], [card(10), card(11),card(12)]]
-  
+  state.players[0].discardPiles = [
+    [card(1), card(5), card(9)],
+    [card(2), card(6), card(10)],
+    [card(3), card(7), card(11)],
+    [card(4), card(8), card(12)],
+  ];
+  state.players[1].discardPiles = [
+    [card(1), card(2), card(3)],
+    [card(4), card(5), card(6)],
+    [card(7), card(8), card(9)],
+    [card(10), card(11), card(12)],
+  ];
+
   return state;
 };
 

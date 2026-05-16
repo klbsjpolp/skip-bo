@@ -1,9 +1,9 @@
-import {act, renderHook} from '@testing-library/react';
-import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {type Card, type GameState, initialGameState} from '@skipbo/game-core';
+import { type Card, type GameState, initialGameState } from '@skipbo/game-core';
 
-import {useSkipBoGame} from '@/hooks/useSkipBoGame';
+import { useSkipBoGame } from '@/hooks/useSkipBoGame';
 
 const {
   activeAnimationsState,
@@ -31,11 +31,7 @@ const {
   const actorRef = {
     getSnapshot: () => ({ context: { G: workingState.current } }),
   };
-  const useMachineMock = vi.fn(() => ([
-    { context: { G: workingState.current } },
-    send,
-    actorRef,
-  ] as const));
+  const useMachineMock = vi.fn(() => [{ context: { G: workingState.current } }, send, actorRef] as const);
 
   return {
     activeAnimationsState,
@@ -136,12 +132,7 @@ const createSelectedDiscardCardState = (): GameState => {
   return state;
 };
 
-const createRect = (
-  left: number,
-  top: number,
-  width: number,
-  height: number,
-): DOMRect =>
+const createRect = (left: number, top: number, width: number, height: number): DOMRect =>
   ({
     bottom: top + height,
     height,
@@ -154,10 +145,7 @@ const createRect = (
     y: top,
   }) as DOMRect;
 
-const setElementRect = (
-  element: Element,
-  rect: DOMRect,
-): void => {
+const setElementRect = (element: Element, rect: DOMRect): void => {
   Object.defineProperty(element, 'getBoundingClientRect', {
     configurable: true,
     value: () => rect,
@@ -329,29 +317,39 @@ describe('useSkipBoGame', () => {
       name: 'discard-source plays',
       stateFactory: createSelectedDiscardCardState,
     },
-  ])('accepts new selections while $name are still animating locally', async ({ buildPile, mountDom, stateFactory }) => {
-    workingState.current = stateFactory();
-    mountDom();
+  ])(
+    'accepts new selections while $name are still animating locally',
+    async ({ buildPile, mountDom, stateFactory }) => {
+      workingState.current = stateFactory();
+      mountDom();
 
-    const { result } = renderHook(() => useSkipBoGame());
-    const playPromise = result.current.playCard(buildPile);
+      const { result } = renderHook(() => useSkipBoGame());
+      const playPromise = result.current.playCard(buildPile);
 
-    await act(async () => {
-      const moveResult = await playPromise;
-      expect(moveResult).toEqual({ success: true, message: 'Carte jouée' });
-    });
+      await act(async () => {
+        const moveResult = await playPromise;
+        expect(moveResult).toEqual({ success: true, message: 'Carte jouée' });
+      });
 
-    // PLAY_CARD has been dispatched immediately; the animation runs in
-    // parallel. The user can already queue a new selection.
-    act(() => {
-      result.current.selectCard('stock', workingState.current!.players[0].stockPile.length - 1);
-    });
+      // PLAY_CARD has been dispatched immediately; the animation runs in
+      // parallel. The user can already queue a new selection.
+      act(() => {
+        result.current.selectCard('stock', workingState.current!.players[0].stockPile.length - 1);
+      });
 
-    expect(send.mock.calls).toEqual([
-      [{ type: 'PLAY_CARD', buildPile: 0, animationDuration: 0 }],
-      [{ type: 'SELECT_CARD', source: 'stock', index: workingState.current!.players[0].stockPile.length - 1, discardPileIndex: undefined }],
-    ]);
-  });
+      expect(send.mock.calls).toEqual([
+        [{ type: 'PLAY_CARD', buildPile: 0, animationDuration: 0 }],
+        [
+          {
+            type: 'SELECT_CARD',
+            source: 'stock',
+            index: workingState.current!.players[0].stockPile.length - 1,
+            discardPileIndex: undefined,
+          },
+        ],
+      ]);
+    },
+  );
 
   it('accepts new selections while a discard is still animating locally', async () => {
     workingState.current = createSelectedHandCardState();
@@ -375,7 +373,14 @@ describe('useSkipBoGame', () => {
 
     expect(send.mock.calls).toEqual([
       [{ type: 'DISCARD_CARD', discardPile: 1, animationDuration: expect.any(Number) }],
-      [{ type: 'SELECT_CARD', source: 'stock', index: workingState.current!.players[0].stockPile.length - 1, discardPileIndex: undefined }],
+      [
+        {
+          type: 'SELECT_CARD',
+          source: 'stock',
+          index: workingState.current!.players[0].stockPile.length - 1,
+          discardPileIndex: undefined,
+        },
+      ],
     ]);
   });
 });

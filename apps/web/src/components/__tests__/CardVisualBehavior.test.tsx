@@ -1,5 +1,5 @@
 import { describe, expect, test, beforeEach, afterEach } from 'vitest';
-import {themes} from "@/types";
+import { themes } from '@/types';
 
 /**
  * CSS Visual Behavior Tests
@@ -198,31 +198,31 @@ describe('CSS Visual Behavior', () => {
         {
           selector: '.card.selected',
           description: 'Basic selection rule',
-          specificity: 20 // 1 class + 1 class
+          specificity: 20, // 1 class + 1 class
         },
         {
           selector: '.hoverable-card:hover',
           description: 'Basic hover rule',
-          specificity: 20 // 1 class + 1 pseudo-class
+          specificity: 20, // 1 class + 1 pseudo-class
         },
         {
           selector: '.discard-pile-stack .card.selected.hoverable-card:hover',
           description: 'High-specificity selection override',
-          specificity: 50 // 1 class + 1 class + 1 class + 1 class + 1 pseudo-class
+          specificity: 50, // 1 class + 1 class + 1 class + 1 class + 1 pseudo-class
         },
         {
           selector: '.discard-pile-stack .hoverable-card:hover',
           description: 'Discard pile hover rule',
-          specificity: 30 // 1 class + 1 class + 1 pseudo-class
-        }
+          specificity: 30, // 1 class + 1 class + 1 pseudo-class
+        },
       ];
 
       // Verify that our high-specificity rule is indeed higher than others
-      const highSpecRule = specificityTests.find(t => t.description === 'High-specificity selection override');
-      const otherRules = specificityTests.filter(t => t.description !== 'High-specificity selection override');
+      const highSpecRule = specificityTests.find((t) => t.description === 'High-specificity selection override');
+      const otherRules = specificityTests.filter((t) => t.description !== 'High-specificity selection override');
 
       expect(highSpecRule).toBeDefined();
-      otherRules.forEach(rule => {
+      otherRules.forEach((rule) => {
         expect(highSpecRule!.specificity).toBeGreaterThan(rule.specificity);
       });
     });
@@ -230,7 +230,7 @@ describe('CSS Visual Behavior', () => {
 
   describe('Cross-Theme Consistency', () => {
     test('selection behavior works consistently across themes', () => {
-      themes.forEach(theme => {
+      themes.forEach((theme) => {
         const div = document.createElement('div');
         div.className = `card selected ${theme.value}`;
         document.body.appendChild(div);
@@ -244,7 +244,7 @@ describe('CSS Visual Behavior', () => {
     });
 
     test('hover behavior works consistently across themes', () => {
-      themes.forEach(theme => {
+      themes.forEach((theme) => {
         const div = document.createElement('div');
         div.className = `card hoverable-card ${theme.value}`;
         document.body.appendChild(div);

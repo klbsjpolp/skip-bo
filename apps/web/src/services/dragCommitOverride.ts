@@ -1,4 +1,4 @@
-import type {CardPosition} from '@/utils/cardPositions';
+import type { CardPosition } from '@/utils/cardPositions';
 
 /**
  * One-shot override for the *start position* of the next play/discard animation.

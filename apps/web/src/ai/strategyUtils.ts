@@ -1,20 +1,14 @@
 import type { Card, GameState, Player } from '@/types';
 import { canPlayCard } from '@/lib/validators';
 
-export const getAIPlayer = (
-  gameState: GameState,
-  playerIndex: number = gameState.currentPlayerIndex
-): Player => gameState.players[playerIndex];
+export const getAIPlayer = (gameState: GameState, playerIndex: number = gameState.currentPlayerIndex): Player =>
+  gameState.players[playerIndex];
 
-export const getTopStockCard = (player: Player): Card | null =>
-  player.stockPile[player.stockPile.length - 1] ?? null;
+export const getTopStockCard = (player: Player): Card | null => player.stockPile[player.stockPile.length - 1] ?? null;
 
 export const getNextBuildValue = (buildPile: Card[]): number => buildPile.length + 1;
 
-export const collectNeededValues = (
-  gameState: GameState,
-  lookaheadSteps: number = 1
-): Set<number> => {
+export const collectNeededValues = (gameState: GameState, lookaheadSteps: number = 1): Set<number> => {
   const neededValues = new Set<number>();
 
   gameState.buildPiles.forEach((pile) => {
@@ -31,10 +25,7 @@ export const collectNeededValues = (
   return neededValues;
 };
 
-export const getPlayableBuildPiles = (
-  card: Card,
-  gameState: GameState
-): number[] =>
+export const getPlayableBuildPiles = (card: Card, gameState: GameState): number[] =>
   gameState.buildPiles.reduce<number[]>((indices, _, buildPileIndex) => {
     if (canPlayCard(card, buildPileIndex, gameState)) {
       indices.push(buildPileIndex);
@@ -42,10 +33,7 @@ export const getPlayableBuildPiles = (
     return indices;
   }, []);
 
-export const countVisibleNaturalCards = (
-  gameState: GameState,
-  targetValue: number
-): number => {
+export const countVisibleNaturalCards = (gameState: GameState, targetValue: number): number => {
   let visibleCards = 0;
 
   gameState.buildPiles.forEach((pile) => {
@@ -113,7 +101,7 @@ export const countVisibleSkipBos = (gameState: GameState): number => {
 
 export const getClosestGapToStock = (
   gameState: GameState,
-  playerIndex: number = gameState.currentPlayerIndex
+  playerIndex: number = gameState.currentPlayerIndex,
 ): number | null => {
   const stockCard = getTopStockCard(getAIPlayer(gameState, playerIndex));
 
@@ -162,16 +150,13 @@ export interface ScoredOption<T> {
 
 export const pickRandomNearBestOption = <T>(
   options: ScoredOption<T>[],
-  scoreWindow: number
+  scoreWindow: number,
 ): ScoredOption<T> | null => {
   if (options.length === 0) {
     return null;
   }
 
-  const bestScore = options.reduce(
-    (currentBest, { score }) => Math.max(currentBest, score),
-    Number.NEGATIVE_INFINITY
-  );
+  const bestScore = options.reduce((currentBest, { score }) => Math.max(currentBest, score), Number.NEGATIVE_INFINITY);
   const nearBestOptions = options.filter(({ score }) => bestScore - score <= scoreWindow);
   const chosenIndex = Math.floor(Math.random() * nearBestOptions.length);
 

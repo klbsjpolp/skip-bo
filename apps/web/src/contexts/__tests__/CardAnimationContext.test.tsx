@@ -1,10 +1,7 @@
 import { render, waitFor } from '@testing-library/react';
 import { act, useEffect } from 'react';
 import { describe, expect, it, vi, afterEach } from 'vitest';
-import {
-  CardAnimationProvider,
-  type AnimationContextType,
-} from '@/contexts/CardAnimationContext.tsx';
+import { CardAnimationProvider, type AnimationContextType } from '@/contexts/CardAnimationContext.tsx';
 import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
 
 function ContextProbe({ onReady }: { onReady: (context: AnimationContextType) => void }) {
@@ -27,9 +24,10 @@ describe('CardAnimationProvider', () => {
 
     render(
       <CardAnimationProvider>
-        <ContextProbe onReady={(nextContext) => {
-          context = nextContext;
-        }}
+        <ContextProbe
+          onReady={(nextContext) => {
+            context = nextContext;
+          }}
         />
       </CardAnimationProvider>,
     );

@@ -1,12 +1,5 @@
-import {
-  RoomVersionConflictError,
-} from '../repositories/types.js';
-import type {
-  ConnectionRecord,
-  ConnectionRepository,
-  RoomRecord,
-  RoomRepository,
-} from '../repositories/types.js';
+import { RoomVersionConflictError } from '../repositories/types.js';
+import type { ConnectionRecord, ConnectionRepository, RoomRecord, RoomRepository } from '../repositories/types.js';
 
 export class InMemoryRoomRepository implements RoomRepository {
   private readonly rooms = new Map<string, RoomRecord>();

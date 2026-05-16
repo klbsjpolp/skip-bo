@@ -5,13 +5,7 @@ import { describe, expect, test, vi } from 'vitest';
 describe('Card Interaction Behavior', () => {
   describe('Cursor Behavior', () => {
     test('grabbable cards show pointer cursor', () => {
-      const { container } = render(
-        <Card
-          card={{ value: 5, isSkipBo: false }}
-          canBeGrabbed={true}
-          onClick={vi.fn()}
-        />
-      );
+      const { container } = render(<Card card={{ value: 5, isSkipBo: false }} canBeGrabbed={true} onClick={vi.fn()} />);
 
       const card = container.querySelector('.card') as HTMLElement;
       expect(card.className).toContain('cursor-pointer');
@@ -20,11 +14,7 @@ describe('Card Interaction Behavior', () => {
 
     test('non-grabbable cards with onClick show default cursor', () => {
       const { container } = render(
-        <Card
-          card={{ value: 5, isSkipBo: false }}
-          canBeGrabbed={false}
-          onClick={vi.fn()}
-        />
+        <Card card={{ value: 5, isSkipBo: false }} canBeGrabbed={false} onClick={vi.fn()} />,
       );
 
       const card = container.querySelector('.card') as HTMLElement;
@@ -33,12 +23,7 @@ describe('Card Interaction Behavior', () => {
     });
 
     test('cards without onClick show default cursor', () => {
-      const { container } = render(
-        <Card
-          card={{ value: 5, isSkipBo: false }}
-          canBeGrabbed={false}
-        />
-      );
+      const { container } = render(<Card card={{ value: 5, isSkipBo: false }} canBeGrabbed={false} />);
 
       const card = container.querySelector('.card') as HTMLElement;
       expect(card.className).toContain('cursor-default');
@@ -48,13 +33,7 @@ describe('Card Interaction Behavior', () => {
 
   describe('Hover Effects', () => {
     test('grabbable cards have hoverable-card class', () => {
-      const { container } = render(
-        <Card
-          card={{ value: 5, isSkipBo: false }}
-          canBeGrabbed={true}
-          onClick={vi.fn()}
-        />
-      );
+      const { container } = render(<Card card={{ value: 5, isSkipBo: false }} canBeGrabbed={true} onClick={vi.fn()} />);
 
       const card = container.querySelector('.card') as HTMLElement;
       expect(card.className).toContain('hoverable-card');
@@ -62,11 +41,7 @@ describe('Card Interaction Behavior', () => {
 
     test('non-grabbable cards do not have hoverable-card class', () => {
       const { container } = render(
-        <Card
-          card={{ value: 5, isSkipBo: false }}
-          canBeGrabbed={false}
-          onClick={vi.fn()}
-        />
+        <Card card={{ value: 5, isSkipBo: false }} canBeGrabbed={false} onClick={vi.fn()} />,
       );
 
       const card = container.querySelector('.card') as HTMLElement;
@@ -77,12 +52,7 @@ describe('Card Interaction Behavior', () => {
   describe('Selection Effects', () => {
     test('selected cards have selected class', () => {
       const { container } = render(
-        <Card
-          card={{ value: 5, isSkipBo: false }}
-          isSelected={true}
-          canBeGrabbed={true}
-          onClick={vi.fn()}
-        />
+        <Card card={{ value: 5, isSkipBo: false }} isSelected={true} canBeGrabbed={true} onClick={vi.fn()} />,
       );
 
       const card = container.querySelector('.card') as HTMLElement;
@@ -91,12 +61,7 @@ describe('Card Interaction Behavior', () => {
 
     test('non-selected cards do not have selected class', () => {
       const { container } = render(
-        <Card
-          card={{ value: 5, isSkipBo: false }}
-          isSelected={false}
-          canBeGrabbed={true}
-          onClick={vi.fn()}
-        />
+        <Card card={{ value: 5, isSkipBo: false }} isSelected={false} canBeGrabbed={true} onClick={vi.fn()} />,
       );
 
       const card = container.querySelector('.card') as HTMLElement;
@@ -106,12 +71,7 @@ describe('Card Interaction Behavior', () => {
 
   describe('Transform Effects', () => {
     test('cards use CSS custom properties for transforms', () => {
-      const {container} = render(
-        <Card
-          card={{value: 5, isSkipBo: false}}
-          canBeGrabbed={true}
-        />
-      );
+      const { container } = render(<Card card={{ value: 5, isSkipBo: false }} canBeGrabbed={true} />);
 
       const card = container.querySelector('.card') as HTMLElement;
 
@@ -126,11 +86,7 @@ describe('Card Interaction Behavior', () => {
     test('clicking grabbable card calls onClick', () => {
       const mockOnClick = vi.fn();
       const { container } = render(
-        <Card
-          card={{ value: 5, isSkipBo: false }}
-          canBeGrabbed={true}
-          onClick={mockOnClick}
-        />
+        <Card card={{ value: 5, isSkipBo: false }} canBeGrabbed={true} onClick={mockOnClick} />,
       );
 
       const card = container.querySelector('.card') as HTMLElement;
@@ -142,11 +98,7 @@ describe('Card Interaction Behavior', () => {
     test('clicking non-grabbable card still calls onClick if provided', () => {
       const mockOnClick = vi.fn();
       const { container } = render(
-        <Card
-          card={{ value: 5, isSkipBo: false }}
-          canBeGrabbed={false}
-          onClick={mockOnClick}
-        />
+        <Card card={{ value: 5, isSkipBo: false }} canBeGrabbed={false} onClick={mockOnClick} />,
       );
 
       const card = container.querySelector('.card') as HTMLElement;
@@ -164,7 +116,7 @@ describe('Card Interaction Behavior', () => {
         { card: { value: 1, isSkipBo: true }, canBeGrabbed: true, onClick: vi.fn() },
       ];
 
-      configs.forEach(config => {
+      configs.forEach((config) => {
         const { container } = render(<Card {...config} />);
         const card = container.querySelector('.card') as HTMLElement;
 
@@ -181,7 +133,7 @@ describe('Card Interaction Behavior', () => {
         { card: { value: 1, isSkipBo: true }, canBeGrabbed: false },
       ];
 
-      configs.forEach(config => {
+      configs.forEach((config) => {
         const { container } = render(<Card {...config} />);
         const card = container.querySelector('.card') as HTMLElement;
 
@@ -198,7 +150,7 @@ describe('Card Interaction Behavior', () => {
         { card: { value: 1, isSkipBo: true }, isSelected: true, canBeGrabbed: true },
       ];
 
-      configs.forEach(config => {
+      configs.forEach((config) => {
         const { container } = render(<Card {...config} />);
         const card = container.querySelector('.card') as HTMLElement;
 

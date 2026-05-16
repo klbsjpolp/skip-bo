@@ -36,9 +36,14 @@ test.describe('Layout and interaction coverage', () => {
 
     await page.getByTestId('theme-switcher-trigger').click();
     await expect(page.getByTestId('theme-switcher-content')).toBeVisible();
-    await expectScreenshotIfBaselineExists(page.getByTestId('theme-switcher-content'), testInfo, 'theme-switcher-open.png', {
-      animations: 'disabled',
-    });
+    await expectScreenshotIfBaselineExists(
+      page.getByTestId('theme-switcher-content'),
+      testInfo,
+      'theme-switcher-open.png',
+      {
+        animations: 'disabled',
+      },
+    );
 
     await page.getByTestId('theme-option-theme-retro-space').click();
     await expectThemeClass(page, 'theme-retro-space');
@@ -62,8 +67,7 @@ test.describe('Layout and interaction coverage', () => {
     );
 
     const selectedTheme = await page.evaluate(
-      (themeValues) =>
-        themeValues.find((value) => document.documentElement.classList.contains(value)) ?? null,
+      (themeValues) => themeValues.find((value) => document.documentElement.classList.contains(value)) ?? null,
       availableThemes,
     );
 
@@ -83,9 +87,7 @@ test.describe('Layout and interaction coverage', () => {
     const deckBack = page.getByTestId('center-deck-section').locator('.deck .back');
     await expect(deckBack).toBeVisible();
 
-    const backgroundImage = await deckBack.evaluate((element) =>
-      getComputedStyle(element).backgroundImage,
-    );
+    const backgroundImage = await deckBack.evaluate((element) => getComputedStyle(element).backgroundImage);
 
     expect(backgroundImage).not.toBe('none');
     expect(backgroundImage).toContain('repeating-linear-gradient');

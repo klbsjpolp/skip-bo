@@ -1,6 +1,6 @@
-import type {Card, GameConfig, GameState, Player, SelectedCard} from '@skipbo/game-core';
+import type { Card, GameConfig, GameState, Player, SelectedCard } from '@skipbo/game-core';
 
-import {getDefaultPlayerName, normalizePlayerName} from '../playerName.js';
+import { getDefaultPlayerName, normalizePlayerName } from '../playerName.js';
 
 export type RoomStatus = 'WAITING' | 'ACTIVE' | 'FINISHED';
 
@@ -79,8 +79,7 @@ const cloneCard = (card: Card): Card => ({ ...card });
 
 const redactDeck = (deck: Card[]): Card[] => deck.map(() => ({ ...HIDDEN_CARD }));
 
-const revealStockPile = (stockPile: Card[]): Card[] =>
-  stockPile.map(cloneCard);
+const revealStockPile = (stockPile: Card[]): Card[] => stockPile.map(cloneCard);
 
 const redactStockPile = (stockPile: Card[], visibleCount: number): Card[] => {
   if (stockPile.length === 0) {
@@ -106,7 +105,7 @@ const rotateIndex = (index: number | null, viewerSeatIndex: number, playerCount:
     return null;
   }
 
-  return ((index - viewerSeatIndex) + playerCount) % playerCount;
+  return (index - viewerSeatIndex + playerCount) % playerCount;
 };
 
 const getPlayerDisplayName = (
@@ -145,9 +144,7 @@ const getViewMessage = (
   const rotatedCurrentPlayerIndex = rotateIndex(gameState.currentPlayerIndex, viewerSeatIndex, playerCount) ?? 0;
 
   if (status === 'WAITING') {
-    return connectedSeats.length < 2
-      ? 'En attente d’au moins un autre joueur'
-      : 'En attente du démarrage';
+    return connectedSeats.length < 2 ? 'En attente d’au moins un autre joueur' : 'En attente du démarrage';
   }
 
   if (gameState.gameIsOver) {
@@ -157,12 +154,12 @@ const getViewMessage = (
   }
 
   if (rotatedCurrentPlayerIndex === 0) {
-    return gameState.selectedCard ? 'Sélectionnez une destination' : "C’est votre tour";
+    return gameState.selectedCard ? 'Sélectionnez une destination' : 'C’est votre tour';
   }
 
   const currentPlayerName = players[rotatedCurrentPlayerIndex]?.displayName;
   const stockPileLength = players[rotatedCurrentPlayerIndex]?.stockPile?.length;
-  return currentPlayerName ? `Tour de ${currentPlayerName} (${stockPileLength ?? 0})` : "Tour d’un adversaire";
+  return currentPlayerName ? `Tour de ${currentPlayerName} (${stockPileLength ?? 0})` : 'Tour d’un adversaire';
 };
 
 const toSelectedCardView = (
@@ -177,10 +174,7 @@ const toSelectedCardView = (
 
   const rotatedCurrentPlayerIndex = rotateIndex(currentPlayerIndex, viewerSeatIndex, playerCount) ?? 0;
   const isLocalSelection = rotatedCurrentPlayerIndex === 0;
-  const card =
-    isLocalSelection || selectedCard.source !== 'hand'
-      ? cloneCard(selectedCard.card)
-      : { ...HIDDEN_CARD };
+  const card = isLocalSelection || selectedCard.source !== 'hand' ? cloneCard(selectedCard.card) : { ...HIDDEN_CARD };
 
   return {
     ...selectedCard,
@@ -221,9 +215,10 @@ export const serializeClientGameView = ({
       kind: 'human',
       relativeSeatIndex,
       role,
-      stockPile: role === 'local'
-        ? revealStockPile(player.stockPile)
-        : redactStockPile(player.stockPile, OPPONENT_VISIBLE_STOCK_CARDS),
+      stockPile:
+        role === 'local'
+          ? revealStockPile(player.stockPile)
+          : redactStockPile(player.stockPile, OPPONENT_VISIBLE_STOCK_CARDS),
     };
   });
 
@@ -247,7 +242,12 @@ export const serializeClientGameView = ({
       status,
       version,
     },
-    selectedCard: toSelectedCardView(gameState.selectedCard, viewerSeatIndex, gameState.currentPlayerIndex, playerCount),
+    selectedCard: toSelectedCardView(
+      gameState.selectedCard,
+      viewerSeatIndex,
+      gameState.currentPlayerIndex,
+      playerCount,
+    ),
     winnerIndex: rotateIndex(gameState.winnerIndex, viewerSeatIndex, playerCount),
   };
 };

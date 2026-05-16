@@ -2,7 +2,13 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gameReducer, initialGameState, type Card, type GameState } from '@skipbo/game-core';
-import { serializeClientGameView, type ClientGameView, type CreateRoomResponse, type LobbySeatInfo, type ServerMessage } from '@skipbo/multiplayer-protocol';
+import {
+  serializeClientGameView,
+  type ClientGameView,
+  type CreateRoomResponse,
+  type LobbySeatInfo,
+  type ServerMessage,
+} from '@skipbo/multiplayer-protocol';
 
 import { useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
 
@@ -53,10 +59,7 @@ vi.mock('@/services/aiAnimationService', () => ({
 
 const card = (value: number, isSkipBo = false): Card => ({ value, isSkipBo });
 
-const createOnlineView = (
-  gameState: GameState,
-  version: number,
-): ClientGameView =>
+const createOnlineView = (gameState: GameState, version: number): ClientGameView =>
   serializeClientGameView({
     connectedSeats: gameState.players.map((_, index) => index),
     expiresAt: '2026-04-05T12:00:00.000Z',
@@ -67,11 +70,7 @@ const createOnlineView = (
     viewerSeatIndex: 0,
   });
 
-const createWaitingView = (
-  connectedSeats: number[],
-  version: number,
-  lobbySeats?: LobbySeatInfo[],
-): ClientGameView => {
+const createWaitingView = (connectedSeats: number[], version: number, lobbySeats?: LobbySeatInfo[]): ClientGameView => {
   const state = initialGameState({ playerCount: 4 });
 
   state.deck = [];
@@ -202,12 +201,7 @@ const createOpponentDiscardHandoffStates = (): { previousState: GameState; nextS
   return { previousState, nextState };
 };
 
-const createRect = (
-  left: number,
-  top: number,
-  width: number,
-  height: number,
-): DOMRect =>
+const createRect = (left: number, top: number, width: number, height: number): DOMRect =>
   ({
     bottom: top + height,
     height,
@@ -220,10 +214,7 @@ const createRect = (
     y: top,
   }) as DOMRect;
 
-const setElementRect = (
-  element: Element,
-  rect: DOMRect,
-): void => {
+const setElementRect = (element: Element, rect: DOMRect): void => {
   Object.defineProperty(element, 'getBoundingClientRect', {
     configurable: true,
     value: () => rect,
@@ -467,16 +458,13 @@ describe('useOnlineSkipBoGame', () => {
 
     expect(triggerMultipleDrawAnimations).toHaveBeenCalledTimes(1);
 
-    const [playerIndex, refillCards, handIndices] =
-      triggerMultipleDrawAnimations.mock.calls[0] as unknown as [number, Card[], number[]];
+    const [playerIndex, refillCards, handIndices] = triggerMultipleDrawAnimations.mock.calls[0] as unknown as [
+      number,
+      Card[],
+      number[],
+    ];
     expect(playerIndex).toBe(0);
-    expect(refillCards).toEqual([
-      card(8),
-      card(9),
-      card(10),
-      card(11),
-      card(12),
-    ]);
+    expect(refillCards).toEqual([card(8), card(9), card(10), card(11), card(12)]);
     expect(handIndices).toEqual([0, 1, 2, 3, 4]);
   });
 
@@ -712,21 +700,23 @@ describe('useOnlineSkipBoGame', () => {
   it('accepts new selections while snapshot-driven animations are still active online', async () => {
     const session = createSession();
 
-    activeAnimationsState.current = [{
-      animationType: 'play',
-      duration: 200,
-      endPosition: { x: 0, y: 0 },
-      id: 'active-animation',
-      initialDelay: 0,
-      sourceInfo: {
-        index: 0,
-        playerIndex: 0,
-        source: 'hand',
+    activeAnimationsState.current = [
+      {
+        animationType: 'play',
+        duration: 200,
+        endPosition: { x: 0, y: 0 },
+        id: 'active-animation',
+        initialDelay: 0,
+        sourceInfo: {
+          index: 0,
+          playerIndex: 0,
+          source: 'hand',
+        },
+        sourceRevealed: true,
+        startPosition: { x: 0, y: 0 },
+        targetRevealed: true,
       },
-      sourceRevealed: true,
-      startPosition: { x: 0, y: 0 },
-      targetRevealed: true,
-    }];
+    ];
 
     const initialView = createOnlineView(createInteractiveOnlineState(), 1);
 
@@ -771,9 +761,12 @@ describe('useOnlineSkipBoGame', () => {
     const nextView = createOnlineView(nextState, 2);
     let resolveOpponentAnimation: (() => void) | null = null;
 
-    triggerAIAnimation.mockImplementationOnce(() => new Promise<number>((resolve) => {
-      resolveOpponentAnimation = () => resolve(200);
-    }));
+    triggerAIAnimation.mockImplementationOnce(
+      () =>
+        new Promise<number>((resolve) => {
+          resolveOpponentAnimation = () => resolve(200);
+        }),
+    );
     calculateMultipleDrawAnimationDuration.mockReturnValueOnce(700);
 
     const { result } = renderHook(() => useOnlineSkipBoGame(session));
@@ -865,11 +858,13 @@ describe('useOnlineSkipBoGame', () => {
       result.current.startGame();
     });
 
-    expect(socket.sent.some((message) => {
-      const parsed = JSON.parse(message) as { type: string; clientVersion?: number };
+    expect(
+      socket.sent.some((message) => {
+        const parsed = JSON.parse(message) as { type: string; clientVersion?: number };
 
-      return parsed.type === 'startGame' && parsed.clientVersion === 2;
-    })).toBe(true);
+        return parsed.type === 'startGame' && parsed.clientVersion === 2;
+      }),
+    ).toBe(true);
   });
 
   it('keeps the local waiting-room hand visible before the game starts', async () => {
@@ -909,19 +904,29 @@ describe('useOnlineSkipBoGame', () => {
       await Promise.resolve();
     });
 
-    act(() => { result.current.sendSetReady('Alice'); });
+    act(() => {
+      result.current.sendSetReady('Alice');
+    });
     expect(JSON.parse(socket.sent.at(-1) ?? '{}')).toEqual({ type: 'setReady', playerName: 'Alice' });
 
-    act(() => { result.current.sendSetReady(); });
+    act(() => {
+      result.current.sendSetReady();
+    });
     expect(JSON.parse(socket.sent.at(-1) ?? '{}')).toMatchObject({ type: 'setReady' });
 
-    act(() => { result.current.sendSetUnready(); });
+    act(() => {
+      result.current.sendSetUnready();
+    });
     expect(JSON.parse(socket.sent.at(-1) ?? '{}')).toEqual({ type: 'setUnready' });
 
-    act(() => { result.current.kickSeat(2); });
+    act(() => {
+      result.current.kickSeat(2);
+    });
     expect(JSON.parse(socket.sent.at(-1) ?? '{}')).toEqual({ type: 'kickSeat', targetSeatIndex: 2 });
 
-    act(() => { result.current.leaveLobby(); });
+    act(() => {
+      result.current.leaveLobby();
+    });
     expect(JSON.parse(socket.sent.at(-1) ?? '{}')).toEqual({ type: 'leaveLobby' });
   });
 
@@ -939,7 +944,9 @@ describe('useOnlineSkipBoGame', () => {
       await Promise.resolve();
     });
 
-    act(() => { result.current.leaveLobby(); });
+    act(() => {
+      result.current.leaveLobby();
+    });
     await act(async () => {
       socket.close();
       await Promise.resolve();

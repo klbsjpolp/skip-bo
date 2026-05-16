@@ -19,11 +19,7 @@ describe('findBestDiscardPile', () => {
       discardPiles: [[{ value: 12, isSkipBo: false }], [], [], []],
     };
 
-    const discardPileIndex = findBestDiscardPile(
-      { value: 3, isSkipBo: false },
-      state.players[1].discardPiles,
-      state
-    );
+    const discardPileIndex = findBestDiscardPile({ value: 3, isSkipBo: false }, state.players[1].discardPiles, state);
 
     expect([1, 2, 3]).toContain(discardPileIndex);
   });
@@ -40,11 +36,7 @@ describe('findBestDiscardPile', () => {
       discardPiles: [[{ value: 8, isSkipBo: false }], [], [], []],
     };
 
-    const discardPileIndex = findBestDiscardPile(
-      { value: 8, isSkipBo: false },
-      state.players[1].discardPiles,
-      state
-    );
+    const discardPileIndex = findBestDiscardPile({ value: 8, isSkipBo: false }, state.players[1].discardPiles, state);
 
     expect(discardPileIndex).toBe(0);
   });
@@ -63,11 +55,7 @@ describe('findBestDiscardPile', () => {
       discardPiles: [[], [], [{ value: 12, isSkipBo: false }], [{ value: 11, isSkipBo: false }]],
     };
 
-    const discardPileIndex = findBestDiscardPile(
-      { value: 3, isSkipBo: false },
-      state.players[1].discardPiles,
-      state
-    );
+    const discardPileIndex = findBestDiscardPile({ value: 3, isSkipBo: false }, state.players[1].discardPiles, state);
 
     expect(discardPileIndex).toBe(1);
   });

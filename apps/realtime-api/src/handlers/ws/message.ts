@@ -5,7 +5,16 @@ import { clientMessageSchema } from '@skipbo/multiplayer-protocol';
 
 import { isClientError } from '../../errors/clientError.js';
 import { captureBackendException, withSentry } from '../../monitoring/sentry.js';
-import { authenticateConnection, handleAction, handleKickSeat, handleLeaveLobby, handleSetReady, handleSetUnready, rejectAction, startGame } from '../../services/roomService.js';
+import {
+  authenticateConnection,
+  handleAction,
+  handleKickSeat,
+  handleLeaveLobby,
+  handleSetReady,
+  handleSetUnready,
+  rejectAction,
+  startGame,
+} from '../../services/roomService.js';
 import { broadcaster, connectionRepository, roomRepository, websocketUrl } from '../shared.js';
 
 const messageHandler: APIGatewayProxyWebsocketHandlerV2 = async (event) => {
@@ -64,12 +73,16 @@ const messageHandler: APIGatewayProxyWebsocketHandlerV2 = async (event) => {
     return { statusCode: 200, body: 'ok' };
   } catch (error) {
     if (error instanceof ZodError) {
-      await rejectAction({
-        broadcaster,
-        connectionRepository,
-        roomRepository,
-        websocketUrl,
-      }, connectionId, error.message);
+      await rejectAction(
+        {
+          broadcaster,
+          connectionRepository,
+          roomRepository,
+          websocketUrl,
+        },
+        connectionId,
+        error.message,
+      );
       return { statusCode: 400, body: error.message };
     }
 
@@ -82,12 +95,16 @@ const messageHandler: APIGatewayProxyWebsocketHandlerV2 = async (event) => {
       });
     }
 
-    await rejectAction({
-      broadcaster,
-      connectionRepository,
-      roomRepository,
-      websocketUrl,
-    }, connectionId, error instanceof Error ? error.message : 'Unknown error');
+    await rejectAction(
+      {
+        broadcaster,
+        connectionRepository,
+        roomRepository,
+        websocketUrl,
+      },
+      connectionId,
+      error instanceof Error ? error.message : 'Unknown error',
+    );
 
     return { statusCode: 200, body: 'rejected' };
   }

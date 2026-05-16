@@ -2,9 +2,26 @@ import { describe, expect, it } from 'vitest';
 
 import { ROOM_CODE_LENGTH, type ServerMessage } from '@skipbo/multiplayer-protocol';
 
-import { RoomVersionConflictError, type ConnectionRecord, type ConnectionRepository, type RoomRecord, type RoomRepository } from '../src/repositories/types.js';
+import {
+  RoomVersionConflictError,
+  type ConnectionRecord,
+  type ConnectionRepository,
+  type RoomRecord,
+  type RoomRepository,
+} from '../src/repositories/types.js';
 import type { RealtimeBroadcaster } from '../src/services/broadcaster.js';
-import { authenticateConnection, createRoom, DISCONNECT_GRACE_MS, handleAction, handleDisconnect, handleLeaveLobby, handleSetReady, joinRoom, rejectAction, startGame } from '../src/services/roomService.js';
+import {
+  authenticateConnection,
+  createRoom,
+  DISCONNECT_GRACE_MS,
+  handleAction,
+  handleDisconnect,
+  handleLeaveLobby,
+  handleSetReady,
+  joinRoom,
+  rejectAction,
+  startGame,
+} from '../src/services/roomService.js';
 
 class InMemoryRoomRepository implements RoomRepository {
   readonly rooms = new Map<string, RoomRecord>();
@@ -198,7 +215,11 @@ describe('roomService', () => {
     expect(joined.seatIndex).toBe(1);
     expect(joinedThird.seatIndex).toBe(2);
     expect(joinedFourth.seatIndex).toBe(3);
-    expect(room?.lobbyPlayers?.find((p) => p.seatIndex === 1)).toEqual({ seatIndex: 1, readyState: 'never-ready', playerName: null });
+    expect(room?.lobbyPlayers?.find((p) => p.seatIndex === 1)).toEqual({
+      seatIndex: 1,
+      readyState: 'never-ready',
+      playerName: null,
+    });
     await expect(joinRoom(dependencies, { roomCode: created.roomCode })).rejects.toThrow('Room is full');
   });
 
@@ -362,9 +383,11 @@ describe('roomService', () => {
       seatToken: created.seatToken,
     });
 
-    await expect(startGame(dependencies, {
-      connectionId: 'c-1',
-    })).rejects.toThrow('Tous les joueurs doivent être prêts pour démarrer');
+    await expect(
+      startGame(dependencies, {
+        connectionId: 'c-1',
+      }),
+    ).rejects.toThrow('Tous les joueurs doivent être prêts pour démarrer');
 
     const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
     await authenticateConnection(dependencies, {
@@ -377,9 +400,11 @@ describe('roomService', () => {
     await handleSetReady(dependencies, { connectionId: 'c-1' });
     await handleSetReady(dependencies, { connectionId: 'c-2' });
 
-    await expect(startGame(dependencies, {
-      connectionId: 'c-2',
-    })).rejects.toThrow('Only the host can start the room');
+    await expect(
+      startGame(dependencies, {
+        connectionId: 'c-2',
+      }),
+    ).rejects.toThrow('Only the host can start the room');
   });
 
   it('marks a disconnected seat with a grace timestamp instead of removing it', async () => {
@@ -406,9 +431,7 @@ describe('roomService', () => {
     expect(room?.authenticatedSeats).toEqual([0, 1]);
     expect(room?.disconnectedSeats?.['1']?.disconnectedAt).toBeTypeOf('string');
 
-    const presenceMessage = dependencies.broadcaster.sent
-      .filter((entry) => entry.message.type === 'presence')
-      .at(-1);
+    const presenceMessage = dependencies.broadcaster.sent.filter((entry) => entry.message.type === 'presence').at(-1);
     expect(presenceMessage).toBeDefined();
     if (presenceMessage?.message.type === 'presence') {
       expect(presenceMessage.message.room.disconnectedSeats).toEqual([
@@ -564,8 +587,7 @@ describe('roomService', () => {
     expect(updated?.disconnectedSeats?.[String(joined.seatIndex)]).toBeUndefined();
     expect(updated?.authenticatedSeats).not.toContain(joined.seatIndex);
 
-    const presenceMessages = dependencies.broadcaster.sent
-      .filter((entry) => entry.message.type === 'presence');
+    const presenceMessages = dependencies.broadcaster.sent.filter((entry) => entry.message.type === 'presence');
     const lastPresence = presenceMessages.at(-1);
     if (lastPresence?.message.type === 'presence') {
       expect(lastPresence.message.room.disconnectedSeats).toEqual([]);
@@ -642,8 +664,9 @@ describe('roomService', () => {
 
     await handleDisconnect(dependencies, 'c-1');
 
-    const closeMessages = dependencies.broadcaster.sent
-      .filter((entry) => entry.message.type === 'roomClosed' && entry.connectionId === 'c-2');
+    const closeMessages = dependencies.broadcaster.sent.filter(
+      (entry) => entry.message.type === 'roomClosed' && entry.connectionId === 'c-2',
+    );
     expect(closeMessages.length).toBeGreaterThan(0);
   });
 

@@ -7,13 +7,7 @@ describe('planHandRefill', () => {
   });
 
   it('fills empty slots from the deck in hand order', () => {
-    const hand = [
-      { value: 1, isSkipBo: false },
-      null,
-      { value: 3, isSkipBo: false },
-      null,
-      null,
-    ];
+    const hand = [{ value: 1, isSkipBo: false }, null, { value: 3, isSkipBo: false }, null, null];
     const deck = [
       { value: 4, isSkipBo: false },
       { value: 5, isSkipBo: false },
@@ -45,9 +39,7 @@ describe('planHandRefill', () => {
     expect(result.handIndices).toEqual([0, 1, 2, 3, 4]);
     expect(result.cards.slice(0, 2)).toEqual(deck);
     expect(result.cards.slice(2)).toHaveLength(3);
-    expect(result.cards.slice(2)).toEqual(
-      expect.arrayContaining(completedBuildPiles),
-    );
+    expect(result.cards.slice(2)).toEqual(expect.arrayContaining(completedBuildPiles));
   });
 
   it('returns no refill when there are no empty slots', () => {

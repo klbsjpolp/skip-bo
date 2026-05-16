@@ -8,12 +8,15 @@ const disconnectHandler: APIGatewayProxyWebsocketHandlerV2 = async (event) => {
   const connectionId = event.requestContext.connectionId;
 
   if (connectionId) {
-    await handleDisconnect({
-      broadcaster,
-      connectionRepository,
-      roomRepository,
-      websocketUrl,
-    }, connectionId);
+    await handleDisconnect(
+      {
+        broadcaster,
+        connectionRepository,
+        roomRepository,
+        websocketUrl,
+      },
+      connectionId,
+    );
   }
 
   return {

@@ -1,10 +1,10 @@
-import {act, fireEvent, render, screen} from '@testing-library/react';
-import {describe, expect, test, vi} from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, test, vi } from 'vitest';
 
-import {PlayerArea} from '@/components/PlayerArea';
-import {DragProvider} from '@/contexts/DragContext';
-import {CardAnimationProvider} from '@/contexts/CardAnimationContext';
-import type {Card, GameConfig, GameState, MoveResult, Player, SelectedCard} from '@/types';
+import { PlayerArea } from '@/components/PlayerArea';
+import { DragProvider } from '@/contexts/DragContext';
+import { CardAnimationProvider } from '@/contexts/CardAnimationContext';
+import type { Card, GameConfig, GameState, MoveResult, Player, SelectedCard } from '@/types';
 
 type SelectCardFn = (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void;
 type PlayCardFn = (buildPileIndex: number) => Promise<MoveResult>;
@@ -93,9 +93,7 @@ describe('Drag selection', () => {
 
     // Top of discard pile 0 (value 9). It's the rendered draggable top card.
     const discardPile = screen.getByLabelText('Défausse 1');
-    const topCard = Array.from(
-      discardPile.querySelectorAll<HTMLElement>('.card[data-value]'),
-    ).pop();
+    const topCard = Array.from(discardPile.querySelectorAll<HTMLElement>('.card[data-value]')).pop();
     expect(topCard, 'expected a top discard card to drag').toBeTruthy();
 
     // Simulate a real drag: pointerdown then a pointermove past the 5px threshold.
@@ -130,7 +128,7 @@ describe('Drag selection', () => {
 
     // discardCard must NOT have been triggered as a side-effect (otherwise the
     // hand card would have been discarded instead of the drag starting).
-    expect((handlers.discardCard as unknown as ReturnType<typeof vi.fn>)).not.toHaveBeenCalled();
+    expect(handlers.discardCard as unknown as ReturnType<typeof vi.fn>).not.toHaveBeenCalled();
 
     // Cleanup so the drag listeners (and the post-drop swallow-click capture
     // listener) don't leak between tests.
@@ -162,9 +160,7 @@ describe('Drag selection', () => {
     renderHumanPlayer(gameState, handlers);
 
     const discardPile = screen.getByLabelText('Défausse 1');
-    const topCard = Array.from(
-      discardPile.querySelectorAll<HTMLElement>('.card[data-value]'),
-    ).pop()!;
+    const topCard = Array.from(discardPile.querySelectorAll<HTMLElement>('.card[data-value]')).pop()!;
 
     // Plain tap (pointerdown → pointerup with no movement → click). Drag must
     // NOT start, and the click must reach the discard-pile-stack's handler.
@@ -195,7 +191,7 @@ describe('Drag selection', () => {
     // No selection switch — pointerdown without a real drag must be silent.
     expect(handlers.selectCard).not.toHaveBeenCalled();
     // The legacy click affordance fires: discard the selected hand card here.
-    expect((handlers.discardCard as unknown as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(0);
+    expect(handlers.discardCard as unknown as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(0);
   });
 
   test('starting a drag from a hand card while another hand card is selected switches the selection', () => {

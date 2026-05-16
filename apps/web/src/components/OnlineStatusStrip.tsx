@@ -1,10 +1,10 @@
-import {Check, CircleCheck, Copy, Flag, LoaderCircle, WifiOff} from 'lucide-react';
-import {useEffect, useState} from 'react';
+import { Check, CircleCheck, Copy, Flag, LoaderCircle, WifiOff } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import type {DisconnectedSeatInfo} from '@skipbo/multiplayer-protocol';
+import type { DisconnectedSeatInfo } from '@skipbo/multiplayer-protocol';
 
-import {Button} from '@/components/ui/button';
-import {cn} from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const GRACE_MS = 5 * 60 * 1000;
 
@@ -59,10 +59,7 @@ const formatRemaining = (remainingMs: number): string => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-const getSeatLabel = (
-  seatIndex: number,
-  playersBySeatIndex?: Record<number, DisconnectedPlayer>,
-): string =>
+const getSeatLabel = (seatIndex: number, playersBySeatIndex?: Record<number, DisconnectedPlayer>): string =>
   playersBySeatIndex?.[seatIndex]?.displayName ?? `Joueur ${seatIndex + 1}`;
 
 export function OnlineStatusStrip({
@@ -101,28 +98,37 @@ export function OnlineStatusStrip({
 
   return (
     <div
-      className={cn(
-        'flex flex-row gap-3 items-center',
-        roomStatus === 'WAITING' && 'border-dashed',
-      )}
+      className={cn('flex flex-row gap-3 items-center', roomStatus === 'WAITING' && 'border-dashed')}
       data-testid="online-status-strip"
     >
       <span className="text-primary-foreground" title={statusLabel} aria-label={statusLabel}>
-        {roomStatus === 'FINISHED' ? (<Flag className="text-muted-foreground"/>) :
-         visibleDisconnectedSeats.length ? <WifiOff className="text-destructive" /> :
-         roomStatus === 'WAITING' ? (<LoaderCircle className="animate-spin text-primary"/>) :
-         roomStatus === 'ACTIVE' ? (<CircleCheck className="text-success" />) : null}
+        {roomStatus === 'FINISHED' ? (
+          <Flag className="text-muted-foreground" />
+        ) : visibleDisconnectedSeats.length ? (
+          <WifiOff className="text-destructive" />
+        ) : roomStatus === 'WAITING' ? (
+          <LoaderCircle className="animate-spin text-primary" />
+        ) : roomStatus === 'ACTIVE' ? (
+          <CircleCheck className="text-success" />
+        ) : null}
       </span>
-      {roomStatus === 'WAITING' && (<>
+      {roomStatus === 'WAITING' && (
+        <>
           <div
             className="flex flex-row rounded-xl border gap-1 py-0.5 px-2 bg-secondary text-secondary-foreground items-center"
             data-testid="online-room-controls"
           >
-            <p className="text-sm font-medium tabular-nums" data-testid="online-seat-count">{connectedSeatCount}/{seatCapacity} joueurs</p>
+            <p className="text-sm font-medium tabular-nums" data-testid="online-seat-count">
+              {connectedSeatCount}/{seatCapacity} joueurs
+            </p>
             <div className="mx-1 h-4 w-px bg-border/70" aria-hidden="true" />
             <p className="text-sm font-medium font-mono tracking-[0.2em]">{roomCode}</p>
             <Button type="button" size="icon-xs" variant="ghost" onClick={() => void handleCopy()}>
-              {copied ? <Check data-icon="inline-start" /> : connectionStatus === 'connecting' ? null : <Copy data-icon="inline-start" />}
+              {copied ? (
+                <Check data-icon="inline-start" />
+              ) : connectionStatus === 'connecting' ? null : (
+                <Copy data-icon="inline-start" />
+              )}
             </Button>
             {isHost ? (
               <>
@@ -143,10 +149,7 @@ export function OnlineStatusStrip({
         </>
       )}
       {visibleDisconnectedSeats.length > 0 && (
-        <div
-          className="flex flex-row gap-1 items-center"
-          data-testid="online-disconnected-seats"
-        >
+        <div className="flex flex-row gap-1 items-center" data-testid="online-disconnected-seats">
           {visibleDisconnectedSeats.map((entry) => {
             const remainingMs = GRACE_MS - (now - new Date(entry.disconnectedAt).getTime());
             const seatLabel = getSeatLabel(entry.seatIndex, playersBySeatIndex);

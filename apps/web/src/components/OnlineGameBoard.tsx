@@ -1,9 +1,9 @@
-import {CenterArea} from '@/components/CenterArea';
-import type {GameBoardProps} from '@/components/GameBoard';
-import {GameBoard} from '@/components/GameBoard';
-import {DiscardPiles, HandSection, PlayerArea, StockPile} from '@/components/PlayerArea';
-import {VictoryEffects} from '@/components/VictoryEffects';
-import {cn} from '@/lib/utils';
+import { CenterArea } from '@/components/CenterArea';
+import type { GameBoardProps } from '@/components/GameBoard';
+import { GameBoard } from '@/components/GameBoard';
+import { DiscardPiles, HandSection, PlayerArea, StockPile } from '@/components/PlayerArea';
+import { VictoryEffects } from '@/components/VictoryEffects';
+import { cn } from '@/lib/utils';
 
 type OnlineGameBoardProps = GameBoardProps;
 
@@ -23,7 +23,7 @@ interface RemoteSeatProps {
 function RemoteSeat({
   clearSelection,
   discardCard,
-                      playCard,
+  playCard,
   gameState,
   isCurrentPlayer,
   isWinner,
@@ -34,11 +34,7 @@ function RemoteSeat({
 }: RemoteSeatProps) {
   return (
     <section
-      className={cn(
-        'player-area ring-3',
-        isCurrentPlayer && 'active-turn',
-        isWinner && 'winner',
-      )}
+      className={cn('player-area ring-3', isCurrentPlayer && 'active-turn', isWinner && 'winner')}
       data-player-index={playerIndex}
       data-player-seat={player.seatIndex}
       data-player-state={isWinner ? 'winner' : isCurrentPlayer ? 'active' : 'idle'}
@@ -53,9 +49,7 @@ function RemoteSeat({
         )}
       >
         {player.name ? (
-          <div className="vertical-text self-center border-l border-primary xl:row-span-2">
-            {player.name}
-          </div>
+          <div className="vertical-text self-center border-l border-primary xl:row-span-2">{player.name}</div>
         ) : null}
 
         <StockPile
@@ -127,16 +121,10 @@ export function OnlineGameBoard({
   const winner = gameState.winnerIndex !== null ? gameState.players[gameState.winnerIndex] : null;
 
   return (
-    <div
-      className={cn('game-board max-w-7xl mx-auto', winner && 'game-board-victory')}
-      data-testid="game-board"
-    >
+    <div className={cn('game-board max-w-7xl mx-auto', winner && 'game-board-victory')} data-testid="game-board">
       {remotePlayers.length > 0 ? (
         <div
-          className={cn(
-            'mb-4 grid gap-3',
-            remotePlayers.length === 1 ? 'grid-cols-1' : 'grid-cols-1 xl:grid-cols-2',
-          )}
+          className={cn('mb-4 grid gap-3', remotePlayers.length === 1 ? 'grid-cols-1' : 'grid-cols-1 xl:grid-cols-2')}
         >
           {remotePlayers.map((player, remotePlayerOffset) => {
             const playerIndex = remotePlayerOffset + 1;
@@ -163,11 +151,7 @@ export function OnlineGameBoard({
         </div>
       ) : null}
 
-      <CenterArea
-        gameState={gameState}
-        playCard={playCard}
-        canPlayCard={canPlayCard}
-      />
+      <CenterArea gameState={gameState} playCard={playCard} canPlayCard={canPlayCard} />
 
       <h1 className="my-4 lg:my-6" data-testid="game-message">
         {gameState.message}

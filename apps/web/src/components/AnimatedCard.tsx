@@ -23,7 +23,7 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
   const portalTarget = useMemo<HTMLElement | null>(() => {
     if (animation.animationType !== 'draw') return null;
     return document.querySelector<HTMLElement>(
-      `.player-area[data-player-index="${animation.sourceInfo.playerIndex}"] .hand-area.overlap-hand`
+      `.player-area[data-player-index="${animation.sourceInfo.playerIndex}"] .hand-area.overlap-hand`,
     );
   }, [animation.animationType, animation.sourceInfo.playerIndex]);
   // Card is invisible during the initial delay — same UX as before
@@ -90,7 +90,7 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
         { transform: `translate(${sx}px, ${sy}px) rotateZ(${startAngle}deg)` },
         { transform: `translate(${ex}px, ${ey}px) rotateZ(${endAngle}deg)` },
       ],
-      { duration, easing: 'cubic-bezier(0.4, 0.0, 0.2, 1)', fill: 'forwards' }
+      { duration, easing: 'cubic-bezier(0.4, 0.0, 0.2, 1)', fill: 'forwards' },
     );
 
     // Remove from context once travel completes — no setTimeout guess needed
@@ -103,28 +103,32 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
     let flipCancelled = false;
     if (needsFlip && flipRef.current && duration > 0) {
       const flipDuration = duration * 0.4;
-      const flipDelay  = duration * 0.3;
+      const flipDelay = duration * 0.3;
 
-      firstHalfAnim = flipRef.current.animate(
-        [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(90deg)' }],
-        { duration: flipDuration / 2, delay: flipDelay, easing: 'ease-in', fill: 'forwards' }
-      );
+      firstHalfAnim = flipRef.current.animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(90deg)' }], {
+        duration: flipDuration / 2,
+        delay: flipDelay,
+        easing: 'ease-in',
+        fill: 'forwards',
+      });
 
-      firstHalfAnim.finished.then(() => {
-        // Guard: cleanup may have run between firstHalf finishing and this callback
-        if (flipCancelled) return;
-        // Card is edge-on (invisible) — swap the face synchronously so the
-        // second-half animation starts with the NEW face already in the DOM.
-        // Without flushSync, React commits during phase 2 and the user sees the
-        // OLD face for 3-4 frames after the rotation has started unfolding.
-        flushSync(() => setIsRevealed(animation.targetRevealed));
-        // Second half: start from the opposite edge so the card "unfolds" forward
-        secondHalfRef.current = flipRef.current!.animate(
-          [{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg)' }],
-          { duration: flipDuration / 2, easing: 'ease-out', fill: 'forwards' }
-        );
-        secondHalfRef.current.finished.catch(() => {});
-      }).catch(() => {});
+      firstHalfAnim.finished
+        .then(() => {
+          // Guard: cleanup may have run between firstHalf finishing and this callback
+          if (flipCancelled) return;
+          // Card is edge-on (invisible) — swap the face synchronously so the
+          // second-half animation starts with the NEW face already in the DOM.
+          // Without flushSync, React commits during phase 2 and the user sees the
+          // OLD face for 3-4 frames after the rotation has started unfolding.
+          flushSync(() => setIsRevealed(animation.targetRevealed));
+          // Second half: start from the opposite edge so the card "unfolds" forward
+          secondHalfRef.current = flipRef.current!.animate(
+            [{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg)' }],
+            { duration: flipDuration / 2, easing: 'ease-out', fill: 'forwards' },
+          );
+          secondHalfRef.current.finished.catch(() => {});
+        })
+        .catch(() => {});
     }
 
     return () => {
@@ -145,9 +149,7 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
   // When portaled into the hand-area, use the destination slot index as
   // z-index so the in-flight card stacks naturally with sibling hand cards
   // (slot 4 above slot 3, etc.) — eliminating the z-snap on landing.
-  const zIndex = portalTarget
-    ? animation.sourceInfo.index
-    : 1000 - animation.sourceInfo.index;
+  const zIndex = portalTarget ? animation.sourceInfo.index : 1000 - animation.sourceInfo.index;
 
   const node = (
     <div
@@ -170,20 +172,10 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
     >
       {needsFlip ? (
         <div ref={flipRef}>
-          <Card
-            hint="AnimatedCard"
-            card={animation.card}
-            isRevealed={isRevealed}
-            canBeGrabbed={false}
-          />
+          <Card hint="AnimatedCard" card={animation.card} isRevealed={isRevealed} canBeGrabbed={false} />
         </div>
       ) : (
-        <Card
-          hint="AnimatedCard"
-          card={animation.card}
-          isRevealed={animation.sourceRevealed}
-          canBeGrabbed={false}
-        />
+        <Card hint="AnimatedCard" card={animation.card} isRevealed={animation.sourceRevealed} canBeGrabbed={false} />
       )}
     </div>
   );

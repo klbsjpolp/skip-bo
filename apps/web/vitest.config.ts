@@ -10,8 +10,8 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "virtual:pwa-register": path.resolve(__dirname, "./src/testing/virtualPwaRegisterStub.ts"),
+      '@': path.resolve(__dirname, './src'),
+      'virtual:pwa-register': path.resolve(__dirname, './src/testing/virtualPwaRegisterStub.ts'),
     },
   },
   test: {

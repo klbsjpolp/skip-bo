@@ -1,14 +1,12 @@
-import {createContext, useContext} from 'react';
-import type {Card} from '@/types';
+import { createContext, useContext } from 'react';
+import type { Card } from '@/types';
 
 export type DragSource =
   | { kind: 'hand'; index: number }
   | { kind: 'stock'; index: number }
   | { kind: 'discard'; index: number; discardPileIndex: number };
 
-export type DragTargetId =
-  | { kind: 'build'; index: number }
-  | { kind: 'discard'; index: number };
+export type DragTargetId = { kind: 'build'; index: number } | { kind: 'discard'; index: number };
 
 export interface DragSession {
   source: DragSource;

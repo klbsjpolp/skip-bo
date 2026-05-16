@@ -4,19 +4,11 @@ import { expect, type Locator, type Page, type TestInfo } from '@playwright/test
 import type { Theme } from '../../src/types/index.ts';
 import type { UiFixtureName } from '../../src/testing/uiFixtures.ts';
 
-const stableScreenshotCss = readFileSync(
-  new URL('./stable-screenshot.css', import.meta.url),
-  'utf8',
-);
+const stableScreenshotCss = readFileSync(new URL('./stable-screenshot.css', import.meta.url), 'utf8');
 
 const cardTokens = ['--background', '--foreground', '--selected-border-color', '--card-g1'] as const;
 
-export const representativeThemes: Theme[] = [
-  'theme-paper',
-  'theme-midnight',
-  'theme-glass',
-  'theme-retro-space',
-];
+export const representativeThemes: Theme[] = ['theme-paper', 'theme-midnight', 'theme-glass', 'theme-retro-space'];
 
 export const gotoFixture = async (page: Page, fixture: UiFixtureName, theme: Theme) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });

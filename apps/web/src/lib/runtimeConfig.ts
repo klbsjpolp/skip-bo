@@ -22,7 +22,7 @@ const fetchRuntimeConfigFromNetwork = async (): Promise<RuntimeConfig | null> =>
     })
     .catch(() => null);
 
-export const fetchRuntimeConfig = async ({force = false}: {force?: boolean} = {}): Promise<RuntimeConfig> => {
+export const fetchRuntimeConfig = async ({ force = false }: { force?: boolean } = {}): Promise<RuntimeConfig> => {
   if (force || !runtimeConfigPromise) {
     runtimeConfigPromise = fetchRuntimeConfigFromNetwork().then((runtimeConfig) => {
       if (runtimeConfig) {

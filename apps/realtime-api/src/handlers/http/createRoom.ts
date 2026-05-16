@@ -12,12 +12,15 @@ const createRoomHandler: APIGatewayProxyHandlerV2 = async (event) => {
   try {
     const body: unknown = event.body ? JSON.parse(event.body) : {};
     const request = createRoomRequestSchema.parse(body);
-    const response = await createRoom({
-      broadcaster,
-      connectionRepository,
-      roomRepository,
-      websocketUrl,
-    }, request);
+    const response = await createRoom(
+      {
+        broadcaster,
+        connectionRepository,
+        roomRepository,
+        websocketUrl,
+      },
+      request,
+    );
 
     return jsonResponse(201, response);
   } catch (error) {

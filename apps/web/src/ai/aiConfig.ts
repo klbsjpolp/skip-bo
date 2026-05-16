@@ -92,11 +92,8 @@ const config: AIConfig = {
 
 export const getWeights = (): AIWeights => config.weights;
 
-export const getDelay = (delayType: keyof AIConfig['delays']): number =>
-  config.delays[delayType];
+export const getDelay = (delayType: keyof AIConfig['delays']): number => config.delays[delayType];
 
 export const getSearchDepth = (): number => config.searchDepth;
 
-export const getRandomnessWindow = (
-  windowType: keyof AIConfig['randomness']
-): number => config.randomness[windowType];
+export const getRandomnessWindow = (windowType: keyof AIConfig['randomness']): number => config.randomness[windowType];
