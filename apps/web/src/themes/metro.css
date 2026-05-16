@@ -1,7 +1,7 @@
 .theme-metro {
   --primary: #00A300;
   --primary-foreground: hsl(0 0% 100%);
-  --secondary: #036e71;
+  --secondary: #0a8588;
   --secondary-foreground: hsl(0 0% 100%);
   --success: #00A300;
   --success-foreground: hsl(0 0% 100%);
@@ -14,7 +14,7 @@
   --muted-foreground: hsl(0 0% 100% / 0.7);
   --text-color: #ffffff;
   --title-color: #ffffff;
-  --card-back-color: #000;
+  --card-back-color: #ffffff;
   --card-border-color: transparent;
   --card-shadow: none;
   --card-radius: 0px;
@@ -52,7 +52,7 @@
   }
 
   .card {
-    @apply border-0 text-white;
+    @apply border border-black/15 text-white;
     font-family: "Segoe UI", "Segoe UI Light", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
 
     &.normal-card {
@@ -154,11 +154,8 @@
     @apply bg-white/30;
   }
 
-  /* Active-turn fill: a tinted overlay that wipes in from the left like a
-     Metro tile reveal. Sits between .bg-layer (z-0) and .content-layer (z-2)
-     so cards and text remain readable. */
-  .player-area {
-    @apply ring-0;
+  .player-area.active-turn {
+    @apply ring-0 border border-white/15;
   }
 
   .player-area::before {
