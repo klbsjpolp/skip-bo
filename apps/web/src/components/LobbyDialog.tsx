@@ -73,7 +73,7 @@ function SeatRow({
 
 function StatusMessage({ connectedSeats, lobbySeats }: { connectedSeats: number[]; lobbySeats: LobbySeatInfo[] }) {
   if (connectedSeats.length < 2) {
-    return <p className="text-center text-sm text-muted-foreground">En attente d'au moins un autre joueur</p>;
+    return <p className="text-center text-muted-sm">En attente d'au moins un autre joueur</p>;
   }
 
   const allReady = connectedSeats.every((s) => lobbySeats.find((lp) => lp.seatIndex === s)?.readyState === 'ready');
@@ -82,7 +82,7 @@ function StatusMessage({ connectedSeats, lobbySeats }: { connectedSeats: number[
     return <p className="text-center text-sm font-medium text-success">Tous les joueurs sont prêts !</p>;
   }
 
-  return <p className="text-center text-sm text-muted-foreground">Tous les joueurs doivent être prêts pour démarrer</p>;
+  return <p className="text-center text-muted-sm">Tous les joueurs doivent être prêts pour démarrer</p>;
 }
 
 export function LobbyDialog({
@@ -250,7 +250,7 @@ export function LobbyRemovedDialog({
             <DialogTitle>{message?.title}</DialogTitle>
           </div>
         </DialogHeader>
-        <p className="text-sm text-muted-foreground">{message?.body}</p>
+        <p className="text-muted-sm">{message?.body}</p>
         <Button type="button" onClick={onDismiss}>
           Retour à l'accueil
         </Button>
