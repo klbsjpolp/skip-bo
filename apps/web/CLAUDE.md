@@ -20,9 +20,9 @@ Animation services live in `src/services/`.
 
 ## Local vs. Online Mode
 
-| Mode | Hook | Authority |
-|------|------|-----------|
-| Local | `useLocalSkipBoGame.ts` | client drives full loop |
+| Mode   | Hook                     | Authority                                                   |
+| ------ | ------------------------ | ----------------------------------------------------------- |
+| Local  | `useLocalSkipBoGame.ts`  | client drives full loop                                     |
 | Online | `useOnlineSkipBoGame.ts` | server snapshots are canonical; browser never mutates state |
 
 `useLocalSkipBoGame` is a thin re-export of `useSkipBoGame`.
@@ -51,21 +51,17 @@ Cards render as `<div class="card normal-card" data-value="N">` for N=1–12 and
 
 ## Theme Styling
 
-Each theme lives in `src/themes/<name>.css` and overrides CSS variables on a `.theme-<name>` class. The base body rule in `src/index.css` applies `bg-background` (= `var(--background)`), so every theme inherits a solid background-color.
+Full guide: [`src/themes/README.md`](src/themes/README.md). It covers the file map (`src/styles/*.css` + `src/themes/*.css`), Tailwind 4 conventions, the token catalog, and the theme template.
 
-Two rules when adding decorative gradients/textures on `body` (or any element that needs to keep a solid color):
+Two rules that get violated most often — keep them in your head:
 
-1. **Use `background-image:` — never the `background:` shorthand.** The shorthand resets `background-color` to transparent. iOS Safari samples the body's background-color when tinting its top bar; a transparent body falls back to the system default (white in light mode), which is what made Neon's status bar look wrong even though the meta `theme-color` was correct. If you need `background-attachment: fixed`, set it on its own line.
-
-2. **Keep `--background` close to what's actually visible at the top of the page.** `useThemeColorMeta` writes `--background` into `<meta name="theme-color">`, and Tailwind's `bg-background` paints the body with the same value. A wildly off-base `--background` makes the iOS bar mismatch the page (Neon's `#0a0a0a` underneath a `#13002a → #0a0a0a` gradient is fine; Minecraft's old `#2f2418` was much darker than the dirt texture's `#866043` average — fix that, not the bar).
-
-Multi-image gradients must be **comma-separated**. Browsers silently drop a `background-image` declaration whose layers are space-separated; `candy.css` and `retro-space.css` shipped broken halos for this reason.
-
-When overriding a multi-layer `background-image`, the matching `background-size` and `background-repeat` lists must have the **same number of entries** as the layers — CSS cycles shorter lists, so a layer can silently inherit `repeat` + a tile size meant for another layer. (Rainbow's lightning shipped with the sun glow tiling four times because of this.)
+1. **Use `background-image:` — never the `background:` shorthand on body or anywhere that needs a stable `background-color`.** The shorthand resets `background-color` to transparent; iOS Safari samples that color for the status bar tint.
+2. **Multi-layer gradients must be comma-separated**, and `background-size` / `background-repeat` lists must have the same number of entries as the layers (CSS silently cycles shorter lists).
 
 ## Debug Buttons
 
 `DebugStrip` renders in `DEV` mode only, in both local and online game screens:
+
 - **Fill build pile** — fills build pile 0 to one card before completion
 - **Win** — ends the game immediately for the current player
 
