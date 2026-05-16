@@ -1,17 +1,13 @@
-import {Asterisk, LoaderCircle, type LucideIcon, Plug, Plus} from 'lucide-react';
-import {useEffect, useState} from 'react';
+import { Asterisk, LoaderCircle, type LucideIcon, Plug, Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import {StockPileSizeSwitcher} from '@/components/StockPileSizeSwitcher.tsx';
-import {Button} from '@/components/ui/button.tsx';
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,} from '@/components/ui/dialog';
-import {Input} from '@/components/ui/input';
-import {getStoredStockSize} from '@/state/initialGameState.ts';
-import {
-  ROOM_CODE_LENGTH,
-  isValidRoomCode,
-  normalizeRoomCode,
-} from '@skipbo/multiplayer-protocol';
-import {Alert, AlertTitle} from "@/components/ui/alert.tsx";
+import { StockPileSizeSwitcher } from '@/components/StockPileSizeSwitcher.tsx';
+import { Button } from '@/components/ui/button.tsx';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { getStoredStockSize } from '@/state/initialGameState.ts';
+import { ROOM_CODE_LENGTH, isValidRoomCode, normalizeRoomCode } from '@skipbo/multiplayer-protocol';
+import { Alert, AlertTitle } from '@/components/ui/alert.tsx';
 
 interface NewGameProps {
   onJoinOnlineGame: (roomCode: string) => Promise<void>;
@@ -53,11 +49,7 @@ const MODE_OPTIONS: ModeOption[] = [
   },
 ];
 
-function NewGame({
-  onJoinOnlineGame,
-  onStartLocalGame,
-  onStartOnlineGame,
-}: NewGameProps) {
+function NewGame({ onJoinOnlineGame, onStartLocalGame, onStartOnlineGame }: NewGameProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<'create-online' | 'join-online' | null>(null);
@@ -157,8 +149,9 @@ function NewGame({
           <Button size="sm">Nouvelle partie</Button>
         </DialogTrigger>
         <DialogContent
-            className="w-[min(32rem,calc(100vw-1rem))] max-h-[calc(100svh-1rem)] gap-3 overflow-y-auto p-3 sm:p-4"
-            aria-description="new-game">
+          className="w-[min(32rem,calc(100vw-1rem))] max-h-[calc(100svh-1rem)] gap-3 overflow-y-auto p-3 sm:p-4"
+          aria-description="new-game"
+        >
           <DialogHeader className="pr-10">
             <DialogTitle className="text-xl sm:text-2xl">Nouvelle partie</DialogTitle>
           </DialogHeader>
@@ -217,10 +210,9 @@ function NewGame({
             </div>
 
             {errorMessage ? (
-                <Alert variant="destructive"
-                       className="bg-destructive/10 p-2 mt-2">
-                  <AlertTitle>{errorMessage}</AlertTitle>
-                </Alert>
+              <Alert variant="destructive" className="bg-destructive/10 p-2 mt-2">
+                <AlertTitle>{errorMessage}</AlertTitle>
+              </Alert>
             ) : null}
             {selectedMode === 'join-online' ? (
               <>
@@ -250,13 +242,15 @@ function NewGame({
                     className="h-11 font-mono text-base tracking-[0.28em] uppercase sm:text-sm"
                   />
                   <Button type="submit" className="min-w-28" disabled={isBusy}>
-                    {isJoiningOnline ? <LoaderCircle data-icon="inline-start" className="animate-spin" /> : <Plug data-icon="inline-start" />}
+                    {isJoiningOnline ? (
+                      <LoaderCircle data-icon="inline-start" className="animate-spin" />
+                    ) : (
+                      <Plug data-icon="inline-start" />
+                    )}
                     Rejoindre
                   </Button>
                 </form>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Les paramètres de partie sont définis par l’hôte.
-                </p>
+                <p className="mt-2 text-xs text-muted-foreground">Les paramètres de partie sont définis par l’hôte.</p>
               </>
             ) : (
               <Button
