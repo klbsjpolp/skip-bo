@@ -12,7 +12,9 @@
     "dev": "pnpm dev:web --host",
     "dev:api": "pnpm --filter @skipbo/realtime-api dev",
     "dev:web": "pnpm --filter @skipbo/web dev",
-    "lint": "pnpm --filter @skipbo/game-core lint && pnpm --filter @skipbo/multiplayer-protocol lint && pnpm --filter @skipbo/realtime-api lint && pnpm --filter @skipbo/web lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,cjs,json,md,css,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,cjs,json,md,css,yml,yaml}\"",
+    "lint": "pnpm format:check && pnpm --filter @skipbo/game-core lint && pnpm --filter @skipbo/multiplayer-protocol lint && pnpm --filter @skipbo/realtime-api lint && pnpm --filter @skipbo/web lint",
     "prepare": "husky",
     "preview": "pnpm --filter @skipbo/web preview",
     "release": "commit-and-tag-version",
@@ -47,6 +49,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "husky": "^9.1.7",
+    "prettier": "^3.8.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.3"
   },
