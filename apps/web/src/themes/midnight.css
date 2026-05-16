@@ -432,8 +432,8 @@
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .player-area.winner {
+  .player-area.winner {
+    @variant motion-reduce {
       animation: none;
     }
   }

@@ -123,9 +123,28 @@ Every selector for a theme lives inside one `.theme-<name>` block. The only exce
 }
 ```
 
-### 3.5 `@custom-variant`
+### 3.5 `@custom-variant` and `@variant`
 
-The project has one: `dark (&:is(.dark *))` in `index.css`. Add new variants only when project-wide. Avoid one-off variants per component.
+- `@custom-variant` defines a new project-wide variant. The project has one: `dark (&:is(.dark *))` in `index.css`. Add new ones only when project-wide; avoid one-off variants per component.
+- `@variant <name> { ... }` applies an existing variant in CSS — use it instead of writing the matching `@media` query by hand. For accessibility/responsive overrides this is the idiomatic Tailwind 4 form:
+
+  ```css
+  /* ❌ avoid */
+  @media (prefers-reduced-motion: reduce) {
+    .victory-burst-layer {
+      display: none;
+    }
+  }
+
+  /* ✅ prefer */
+  .victory-burst-layer {
+    @variant motion-reduce {
+      display: none;
+    }
+  }
+  ```
+
+  Same idea for `motion-safe`, `dark`, `lg`, `max-lg`, etc. — anything Tailwind already names as a variant.
 
 ### 3.6 `@layer`
 

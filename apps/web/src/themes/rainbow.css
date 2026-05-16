@@ -137,9 +137,9 @@
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .back::before,
-    .back::after {
+  .back::before,
+  .back::after {
+    @variant motion-reduce {
       animation: none;
     }
   }
@@ -299,8 +299,8 @@
     display: none;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    body {
+  body {
+    @variant motion-reduce {
       animation: none;
     }
   }
