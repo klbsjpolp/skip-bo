@@ -103,14 +103,16 @@
     @apply border-border;
   }
 
-  .victory-burst-layer,
+  /* .victory-burst-layer and .victory-pattern get their motion-reduce
+     overrides next to their base declarations in styles/victory.css.
+     .victory-flyby-layer and .victory-shine have no base rule — themes
+     opt in and we always want them silenced under motion-reduce. */
   .victory-flyby-layer {
     @variant motion-reduce {
       display: none;
     }
   }
 
-  .victory-pattern,
   .victory-shine {
     @variant motion-reduce {
       animation: none !important;
