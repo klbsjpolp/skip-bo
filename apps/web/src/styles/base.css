@@ -75,8 +75,8 @@
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 
-  @media (width >= 64rem) {
-    :root {
+  :root {
+    @variant lg {
       --card-width: 70px;
       --card-height: 100px;
       --stack-diff: 20px;
