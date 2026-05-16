@@ -3,6 +3,10 @@ packages:
   - packages/*
   - infra/*
 
+allowBuilds:
+  '@sentry/cli': true
+  esbuild: true
+
 ignoredBuiltDependencies:
   - '@sentry/cli'
 
