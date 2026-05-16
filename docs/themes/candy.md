@@ -2,7 +2,7 @@
 
 ## Document Contract
 
-- Purpose: describe the `theme-bonbon` look and record improvement ideas.
+- Purpose: describe the `theme-candy` look and record improvement ideas.
 - Audience: contributors maintaining the candy-inspired theme.
 - Source of truth: [../../apps/web/src/themes/candy.css](../../apps/web/src/themes/candy.css) for current behavior. Improvement Ideas below are non-normative.
 - When to update: when the CSS changes, when ideas are adopted, or when the theme is retired.
