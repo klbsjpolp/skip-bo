@@ -380,16 +380,13 @@
       1px 1px 0 var(--minecraft-text-outline);
   }
 
-  @media (prefers-reduced-motion: reduce) {
+  @variant motion-reduce {
     body::before,
     body::after,
     .player-area .bg-layer::before,
     .player-area .bg-layer::after,
     .center-area .bg-layer::before,
-    .center-area .bg-layer::after {
-      animation: none;
-    }
-
+    .center-area .bg-layer::after,
     .victory-burst-piece {
       animation: none;
     }

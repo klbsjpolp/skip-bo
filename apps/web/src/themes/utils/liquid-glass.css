@@ -74,9 +74,9 @@
 }
 
 /* optional: reduce motion for users and further reduce work on low-power devices */
-@media (prefers-reduced-motion: reduce) {
-  .liquid-glass .bg-layer::before,
-  .liquid-glass .bg-layer::after {
+.liquid-glass .bg-layer::before,
+.liquid-glass .bg-layer::after {
+  @variant motion-reduce {
     animation: none;
     transition: none;
     filter: blur(6px);

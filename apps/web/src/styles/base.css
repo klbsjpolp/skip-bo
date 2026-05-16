@@ -103,14 +103,16 @@
     @apply border-border;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .victory-burst-layer,
-    .victory-flyby-layer {
+  .victory-burst-layer,
+  .victory-flyby-layer {
+    @variant motion-reduce {
       display: none;
     }
+  }
 
-    .victory-pattern,
-    .victory-shine {
+  .victory-pattern,
+  .victory-shine {
+    @variant motion-reduce {
       animation: none !important;
     }
   }

@@ -641,7 +641,7 @@
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
+  @variant motion-reduce {
     body::after,
     &::before,
     &::after {
