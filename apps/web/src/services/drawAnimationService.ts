@@ -1,11 +1,11 @@
-import type {Card} from '@/types';
+import type { Card } from '@/types';
 import {
   calculateAnimationDuration,
   getDeckPosition,
   getHandCardAngle,
-  getHandSlotLayoutPosition
+  getHandSlotLayoutPosition,
 } from '@/utils/cardPositions';
-import type {CardAnimationData} from "@/contexts/CardAnimationContext.tsx";
+import type { CardAnimationData } from '@/contexts/CardAnimationContext.tsx';
 
 // Global reference to the animation context
 let globalAnimationContext: {
@@ -66,7 +66,7 @@ const triggerDrawAnimation = (
   playerIndex: number,
   card: Card,
   handIndex: number,
-  initialDelay: number = 0
+  initialDelay: number = 0,
 ): { duration: number; animationId: string } => {
   if (!globalAnimationContext) {
     console.warn('Animation context not available for draw action');
@@ -143,9 +143,7 @@ export const triggerMultipleDrawAnimations = async (
   });
 
   try {
-    const totalDuration = animationResults
-      .map(result => result.duration)
-      .reduce((a, b) => a > b ? a : b, 0);
+    const totalDuration = animationResults.map((result) => result.duration).reduce((a, b) => (a > b ? a : b), 0);
 
     return totalDuration;
   } catch (error) {

@@ -1,6 +1,6 @@
-import {useCallback, useEffect, useMemo, useState} from 'react';
-import type {FC, ReactNode} from 'react';
-import {DragContext, type DragContextValue, type DragSession} from '@/contexts/useDrag';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC, ReactNode } from 'react';
+import { DragContext, type DragContextValue, type DragSession } from '@/contexts/useDrag';
 
 interface DragProviderProps {
   children: ReactNode;

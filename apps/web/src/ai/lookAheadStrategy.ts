@@ -41,11 +41,7 @@ const getCardForMove = (gameState: GameState, move: MoveEvaluation): Card | null
     return aiPlayer.hand[move.sourceIndex] ?? null;
   }
 
-  if (
-    move.source === 'discard' &&
-    move.sourceDiscardPileIndex !== undefined &&
-    move.sourceIndex !== undefined
-  ) {
+  if (move.source === 'discard' && move.sourceDiscardPileIndex !== undefined && move.sourceIndex !== undefined) {
     return aiPlayer.discardPiles[move.sourceDiscardPileIndex][move.sourceIndex] ?? null;
   }
 
@@ -99,16 +95,11 @@ const sameSource = (
   move: MoveEvaluation,
   source: 'stock' | 'hand' | 'discard',
   sourceIndex: number,
-  sourceDiscardPileIndex?: number
+  sourceDiscardPileIndex?: number,
 ): boolean =>
-  move.source === source &&
-  move.sourceIndex === sourceIndex &&
-  move.sourceDiscardPileIndex === sourceDiscardPileIndex;
+  move.source === source && move.sourceIndex === sourceIndex && move.sourceDiscardPileIndex === sourceDiscardPileIndex;
 
-const hasNaturalAlternativeForBuild = (
-  gameState: GameState,
-  move: MoveEvaluation
-): boolean => {
+const hasNaturalAlternativeForBuild = (gameState: GameState, move: MoveEvaluation): boolean => {
   if (move.buildPileIndex === undefined) {
     return false;
   }
@@ -248,11 +239,7 @@ const countPlayableTopDiscards = (gameState: GameState, playerIndex: number): nu
   }, 0);
 };
 
-const simulateOpponentStockPlay = (
-  gameState: GameState,
-  playerIndex: number,
-  buildPileIndex: number
-): GameState => {
+const simulateOpponentStockPlay = (gameState: GameState, playerIndex: number, buildPileIndex: number): GameState => {
   const opponent = getAIPlayer(gameState, playerIndex);
   const stockIndex = opponent.stockPile.length - 1;
   const simulationState = {
@@ -277,7 +264,7 @@ const simulateOpponentStockPlay = (
 const getOpponentFollowUpThreat = (
   gameState: GameState,
   playerIndex: number,
-  weights: ReturnType<typeof getWeights>
+  weights: ReturnType<typeof getWeights>,
 ): number => {
   const opponent = getAIPlayer(gameState, playerIndex);
   const stockCard = getTopStockCard(opponent);
@@ -308,7 +295,7 @@ const getOpponentFollowUpThreat = (
 
 const getOpponentThreatPenalty = (
   gameState: GameState,
-  aiPlayerIndex: number = gameState.currentPlayerIndex
+  aiPlayerIndex: number = gameState.currentPlayerIndex,
 ): number => {
   const weights = getWeights();
 
@@ -336,10 +323,7 @@ const getOpponentThreatPenalty = (
   }, 0);
 };
 
-const evaluateState = (
-  gameState: GameState,
-  aiPlayerIndex: number = gameState.currentPlayerIndex
-): number => {
+const evaluateState = (gameState: GameState, aiPlayerIndex: number = gameState.currentPlayerIndex): number => {
   const weights = getWeights();
   const aiPlayer = getAIPlayer(gameState, aiPlayerIndex);
 
@@ -395,7 +379,7 @@ const evaluateMove = (
   gameState: GameState,
   move: MoveEvaluation,
   nextState: GameState,
-  aiPlayerIndex: number
+  aiPlayerIndex: number,
 ): number => {
   const weights = getWeights();
   const card = getCardForMove(gameState, move);
@@ -468,11 +452,7 @@ const evaluateMove = (
   return score;
 };
 
-const searchTurn = (
-  gameState: GameState,
-  aiPlayerIndex: number,
-  depth: number
-): SearchResult => {
+const searchTurn = (gameState: GameState, aiPlayerIndex: number, depth: number): SearchResult => {
   if (depth <= 0 || gameState.gameIsOver) {
     return { score: evaluateState(gameState, aiPlayerIndex), move: null };
   }
@@ -521,10 +501,7 @@ const searchTurn = (
     });
   });
 
-  const selectedMove = pickRandomNearBestOption(
-    scoredMoves,
-    getRandomnessWindow('searchScoreWindow')
-  );
+  const selectedMove = pickRandomNearBestOption(scoredMoves, getRandomnessWindow('searchScoreWindow'));
 
   return {
     score: selectedMove?.score ?? Number.NEGATIVE_INFINITY,
@@ -532,10 +509,7 @@ const searchTurn = (
   };
 };
 
-export const lookAheadEvaluation = (
-  gameState: GameState,
-  depth: number = 4
-): MoveEvaluation | null => {
+export const lookAheadEvaluation = (gameState: GameState, depth: number = 4): MoveEvaluation | null => {
   const aiPlayer = getAIPlayer(gameState);
 
   if (!aiPlayer.isAI) {

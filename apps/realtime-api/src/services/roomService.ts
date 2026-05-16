@@ -1,20 +1,34 @@
-import type {GameAction} from '@skipbo/game-core';
+import type { GameAction } from '@skipbo/game-core';
 import type {
   CreateRoomRequest,
   CreateRoomResponse,
   JoinRoomRequest,
   JoinRoomResponse,
   LobbySeatInfo,
-  ServerMessage
+  ServerMessage,
 } from '@skipbo/multiplayer-protocol';
 import { normalizePlayerName, normalizeRoomCode, serializeClientGameView } from '@skipbo/multiplayer-protocol';
 
-import { RoomVersionConflictError, type ConnectionRecord, type ConnectionRepository, type DisconnectedSeatRecord, type LobbyPlayerRecord, type RoomRecord, type RoomRepository } from '../repositories/types.js';
-import {ClientError} from '../errors/clientError.js';
-import type {RealtimeBroadcaster} from './broadcaster.js';
-import {applyOnlineAction, createOnlineInitialGameState, createWaitingRoomState, isDebugAction, validateOnlineAction} from './gameState.js';
-import {createRoomCode} from './roomCode.js';
-import {createSeatToken, hashSeatToken} from './tokens.js';
+import {
+  RoomVersionConflictError,
+  type ConnectionRecord,
+  type ConnectionRepository,
+  type DisconnectedSeatRecord,
+  type LobbyPlayerRecord,
+  type RoomRecord,
+  type RoomRepository,
+} from '../repositories/types.js';
+import { ClientError } from '../errors/clientError.js';
+import type { RealtimeBroadcaster } from './broadcaster.js';
+import {
+  applyOnlineAction,
+  createOnlineInitialGameState,
+  createWaitingRoomState,
+  isDebugAction,
+  validateOnlineAction,
+} from './gameState.js';
+import { createRoomCode } from './roomCode.js';
+import { createSeatToken, hashSeatToken } from './tokens.js';
 
 interface RoomServiceDependencies {
   broadcaster: RealtimeBroadcaster;
@@ -29,7 +43,7 @@ const DEFAULT_HOST_SEAT_INDEX = 0;
 const ROOM_UPDATE_MAX_ATTEMPTS = 5;
 export const DISCONNECT_GRACE_MS = 5 * 60 * 1000;
 
-const shuffleArray = <T,>(array: T[]): T[] => {
+const shuffleArray = <T>(array: T[]): T[] => {
   const result = [...array];
   for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -161,9 +175,11 @@ const broadcastPresence = async (
     type: 'presence',
   };
 
-  await Promise.allSettled(connections.map(async (connection) => {
-    await dependencies.broadcaster.send(connection.connectionId, message);
-  }));
+  await Promise.allSettled(
+    connections.map(async (connection) => {
+      await dependencies.broadcaster.send(connection.connectionId, message);
+    }),
+  );
 };
 
 const broadcastSnapshots = async (
@@ -174,35 +190,39 @@ const broadcastSnapshots = async (
   const connections = await dependencies.connectionRepository.listByRoomCode(room.roomCode);
   const connectedSeats = connectedSeatsOverride ?? getConnectedSeats(connections);
 
-  await Promise.allSettled(connections.map(async (connection) => {
-    const viewerSeatIndex = getViewerPlayerIndex(room, connection.seatIndex);
+  await Promise.allSettled(
+    connections.map(async (connection) => {
+      const viewerSeatIndex = getViewerPlayerIndex(room, connection.seatIndex);
 
-    if (viewerSeatIndex < 0) {
-      return;
-    }
+      if (viewerSeatIndex < 0) {
+        return;
+      }
 
-    await dependencies.broadcaster.send(connection.connectionId, {
-      type: 'snapshot',
-      view: serializeClientGameView({
-        connectedSeats,
-        disconnectedSeats: toDisconnectedSeatsArray(getDisconnectedSeatsMap(room)),
-        expiresAt: new Date(room.expiresAt * 1000).toISOString(),
-        gameState: room.state,
-        hostSeatIndex: room.hostSeatIndex,
-        lobbySeats: buildLobbySeats(room),
-        roomCode: room.roomCode,
-        seatCapacity: room.seatCapacity,
-        status: room.status,
-        version: room.version,
-        viewerSeatIndex,
-      }),
-    });
-  }));
+      await dependencies.broadcaster.send(connection.connectionId, {
+        type: 'snapshot',
+        view: serializeClientGameView({
+          connectedSeats,
+          disconnectedSeats: toDisconnectedSeatsArray(getDisconnectedSeatsMap(room)),
+          expiresAt: new Date(room.expiresAt * 1000).toISOString(),
+          gameState: room.state,
+          hostSeatIndex: room.hostSeatIndex,
+          lobbySeats: buildLobbySeats(room),
+          roomCode: room.roomCode,
+          seatCapacity: room.seatCapacity,
+          status: room.status,
+          version: room.version,
+          viewerSeatIndex,
+        }),
+      });
+    }),
+  );
 
   if (room.status === 'FINISHED') {
-    await Promise.allSettled(connections.map(async (connection) => {
-      await dependencies.broadcaster.send(connection.connectionId, toRoomClosedMessage(room));
-    }));
+    await Promise.allSettled(
+      connections.map(async (connection) => {
+        await dependencies.broadcaster.send(connection.connectionId, toRoomClosedMessage(room));
+      }),
+    );
   }
 };
 
@@ -287,10 +307,7 @@ export const createRoom = async (
       lobbyPlayers: [{ seatIndex: DEFAULT_HOST_SEAT_INDEX, readyState: 'never-ready', playerName: null }],
       roomCode,
       seatCapacity: DEFAULT_SEAT_CAPACITY,
-      seatTokenHashes: [
-        hashSeatToken(seatToken),
-        ...Array<string | null>(DEFAULT_SEAT_CAPACITY - 1).fill(null),
-      ],
+      seatTokenHashes: [hashSeatToken(seatToken), ...Array<string | null>(DEFAULT_SEAT_CAPACITY - 1).fill(null)],
       state: waitingRoomState,
       status: 'WAITING',
       summary: null,
@@ -403,13 +420,21 @@ export const authenticateConnection = async (
 
     const pruned = pruneStaleDisconnects(currentRoom);
 
-    if (currentRoom.status !== 'WAITING' && currentRoom.activeSeatIndices && !currentRoom.activeSeatIndices.includes(input.seatIndex)) {
+    if (
+      currentRoom.status !== 'WAITING' &&
+      currentRoom.activeSeatIndices &&
+      !currentRoom.activeSeatIndices.includes(input.seatIndex)
+    ) {
       throw new ClientError('Seat is not active in this room', 409);
     }
 
     const existingConnections = await dependencies.connectionRepository.listByRoomCode(currentRoom.roomCode);
-    const connectedSeats = [...new Set([...getConnectedSeats(existingConnections), input.seatIndex])].sort((left, right) => left - right);
-    const authenticatedSeats = [...new Set([...pruned.authenticatedSeats, input.seatIndex])].sort((left, right) => left - right);
+    const connectedSeats = [...new Set([...getConnectedSeats(existingConnections), input.seatIndex])].sort(
+      (left, right) => left - right,
+    );
+    const authenticatedSeats = [...new Set([...pruned.authenticatedSeats, input.seatIndex])].sort(
+      (left, right) => left - right,
+    );
     const disconnectedSeats = clearSeatDisconnected(pruned.disconnectedSeats, input.seatIndex);
     const updatedRoom = buildUpdatedRoom(currentRoom, {
       authenticatedSeats,
@@ -461,8 +486,8 @@ export const startGame = async (
 
     const nextState = createOnlineInitialGameState({
       playerCount: connectedSeats.length,
-      playerNames: connectedSeats.map((seatIndex) =>
-        getLobbyPlayers(room).find((p) => p.seatIndex === seatIndex)?.playerName ?? undefined
+      playerNames: connectedSeats.map(
+        (seatIndex) => getLobbyPlayers(room).find((p) => p.seatIndex === seatIndex)?.playerName ?? undefined,
       ),
       seatIndices: connectedSeats,
       stockSize: room.state.config.STOCK_SIZE,
@@ -576,9 +601,11 @@ export const handleDisconnect = async (
 
   if (room.status === 'WAITING' && connection.seatIndex === room.hostSeatIndex) {
     const connections = await dependencies.connectionRepository.listByRoomCode(room.roomCode);
-    await Promise.allSettled(connections.map(async (c) => {
-      await dependencies.broadcaster.send(c.connectionId, toRoomClosedMessage(room));
-    }));
+    await Promise.allSettled(
+      connections.map(async (c) => {
+        await dependencies.broadcaster.send(c.connectionId, toRoomClosedMessage(room));
+      }),
+    );
     return;
   }
 
@@ -597,7 +624,9 @@ export const handleDisconnect = async (
 
     const updates: Partial<RoomRecord> = isCleanLeave
       ? {
-          authenticatedSeats: getAuthenticatedSeats(currentRoom).filter((seatIndex) => seatIndex !== connection.seatIndex),
+          authenticatedSeats: getAuthenticatedSeats(currentRoom).filter(
+            (seatIndex) => seatIndex !== connection.seatIndex,
+          ),
           disconnectedSeats: clearSeatDisconnected(getDisconnectedSeatsMap(currentRoom), connection.seatIndex),
           version: currentRoom.version + 1,
         }
@@ -753,13 +782,17 @@ export const handleKickSeat = async (
       const allConnections = await dependencies.connectionRepository.listByRoomCode(room.roomCode);
       const targetConnections = allConnections.filter((c) => c.seatIndex === input.targetSeatIndex);
 
-      await Promise.allSettled(targetConnections.map(async (c) => {
-        try {
-          await dependencies.broadcaster.send(c.connectionId, toRoomClosedMessage(room));
-          await dependencies.broadcaster.disconnect(c.connectionId);
-        } catch { /* stale connection */ }
-        await dependencies.connectionRepository.delete(c.connectionId);
-      }));
+      await Promise.allSettled(
+        targetConnections.map(async (c) => {
+          try {
+            await dependencies.broadcaster.send(c.connectionId, toRoomClosedMessage(room));
+            await dependencies.broadcaster.disconnect(c.connectionId);
+          } catch {
+            /* stale connection */
+          }
+          await dependencies.connectionRepository.delete(c.connectionId);
+        }),
+      );
 
       await broadcastPresence(dependencies, updatedRoom);
       return;
@@ -778,7 +811,9 @@ export const handleLeaveLobby = async (
   await handleDisconnect(dependencies, input.connectionId, { intentional: true });
   try {
     await dependencies.broadcaster.disconnect(input.connectionId);
-  } catch { /* connection may already be gone */ }
+  } catch {
+    /* connection may already be gone */
+  }
 };
 
 export const rejectAction = async (

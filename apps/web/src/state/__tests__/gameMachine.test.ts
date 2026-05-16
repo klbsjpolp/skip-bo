@@ -1,31 +1,31 @@
-import {describe, expect, it, vi} from 'vitest';
-import {createActor, waitFor} from 'xstate';
-import {gameMachine} from '@/state/gameMachine';
-import {gameReducer} from '@/state/gameReducer';
-import type {GameAction} from '@/state/gameActions';
+import { describe, expect, it, vi } from 'vitest';
+import { createActor, waitFor } from 'xstate';
+import { gameMachine } from '@/state/gameMachine';
+import { gameReducer } from '@/state/gameReducer';
+import type { GameAction } from '@/state/gameActions';
 import * as initialGameStateModule from '@/state/initialGameState';
-import {initialGameState} from '@/state/initialGameState';
-import {act} from "@testing-library/react";
+import { initialGameState } from '@/state/initialGameState';
+import { act } from '@testing-library/react';
 
 // Mock the AI module
 vi.mock('@/ai/computeBestMove', () => ({
-  computeBestMove: vi.fn(() => Promise.resolve({ type: 'END_TURN' }))
+  computeBestMove: vi.fn(() => Promise.resolve({ type: 'END_TURN' })),
 }));
 
 // Mock animation services to avoid timing issues in tests
 vi.mock('@/services/aiAnimationService', () => ({
-  triggerAIAnimation: vi.fn(() => Promise.resolve(0))
+  triggerAIAnimation: vi.fn(() => Promise.resolve(0)),
 }));
 
 vi.mock('@/services/drawAnimationService', () => ({
-  triggerMultipleDrawAnimations: vi.fn(async () => 0)
+  triggerMultipleDrawAnimations: vi.fn(async () => 0),
 }));
 
 describe('gameMachine', () => {
   it('should start in setup state and transition to humanTurn', async () => {
     const actor = createActor(gameMachine);
     actor.start();
-    
+
     // Wait for the machine to reach a stable state
     await waitFor(actor, (state) => state.matches('humanTurn.ready'));
 
@@ -75,11 +75,11 @@ describe('gameMachine', () => {
 
     // Send SELECT_CARD event
     actor.send({
-      type: 'SELECT_CARD', 
-      source: 'hand', 
-      index: 0 
+      type: 'SELECT_CARD',
+      source: 'hand',
+      index: 0,
     });
-    
+
     const newState = actor.getSnapshot().context.G;
     expect(newState.selectedCard).toBeDefined();
     expect(newState.selectedCard?.source).toBe('hand');
@@ -89,43 +89,40 @@ describe('gameMachine', () => {
   it('should handle CLEAR_SELECTION event', async () => {
     const actor = createActor(gameMachine);
     actor.start();
-    
+
     // Wait for the drawing phase to complete
     await waitFor(actor, (state) => state.matches('humanTurn.ready'));
 
     // First select a card
-    actor.send({ 
-      type: 'SELECT_CARD', 
-      source: 'hand', 
-      index: 0 
+    actor.send({
+      type: 'SELECT_CARD',
+      source: 'hand',
+      index: 0,
     });
-    
+
     expect(actor.getSnapshot().context.G.selectedCard).toBeDefined();
-    
+
     // Then clear selection
     actor.send({ type: 'CLEAR_SELECTION' });
-    
+
     expect(actor.getSnapshot().context.G.selectedCard).toBeNull();
   });
 
   it('should transition to botTurn on END_TURN', async () => {
     const actor = createActor(gameMachine);
     actor.start();
-    
+
     // Wait for the drawing phase to complete
     await waitFor(actor, (state) => state.matches('humanTurn.ready'));
 
     expect(actor.getSnapshot().matches('humanTurn')).toBe(true);
     expect(actor.getSnapshot().context.G.currentPlayerIndex).toBe(0);
-    
+
     // Send END_TURN event
     actor.send({ type: 'END_TURN' });
-    
+
     // Wait for the state to transition to botTurn and stabilize
-    await waitFor(actor, (state) =>
-      state.matches('botTurn') &&
-      state.context.G.currentPlayerIndex === 1
-    );
+    await waitFor(actor, (state) => state.matches('botTurn') && state.context.G.currentPlayerIndex === 1);
 
     // After END_TURN, we should be in botTurn with currentPlayerIndex changed to 1
     expect(actor.getSnapshot().matches('botTurn')).toBe(true);
@@ -135,7 +132,7 @@ describe('gameMachine', () => {
   it('should handle RESET event and return to setup', async () => {
     const actor = createActor(gameMachine);
     actor.start();
-    
+
     // Wait for initial state
     await waitFor(actor, (state) => state.matches('humanTurn.ready'));
 
@@ -143,11 +140,11 @@ describe('gameMachine', () => {
     actor.send({
       type: 'SELECT_CARD',
       source: 'hand',
-      index: 0
+      index: 0,
     });
-    
+
     expect(actor.getSnapshot().context.G.selectedCard).toBeDefined();
-    
+
     // Reset
     actor.send({ type: 'RESET' });
 
@@ -162,23 +159,20 @@ describe('gameMachine', () => {
   it('should not process events when guard conditions are not met', async () => {
     const actor = createActor(gameMachine);
     actor.start();
-    
+
     // Wait for the drawing phase to complete
     await waitFor(actor, (state) => state.matches('humanTurn.ready'));
 
     // Set current player to AI (index 1)
     actor.send({ type: 'END_TURN' }); // This changes currentPlayerIndex to 1 and transitions to botTurn
-    
+
     // Wait for the state transition to botTurn
-    await waitFor(actor, (state) =>
-      state.matches('botTurn') &&
-      state.context.G.currentPlayerIndex === 1
-    );
+    await waitFor(actor, (state) => state.matches('botTurn') && state.context.G.currentPlayerIndex === 1);
 
     // After END_TURN, we should be in botTurn with currentPlayerIndex changed to 1
     expect(actor.getSnapshot().matches('botTurn')).toBe(true);
     expect(actor.getSnapshot().context.G.currentPlayerIndex).toBe(1);
-    
+
     // Try to select a card (should not work because it's AI's turn and we're in botTurn)
     const stateBefore = actor.getSnapshot().context.G;
     actor.send({ type: 'SELECT_CARD', source: 'hand', index: 0 });
@@ -216,12 +210,12 @@ describe('gameMachine', () => {
 
     const initialContext = actor.getSnapshot().context;
     const initialG = initialContext.G;
-    
+
     // Send an event that modifies state
     actor.send({
       type: 'SELECT_CARD',
-      source: 'hand', 
-      index: 0 
+      source: 'hand',
+      index: 0,
     });
 
     const newContext = actor.getSnapshot().context;
@@ -236,7 +230,7 @@ describe('gameMachine', () => {
   it('should handle multiple rapid events without errors', async () => {
     const actor = createActor(gameMachine);
     actor.start();
-    
+
     // Wait for initial state
     await waitFor(actor, (state) => state.matches('humanTurn.ready'));
 
@@ -305,13 +299,16 @@ describe('gameMachine', () => {
     // Manually set up AI with empty slots
     initialState.players[1].hand = [
       { value: 1, isSkipBo: false }, // AI has only 1 card
-      null, null, null, null // 4 empty slots that should be filled
+      null,
+      null,
+      null,
+      null, // 4 empty slots that should be filled
     ];
     initialState.currentPlayerIndex = 1; // Switch to AI turn
 
     // Verify the initial setup
-    expect(initialState.players[1].hand.filter(c => !!c)).toHaveLength(1);
-    expect(initialState.players[1].hand.filter(c => c === null)).toHaveLength(4);
+    expect(initialState.players[1].hand.filter((c) => !!c)).toHaveLength(1);
+    expect(initialState.players[1].hand.filter((c) => c === null)).toHaveLength(4);
 
     // Test the DRAW action directly
     const drawAction: GameAction = { type: 'DRAW' };
@@ -319,8 +316,8 @@ describe('gameMachine', () => {
 
     // AI should now have a full hand (5 cards)
     const aiPlayer = stateAfterDraw.players[1];
-    expect(aiPlayer.hand.filter(c => !!c)).toHaveLength(5);
-    expect(aiPlayer.hand.filter(c => c === null)).toHaveLength(0);
+    expect(aiPlayer.hand.filter((c) => !!c)).toHaveLength(5);
+    expect(aiPlayer.hand.filter((c) => c === null)).toHaveLength(0);
 
     // Verify deck was depleted correctly (4 cards drawn)
     expect(initialState.deck.length - stateAfterDraw.deck.length).toBe(4);
@@ -339,14 +336,14 @@ describe('gameMachine', () => {
     const initialDeckSize = initialState.deck.length;
 
     // Ensure AI has full hand initially
-    expect(initialAIHand.filter(c => !!c)).toHaveLength(5);
+    expect(initialAIHand.filter((c) => !!c)).toHaveLength(5);
 
     // Send END_TURN to switch to AI
     actor.send({ type: 'END_TURN' });
 
     // Wait for AI turn to start
     await waitFor(actor, (state) => state.matches('botTurn'), {
-      timeout: 2000
+      timeout: 2000,
     });
 
     // AI should NOT have drawn any additional cards
@@ -355,7 +352,7 @@ describe('gameMachine', () => {
     const finalDeckSize = finalState.deck.length;
 
     // Hand should still have 5 cards
-    expect(finalAIHand.filter(c => !!c)).toHaveLength(5);
+    expect(finalAIHand.filter((c) => !!c)).toHaveLength(5);
     // Deck size should be unchanged
     expect(finalDeckSize).toBe(initialDeckSize);
   });

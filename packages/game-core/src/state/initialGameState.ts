@@ -1,4 +1,4 @@
-import type {Card, GameConfig, GameState} from '../types/index.js';
+import type { Card, GameConfig, GameState } from '../types/index.js';
 import { createDeck } from './deck.js';
 
 export const STOCK_STORAGE_KEY = 'skipbo_stock_size';
@@ -13,7 +13,11 @@ interface InitialGameStateOptions {
 const SUPPORTED_PLAYER_COUNTS = [2, 3, 4] as const;
 
 const parsePlayerCount = (value: unknown): number | null => {
-  if (typeof value === 'number' && Number.isInteger(value) && SUPPORTED_PLAYER_COUNTS.includes(value as typeof SUPPORTED_PLAYER_COUNTS[number])) {
+  if (
+    typeof value === 'number' &&
+    Number.isInteger(value) &&
+    SUPPORTED_PLAYER_COUNTS.includes(value as (typeof SUPPORTED_PLAYER_COUNTS)[number])
+  ) {
     return value;
   }
 
@@ -21,7 +25,7 @@ const parsePlayerCount = (value: unknown): number | null => {
 };
 
 const parseStockSize = (value: unknown): number | null => {
-  if (typeof value === 'number' && STOCK_SIZE_OPTIONS.includes(value as typeof STOCK_SIZE_OPTIONS[number])) {
+  if (typeof value === 'number' && STOCK_SIZE_OPTIONS.includes(value as (typeof STOCK_SIZE_OPTIONS)[number])) {
     return value;
   }
 
@@ -32,7 +36,7 @@ const parseStockSize = (value: unknown): number | null => {
     if (
       trimmedValue.length > 0 &&
       Number.isInteger(parsedValue) &&
-      STOCK_SIZE_OPTIONS.includes(parsedValue as typeof STOCK_SIZE_OPTIONS[number])
+      STOCK_SIZE_OPTIONS.includes(parsedValue as (typeof STOCK_SIZE_OPTIONS)[number])
     ) {
       return parsedValue;
     }
@@ -44,9 +48,7 @@ const parseStockSize = (value: unknown): number | null => {
 export function getStoredStockSize(): number {
   try {
     const storage =
-      typeof globalThis === 'object' &&
-      'localStorage' in globalThis &&
-      globalThis.localStorage
+      typeof globalThis === 'object' && 'localStorage' in globalThis && globalThis.localStorage
         ? globalThis.localStorage
         : null;
 
@@ -57,11 +59,13 @@ export function getStoredStockSize(): number {
         return storedStockSize;
       }
     }
-  } catch { /* empty */ }
+  } catch {
+    /* empty */
+  }
   return DEFAULT_STOCK_SIZE;
 }
 
-function getGameConfig(options: InitialGameStateOptions = {}):GameConfig {
+function getGameConfig(options: InitialGameStateOptions = {}): GameConfig {
   return {
     DECK_SIZE: 162,
     SKIP_BO_CARDS: 18,
@@ -87,15 +91,15 @@ export const initialGameState = (options: InitialGameStateOptions = {}): GameSta
   }));
 
   // Deal stock piles
-  players.forEach(player => {
+  players.forEach((player) => {
     player.stockPile = deck.splice(0, config.STOCK_SIZE);
   });
 
   // Deal initial hands
-  players.forEach(player => {
+  players.forEach((player) => {
     // Initialize hand with fixed length of config.HAND_SIZE, filled with null
     player.hand = Array<Card | null>(config.HAND_SIZE).fill(null);
-    
+
     // Fill hand with cards from deck
     for (let i = 0; i < config.HAND_SIZE; i++) {
       if (deck.length > 0) {
@@ -114,6 +118,6 @@ export const initialGameState = (options: InitialGameStateOptions = {}): GameSta
     message: 'Nouvelle partie commencée !',
     gameIsOver: false,
     winnerIndex: null,
-    config
+    config,
   };
 };

@@ -19,38 +19,46 @@ export class DynamoConnectionRepository implements ConnectionRepository {
   }
 
   async delete(connectionId: string): Promise<void> {
-    await this.client.send(new DeleteCommand({
-      TableName: this.tableName,
-      Key: { connectionId },
-    }));
+    await this.client.send(
+      new DeleteCommand({
+        TableName: this.tableName,
+        Key: { connectionId },
+      }),
+    );
   }
 
   async get(connectionId: string): Promise<ConnectionRecord | null> {
-    const result = await this.client.send(new GetCommand({
-      TableName: this.tableName,
-      Key: { connectionId },
-    }));
+    const result = await this.client.send(
+      new GetCommand({
+        TableName: this.tableName,
+        Key: { connectionId },
+      }),
+    );
 
     return (result.Item as ConnectionRecord | undefined) ?? null;
   }
 
   async listByRoomCode(roomCode: string): Promise<ConnectionRecord[]> {
-    const result = await this.client.send(new QueryCommand({
-      TableName: this.tableName,
-      IndexName: this.roomCodeIndexName,
-      KeyConditionExpression: 'roomCode = :roomCode',
-      ExpressionAttributeValues: {
-        ':roomCode': roomCode,
-      },
-    }));
+    const result = await this.client.send(
+      new QueryCommand({
+        TableName: this.tableName,
+        IndexName: this.roomCodeIndexName,
+        KeyConditionExpression: 'roomCode = :roomCode',
+        ExpressionAttributeValues: {
+          ':roomCode': roomCode,
+        },
+      }),
+    );
 
     return (result.Items as ConnectionRecord[] | undefined) ?? [];
   }
 
   async put(record: ConnectionRecord): Promise<void> {
-    await this.client.send(new PutCommand({
-      TableName: this.tableName,
-      Item: record,
-    }));
+    await this.client.send(
+      new PutCommand({
+        TableName: this.tableName,
+        Item: record,
+      }),
+    );
   }
 }

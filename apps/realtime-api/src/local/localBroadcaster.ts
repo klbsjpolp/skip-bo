@@ -7,10 +7,11 @@ import type { RealtimeBroadcaster } from '../services/broadcaster.js';
 const createGoneException = (): Error & {
   $metadata: { httpStatusCode: number };
   name: string;
-} => Object.assign(new Error('connection closed'), {
-  $metadata: { httpStatusCode: 410 },
-  name: 'GoneException',
-});
+} =>
+  Object.assign(new Error('connection closed'), {
+    $metadata: { httpStatusCode: 410 },
+    name: 'GoneException',
+  });
 
 export class LocalRealtimeBroadcaster implements RealtimeBroadcaster {
   private readonly sockets = new Map<string, WebSocket>();

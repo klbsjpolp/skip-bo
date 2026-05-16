@@ -1,5 +1,5 @@
-import {cn} from '@/lib/utils';
-import type {MouseEventHandler} from "react";
+import { cn } from '@/lib/utils';
+import type { MouseEventHandler } from 'react';
 
 interface EmptyCardProps {
   onClick?: MouseEventHandler;
@@ -10,14 +10,14 @@ interface EmptyCardProps {
   hideLabel?: boolean;
 }
 
-export function EmptyCard({onClick, canDropCard = false, className, hideLabel = false}: EmptyCardProps) {
+export function EmptyCard({ onClick, canDropCard = false, className, hideLabel = false }: EmptyCardProps) {
   return (
     <div
       className={cn(
         'card empty-card opacity-50',
         canDropCard && 'hoverable-card cursor-pointer',
         !canDropCard && 'cursor-default',
-        className
+        className,
       )}
       onClick={onClick}
     >

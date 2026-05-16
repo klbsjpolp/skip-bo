@@ -2,8 +2,8 @@ import type { Card } from '../types/index.js';
 
 export type GameAction =
   | { type: 'INIT' }
-  | { type: 'DRAW'; count?: number }                              // défaut : 5
-  | { type: 'DRAW_SINGLE_CARD'; card: Card; handIndex: number }   // Draw specific card to specific hand slot
+  | { type: 'DRAW'; count?: number } // défaut : 5
+  | { type: 'DRAW_SINGLE_CARD'; card: Card; handIndex: number } // Draw specific card to specific hand slot
   | {
       type: 'SELECT_CARD';
       source: 'hand' | 'stock' | 'discard';

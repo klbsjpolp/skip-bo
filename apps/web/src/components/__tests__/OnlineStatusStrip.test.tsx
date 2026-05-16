@@ -20,14 +20,7 @@ describe('OnlineStatusStrip', () => {
   });
 
   test('defaults to the current two-seat room capacity', () => {
-    render(
-      <OnlineStatusStrip
-        connectedSeats={[0]}
-        connectionStatus="connected"
-        roomCode="ABC"
-        roomStatus="WAITING"
-      />,
-    );
+    render(<OnlineStatusStrip connectedSeats={[0]} connectionStatus="connected" roomCode="ABC" roomStatus="WAITING" />);
 
     expect(screen.getByTestId('online-seat-count').textContent).toContain('1/2 joueurs');
   });
@@ -94,9 +87,9 @@ describe('OnlineStatusStrip', () => {
       />,
     );
 
-    expect(
-      screen.getByTestId('online-room-controls').contains(screen.getByRole('button', { name: 'Démarrer' })),
-    ).toBe(true);
+    expect(screen.getByTestId('online-room-controls').contains(screen.getByRole('button', { name: 'Démarrer' }))).toBe(
+      true,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Démarrer' }));
     expect(onStartGame).toHaveBeenCalledTimes(1);
   });

@@ -24,6 +24,7 @@ pnpm --filter @skipbo/multiplayer-protocol test
 ```
 
 Tests live in `tests/`. When changing DTOs, redaction logic, or WebSocket shapes:
+
 1. Update tests here
 2. Update `apps/realtime-api/tests`
 3. Update `docs/protocols/realtime-events.md`

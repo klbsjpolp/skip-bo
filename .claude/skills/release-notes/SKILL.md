@@ -11,6 +11,7 @@ Produce a formatted release-notes draft for the next version by doing the follow
 ## Steps
 
 1. **Get last tag and unreleased commits**
+
    ```bash
    git describe --tags --abbrev=0
    git log $(git describe --tags --abbrev=0)..HEAD --oneline --no-merges
@@ -32,6 +33,7 @@ Produce a formatted release-notes draft for the next version by doing the follow
    relevant env var) needs bumping, and note it explicitly.
 
 5. **Output** a markdown block ready to paste into the GitHub release or PR description:
+
    ```
    ## What's changed in vX.Y.Z
 

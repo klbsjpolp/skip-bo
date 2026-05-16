@@ -1,6 +1,6 @@
-import * as Sentry from "@sentry/react";
+import * as Sentry from '@sentry/react';
 
-import { sentryTracePropagationTargets } from "./monitoring/tracePropagation";
+import { sentryTracePropagationTargets } from './monitoring/tracePropagation';
 
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
 
@@ -31,5 +31,5 @@ if (sentryDsn) {
     enableLogs: true,
   });
 } else if (import.meta.env.DEV) {
-  console.info("[sentry] disabled: VITE_SENTRY_DSN is not set");
+  console.info('[sentry] disabled: VITE_SENTRY_DSN is not set');
 }

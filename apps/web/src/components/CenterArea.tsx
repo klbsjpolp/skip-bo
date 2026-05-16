@@ -1,10 +1,10 @@
-import type {Card as CardType, GameState} from '@/types';
-import {Card} from '@/components/Card';
-import {EmptyCard} from "@/components/EmptyCard.tsx";
-import {cn} from '@/lib/utils';
-import {useCardAnimation} from '@/contexts/useCardAnimation.ts';
-import {useDrag} from '@/contexts/useDrag';
-import {getRetreatPileAngle, RETREAT_PILE_PREVIEW_LIMIT,} from '@/lib/retreatPile';
+import type { Card as CardType, GameState } from '@/types';
+import { Card } from '@/components/Card';
+import { EmptyCard } from '@/components/EmptyCard.tsx';
+import { cn } from '@/lib/utils';
+import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
+import { useDrag } from '@/contexts/useDrag';
+import { getRetreatPileAngle, RETREAT_PILE_PREVIEW_LIMIT } from '@/lib/retreatPile';
 
 interface CenterAreaProps {
   gameState: GameState;
@@ -14,28 +14,22 @@ interface CenterAreaProps {
 
 export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps) {
   const { activeAnimations } = useCardAnimation();
-  const {session: dragSession} = useDrag();
+  const { session: dragSession } = useDrag();
   const isDragActive = dragSession !== null;
   const pendingRetreatCardsCount = activeAnimations.filter(
     (animation) => animation.animationType === 'complete',
   ).length;
-  const visibleCompletedBuildPileCount = Math.max(
-    gameState.completedBuildPiles.length - pendingRetreatCardsCount,
-    0,
-  );
+  const visibleCompletedBuildPileCount = Math.max(gameState.completedBuildPiles.length - pendingRetreatCardsCount, 0);
   const visibleCompletedBuildPiles =
     visibleCompletedBuildPileCount === gameState.completedBuildPiles.length
       ? gameState.completedBuildPiles
       : gameState.completedBuildPiles.slice(0, visibleCompletedBuildPileCount);
-  const retreatPreviewStartIndex = Math.max(
-    visibleCompletedBuildPileCount - RETREAT_PILE_PREVIEW_LIMIT,
-    0,
-  );
+  const retreatPreviewStartIndex = Math.max(visibleCompletedBuildPileCount - RETREAT_PILE_PREVIEW_LIMIT, 0);
   const retreatPreviewCards = visibleCompletedBuildPiles.slice(-RETREAT_PILE_PREVIEW_LIMIT);
 
   return (
     <div className="center-area" data-testid="center-area">
-      <div className="bg-layer"/>
+      <div className="bg-layer" />
       <div className="content-layer flex items-center gap-2 lg:gap-4 h-full flex-wrap">
         <div className="flex items-center gap-2 lg:gap-4" data-testid="center-deck-section">
           <h2 className="min-w-fit vertical-text" data-testid="center-deck-title">
@@ -43,12 +37,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
           </h2>
           <div className="deck">
             {gameState.deck.length > 0 ? (
-              <Card
-                hint="Deck"
-                card={{ value: 0, isSkipBo: false }}
-                isRevealed={false}
-                canBeGrabbed={false}
-              />
+              <Card hint="Deck" card={{ value: 0, isSkipBo: false }} isRevealed={false} canBeGrabbed={false} />
             ) : (
               <EmptyCard canDropCard={false} />
             )}
@@ -57,20 +46,21 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
 
         <div className="flex items-center gap-2 lg:gap-4" data-testid="center-build-section">
           <h2 className="min-w-fit vertical-text" data-testid="center-build-title">
-            Piles de<br />construction
+            Piles de
+            <br />
+            construction
           </h2>
           <div className="build-piles">
             {gameState.buildPiles.map((pile, index) => {
               const canDropFromSelection = Boolean(
                 gameState.selectedCard &&
                 gameState.currentPlayerIndex === 0 &&
-                canPlayCard(gameState.selectedCard.card, index, gameState)
+                canPlayCard(gameState.selectedCard.card, index, gameState),
               );
               const canDropFromDrag = isDragActive && dragSession.validBuildPiles.has(index);
               const canDropSelectedCard = isDragActive ? canDropFromDrag : canDropFromSelection;
-              const isDragOver = canDropFromDrag
-                  && dragSession.hovered?.kind === 'build'
-                  && dragSession.hovered.index === index;
+              const isDragOver =
+                canDropFromDrag && dragSession.hovered?.kind === 'build' && dragSession.hovered.index === index;
               const incomingPlayAnimation = activeAnimations.find(
                 (animation) =>
                   animation.animationType === 'play' &&
@@ -92,13 +82,8 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                   !animation.hasStarted,
               );
               const shouldMaskIncomingPlay = incomingPlayHasSettledInRenderedPile;
-              const visiblePileLength = shouldMaskIncomingPlay
-                ? Math.max(pile.length - 1, 0)
-                : pile.length;
-              const visibleTopCard =
-                visiblePileLength > 0
-                  ? pile[visiblePileLength - 1]
-                  : null;
+              const visiblePileLength = shouldMaskIncomingPlay ? Math.max(pile.length - 1, 0) : pile.length;
+              const visibleTopCard = visiblePileLength > 0 ? pile[visiblePileLength - 1] : null;
               const handleBuildPilePress = () => {
                 if (canDropSelectedCard) {
                   void playCard(index);
@@ -115,9 +100,9 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                   tabIndex={canDropSelectedCard ? 0 : undefined}
                   aria-label={`Pile de construction ${index + 1}`}
                   className={cn(
-                    "relative drop-indicator build-pile",
-                      canDropSelectedCard && 'can-drop',
-                      isDragOver && 'is-drag-over'
+                    'relative drop-indicator build-pile',
+                    canDropSelectedCard && 'can-drop',
+                    isDragOver && 'is-drag-over',
                   )}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -167,10 +152,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                   ) : (
                     <EmptyCard
                       canDropCard={canDropSelectedCard}
-                      className={cn(
-                        "drop-indicator",
-                        canDropSelectedCard && "can-drop"
-                      )}
+                      className={cn('drop-indicator', canDropSelectedCard && 'can-drop')}
                     />
                   )}
                 </div>
@@ -202,12 +184,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                       transform: `rotate(${getRetreatPileAngle(absoluteIndex)}deg)`,
                     }}
                   >
-                    <Card
-                      hint={`Retrait ${absoluteIndex + 1}`}
-                      card={card}
-                      isRevealed={true}
-                      canBeGrabbed={false}
-                    />
+                    <Card hint={`Retrait ${absoluteIndex + 1}`} card={card} isRevealed={true} canBeGrabbed={false} />
                   </div>
                 );
               })

@@ -14,4 +14,3 @@ export const animationServiceBridge: AnimationServiceBridge = {
     return Promise.resolve();
   },
 };
-

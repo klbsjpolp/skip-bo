@@ -1,21 +1,18 @@
-import { defineConfig, loadEnv } from 'vite'
-import react from "@vitejs/plugin-react";
-import path from 'path'
-import tailwindcss from "@tailwindcss/vite";
-import { VitePWA } from 'vite-plugin-pwa'
-import { sentryVitePlugin } from "@sentry/vite-plugin";
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+import tailwindcss from '@tailwindcss/vite';
+import { VitePWA } from 'vite-plugin-pwa';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, path.resolve(__dirname, '../..'), '')
-  const isProd = mode === 'production'
-  const base = isProd ? '/skip-bo/' : '/'
-  const sentryAuthToken = env.SENTRY_AUTH_TOKEN
-  const sentryOrg = env.SENTRY_ORG
-  const sentryProject = env.SENTRY_PROJECT
-  const plugins = [
-    react(),
-    tailwindcss(),
-  ]
+  const env = loadEnv(mode, path.resolve(__dirname, '../..'), '');
+  const isProd = mode === 'production';
+  const base = isProd ? '/skip-bo/' : '/';
+  const sentryAuthToken = env.SENTRY_AUTH_TOKEN;
+  const sentryOrg = env.SENTRY_ORG;
+  const sentryProject = env.SENTRY_PROJECT;
+  const plugins = [react(), tailwindcss()];
 
   if (sentryAuthToken && sentryOrg && sentryProject) {
     plugins.push(
@@ -24,13 +21,13 @@ export default defineConfig(({ mode }) => {
         project: sentryProject,
         authToken: sentryAuthToken,
       }),
-    )
+    );
   }
 
   return {
     base,
     envDir: path.resolve(__dirname, '../..'),
-    build: { sourcemap: "hidden" },
+    build: { sourcemap: 'hidden' },
     plugins: [
       ...plugins,
       VitePWA({
@@ -53,10 +50,10 @@ export default defineConfig(({ mode }) => {
           scope: base,
           icons: [
             // Replace these with real generated PNGs in /public
-            { src: 'manifest-icon-192.maskable.png', sizes: '192x192', type: 'image/png', "purpose": "any" },
-            { src: 'manifest-icon-192.maskable.png', sizes: '192x192', type: 'image/png', "purpose": "maskable" },
-            { src: 'manifest-icon-512.maskable.png', sizes: '512x512', type: 'image/png', "purpose": "any" },
-            { src: 'manifest-icon-512.maskable.png', sizes: '512x512', type: 'image/png', "purpose": "maskable" },
+            { src: 'manifest-icon-192.maskable.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+            { src: 'manifest-icon-192.maskable.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+            { src: 'manifest-icon-512.maskable.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+            { src: 'manifest-icon-512.maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           ],
         },
         workbox: {
@@ -82,8 +79,8 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "./src"),
+        '@': path.resolve(__dirname, './src'),
       },
     },
-  }
-})
+  };
+});

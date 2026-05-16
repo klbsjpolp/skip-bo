@@ -1,13 +1,9 @@
 import type { GameState } from '@/types';
 import type { GameAction } from '@/state/gameActions';
 import { canPlayCard } from '@/lib/validators';
-import {
-  findBestDiscardPile,
-  findBestDiscardPileToPlayFrom,
-  selectCardToDiscard,
-} from './discardUtils';
+import { findBestDiscardPile, findBestDiscardPileToPlayFrom, selectCardToDiscard } from './discardUtils';
 import { getDelay, getRandomnessWindow, getSearchDepth } from './aiConfig';
-import type { MoveEvaluation} from './lookAheadStrategy';
+import type { MoveEvaluation } from './lookAheadStrategy';
 import { lookAheadEvaluation } from './lookAheadStrategy';
 import { pickRandomNearBestOption } from './strategyUtils';
 
@@ -40,10 +36,7 @@ const chooseBestBuildPile = (gameState: GameState): number | null => {
     scoredBuildPiles.push({ option: buildPileIndex, score });
   });
 
-  return (
-    pickRandomNearBestOption(scoredBuildPiles, getRandomnessWindow('buildPileScoreWindow'))?.option ??
-    null
-  );
+  return pickRandomNearBestOption(scoredBuildPiles, getRandomnessWindow('buildPileScoreWindow'))?.option ?? null;
 };
 
 const selectionActionFromMove = (move: MoveEvaluation): GameAction | null => {
@@ -131,11 +124,11 @@ export const computeBestMove = async (gameState: GameState): Promise<GameAction>
 
         return options;
       },
-      []
+      [],
     );
     const buildPileIndex = pickRandomNearBestOption(
       playableBuildPiles,
-      getRandomnessWindow('buildPileScoreWindow')
+      getRandomnessWindow('buildPileScoreWindow'),
     )?.option;
 
     if (buildPileIndex !== undefined) {
@@ -168,11 +161,11 @@ export const computeBestMove = async (gameState: GameState): Promise<GameAction>
 
         return options;
       },
-      []
+      [],
     );
     const buildPileIndex = pickRandomNearBestOption(
       playableBuildPiles,
-      getRandomnessWindow('buildPileScoreWindow')
+      getRandomnessWindow('buildPileScoreWindow'),
     )?.option;
 
     if (buildPileIndex !== undefined) {
@@ -185,11 +178,7 @@ export const computeBestMove = async (gameState: GameState): Promise<GameAction>
     }
   }
 
-  const bestDiscardPlay = findBestDiscardPileToPlayFrom(
-    aiPlayer.discardPiles,
-    gameState.buildPiles,
-    gameState
-  );
+  const bestDiscardPlay = findBestDiscardPileToPlayFrom(aiPlayer.discardPiles, gameState.buildPiles, gameState);
   if (bestDiscardPlay) {
     const discardPile = aiPlayer.discardPiles[bestDiscardPlay.discardPileIndex];
     return {

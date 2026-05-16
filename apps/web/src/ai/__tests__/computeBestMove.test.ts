@@ -58,13 +58,7 @@ describe('computeBestMove', () => {
       ...state.players[1],
       isAI: true,
       stockPile: [{ value: 5, isSkipBo: false }],
-      hand: [
-        { value: 3, isSkipBo: false },
-        { value: 1, isSkipBo: false },
-        null,
-        null,
-        null,
-      ],
+      hand: [{ value: 3, isSkipBo: false }, { value: 1, isSkipBo: false }, null, null, null],
       discardPiles: [[{ value: 4, isSkipBo: false }], [], [], []],
     };
 
@@ -90,13 +84,7 @@ describe('computeBestMove', () => {
       ...state.players[1],
       isAI: true,
       stockPile: [{ value: 9, isSkipBo: false }],
-      hand: [
-        { value: 0, isSkipBo: true },
-        { value: 1, isSkipBo: false },
-        null,
-        null,
-        null,
-      ],
+      hand: [{ value: 0, isSkipBo: true }, { value: 1, isSkipBo: false }, null, null, null],
       discardPiles: [[], [], [], []],
     };
 
@@ -195,12 +183,7 @@ describe('computeBestMove', () => {
     state.deck = [];
     state.completedBuildPiles = [];
     state.selectedCard = null;
-    state.buildPiles = [
-      Array.from({ length: 7 }, (_, index) => ({ value: index + 1, isSkipBo: false })),
-      [],
-      [],
-      [],
-    ];
+    state.buildPiles = [Array.from({ length: 7 }, (_, index) => ({ value: index + 1, isSkipBo: false })), [], [], []];
     state.players[0] = {
       ...state.players[0],
       stockPile: [{ value: 9, isSkipBo: false }],
@@ -233,12 +216,7 @@ describe('computeBestMove', () => {
     state.deck = [];
     state.completedBuildPiles = [];
     state.selectedCard = null;
-    state.buildPiles = [
-      Array.from({ length: 8 }, (_, index) => ({ value: index + 1, isSkipBo: false })),
-      [],
-      [],
-      [],
-    ];
+    state.buildPiles = [Array.from({ length: 8 }, (_, index) => ({ value: index + 1, isSkipBo: false })), [], [], []];
     state.players[0] = {
       ...state.players[0],
       stockPile: [{ value: 9, isSkipBo: false }],
@@ -247,13 +225,7 @@ describe('computeBestMove', () => {
       ...state.players[1],
       isAI: true,
       stockPile: [{ value: 12, isSkipBo: false }],
-      hand: [
-        { value: 1, isSkipBo: false },
-        { value: 9, isSkipBo: false },
-        null,
-        null,
-        null,
-      ],
+      hand: [{ value: 1, isSkipBo: false }, { value: 9, isSkipBo: false }, null, null, null],
       discardPiles: [[], [], [], []],
     };
 
@@ -263,8 +235,8 @@ describe('computeBestMove', () => {
     expect(humanStockCard).toBeTruthy();
     expect(
       finalState.buildPiles.some((_, buildPileIndex) =>
-        humanStockCard ? canPlayCard(humanStockCard, buildPileIndex, finalState) : false
-      )
+        humanStockCard ? canPlayCard(humanStockCard, buildPileIndex, finalState) : false,
+      ),
     ).toBe(false);
   });
 
@@ -277,12 +249,7 @@ describe('computeBestMove', () => {
     state.deck = [];
     state.completedBuildPiles = [];
     state.selectedCard = null;
-    state.buildPiles = [
-      Array.from({ length: 7 }, (_, index) => ({ value: index + 1, isSkipBo: false })),
-      [],
-      [],
-      [],
-    ];
+    state.buildPiles = [Array.from({ length: 7 }, (_, index) => ({ value: index + 1, isSkipBo: false })), [], [], []];
     state.players[0] = {
       ...state.players[0],
       stockPile: [{ value: 9, isSkipBo: false }],
@@ -291,13 +258,7 @@ describe('computeBestMove', () => {
       ...state.players[1],
       isAI: true,
       stockPile: [{ value: 12, isSkipBo: false }],
-      hand: [
-        { value: 8, isSkipBo: false },
-        { value: 9, isSkipBo: false },
-        null,
-        null,
-        null,
-      ],
+      hand: [{ value: 8, isSkipBo: false }, { value: 9, isSkipBo: false }, null, null, null],
       discardPiles: [[], [], [], []],
     };
 

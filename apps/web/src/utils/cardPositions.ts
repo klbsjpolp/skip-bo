@@ -29,10 +29,7 @@ export const getElementCenter = (element: HTMLElement): CardPosition => {
 /**
  * Get position of a card in a player's hand
  */
-export const getHandCardPosition = (
-  handContainer: HTMLElement,
-  cardIndex: number,
-): CardPosition => {
+export const getHandCardPosition = (handContainer: HTMLElement, cardIndex: number): CardPosition => {
   const holderElement = handContainer.querySelector<HTMLElement>(`[data-card-index="${cardIndex}"]`);
   const cardElement = holderElement?.querySelector<HTMLElement>('.card.selected, .card');
 
@@ -56,10 +53,7 @@ export const getHandCardPosition = (
  * position but the real card settles at formula + rotation offset — a visible
  * glitch on the ±8° extremity cards.
  */
-export const getHandSlotLayoutPosition = (
-  handContainer: HTMLElement,
-  cardIndex: number,
-): CardPosition => {
+export const getHandSlotLayoutPosition = (handContainer: HTMLElement, cardIndex: number): CardPosition => {
   const handRect = handContainer.getBoundingClientRect();
   const handStyle = getComputedStyle(handContainer);
   const cardW = parseFloat(handStyle.getPropertyValue('--card-width')) || 0;
@@ -95,13 +89,8 @@ export const getStockCardPosition = (stockContainer: HTMLElement): CardPosition 
 /**
  * Get position of a build pile
  */
-export const getBuildPilePosition = (
-  centerContainer: HTMLElement,
-  buildPileIndex: number
-): CardPosition => {
-  const buildPileElement = centerContainer.querySelector(
-    `[data-build-pile="${buildPileIndex}"]`
-  ) as HTMLElement;
+export const getBuildPilePosition = (centerContainer: HTMLElement, buildPileIndex: number): CardPosition => {
+  const buildPileElement = centerContainer.querySelector(`[data-build-pile="${buildPileIndex}"]`) as HTMLElement;
   if (buildPileElement) {
     return getElementCenter(buildPileElement);
   }
@@ -139,11 +128,9 @@ export const getRetreatPilePosition = (centerContainer: HTMLElement): CardPositi
 export const calculateAnimationDuration = (
   startPos: CardPosition,
   endPos: CardPosition,
-  baseSpeed: number = 0.5 // pixels per millisecond
+  baseSpeed: number = 0.5, // pixels per millisecond
 ): number => {
-  const distance = Math.sqrt(
-    Math.pow(endPos.x - startPos.x, 2) + Math.pow(endPos.y - startPos.y, 2)
-  );
+  const distance = Math.sqrt(Math.pow(endPos.x - startPos.x, 2) + Math.pow(endPos.y - startPos.y, 2));
   const duration = Math.max(300, Math.min(800, distance / baseSpeed));
   return Math.round(duration);
 };
@@ -151,10 +138,7 @@ export const calculateAnimationDuration = (
 /**
  * Get rotation angle (in degrees) of a card in the player's hand
  */
-export const getHandCardAngle = (
-  handContainer: HTMLElement,
-  cardIndex: number,
-): number => {
+export const getHandCardAngle = (handContainer: HTMLElement, cardIndex: number): number => {
   const holderElement = handContainer.querySelector(`[data-card-index="${cardIndex}"]`);
   if (!holderElement) return 0;
   const style = window.getComputedStyle(holderElement);
@@ -167,10 +151,7 @@ export const getHandCardAngle = (
 /**
  * Get the top card center for a discard pile.
  */
-export const getDiscardTopCardPosition = (
-  discardContainer: HTMLElement,
-  pileIndex: number
-): CardPosition => {
+export const getDiscardTopCardPosition = (discardContainer: HTMLElement, pileIndex: number): CardPosition => {
   const pileElement = discardContainer.querySelector<HTMLElement>(`[data-pile-index="${pileIndex}"]`);
   if (!pileElement) {
     return getElementCenter(discardContainer);
@@ -190,10 +171,7 @@ export const getDiscardTopCardPosition = (
 /**
  * Get the position where the next card should land on a discard pile (accounts for stacked offset)
  */
-export const getNextDiscardCardPosition = (
-  discardContainer: HTMLElement,
-  pileIndex: number
-): CardPosition => {
+export const getNextDiscardCardPosition = (discardContainer: HTMLElement, pileIndex: number): CardPosition => {
   const pileElement = discardContainer.querySelector<HTMLElement>(`[data-pile-index="${pileIndex}"]`);
   if (!pileElement) {
     // Fallback: container center
@@ -202,7 +180,7 @@ export const getNextDiscardCardPosition = (
 
   // Determine how many real cards are in the pile (exclude placeholder which has opacity-50)
   const allCards = Array.from(pileElement.querySelectorAll<HTMLElement>('.card'));
-  const realCards = allCards.filter(el => !el.classList.contains('opacity-50'));
+  const realCards = allCards.filter((el) => !el.classList.contains('opacity-50'));
 
   if (realCards.length === 0) {
     // Empty pile: land on the base position (placeholder center)

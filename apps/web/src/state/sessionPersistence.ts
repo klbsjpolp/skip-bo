@@ -26,7 +26,9 @@ export const saveOnlineSession = (session: CreateRoomResponse): void => {
   try {
     const envelope: PersistedEnvelope = { version: SCHEMA_VERSION, session };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(envelope));
-  } catch { /* storage unavailable, fail silently */ }
+  } catch {
+    /* storage unavailable, fail silently */
+  }
 };
 
 export const loadOnlineSession = (now: Date = new Date()): CreateRoomResponse | null => {
@@ -54,5 +56,7 @@ export const loadOnlineSession = (now: Date = new Date()): CreateRoomResponse | 
 export const clearOnlineSession = (): void => {
   try {
     localStorage.removeItem(STORAGE_KEY);
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 };

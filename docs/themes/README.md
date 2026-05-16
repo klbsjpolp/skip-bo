@@ -15,13 +15,13 @@ Themes are declared as an immutable list in [../../packages/game-core/src/types/
 
 Themes group into five categories along a mood / visual-language axis. The goal is that each category covers one recognisable "kind of table" a player might want to sit at, and the set balances across them so picking a theme feels like choosing a vibe rather than flipping a color.
 
-| Category | What it looks like | Themes |
-|---|---|---|
-| **Clean & Minimal** | Flat surfaces, restrained palettes, no texture. The card is the star. | [paper](paper.md), [dark](dark.md), [metro](metro.md) |
-| **Soft & Playful** | High-key palettes, rounded shapes, decorative backgrounds. Reads as friendly and casual. | [origami](origami.md), [bonbon](bonbon.md), [rainbow](rainbow.md) |
-| **Retro & Vintage** | Era-specific palettes and shapes, reference-driven, avoids modern effects. | [retro](retro.md), [retro-space](retro-space.md) |
-| **Futuristic & Digital** | Glow, blur, animated gradients, high contrast, lean into screen-native effects. | [neon](neon.md), [glass](glass.md) |
-| **Tactile & Crafted** | Imitates physical materials — yarn, blocks, brass. Heavy use of textures. | [wool](wool.md), [minecraft](minecraft.md), [steampunk](steampunk.md) |
+| Category                 | What it looks like                                                                       | Themes                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| **Clean & Minimal**      | Flat surfaces, restrained palettes, no texture. The card is the star.                    | [paper](paper.md), [dark](dark.md), [metro](metro.md)                 |
+| **Soft & Playful**       | High-key palettes, rounded shapes, decorative backgrounds. Reads as friendly and casual. | [origami](origami.md), [bonbon](bonbon.md), [rainbow](rainbow.md)     |
+| **Retro & Vintage**      | Era-specific palettes and shapes, reference-driven, avoids modern effects.               | [retro](retro.md), [retro-space](retro-space.md)                      |
+| **Futuristic & Digital** | Glow, blur, animated gradients, high contrast, lean into screen-native effects.          | [neon](neon.md), [glass](glass.md)                                    |
+| **Tactile & Crafted**    | Imitates physical materials — yarn, blocks, brass. Heavy use of textures.                | [wool](wool.md), [minecraft](minecraft.md), [steampunk](steampunk.md) |
 
 Retro & Vintage and Futuristic & Digital currently hold only two themes each, while the other three hold three. This is the clearest place to add new themes if the registry grows.
 

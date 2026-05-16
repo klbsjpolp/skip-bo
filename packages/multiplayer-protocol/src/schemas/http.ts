@@ -4,7 +4,12 @@ import { ROOM_CODE_LENGTH } from '../code.js';
 import { MAX_PLAYER_NAME_LENGTH } from '../playerName.js';
 
 export const roomCodeSchema = z.string().trim().min(1).max(ROOM_CODE_LENGTH);
-export const stockSizeSchema = z.number().int().min(5).max(50).refine((value) => value % 5 === 0);
+export const stockSizeSchema = z
+  .number()
+  .int()
+  .min(5)
+  .max(50)
+  .refine((value) => value % 5 === 0);
 export const playerNameSchema = z.string().trim().max(MAX_PLAYER_NAME_LENGTH);
 
 export const createRoomRequestSchema = z.object({

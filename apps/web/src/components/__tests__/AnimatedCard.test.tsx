@@ -34,7 +34,7 @@ describe('AnimatedCard', () => {
     const { container } = render(
       <CardAnimationProvider>
         <AnimatedCard animation={createAnimation(200)} />
-      </CardAnimationProvider>
+      </CardAnimationProvider>,
     );
 
     expect(container.querySelector('.animated-card')).toBeNull();

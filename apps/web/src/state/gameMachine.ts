@@ -1,14 +1,14 @@
-import {assign, createMachine, fromPromise} from 'xstate';
-import {gameReducer} from './gameReducer';
-import type {GameAction} from './gameActions';
-import {initialGameState} from './initialGameState';
-import {computeBestMove} from '@/ai/computeBestMove';
-import type {Card, GameState} from '@/types';
-import {triggerAIAnimation} from '@/services/aiAnimationService';
+import { assign, createMachine, fromPromise } from 'xstate';
+import { gameReducer } from './gameReducer';
+import type { GameAction } from './gameActions';
+import { initialGameState } from './initialGameState';
+import { computeBestMove } from '@/ai/computeBestMove';
+import type { Card, GameState } from '@/types';
+import { triggerAIAnimation } from '@/services/aiAnimationService';
 import { triggerCompletedBuildPileAnimation } from '@/services/completedBuildPileAnimationService';
-import {triggerMultipleDrawAnimations} from '@/services/drawAnimationService';
-import {animationGate} from '@/services/animationGate';
-import {animationServiceBridge} from "@/lib/animationServiceBridge.ts";
+import { triggerMultipleDrawAnimations } from '@/services/drawAnimationService';
+import { animationGate } from '@/services/animationGate';
+import { animationServiceBridge } from '@/lib/animationServiceBridge.ts';
 import { getCompletedBuildPileCards } from '@/lib/retreatPile';
 import { planHandRefill } from '@/lib/handRefill';
 
@@ -17,447 +17,442 @@ const willPlayCardEmptyHand = (gameState: GameState): boolean => {
   if (!gameState.selectedCard || gameState.selectedCard.source !== 'hand') {
     return false;
   }
-  
+
   const player = gameState.players[gameState.currentPlayerIndex];
   const handAfterPlay = [...player.hand];
   handAfterPlay[gameState.selectedCard.index] = null;
-  
-  return handAfterPlay.every(card => card === null);
+
+  return handAfterPlay.every((card) => card === null);
 };
 
-export const gameMachine = createMachine({
-  id: 'skipbo',
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  types: {} as unknown as {
-    context: {
-      G: GameState;
-      animationDuration: number;
-    };
-    events: GameAction;
-  },
-  context: () => ({
-    G: initialGameState(),
-    animationDuration: 0,
-  }),
-  on: {
-    DEBUG_WIN: {
-      actions: 'apply',
-      target: '.finished',
+export const gameMachine = createMachine(
+  {
+    id: 'skipbo',
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    types: {} as unknown as {
+      context: {
+        G: GameState;
+        animationDuration: number;
+      };
+      events: GameAction;
     },
-  },
-  initial: 'setup',
-  states: {
-    setup: {
-      always: [
-        { target: 'botTurn', guard: 'isAITurn' },
-        { target: 'humanTurn' }
-      ],
+    context: () => ({
+      G: initialGameState(),
+      animationDuration: 0,
+    }),
+    on: {
+      DEBUG_WIN: {
+        actions: 'apply',
+        target: '.finished',
+      },
     },
+    initial: 'setup',
+    states: {
+      setup: {
+        always: [{ target: 'botTurn', guard: 'isAITurn' }, { target: 'humanTurn' }],
+      },
 
-    humanTurn: {
-      initial: 'drawing',
-      states: {
-        drawing: {
-          invoke: {
-            src: 'drawService',
-            input: ({ context }) => ({ G: context.G }),
-            onDone: {
-              actions: 'applyDrawAndStoreAnimation',
-              target: 'drawAnimating',
+      humanTurn: {
+        initial: 'drawing',
+        states: {
+          drawing: {
+            invoke: {
+              src: 'drawService',
+              input: ({ context }) => ({ G: context.G }),
+              onDone: {
+                actions: 'applyDrawAndStoreAnimation',
+                target: 'drawAnimating',
+              },
             },
           },
-        },
-        drawAnimating: {
-          invoke: {
-            src: 'animationGate',
-            input: ({ context }) => ({ duration: context.animationDuration }),
-            onDone: {
-              target: 'ready',
+          drawAnimating: {
+            invoke: {
+              src: 'animationGate',
+              input: ({ context }) => ({ duration: context.animationDuration }),
+              onDone: {
+                target: 'ready',
+              },
             },
           },
-        },
-        ready: {
-          always: [
-            { target: '#skipbo.finished', guard: 'hasWinner' },
-            { target: '#skipbo.botTurn', guard: 'isAITurn' },
-          ],
-          on: {
-            INIT: {
-              actions: 'apply',
-              target: '#skipbo.setup'
-            },
-            SELECT_CARD: {
-              actions: 'apply',
-              guard: 'isHumanAction',
-            },
-            CLEAR_SELECTION: {
-              actions: 'apply',
-              guard: 'isHumanAction',
-            },
-            PLAY_CARD: {
-              actions: 'applyAndStoreAnimation',
-              target: 'humanActionAnimating',
-              guard: 'isHumanAction',
-            },
-            DISCARD_CARD: {
-              actions: 'applyAndStoreAnimation',
-              target: 'humanActionAnimating',
-              guard: 'isHumanAction',
-            },
-            END_TURN: {
-              actions: 'apply',
-              target: '#skipbo.botTurn',
-            },
-            DEBUG_FILL_BUILD_PILE: {
-              actions: 'apply',
-              guard: 'isHumanAction',
-            },
-            RESET: {
-              actions: 'apply',
-              target: '#skipbo.setup'
-            },
-          },
-        },
-        humanActionAnimating: {
-          // Allow further human actions while animations are still in flight.
-          // The animationGate keeps waiting on `waitForAnimations()`, which
-          // covers any animation queued during this state. We deliberately omit
-          // `target` on PLAY_CARD/DISCARD_CARD/SELECT_CARD/CLEAR_SELECTION so
-          // xstate v5 doesn't re-invoke `animationGate` on every chained action
-          // (a re-invoke would cancel the in-flight gate and reset the
-          // minimum-duration timer).
-          on: {
-            SELECT_CARD: {
-              actions: 'apply',
-              guard: 'isHumanAction',
-            },
-            CLEAR_SELECTION: {
-              actions: 'apply',
-              guard: 'isHumanAction',
-            },
-            PLAY_CARD: {
-              actions: 'applyAndStoreAnimation',
-              guard: 'isHumanAction',
-            },
-            DISCARD_CARD: {
-              actions: 'applyAndStoreAnimation',
-              guard: 'isHumanAction',
+          ready: {
+            always: [
+              { target: '#skipbo.finished', guard: 'hasWinner' },
+              { target: '#skipbo.botTurn', guard: 'isAITurn' },
+            ],
+            on: {
+              INIT: {
+                actions: 'apply',
+                target: '#skipbo.setup',
+              },
+              SELECT_CARD: {
+                actions: 'apply',
+                guard: 'isHumanAction',
+              },
+              CLEAR_SELECTION: {
+                actions: 'apply',
+                guard: 'isHumanAction',
+              },
+              PLAY_CARD: {
+                actions: 'applyAndStoreAnimation',
+                target: 'humanActionAnimating',
+                guard: 'isHumanAction',
+              },
+              DISCARD_CARD: {
+                actions: 'applyAndStoreAnimation',
+                target: 'humanActionAnimating',
+                guard: 'isHumanAction',
+              },
+              END_TURN: {
+                actions: 'apply',
+                target: '#skipbo.botTurn',
+              },
+              DEBUG_FILL_BUILD_PILE: {
+                actions: 'apply',
+                guard: 'isHumanAction',
+              },
+              RESET: {
+                actions: 'apply',
+                target: '#skipbo.setup',
+              },
             },
           },
-          invoke: {
-            src: 'animationGate',
-            input: ({ context }) => ({ duration: context.animationDuration }),
-            onDone: {
-              target: 'ready',
+          humanActionAnimating: {
+            // Allow further human actions while animations are still in flight.
+            // The animationGate keeps waiting on `waitForAnimations()`, which
+            // covers any animation queued during this state. We deliberately omit
+            // `target` on PLAY_CARD/DISCARD_CARD/SELECT_CARD/CLEAR_SELECTION so
+            // xstate v5 doesn't re-invoke `animationGate` on every chained action
+            // (a re-invoke would cancel the in-flight gate and reset the
+            // minimum-duration timer).
+            on: {
+              SELECT_CARD: {
+                actions: 'apply',
+                guard: 'isHumanAction',
+              },
+              CLEAR_SELECTION: {
+                actions: 'apply',
+                guard: 'isHumanAction',
+              },
+              PLAY_CARD: {
+                actions: 'applyAndStoreAnimation',
+                guard: 'isHumanAction',
+              },
+              DISCARD_CARD: {
+                actions: 'applyAndStoreAnimation',
+                guard: 'isHumanAction',
+              },
+            },
+            invoke: {
+              src: 'animationGate',
+              input: ({ context }) => ({ duration: context.animationDuration }),
+              onDone: {
+                target: 'ready',
+              },
             },
           },
         },
       },
-    },
 
-    botTurn: {
-      initial: 'drawing',
-      states: {
-        drawing: {
-          invoke: {
-            src: 'drawService',
-            input: ({ context }) => ({ G: context.G }),
-            onDone: {
-              actions: 'applyDrawAndStoreAnimation',
-              target: 'drawAnimating',
+      botTurn: {
+        initial: 'drawing',
+        states: {
+          drawing: {
+            invoke: {
+              src: 'drawService',
+              input: ({ context }) => ({ G: context.G }),
+              onDone: {
+                actions: 'applyDrawAndStoreAnimation',
+                target: 'drawAnimating',
+              },
             },
           },
-        },
-        drawAnimating: {
-          invoke: {
-            src: 'animationGate',
-            input: ({ context }) => ({ duration: context.animationDuration }),
-            onDone: {
-              target: 'ready',
+          drawAnimating: {
+            invoke: {
+              src: 'animationGate',
+              input: ({ context }) => ({ duration: context.animationDuration }),
+              onDone: {
+                target: 'ready',
+              },
             },
           },
-        },
-        ready: {
-          always: [
-            { target: '#skipbo.finished', guard: 'hasWinner' },
-            { target: '#skipbo.humanTurn', guard: 'isHumanTurn' },
-            { target: 'thinking' }
-          ],
-        },
-        thinking: {
-          invoke: {
-            src: 'botService',
-            input: ({ context }) => ({ G: context.G }),
-            onDone: {
-              actions: 'applyBotAndStoreAnimation',
-              target: 'animating',
+          ready: {
+            always: [
+              { target: '#skipbo.finished', guard: 'hasWinner' },
+              { target: '#skipbo.humanTurn', guard: 'isHumanTurn' },
+              { target: 'thinking' },
+            ],
+          },
+          thinking: {
+            invoke: {
+              src: 'botService',
+              input: ({ context }) => ({ G: context.G }),
+              onDone: {
+                actions: 'applyBotAndStoreAnimation',
+                target: 'animating',
+              },
             },
           },
-        },
-        animating: {
-          invoke: {
-            src: 'animationGate',
-            input: ({ context }) => ({ duration: context.animationDuration }),
-            onDone: {
-              target: 'checkState',
+          animating: {
+            invoke: {
+              src: 'animationGate',
+              input: ({ context }) => ({ duration: context.animationDuration }),
+              onDone: {
+                target: 'checkState',
+              },
             },
           },
+          checkState: {
+            always: [
+              { target: '#skipbo.finished', guard: 'hasWinner' },
+              { target: '#skipbo.humanTurn', guard: 'isHumanTurn' },
+              { target: 'thinking' },
+            ],
+          },
         },
-        checkState: {
-          always: [
-            { target: '#skipbo.finished', guard: 'hasWinner' },
-            { target: '#skipbo.humanTurn', guard: 'isHumanTurn' },
-            { target: 'thinking' }
-          ]
-        }
-      }
-    },
+      },
 
-    finished: { 
-      on: {
-        INIT: {
-          target: 'setup',
-          actions: 'apply'
+      finished: {
+        on: {
+          INIT: {
+            target: 'setup',
+            actions: 'apply',
+          },
+          RESET: {
+            target: 'setup',
+            actions: 'apply',
+          },
         },
-        RESET: {
-          target: 'setup',
-          actions: 'apply'
-        }
-      }
+      },
     },
   },
-}, {
-  actions: {
-    apply: assign({ 
-      G: ({ context, event }) => {
-        if (event && typeof event === 'object' && 'type' in event) {
-          return gameReducer(context.G, event);
-        }
-        return context.G;
-      }
-    }),
-    applyBot: assign({ 
-      G: ({ context, event }) => {
-        if (event && typeof event === 'object' && 'output' in event) {
-          const { output: { action } } = (event as unknown as { output: { action: GameAction, animationDuration: number } });
-          return gameReducer(context.G, action);
-        }
-        return context.G;
-      }
-    }),
-    applyBotAndStoreAnimation: assign({
-      G: ({ context, event }) => {
-        if (event && typeof event === 'object' && 'output' in event) {
-          const { action } = (event as unknown as { output: { action: GameAction, animationDuration: number } }).output;
-          return gameReducer(context.G, action);
-        }
-        return context.G;
+  {
+    actions: {
+      apply: assign({
+        G: ({ context, event }) => {
+          if (event && typeof event === 'object' && 'type' in event) {
+            return gameReducer(context.G, event);
+          }
+          return context.G;
+        },
+      }),
+      applyBot: assign({
+        G: ({ context, event }) => {
+          if (event && typeof event === 'object' && 'output' in event) {
+            const {
+              output: { action },
+            } = event as unknown as { output: { action: GameAction; animationDuration: number } };
+            return gameReducer(context.G, action);
+          }
+          return context.G;
+        },
+      }),
+      applyBotAndStoreAnimation: assign({
+        G: ({ context, event }) => {
+          if (event && typeof event === 'object' && 'output' in event) {
+            const { action } = (event as unknown as { output: { action: GameAction; animationDuration: number } })
+              .output;
+            return gameReducer(context.G, action);
+          }
+          return context.G;
+        },
+        animationDuration: ({ event }) => {
+          if (event && typeof event === 'object' && 'output' in event) {
+            const { animationDuration } = (
+              event as unknown as { output: { action: GameAction; animationDuration: number } }
+            ).output;
+            return animationDuration;
+          }
+          return 0;
+        },
+      }),
+      applyAndStoreAnimation: assign({
+        G: ({ context, event }) => {
+          if (event && typeof event === 'object' && 'type' in event) {
+            return gameReducer(context.G, event);
+          }
+          return context.G;
+        },
+        animationDuration: ({ event }) => {
+          if (event && typeof event === 'object' && 'output' in event) {
+            const { animationDuration } = (
+              event as unknown as { output: { action: GameAction; animationDuration: number } }
+            ).output;
+            return animationDuration;
+          }
+          if (event && typeof event === 'object' && 'animationDuration' in event) {
+            const { animationDuration } = event as { animationDuration?: number };
+            return animationDuration ?? 0;
+          }
+          return 0;
+        },
+      }),
+      logAIAction: () => {
+        // No-op in production, can be used for debugging if needed
       },
-      animationDuration: ({ event }) => {
-        if (event && typeof event === 'object' && 'output' in event) {
-          const { animationDuration } = (event as unknown as { output: { action: GameAction, animationDuration: number } }).output;
-          return animationDuration;
-        }
-        return 0;
-      }
-    }),
-    applyAndStoreAnimation: assign({
-      G: ({ context, event }) => {
-        if (event && typeof event === 'object' && 'type' in event) {
-          return gameReducer(context.G, event);
-        }
-        return context.G;
-      },
-      animationDuration: ({ event }) => {
-        if (event && typeof event === 'object' && 'output' in event) {
-          const { animationDuration } = (event as unknown as { output: { action: GameAction, animationDuration: number } }).output;
-          return animationDuration;
-        }
-        if (event && typeof event === 'object' && 'animationDuration' in event) {
-          const { animationDuration } = event as { animationDuration?: number };
-          return animationDuration ?? 0;
-        }
-        return 0;
-      }
-    }),
-    logAIAction: () => {
-      // No-op in production, can be used for debugging if needed
+      applyDraw: assign({
+        G: ({ context, event }) => {
+          if (event && typeof event === 'object' && 'output' in event) {
+            const action = (event as unknown as { output: GameAction }).output;
+            return gameReducer(context.G, action);
+          }
+          return context.G;
+        },
+      }),
+      applyDrawAndStoreAnimation: assign({
+        G: ({ context, event }) => {
+          if (event && typeof event === 'object' && 'output' in event) {
+            const action = (event as unknown as { output: GameAction }).output;
+            return gameReducer(context.G, action);
+          }
+          return context.G;
+        },
+        animationDuration: ({ event }) => {
+          if (event && typeof event === 'object' && 'output' in event) {
+            const { animationDuration } = (event as unknown as { output: { animationDuration: number } }).output;
+            return animationDuration;
+          }
+          return 0;
+        },
+      }),
     },
-    applyDraw: assign({ 
-      G: ({ context, event }) => {
-        if (event && typeof event === 'object' && 'output' in event) {
-          const action = (event as unknown as { output: GameAction }).output;
-          return gameReducer(context.G, action);
-        }
-        return context.G;
-      }
-    }),
-    applyDrawAndStoreAnimation: assign({
-      G: ({ context, event }) => {
-        if (event && typeof event === 'object' && 'output' in event) {
-          const action = (event as unknown as { output: GameAction }).output;
-          return gameReducer(context.G, action);
-        }
-        return context.G;
+    guards: {
+      isHumanAction: ({ context }) => !context.G.players[context.G.currentPlayerIndex].isAI,
+      isAITurn: ({ context }) => context.G.players[context.G.currentPlayerIndex].isAI && !context.G.gameIsOver,
+      isHumanTurn: ({ context }) => !context.G.players[context.G.currentPlayerIndex].isAI || context.G.gameIsOver,
+      hasWinner: ({ context }) => context.G.gameIsOver,
+      // New guard specifically for END_TURN that checks the current player before switching
+      isHumanEndTurn: ({ context }) => !context.G.players[context.G.currentPlayerIndex].isAI,
+      aiNeedsDraw: ({ context }) => {
+        if (!context?.G || !Array.isArray(context.G.players)) return false;
+        const aiPlayer = context.G.players[context.G.currentPlayerIndex];
+        if (!aiPlayer?.isAI || !Array.isArray(aiPlayer.hand)) return false;
+
+        const emptySlots = aiPlayer.hand.filter((c) => c === null).length;
+
+        // AI needs to draw if it has empty slots and there are cards available to draw
+        return emptySlots > 0 && (context.G.deck.length > 0 || context.G.completedBuildPiles.length > 0);
       },
-      animationDuration: ({ event }) => {
-        if (event && typeof event === 'object' && 'output' in event) {
-          const { animationDuration } = (event as unknown as { output: { animationDuration: number } }).output;
-          return animationDuration;
-        }
-        return 0;
-      }
-    }),
-  },
-  guards: {
-    isHumanAction: ({ context }) => !context.G.players[context.G.currentPlayerIndex].isAI,
-    isAITurn: ({ context }) => context.G.players[context.G.currentPlayerIndex].isAI && !context.G.gameIsOver,
-    isHumanTurn: ({ context }) => !context.G.players[context.G.currentPlayerIndex].isAI || context.G.gameIsOver,
-    hasWinner: ({ context }) => context.G.gameIsOver,
-    // New guard specifically for END_TURN that checks the current player before switching
-    isHumanEndTurn: ({ context }) => !context.G.players[context.G.currentPlayerIndex].isAI,
-    aiNeedsDraw: ({ context }) => {
-      if (!context?.G || !Array.isArray(context.G.players)) return false;
-      const aiPlayer = context.G.players[context.G.currentPlayerIndex];
-      if (!aiPlayer?.isAI || !Array.isArray(aiPlayer.hand)) return false;
-
-      const emptySlots = aiPlayer.hand.filter((c) => c === null).length;
-
-      // AI needs to draw if it has empty slots and there are cards available to draw
-      return emptySlots > 0 && (context.G.deck.length > 0 || context.G.completedBuildPiles.length > 0);
     },
-  },
-  actors: {
-    animationGate,
-    botService: fromPromise(async ({ input }: { input: { G: GameState } }) => {
-      const action = await computeBestMove(input.G);
-      const completedBuildPileCards =
-        action.type === 'PLAY_CARD' ? getCompletedBuildPileCards(input.G, action.buildPile) : null;
-      let animationDuration = 0;
+    actors: {
+      animationGate,
+      botService: fromPromise(async ({ input }: { input: { G: GameState } }) => {
+        const action = await computeBestMove(input.G);
+        const completedBuildPileCards =
+          action.type === 'PLAY_CARD' ? getCompletedBuildPileCards(input.G, action.buildPile) : null;
+        let animationDuration = 0;
 
-      // Check if PLAY_CARD will empty the hand and trigger draw animations
-      if (action.type === 'PLAY_CARD' && willPlayCardEmptyHand(input.G)) {
-        // First trigger the play card animation
-        if (input.G.selectedCard) {
-          await triggerAIAnimation(input.G, action);
-          await animationServiceBridge.waitForAnimations();
-        }
+        // Check if PLAY_CARD will empty the hand and trigger draw animations
+        if (action.type === 'PLAY_CARD' && willPlayCardEmptyHand(input.G)) {
+          // First trigger the play card animation
+          if (input.G.selectedCard) {
+            await triggerAIAnimation(input.G, action);
+            await animationServiceBridge.waitForAnimations();
+          }
 
-        const completionAnimationDuration =
-          action.type === 'PLAY_CARD' && completedBuildPileCards
-            ? triggerCompletedBuildPileAnimation(
+          const completionAnimationDuration =
+            action.type === 'PLAY_CARD' && completedBuildPileCards
+              ? triggerCompletedBuildPileAnimation(
+                  input.G,
+                  action.buildPile,
+                  completedBuildPileCards,
+                  input.G.completedBuildPiles.length,
+                )
+              : 0;
+
+          animationDuration = completionAnimationDuration;
+
+          // Then trigger draw animations for the hand refill.
+          const player = input.G.players[input.G.currentPlayerIndex];
+          if (input.G.selectedCard?.source === 'hand') {
+            const handAfterPlay = [...player.hand];
+            handAfterPlay[input.G.selectedCard.index] = null;
+
+            const { cards, handIndices } = planHandRefill(handAfterPlay, input.G.deck, input.G.completedBuildPiles);
+
+            if (cards.length > 0) {
+              animationDuration = Math.max(
+                animationDuration,
+                await triggerMultipleDrawAnimations(
+                  input.G.currentPlayerIndex,
+                  cards,
+                  handIndices,
+                  500,
+                  completionAnimationDuration,
+                ),
+              );
+            }
+          }
+        } else {
+          // Trigger animation for other AI actions that need it
+          if ((action.type === 'PLAY_CARD' || action.type === 'DISCARD_CARD') && input.G.selectedCard) {
+            await triggerAIAnimation(input.G, action);
+            await animationServiceBridge.waitForAnimations();
+          }
+
+          if (action.type === 'PLAY_CARD' && completedBuildPileCards) {
+            animationDuration = triggerCompletedBuildPileAnimation(
               input.G,
               action.buildPile,
               completedBuildPileCards,
               input.G.completedBuildPiles.length,
-            )
-            : 0;
-
-        animationDuration = completionAnimationDuration;
-
-        // Then trigger draw animations for the hand refill.
-        const player = input.G.players[input.G.currentPlayerIndex];
-        if (input.G.selectedCard?.source === 'hand') {
-          const handAfterPlay = [...player.hand];
-          handAfterPlay[input.G.selectedCard.index] = null;
-
-          const { cards, handIndices } = planHandRefill(
-            handAfterPlay,
-            input.G.deck,
-            input.G.completedBuildPiles,
-          );
-
-          if (cards.length > 0) {
-            animationDuration = Math.max(
-              animationDuration,
-              await triggerMultipleDrawAnimations(
-                input.G.currentPlayerIndex,
-                cards,
-                handIndices,
-                500,
-                completionAnimationDuration,
-              ),
             );
           }
         }
-      } else {
-        // Trigger animation for other AI actions that need it
-        if ((action.type === 'PLAY_CARD' || action.type === 'DISCARD_CARD') && input.G.selectedCard) {
-          await triggerAIAnimation(input.G, action);
-          await animationServiceBridge.waitForAnimations();
-        }
 
-        if (action.type === 'PLAY_CARD' && completedBuildPileCards) {
-          animationDuration = triggerCompletedBuildPileAnimation(
-            input.G,
-            action.buildPile,
-            completedBuildPileCards,
-            input.G.completedBuildPiles.length,
-          );
-        }
-      }
+        return { action, animationDuration };
+      }),
+      drawService: fromPromise(async ({ input }: { input: { G: GameState } }) => {
+        const gameState = input.G;
+        const player = gameState.players[gameState.currentPlayerIndex];
+        // Debug: override AI hand via query param aiHand (supports [1,2,3,4,5], 1,2,3,4,5 and 1-2-3-4-5)
+        if (typeof window !== 'undefined' && player.isAI) {
+          try {
+            const params = new URLSearchParams(window.location.search);
+            const raw = params.get('aiHand');
+            if (raw) {
+              let numbers: number[] = [];
 
-      return { action, animationDuration };
-    }),
-    drawService: fromPromise(async ({ input }: { input: { G: GameState } }) => {
-      const gameState = input.G;
-      const player = gameState.players[gameState.currentPlayerIndex];
-      // Debug: override AI hand via query param aiHand (supports [1,2,3,4,5], 1,2,3,4,5 and 1-2-3-4-5)
-      if (typeof window !== 'undefined' && player.isAI) {
-        try {
-          const params = new URLSearchParams(window.location.search);
-          const raw = params.get('aiHand');
-          if (raw) {
-            let numbers: number[] = [];
-
-            // 1) Try JSON array first (e.g., "[1,2,3,4,5]")
-            try {
-              const maybe: unknown = JSON.parse(raw);
-              if (Array.isArray(maybe)) {
-                numbers = maybe
-                  .map((n) => (typeof n === 'string' ? parseInt(n, 10) : Number(n)))
-                  .filter((n) => Number.isFinite(n) && n >= 1);
+              // 1) Try JSON array first (e.g., "[1,2,3,4,5]")
+              try {
+                const maybe: unknown = JSON.parse(raw);
+                if (Array.isArray(maybe)) {
+                  numbers = maybe
+                    .map((n) => (typeof n === 'string' ? parseInt(n, 10) : Number(n)))
+                    .filter((n) => Number.isFinite(n) && n >= 1);
+                }
+              } catch {
+                // Not JSON, fall through
               }
-            } catch {
-              // Not JSON, fall through
-            }
 
-            // 2) Fallback: remove brackets/spaces and split by comma or dash
-            if (numbers.length === 0) {
-              const cleaned = raw.replace(/\[/g, '').replace(/]/g, '').replace(/\s/g, '');
-              const tokens = cleaned.split(/[,-]/).filter(Boolean);
-              numbers = tokens
-                .map((t) => parseInt(t, 10))
-                .filter((n) => Number.isFinite(n) && n >= 1);
-            }
+              // 2) Fallback: remove brackets/spaces and split by comma or dash
+              if (numbers.length === 0) {
+                const cleaned = raw.replace(/\[/g, '').replace(/]/g, '').replace(/\s/g, '');
+                const tokens = cleaned.split(/[,-]/).filter(Boolean);
+                numbers = tokens.map((t) => parseInt(t, 10)).filter((n) => Number.isFinite(n) && n >= 1);
+              }
 
-            if (numbers.length > 0) {
-              const hand: Card[] = numbers.map((v) => ({ value: v, isSkipBo: false }));
-              return { type: 'DEBUG_SET_AI_HAND', hand, animationDuration: 0 };
+              if (numbers.length > 0) {
+                const hand: Card[] = numbers.map((v) => ({ value: v, isSkipBo: false }));
+                return { type: 'DEBUG_SET_AI_HAND', hand, animationDuration: 0 };
+              }
             }
+          } catch {
+            /* ignore invalid aiHand param */
           }
-        } catch { /* ignore invalid aiHand param */ }
-      }
-      const { cards, handIndices } = planHandRefill(
-        player.hand,
-        gameState.deck,
-        gameState.completedBuildPiles,
-      );
-      const cardsToDraw = cards.length;
-      let animationDuration = 0;
-
-      if (cardsToDraw > 0) {
-        // Fire and forget: start animations but don't block the draw state update.
-        if (cards.length > 0) {
-          animationDuration = await triggerMultipleDrawAnimations(
-            gameState.currentPlayerIndex,
-            cards,
-            handIndices,
-          );
         }
-      }
-      
-      return { type: 'DRAW', count: cardsToDraw, animationDuration };
-    }),
+        const { cards, handIndices } = planHandRefill(player.hand, gameState.deck, gameState.completedBuildPiles);
+        const cardsToDraw = cards.length;
+        let animationDuration = 0;
+
+        if (cardsToDraw > 0) {
+          // Fire and forget: start animations but don't block the draw state update.
+          if (cards.length > 0) {
+            animationDuration = await triggerMultipleDrawAnimations(gameState.currentPlayerIndex, cards, handIndices);
+          }
+        }
+
+        return { type: 'DRAW', count: cardsToDraw, animationDuration };
+      }),
+    },
   },
-});
+);

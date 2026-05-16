@@ -69,11 +69,7 @@ describe('serializeClientGameView', () => {
     });
 
     expect(view.players[0].stockPile).toEqual(state.players[0].stockPile);
-    expect(view.players[1].stockPile).toEqual([
-      HIDDEN_CARD,
-      HIDDEN_CARD,
-      state.players[1].stockPile[2],
-    ]);
+    expect(view.players[1].stockPile).toEqual([HIDDEN_CARD, HIDDEN_CARD, state.players[1].stockPile[2]]);
   });
 
   it('rotates multiplayer seats into a viewer-relative order and exposes room metadata', () => {

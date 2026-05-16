@@ -5,21 +5,11 @@ import { describe, expect, test } from 'vitest';
 describe('Card Angle', () => {
   test('cards have correct rotation when overlapIndex is provided', () => {
     // Render cards with different overlap indices
-    const { container: container0 } = render(
-      <Card card={{ value: 1, isSkipBo: false }} overlapIndex={0} />
-    );
-    const { container: container1 } = render(
-      <Card card={{ value: 2, isSkipBo: false }} overlapIndex={1} />
-    );
-    const { container: container2 } = render(
-      <Card card={{ value: 3, isSkipBo: false }} overlapIndex={2} />
-    );
-    const { container: container3 } = render(
-      <Card card={{ value: 4, isSkipBo: false }} overlapIndex={3} />
-    );
-    const { container: container4 } = render(
-      <Card card={{ value: 5, isSkipBo: false }} overlapIndex={4} />
-    );
+    const { container: container0 } = render(<Card card={{ value: 1, isSkipBo: false }} overlapIndex={0} />);
+    const { container: container1 } = render(<Card card={{ value: 2, isSkipBo: false }} overlapIndex={1} />);
+    const { container: container2 } = render(<Card card={{ value: 3, isSkipBo: false }} overlapIndex={2} />);
+    const { container: container3 } = render(<Card card={{ value: 4, isSkipBo: false }} overlapIndex={3} />);
+    const { container: container4 } = render(<Card card={{ value: 5, isSkipBo: false }} overlapIndex={4} />);
 
     // Get the card elements
     const card0 = container0.querySelector('.card') as HTMLElement;
@@ -46,9 +36,7 @@ describe('Card Angle', () => {
   test('cards do not have rotation when stackIndex is provided instead', () => {
     const index = 2;
     // Render a card with stackIndex
-    const { container } = render(
-      <Card card={{ value: 1, isSkipBo: false }} stackIndex={index} />
-    );
+    const { container } = render(<Card card={{ value: 1, isSkipBo: false }} stackIndex={index} />);
 
     // Get the card element
     const card = container.querySelector('.card') as HTMLElement;

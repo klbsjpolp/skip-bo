@@ -24,8 +24,7 @@ const analyzeOpponents = (gameState: GameState, aiPlayerIndex: number = gameStat
 
   return {
     closestToWinning: Math.min(...opponents.map((player) => player.stockPile.length)),
-    avgStockPileSize:
-      opponents.reduce((sum, player) => sum + player.stockPile.length, 0) / opponents.length,
+    avgStockPileSize: opponents.reduce((sum, player) => sum + player.stockPile.length, 0) / opponents.length,
   };
 };
 
@@ -91,11 +90,7 @@ const isUsefulDiscardTop = (card: Card, gameState: GameState): boolean => {
   return getStockBridgeUrgency(card, gameState) > 0;
 };
 
-const scoreDiscardPlacement = (
-  card: Card,
-  discardPile: Card[],
-  gameState: GameState
-): number => {
+const scoreDiscardPlacement = (card: Card, discardPile: Card[], gameState: GameState): number => {
   const weights = getWeights();
   let score = 0;
 
@@ -141,25 +136,16 @@ const scoreDiscardPlacement = (
   return score;
 };
 
-export const findBestDiscardPile = (
-  card: Card,
-  discardPiles: Card[][],
-  gameState: GameState
-): number => {
+export const findBestDiscardPile = (card: Card, discardPiles: Card[][], gameState: GameState): number => {
   const scoredPiles = discardPiles.map((pile, pileIndex) => ({
     option: pileIndex,
     score: scoreDiscardPlacement(card, pile, gameState),
   }));
 
-  return (
-    pickRandomNearBestOption(scoredPiles, getRandomnessWindow('discardPileScoreWindow'))?.option ?? 0
-  );
+  return pickRandomNearBestOption(scoredPiles, getRandomnessWindow('discardPileScoreWindow'))?.option ?? 0;
 };
 
-export const selectCardToDiscard = (
-  hand: (Card | null)[],
-  gameState: GameState
-): number => {
+export const selectCardToDiscard = (hand: (Card | null)[], gameState: GameState): number => {
   const weights = getWeights();
   const opponentAnalysis = analyzeOpponents(gameState);
   const neededSoonValues = getSoonNeededValues(gameState);
@@ -174,7 +160,7 @@ export const selectCardToDiscard = (
     let score = 0;
 
     const duplicateCount = hand.filter(
-      (candidate) => candidate && !candidate.isSkipBo && candidate.value === card.value
+      (candidate) => candidate && !candidate.isSkipBo && candidate.value === card.value,
     ).length;
 
     if (duplicateCount > 1) {
@@ -208,17 +194,10 @@ export const selectCardToDiscard = (
     scoredCards.push({ option: index, score });
   });
 
-  return (
-    pickRandomNearBestOption(scoredCards, getRandomnessWindow('discardCardScoreWindow'))?.option ??
-    -1
-  );
+  return pickRandomNearBestOption(scoredCards, getRandomnessWindow('discardCardScoreWindow'))?.option ?? -1;
 };
 
-export const evaluateDiscardMove = (
-  card: Card,
-  discardPileIndex: number,
-  gameState: GameState
-): number => {
+export const evaluateDiscardMove = (card: Card, discardPileIndex: number, gameState: GameState): number => {
   const weights = getWeights();
   const opponentAnalysis = analyzeOpponents(gameState);
   const neededSoonValues = getSoonNeededValues(gameState);
@@ -246,7 +225,7 @@ export const evaluateDiscardMove = (
 export const findBestDiscardPileToPlayFrom = (
   discardPiles: Card[][],
   buildPiles: Card[][],
-  gameState: GameState
+  gameState: GameState,
 ): { discardPileIndex: number; buildPileIndex: number } | null => {
   const weights = getWeights();
   const aiPlayer = getAIPlayer(gameState);
@@ -302,8 +281,5 @@ export const findBestDiscardPileToPlayFrom = (
     }
   }
 
-  return (
-    pickRandomNearBestOption(scoredPlays, getRandomnessWindow('discardPileScoreWindow'))?.option ??
-    null
-  );
+  return pickRandomNearBestOption(scoredPlays, getRandomnessWindow('discardPileScoreWindow'))?.option ?? null;
 };

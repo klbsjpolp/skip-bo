@@ -1,7 +1,7 @@
-import type {Card as CardType, GameState} from '@/types';
-import {PlayerArea} from '@/components/PlayerArea';
-import {CenterArea} from '@/components/CenterArea';
-import {cn} from '@/lib/utils';
+import type { Card as CardType, GameState } from '@/types';
+import { PlayerArea } from '@/components/PlayerArea';
+import { CenterArea } from '@/components/CenterArea';
+import { cn } from '@/lib/utils';
 
 export interface GameBoardProps {
   gameState: GameState;
@@ -12,13 +12,13 @@ export interface GameBoardProps {
   canPlayCard: (card: CardType, buildPileIndex: number, gameState: GameState) => boolean;
 }
 
-export function GameBoard({ 
-  gameState, 
-  selectCard, 
-  playCard, 
-  discardCard, 
-  clearSelection, 
-  canPlayCard 
+export function GameBoard({
+  gameState,
+  selectCard,
+  playCard,
+  discardCard,
+  clearSelection,
+  canPlayCard,
 }: GameBoardProps) {
   const aiPlayer = gameState.players[1];
   const humanPlayer = gameState.players[0];
@@ -26,10 +26,7 @@ export function GameBoard({
   const winner = gameState.winnerIndex !== null ? gameState.players[gameState.winnerIndex] : null;
 
   return (
-    <div
-      className={cn("game-board max-w-7xl mx-auto", winner && "game-board-victory")}
-      data-testid="game-board"
-    >
+    <div className={cn('game-board max-w-7xl mx-auto', winner && 'game-board-victory')} data-testid="game-board">
       {/* AI Player Area */}
       <PlayerArea
         player={aiPlayer}
@@ -44,11 +41,7 @@ export function GameBoard({
       />
 
       {/* Center Game Area */}
-      <CenterArea
-          gameState={gameState}
-        playCard={playCard}
-        canPlayCard={canPlayCard}
-      />
+      <CenterArea gameState={gameState} playCard={playCard} canPlayCard={canPlayCard} />
 
       {/* Game Message */}
       <h1 className="my-4 lg:my-6" data-testid="game-message">

@@ -23,9 +23,7 @@ const parseVersion = (value: string): ParsedVersion | null => {
 
   return {
     core: match.groups.core.split('.').map((segment) => Number(segment)),
-    prerelease: match.groups.prerelease
-      ? match.groups.prerelease.split('.').map(parsePrereleaseIdentifier)
-      : null,
+    prerelease: match.groups.prerelease ? match.groups.prerelease.split('.').map(parsePrereleaseIdentifier) : null,
   };
 };
 
@@ -44,10 +42,7 @@ const compareNumericSegments = (left: number[], right: number[]): number => {
   return 0;
 };
 
-const comparePrerelease = (
-  left: PrereleaseIdentifier[] | null,
-  right: PrereleaseIdentifier[] | null,
-): number => {
+const comparePrerelease = (left: PrereleaseIdentifier[] | null, right: PrereleaseIdentifier[] | null): number => {
   if (!left && !right) {
     return 0;
   }
@@ -123,5 +118,8 @@ export const compareAppVersions = (left: string | null | undefined, right: strin
     return normalizedLeft.localeCompare(normalizedRight);
   }
 
-  return compareNumericSegments(parsedLeft.core, parsedRight.core) || comparePrerelease(parsedLeft.prerelease, parsedRight.prerelease);
+  return (
+    compareNumericSegments(parsedLeft.core, parsedRight.core) ||
+    comparePrerelease(parsedLeft.prerelease, parsedRight.prerelease)
+  );
 };

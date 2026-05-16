@@ -5,6 +5,7 @@ Guidance for Claude Code in this repository.
 ## Overview
 
 Skip-Bo is a PNPM workspace monorepo. Three tiers:
+
 - **Frontend:** React/Vite PWA — [`apps/web`](apps/web/CLAUDE.md)
 - **Shared packages:** Game rules — [`packages/game-core`](packages/game-core/CLAUDE.md) · Multiplayer DTOs — [`packages/multiplayer-protocol`](packages/multiplayer-protocol/CLAUDE.md)
 - **Backend:** AWS Lambda + DynamoDB — [`apps/realtime-api`](apps/realtime-api/CLAUDE.md)
@@ -30,6 +31,7 @@ See each app/package CLAUDE.md for scoped test commands.
 ## Debug Buttons
 
 `DebugStrip` renders only when `import.meta.env.DEV` is true and is wired into both the local and online game screens. Two actions:
+
 - **Fill build pile** — fills build pile 0 to one card before completion
 - **Win** — immediately ends the game; the winner is whichever player's turn it currently is
 
@@ -55,11 +57,11 @@ PWA_MINIMUM_SUPPORTED_VERSION  # Hard-update threshold for PWA clients
 
 ## Testing Layout
 
-| Scope | Location | Runner |
-|---|---|---|
-| Game-core unit | `packages/game-core/tests/` | Vitest |
-| Protocol unit | `packages/multiplayer-protocol/tests/` | Vitest |
-| API unit | `apps/realtime-api/tests/` | Vitest |
-| Web unit | `apps/web/src/**/__tests__/` | Vitest (jsdom) |
-| E2E | `apps/web/tests/ui/*.spec.ts` | Playwright |
+| Scope             | Location                                   | Runner                        |
+| ----------------- | ------------------------------------------ | ----------------------------- |
+| Game-core unit    | `packages/game-core/tests/`                | Vitest                        |
+| Protocol unit     | `packages/multiplayer-protocol/tests/`     | Vitest                        |
+| API unit          | `apps/realtime-api/tests/`                 | Vitest                        |
+| Web unit          | `apps/web/src/**/__tests__/`               | Vitest (jsdom)                |
+| E2E               | `apps/web/tests/ui/*.spec.ts`              | Playwright                    |
 | Visual regression | `apps/web/tests/ui/theme-contract.spec.ts` | Playwright (chromium-desktop) |

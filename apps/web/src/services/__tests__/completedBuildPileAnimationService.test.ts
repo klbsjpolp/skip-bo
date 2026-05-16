@@ -8,12 +8,7 @@ import type { Card, GameState } from '@/types';
 
 const card = (value: number): Card => ({ value, isSkipBo: false });
 
-const createRect = (
-  left: number,
-  top: number,
-  width: number,
-  height: number,
-): DOMRect =>
+const createRect = (left: number, top: number, width: number, height: number): DOMRect =>
   ({
     bottom: top + height,
     height,
@@ -26,10 +21,7 @@ const createRect = (
     y: top,
   }) as DOMRect;
 
-const setElementRect = (
-  element: Element,
-  rect: DOMRect,
-): void => {
+const setElementRect = (element: Element, rect: DOMRect): void => {
   Object.defineProperty(element, 'getBoundingClientRect', {
     configurable: true,
     value: () => rect,
@@ -104,12 +96,7 @@ describe('completedBuildPileAnimationService', () => {
   });
 
   it('staggers completed build pile cards 100ms apart so only one is visible at the departure point at a time', () => {
-    const totalDuration = triggerCompletedBuildPileAnimation(
-      createGameState(),
-      0,
-      [card(10), card(11), card(12)],
-      4,
-    );
+    const totalDuration = triggerCompletedBuildPileAnimation(createGameState(), 0, [card(10), card(11), card(12)], 4);
 
     expect(startAnimation).toHaveBeenCalledTimes(3);
 

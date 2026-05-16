@@ -1,9 +1,7 @@
 import { startLocalRealtimeDevServer } from './local/devServer.js';
 
 const host = process.env.SKIPBO_LOCAL_API_HOST ?? '127.0.0.1';
-const port = process.env.SKIPBO_LOCAL_API_PORT
-  ? Number.parseInt(process.env.SKIPBO_LOCAL_API_PORT, 10)
-  : 8787;
+const port = process.env.SKIPBO_LOCAL_API_PORT ? Number.parseInt(process.env.SKIPBO_LOCAL_API_PORT, 10) : 8787;
 const publicHost = process.env.SKIPBO_LOCAL_API_PUBLIC_HOST ?? host;
 
 if (!Number.isInteger(port) || port <= 0) {

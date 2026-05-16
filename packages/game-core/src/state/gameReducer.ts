@@ -1,14 +1,12 @@
-import {produce} from 'immer';
-import type {Card, GameState, Player, SelectedCard} from '../types/index.js';
-import type {GameAction} from './gameActions.js';
-import {initialGameState} from './initialGameState.js';
-import {MESSAGES} from '../lib/config.js';
-import {canPlayCard} from '../lib/validators.js';
+import { produce } from 'immer';
+import type { Card, GameState, Player, SelectedCard } from '../types/index.js';
+import type { GameAction } from './gameActions.js';
+import { initialGameState } from './initialGameState.js';
+import { MESSAGES } from '../lib/config.js';
+import { canPlayCard } from '../lib/validators.js';
 
 const cardsMatch = (candidate: Card | null | undefined, selectedCard: Card): boolean =>
-  !!candidate &&
-  candidate.value === selectedCard.value &&
-  candidate.isSkipBo === selectedCard.isSkipBo;
+  !!candidate && candidate.value === selectedCard.value && candidate.isSkipBo === selectedCard.isSkipBo;
 
 const getNextPlayerIndex = (currentPlayerIndex: number, playerCount: number): number => {
   if (playerCount <= 0) {
@@ -39,7 +37,7 @@ const hasValidSelectedSource = (player: Player, selectedCard: SelectedCard): boo
           player.discardPiles[selectedCard.discardPileIndex][
             player.discardPiles[selectedCard.discardPileIndex].length - 1
           ],
-          selectedCard.card
+          selectedCard.card,
         )
       );
   }
@@ -53,12 +51,11 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
 
     case 'DRAW': {
       const player = draft.players[draft.currentPlayerIndex];
-      
-      // Count empty slots in hand (null values)
-      const emptySlots = player.hand.filter(card => card === null).length;
 
-      let remainingToDraw = action.count ??
-        Math.min(emptySlots, draft.deck.length + draft.completedBuildPiles.length);
+      // Count empty slots in hand (null values)
+      const emptySlots = player.hand.filter((card) => card === null).length;
+
+      let remainingToDraw = action.count ?? Math.min(emptySlots, draft.deck.length + draft.completedBuildPiles.length);
 
       // If no empty slots and no count specified, return early
       if (remainingToDraw === 0) {
@@ -108,12 +105,12 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
 
     case 'DRAW_SINGLE_CARD': {
       const player = draft.players[draft.currentPlayerIndex];
-      
+
       // Place the specific card in the specific hand slot
       if (action.handIndex >= 0 && action.handIndex < player.hand.length) {
         player.hand[action.handIndex] = action.card;
       }
-      
+
       return;
     }
 
@@ -138,10 +135,10 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
         return;
       }
 
-      draft.buildPiles[action.buildPile] = Array.from(
-        { length: draft.config.CARD_VALUES_MAX - 1 },
-        (_, index) => ({ value: index + 1, isSkipBo: false }),
-      );
+      draft.buildPiles[action.buildPile] = Array.from({ length: draft.config.CARD_VALUES_MAX - 1 }, (_, index) => ({
+        value: index + 1,
+        isSkipBo: false,
+      }));
 
       const humanPlayer = draft.players[0];
       if (humanPlayer.hand.length > 0) {
@@ -205,7 +202,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
 
     case 'PLAY_CARD': {
       const { selectedCard } = draft;
-      
+
       // Validation
       if (!selectedCard) {
         draft.message = MESSAGES.INVALID_MOVE_NO_SELECTION;
@@ -240,10 +237,10 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       }
 
       // Draw cards only if the player's hand is empty (all slots are null)
-      const allSlotsEmpty = player.hand.every(card => card === null);
+      const allSlotsEmpty = player.hand.every((card) => card === null);
       if (allSlotsEmpty) {
         // Count empty slots in hand (null values)
-        const emptySlots = player.hand.filter(card => card === null).length;
+        const emptySlots = player.hand.filter((card) => card === null).length;
 
         let remainingToDraw = Math.min(emptySlots, draft.deck.length + draft.completedBuildPiles.length);
 
@@ -294,7 +291,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
         draft.winnerIndex = draft.currentPlayerIndex;
         draft.message = MESSAGES.GAME_WON.replace('{player}', player.isAI ? "l'IA" : 'le joueur');
       } else {
-        draft.message = `${player.isAI ? "L'IA joue" : "Vous avez joué une carte"}`;
+        draft.message = `${player.isAI ? "L'IA joue" : 'Vous avez joué une carte'}`;
       }
 
       // Clear selection
@@ -304,7 +301,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
 
     case 'DISCARD_CARD': {
       const { selectedCard } = draft;
-      
+
       // Validation
       if (!selectedCard) {
         draft.message = MESSAGES.INVALID_MOVE_NO_SELECTION;
@@ -338,7 +335,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       // Add card to discard pile
       player.discardPiles[discardPileIndex].push({
         value: selectedCard.card.value,
-        isSkipBo: selectedCard.card.isSkipBo
+        isSkipBo: selectedCard.card.isSkipBo,
       });
 
       // Remove card from hand (set to null instead of removing)
@@ -352,7 +349,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       // Set message
       const currentPlayer = draft.players[previousPlayerIndex];
       const nextPlayer = draft.players[draft.currentPlayerIndex]; // New current player
-      draft.message = `${currentPlayer.isAI ? "Tour de l'IA terminé" : "Votre tour est terminé"}. ${nextPlayer.isAI ? "L'IA joue" : "C'est votre tour"}`;
+      draft.message = `${currentPlayer.isAI ? "Tour de l'IA terminé" : 'Votre tour est terminé'}. ${nextPlayer.isAI ? "L'IA joue" : "C'est votre tour"}`;
 
       // Clear selection
       draft.selectedCard = null;

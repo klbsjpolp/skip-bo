@@ -34,7 +34,9 @@ describe('NewGame', () => {
       const settingsSection = settingsSectionHeading.closest('section');
 
       expect(settingsSection).not.toBeNull();
-      expect(within(settingsSection as HTMLElement).getByRole('combobox', { name: 'Taille de pile de départ' })).toBeTruthy();
+      expect(
+        within(settingsSection as HTMLElement).getByRole('combobox', { name: 'Taille de pile de départ' }),
+      ).toBeTruthy();
       expect(within(dialog).getByRole('heading', { name: 'Local vs IA' })).toBeTruthy();
 
       fireEvent.click(within(dialog).getByRole('button', { name: 'Créer' }));

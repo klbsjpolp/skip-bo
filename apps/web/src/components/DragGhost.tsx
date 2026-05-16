@@ -1,6 +1,6 @@
-import {createPortal} from 'react-dom';
-import {Card} from '@/components/Card';
-import {useDrag} from '@/contexts/useDrag';
+import { createPortal } from 'react-dom';
+import { Card } from '@/components/Card';
+import { useDrag } from '@/contexts/useDrag';
 
 export function DragGhost() {
   const { session } = useDrag();

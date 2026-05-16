@@ -1,6 +1,6 @@
-import {describe, expect, it} from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import {compareAppVersions, normalizeVersionTag} from '../versionUtils';
+import { compareAppVersions, normalizeVersionTag } from '../versionUtils';
 
 describe('versionUtils', () => {
   it('normalizes blank version tags to null', () => {

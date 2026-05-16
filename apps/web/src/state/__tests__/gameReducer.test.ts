@@ -31,18 +31,18 @@ describe('gameReducer', () => {
         players: [
           {
             ...initialState.players[0],
-            hand: [null, null, null, null, null] // Empty hand
+            hand: [null, null, null, null, null], // Empty hand
           },
-          initialState.players[1]
-        ]
+          initialState.players[1],
+        ],
       };
 
       const deckSizeBefore = stateWithEmptyHand.deck.length;
-      const handSizeBefore = stateWithEmptyHand.players[0].hand.filter(c => !!c).length;
+      const handSizeBefore = stateWithEmptyHand.players[0].hand.filter((c) => !!c).length;
 
       const result = gameReducer(stateWithEmptyHand, { type: 'DRAW' });
 
-      expect(result.players[0].hand.filter(c => !!c)).toHaveLength(handSizeBefore + 5);
+      expect(result.players[0].hand.filter((c) => !!c)).toHaveLength(handSizeBefore + 5);
       expect(result.deck).toHaveLength(deckSizeBefore - 5);
     });
 
@@ -53,30 +53,30 @@ describe('gameReducer', () => {
         players: [
           {
             ...initialState.players[0],
-            hand: [{ value: 1, isSkipBo: false }, { value: 2, isSkipBo: false }, null, null, null] // Only 2 cards
+            hand: [{ value: 1, isSkipBo: false }, { value: 2, isSkipBo: false }, null, null, null], // Only 2 cards
           },
-          initialState.players[1]
-        ]
+          initialState.players[1],
+        ],
       };
 
       const deckSizeBefore = stateWithPartialHand.deck.length;
-      const handSizeBefore = stateWithPartialHand.players[0].hand.filter(c => !!c).length;
+      const handSizeBefore = stateWithPartialHand.players[0].hand.filter((c) => !!c).length;
 
       const result = gameReducer(stateWithPartialHand, { type: 'DRAW', count: 3 });
 
-      expect(result.players[0].hand.filter(c => !!c)).toHaveLength(handSizeBefore + 3);
+      expect(result.players[0].hand.filter((c) => !!c)).toHaveLength(handSizeBefore + 3);
       expect(result.deck).toHaveLength(deckSizeBefore - 3);
     });
   });
 
   describe('SELECT_CARD action', () => {
     it('should select a card from hand', () => {
-      const result = gameReducer(initialState, { 
-        type: 'SELECT_CARD', 
-        source: 'hand', 
-        index: 0 
+      const result = gameReducer(initialState, {
+        type: 'SELECT_CARD',
+        source: 'hand',
+        index: 0,
       });
-      
+
       expect(result.selectedCard).toBeDefined();
       expect(result.selectedCard?.source).toBe('hand');
       expect(result.selectedCard?.index).toBe(0);
@@ -90,18 +90,18 @@ describe('gameReducer', () => {
         players: [
           {
             ...initialState.players[0],
-            stockPile: [{ value: 1, isSkipBo: false }]
+            stockPile: [{ value: 1, isSkipBo: false }],
           },
-          initialState.players[1]
-        ]
+          initialState.players[1],
+        ],
       };
 
-      const result = gameReducer(stateWithStock, { 
-        type: 'SELECT_CARD', 
-        source: 'stock', 
-        index: 0 
+      const result = gameReducer(stateWithStock, {
+        type: 'SELECT_CARD',
+        source: 'stock',
+        index: 0,
       });
-      
+
       expect(result.selectedCard).toBeDefined();
       expect(result.selectedCard?.source).toBe('stock');
       expect(result.selectedCard?.card.value).toBe(1);
@@ -111,17 +111,17 @@ describe('gameReducer', () => {
   describe('CLEAR_SELECTION action', () => {
     it('should clear the selected card', () => {
       // First select a card
-      const stateWithSelection = gameReducer(initialState, { 
-        type: 'SELECT_CARD', 
-        source: 'hand', 
-        index: 0 
+      const stateWithSelection = gameReducer(initialState, {
+        type: 'SELECT_CARD',
+        source: 'hand',
+        index: 0,
       });
-      
+
       expect(stateWithSelection.selectedCard).toBeDefined();
-      
+
       // Then clear selection
       const result = gameReducer(stateWithSelection, { type: 'CLEAR_SELECTION' });
-      
+
       expect(result.selectedCard).toBeNull();
     });
   });
@@ -150,7 +150,7 @@ describe('gameReducer', () => {
   describe('PLAY_CARD action', () => {
     it('should not play card if no card is selected', () => {
       const result = gameReducer(initialState, { type: 'PLAY_CARD', buildPile: 0 });
-      
+
       expect(result.message).toContain('Aucune carte sélectionnée');
     });
 
@@ -161,26 +161,26 @@ describe('gameReducer', () => {
         players: [
           {
             ...initialState.players[0],
-            hand: [{ value: 1, isSkipBo: false }, null, null, null, null]
+            hand: [{ value: 1, isSkipBo: false }, null, null, null, null],
           },
-          initialState.players[1]
-        ]
+          initialState.players[1],
+        ],
       };
 
       // Select the card
-      const stateWithSelection = gameReducer(stateWithCard1, { 
-        type: 'SELECT_CARD', 
-        source: 'hand', 
-        index: 0 
+      const stateWithSelection = gameReducer(stateWithCard1, {
+        type: 'SELECT_CARD',
+        source: 'hand',
+        index: 0,
       });
 
       // Play the card
       const result = gameReducer(stateWithSelection, { type: 'PLAY_CARD', buildPile: 0 });
-      
+
       expect(result.buildPiles[0]).toHaveLength(1);
       expect(result.buildPiles[0][0].value).toBe(1);
       // After playing the only card in hand, auto-draw should occur (5 new cards)
-      expect(result.players[0].hand.filter(c => !!c)).toHaveLength(5);
+      expect(result.players[0].hand.filter((c) => !!c)).toHaveLength(5);
       expect(result.selectedCard).toBeNull();
     });
 
@@ -196,21 +196,21 @@ describe('gameReducer', () => {
               { value: 3, isSkipBo: false },
               { value: 4, isSkipBo: false }, // Add extra cards to prevent auto-draw
               { value: 5, isSkipBo: false },
-              { value: 6, isSkipBo: false }
-            ]
+              { value: 6, isSkipBo: false },
+            ],
           },
-          initialState.players[1]
+          initialState.players[1],
         ],
         buildPiles: [
           [{ value: 1, isSkipBo: false }], // Build pile with 1
-        ]
+        ],
       };
 
       // Select the skip-bo card
       const stateWithFirstSelection = gameReducer(stateWithCards, {
         type: 'SELECT_CARD',
         source: 'hand',
-        index: 0
+        index: 0,
       });
 
       // Play the Skip-Bo card as 2
@@ -218,21 +218,21 @@ describe('gameReducer', () => {
 
       expect(stateAfterFirstPlay.buildPiles[0]).toHaveLength(2);
       expect(stateAfterFirstPlay.buildPiles[0][1].isSkipBo).toBe(true);
-      expect(stateAfterFirstPlay.players[0].hand.filter(c => !!c)).toHaveLength(4); // 4 cards left (no auto-draw)
+      expect(stateAfterFirstPlay.players[0].hand.filter((c) => !!c)).toHaveLength(4); // 4 cards left (no auto-draw)
       expect(stateAfterFirstPlay.selectedCard).toBeNull();
 
       // Now select the 3 from the updated state (still at index 1 since Skip-Bo was set to null, not removed)
       const stateWithSecondSelection = gameReducer(stateAfterFirstPlay, {
         type: 'SELECT_CARD',
         source: 'hand',
-        index: 1 // The 3 is still at index 1 since Skip-Bo was set to null
+        index: 1, // The 3 is still at index 1 since Skip-Bo was set to null
       });
 
       // Play the 3
       const stateAfterSecondPlay = gameReducer(stateWithSecondSelection, { type: 'PLAY_CARD', buildPile: 0 });
 
       // Hand should now have 3 cards (no auto-draw since hand wasn't empty)
-      expect(stateAfterSecondPlay.players[0].hand.filter(c => !!c)).toHaveLength(3);
+      expect(stateAfterSecondPlay.players[0].hand.filter((c) => !!c)).toHaveLength(3);
       expect(stateAfterSecondPlay.buildPiles[0]).toHaveLength(3);
       expect(stateAfterSecondPlay.buildPiles[0][2].value).toBe(3);
       expect(stateAfterSecondPlay.selectedCard).toBeNull();
@@ -246,16 +246,16 @@ describe('gameReducer', () => {
           {
             ...initialState.players[0],
             stockPile: [{ value: 1, isSkipBo: false }],
-            hand: [{ value: 3, isSkipBo: false }, null, null, null, null]
+            hand: [{ value: 3, isSkipBo: false }, null, null, null, null],
           },
-          initialState.players[1]
-        ]
+          initialState.players[1],
+        ],
       };
 
       const stateWithSelection = gameReducer(stateWithWinningStock, {
         type: 'SELECT_CARD',
         source: 'stock',
-        index: 0
+        index: 0,
       });
 
       const result = gameReducer(stateWithSelection, { type: 'PLAY_CARD', buildPile: 0 });
@@ -269,7 +269,7 @@ describe('gameReducer', () => {
   describe('DISCARD_CARD action', () => {
     it('should not discard if no card is selected', () => {
       const result = gameReducer(initialState, { type: 'DISCARD_CARD', discardPile: 0 });
-      
+
       expect(result.message).toContain('Aucune carte sélectionnée');
     });
 
@@ -280,12 +280,12 @@ describe('gameReducer', () => {
         selectedCard: {
           card: { value: 0, isSkipBo: true },
           source: 'hand' as const,
-          index: 0
-        }
+          index: 0,
+        },
       };
 
       const result = gameReducer(stateWithSkipBo, { type: 'DISCARD_CARD', discardPile: 0 });
-      
+
       expect(result.message).toContain('Skip-Bo');
     });
 
@@ -296,17 +296,17 @@ describe('gameReducer', () => {
         players: [
           {
             ...initialState.players[0],
-            hand: [{ value: 5, isSkipBo: false }, null, null, null, null] // Only 1 card in hand
+            hand: [{ value: 5, isSkipBo: false }, null, null, null, null], // Only 1 card in hand
           },
-          initialState.players[1]
-        ]
+          initialState.players[1],
+        ],
       };
 
       // Select the card
       const stateWithSelection = gameReducer(stateWithCard, {
         type: 'SELECT_CARD',
         source: 'hand',
-        index: 0
+        index: 0,
       });
 
       // Discard the card
@@ -314,7 +314,7 @@ describe('gameReducer', () => {
 
       expect(result.players[0].discardPiles[0]).toHaveLength(1);
       expect(result.players[0].discardPiles[0][0].value).toBe(5);
-      expect(result.players[0].hand.filter(c => !!c)).toHaveLength(0);
+      expect(result.players[0].hand.filter((c) => !!c)).toHaveLength(0);
       expect(result.currentPlayerIndex).toBe(1); // Turn should switch
       expect(result.selectedCard).toBeNull();
     });
@@ -349,10 +349,13 @@ describe('gameReducer', () => {
 
       expect(result.currentPlayerIndex).toBe(3);
 
-      const wrappedResult = gameReducer({
-        ...multiplayerState,
-        currentPlayerIndex: 3,
-      }, { type: 'END_TURN' });
+      const wrappedResult = gameReducer(
+        {
+          ...multiplayerState,
+          currentPlayerIndex: 3,
+        },
+        { type: 'END_TURN' },
+      );
 
       expect(wrappedResult.currentPlayerIndex).toBe(0);
     });
@@ -379,27 +382,27 @@ describe('gameReducer', () => {
           ...initialState,
           deck: [
             { value: 1, isSkipBo: false },
-            { value: 2, isSkipBo: false }
+            { value: 2, isSkipBo: false },
           ],
           completedBuildPiles: [
             { value: 3, isSkipBo: false },
             { value: 4, isSkipBo: false },
             { value: 5, isSkipBo: true }, // Skip-Bo card should maintain identity
-            { value: 6, isSkipBo: false }
+            { value: 6, isSkipBo: false },
           ],
           players: [
             {
               ...initialState.players[0],
-              hand: [null, null, null, null, null] // Empty hand to allow drawing
+              hand: [null, null, null, null, null], // Empty hand to allow drawing
             },
-            initialState.players[1]
-          ]
+            initialState.players[1],
+          ],
         };
 
         const result = gameReducer(stateWithLowDeck, { type: 'DRAW', count: 4 });
 
         // Should have drawn 4 cards total
-        expect(result.players[0].hand.filter(c => !!c)).toHaveLength(4);
+        expect(result.players[0].hand.filter((c) => !!c)).toHaveLength(4);
         // Deck should have remaining cards after reshuffling
         expect(result.deck.length).toBeGreaterThan(0);
         // Completed build piles should be empty (moved to deck)
@@ -414,16 +417,16 @@ describe('gameReducer', () => {
           players: [
             {
               ...initialState.players[0],
-              hand: [null, null, null, null, null] // Empty hand to allow drawing
+              hand: [null, null, null, null, null], // Empty hand to allow drawing
             },
-            initialState.players[1]
-          ]
+            initialState.players[1],
+          ],
         };
 
         const result = gameReducer(stateWithLowDeck, { type: 'DRAW', count: 3 });
 
         // Should only draw the 1 available card
-        expect(result.players[0].hand.filter(c => !!c)).toHaveLength(1);
+        expect(result.players[0].hand.filter((c) => !!c)).toHaveLength(1);
         expect(result.deck).toHaveLength(0);
         expect(result.completedBuildPiles).toHaveLength(0);
       });
@@ -434,7 +437,7 @@ describe('gameReducer', () => {
         // Create a build pile with 11 cards
         const buildPileWith11Cards = Array.from({ length: 11 }, (_, i) => ({
           value: i + 1,
-          isSkipBo: false
+          isSkipBo: false,
         }));
 
         const stateWith11Cards = {
@@ -443,22 +446,22 @@ describe('gameReducer', () => {
           players: [
             {
               ...initialState.players[0],
-              hand: [{ value: 12, isSkipBo: false }, null, null, null, null] // Only 1 card in hand
+              hand: [{ value: 12, isSkipBo: false }, null, null, null, null], // Only 1 card in hand
             },
-            initialState.players[1]
-          ]
+            initialState.players[1],
+          ],
         };
 
         // Select and play the 12th card
         const stateWithSelection = gameReducer(stateWith11Cards, {
           type: 'SELECT_CARD',
           source: 'hand',
-          index: 0
+          index: 0,
         });
 
         const result = gameReducer(stateWithSelection, {
           type: 'PLAY_CARD',
-          buildPile: 0
+          buildPile: 0,
         });
 
         // Build pile should be empty
@@ -477,7 +480,7 @@ describe('gameReducer', () => {
           { value: 2, isSkipBo: true }, // Skip-Bo played as 2
           { value: 3, isSkipBo: false },
           { value: 4, isSkipBo: true }, // Skip-Bo played as 4
-          ...Array.from({ length: 7 }, (_, i) => ({ value: i + 5, isSkipBo: false }))
+          ...Array.from({ length: 7 }, (_, i) => ({ value: i + 5, isSkipBo: false })),
         ];
 
         const stateWithSkipBoCards = {
@@ -486,25 +489,25 @@ describe('gameReducer', () => {
           players: [
             {
               ...initialState.players[0],
-              hand: [{ value: 12, isSkipBo: false }, null, null, null, null] // Only 1 card in hand
+              hand: [{ value: 12, isSkipBo: false }, null, null, null, null], // Only 1 card in hand
             },
-            initialState.players[1]
-          ]
+            initialState.players[1],
+          ],
         };
 
         const stateWithSelection = gameReducer(stateWithSkipBoCards, {
           type: 'SELECT_CARD',
           source: 'hand',
-          index: 0
+          index: 0,
         });
 
         const result = gameReducer(stateWithSelection, {
           type: 'PLAY_CARD',
-          buildPile: 0
+          buildPile: 0,
         });
 
         // Find the Skip-Bo cards in completed build piles
-        const skipBoCards = result.completedBuildPiles.filter(card => card.isSkipBo);
+        const skipBoCards = result.completedBuildPiles.filter((card) => card.isSkipBo);
         expect(skipBoCards).toHaveLength(2);
         expect(skipBoCards[0].isSkipBo).toBe(true);
         expect(skipBoCards[1].isSkipBo).toBe(true);
@@ -521,31 +524,31 @@ describe('gameReducer', () => {
             { value: 3, isSkipBo: true },
             { value: 4, isSkipBo: false },
             { value: 5, isSkipBo: false }, // Add more cards so deck isn't empty after drawing
-            { value: 6, isSkipBo: false }
+            { value: 6, isSkipBo: false },
           ],
           buildPiles: [[], [], [], []],
           players: [
             {
               ...initialState.players[0],
-              hand: [{ value: 1, isSkipBo: false }, null, null, null, null] // Only 1 card in hand
+              hand: [{ value: 1, isSkipBo: false }, null, null, null, null], // Only 1 card in hand
             },
-            initialState.players[1]
-          ]
+            initialState.players[1],
+          ],
         };
 
         const stateWithSelection = gameReducer(stateWithOneCard, {
           type: 'SELECT_CARD',
           source: 'hand',
-          index: 0
+          index: 0,
         });
 
         const result = gameReducer(stateWithSelection, {
           type: 'PLAY_CARD',
-          buildPile: 0
+          buildPile: 0,
         });
 
         // Should auto-draw 5 cards (1 from deck + 4 from reshuffled completed piles, but limited to 5 total)
-        expect(result.players[0].hand.filter(c => !!c)).toHaveLength(5);
+        expect(result.players[0].hand.filter((c) => !!c)).toHaveLength(5);
         // Completed build piles should be empty
         expect(result.completedBuildPiles).toHaveLength(0);
         // Deck should have remaining cards after reshuffle (1 card left)
@@ -559,23 +562,23 @@ describe('gameReducer', () => {
           ...initialState,
           deck: [], // Empty deck
           completedBuildPiles: [
-            {value: 1, isSkipBo: false},
-            {value: 2, isSkipBo: false},
-            {value: 3, isSkipBo: false},
-            {value: 4, isSkipBo: false},
-            {value: 5, isSkipBo: false},
+            { value: 1, isSkipBo: false },
+            { value: 2, isSkipBo: false },
+            { value: 3, isSkipBo: false },
+            { value: 4, isSkipBo: false },
+            { value: 5, isSkipBo: false },
           ], // 5 cards that need to be reshuffled
           currentPlayerIndex: 0,
           players: [
             {
               ...initialState.players[0],
-              hand: [{ value: 8, isSkipBo: false }, { value: 9, isSkipBo: false }, null, null, null] // 2 cards, needs 3 more
+              hand: [{ value: 8, isSkipBo: false }, { value: 9, isSkipBo: false }, null, null, null], // 2 cards, needs 3 more
             },
             {
               ...initialState.players[1],
-              hand: [{ value: 10, isSkipBo: false }, null, null, null, null] // AI has 1 card, will need to draw later
-            }
-          ]
+              hand: [{ value: 10, isSkipBo: false }, null, null, null, null], // AI has 1 card, will need to draw later
+            },
+          ],
         };
 
         const result = gameReducer(stateForEndTurn, { type: 'END_TURN' });
@@ -583,7 +586,7 @@ describe('gameReducer', () => {
         // Should switch to AI player
         expect(result.currentPlayerIndex).toBe(1);
         // AI should still have only 1 card (END_TURN no longer auto-draws)
-        expect(result.players[1].hand.filter(c => !!c)).toHaveLength(1);
+        expect(result.players[1].hand.filter((c) => !!c)).toHaveLength(1);
         // Completed build piles should remain unchanged (drawing happens in state machine now)
         expect(result.completedBuildPiles).toHaveLength(5);
         // Deck should remain empty (reshuffling happens during DRAW action)
@@ -598,21 +601,21 @@ describe('gameReducer', () => {
           players: [
             {
               ...initialState.players[0],
-              hand: [{ value: 0, isSkipBo: true }, null, null, null, null] // Skip-Bo card
+              hand: [{ value: 0, isSkipBo: true }, null, null, null, null], // Skip-Bo card
             },
-            initialState.players[1]
-          ]
+            initialState.players[1],
+          ],
         };
 
         const stateWithSelection = gameReducer(stateWithSkipBo, {
           type: 'SELECT_CARD',
           source: 'hand',
-          index: 0
+          index: 0,
         });
 
         const result = gameReducer(stateWithSelection, {
           type: 'PLAY_CARD',
-          buildPile: 0
+          buildPile: 0,
         });
 
         // Card in build pile should maintain Skip-Bo identity
@@ -626,7 +629,7 @@ describe('gameReducer', () => {
         const buildPilePartial = [
           { value: 1, isSkipBo: false },
           { value: 2, isSkipBo: false },
-          { value: 3, isSkipBo: false }
+          { value: 3, isSkipBo: false },
         ];
 
         const stateWithPartialPile = {
@@ -635,21 +638,21 @@ describe('gameReducer', () => {
           players: [
             {
               ...initialState.players[0],
-              hand: [{ value: 0, isSkipBo: true }, null, null, null, null] // Skip-Bo should work as 4
+              hand: [{ value: 0, isSkipBo: true }, null, null, null, null], // Skip-Bo should work as 4
             },
-            initialState.players[1]
-          ]
+            initialState.players[1],
+          ],
         };
 
         const stateWithSelection = gameReducer(stateWithPartialPile, {
           type: 'SELECT_CARD',
           source: 'hand',
-          index: 0
+          index: 0,
         });
 
         const result = gameReducer(stateWithSelection, {
           type: 'PLAY_CARD',
-          buildPile: 0
+          buildPile: 0,
         });
 
         // Build pile should now have 4 cards
@@ -668,16 +671,16 @@ describe('gameReducer', () => {
           players: [
             {
               ...initialState.players[0],
-              hand: [null, null, null, null, null] // Empty hand to allow drawing
+              hand: [null, null, null, null, null], // Empty hand to allow drawing
             },
-            initialState.players[1]
-          ]
+            initialState.players[1],
+          ],
         };
 
         const result = gameReducer(emptyState, { type: 'DRAW', count: 5 });
 
         // Should not crash and hand should remain empty
-        expect(result.players[0].hand.filter(c => !!c)).toHaveLength(0);
+        expect(result.players[0].hand.filter((c) => !!c)).toHaveLength(0);
         expect(result.deck).toHaveLength(0);
         expect(result.completedBuildPiles).toHaveLength(0);
       });
@@ -689,32 +692,34 @@ describe('gameReducer', () => {
           completedBuildPiles: [],
           buildPiles: [
             Array.from({ length: 11 }, (_, i) => ({ value: i + 1, isSkipBo: i === 5 })), // 11 cards, one Skip-Bo
-            [], [], []
+            [],
+            [],
+            [],
           ],
           players: [
             {
               ...initialState.players[0],
-              hand: [{ value: 12, isSkipBo: false }, null, null, null, null]
+              hand: [{ value: 12, isSkipBo: false }, null, null, null, null],
             },
-            initialState.players[1]
-          ]
+            initialState.players[1],
+          ],
         };
 
         const stateWithSelection = gameReducer(stateWithMultipleNearComplete, {
           type: 'SELECT_CARD',
           source: 'hand',
-          index: 0
+          index: 0,
         });
 
         const result = gameReducer(stateWithSelection, {
           type: 'PLAY_CARD',
-          buildPile: 0
+          buildPile: 0,
         });
 
         expect(result.completedBuildPiles).toHaveLength(12);
         expect(result.buildPiles[0]).toHaveLength(0);
         // Verify Skip-Bo card is preserved
-        const skipBoInCompleted = result.completedBuildPiles.find(card => card.isSkipBo);
+        const skipBoInCompleted = result.completedBuildPiles.find((card) => card.isSkipBo);
         expect(skipBoInCompleted).toBeDefined();
       });
 

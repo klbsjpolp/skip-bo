@@ -37,10 +37,7 @@ const toError = (error: unknown): Error => {
   return new Error('Unknown error');
 };
 
-export const captureBackendException = (
-  error: unknown,
-  context: BackendExceptionContext,
-): void => {
+export const captureBackendException = (error: unknown, context: BackendExceptionContext): void => {
   if (!sentryEnabled) {
     return;
   }
@@ -70,7 +67,5 @@ export const captureBackendException = (
   });
 };
 
-export const withSentry = <TEvent, TResult>(
-  handler: Handler<TEvent, TResult>,
-): Handler<TEvent, TResult> =>
+export const withSentry = <TEvent, TResult>(handler: Handler<TEvent, TResult>): Handler<TEvent, TResult> =>
   sentryEnabled ? Sentry.wrapHandler(handler) : handler;

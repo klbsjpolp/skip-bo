@@ -21,19 +21,13 @@ describe('Card Colors', () => {
     vi.mocked(useTheme).mockReturnValue({
       theme: 'light',
       setTheme: vi.fn(),
-      themes: []
+      themes: [],
     });
 
     // Render cards with different values
-    const { container: container2 } = render(
-      <Card card={{ value: 2, isSkipBo: false }} isRevealed={true} />
-    );
-    const { container: container6 } = render(
-      <Card card={{ value: 6, isSkipBo: false }} isRevealed={true} />
-    );
-    const { container: container11 } = render(
-      <Card card={{ value: 11, isSkipBo: false }} isRevealed={true} />
-    );
+    const { container: container2 } = render(<Card card={{ value: 2, isSkipBo: false }} isRevealed={true} />);
+    const { container: container6 } = render(<Card card={{ value: 6, isSkipBo: false }} isRevealed={true} />);
+    const { container: container11 } = render(<Card card={{ value: 11, isSkipBo: false }} isRevealed={true} />);
 
     // Get the card elements
     const card2 = container2.querySelector('.card') as HTMLElement;
@@ -53,19 +47,13 @@ describe('Card Colors', () => {
     vi.mocked(useTheme).mockReturnValue({
       theme: 'neon',
       setTheme: vi.fn(),
-      themes: []
+      themes: [],
     });
 
     // Render cards with different values
-    const { container: container2 } = render(
-      <Card card={{ value: 2, isSkipBo: false }} isRevealed={true} />
-    );
-    const { container: container6 } = render(
-      <Card card={{ value: 6, isSkipBo: false }} isRevealed={true} />
-    );
-    const { container: container11 } = render(
-      <Card card={{ value: 11, isSkipBo: false }} isRevealed={true} />
-    );
+    const { container: container2 } = render(<Card card={{ value: 2, isSkipBo: false }} isRevealed={true} />);
+    const { container: container6 } = render(<Card card={{ value: 6, isSkipBo: false }} isRevealed={true} />);
+    const { container: container11 } = render(<Card card={{ value: 11, isSkipBo: false }} isRevealed={true} />);
 
     // Get the card elements
     const card2 = container2.querySelector('.card') as HTMLElement;
@@ -80,9 +68,7 @@ describe('Card Colors', () => {
 
   test('Skip-Bo cards do not have color range classes', () => {
     // Render a Skip-Bo card
-    const { container } = render(
-      <Card card={{ value: 0, isSkipBo: true }} isRevealed={true} />
-    );
+    const { container } = render(<Card card={{ value: 0, isSkipBo: true }} isRevealed={true} />);
 
     // Get the card element
     const card = container.querySelector('.card') as HTMLElement;
@@ -96,9 +82,7 @@ describe('Card Colors', () => {
 
   test('Unrevealed cards do not have color range classes', () => {
     // Render an unrevealed card
-    const { container } = render(
-      <Card card={{ value: 5, isSkipBo: false }} isRevealed={false} />
-    );
+    const { container } = render(<Card card={{ value: 5, isSkipBo: false }} isRevealed={false} />);
 
     // Get the card element
     const card = container.querySelector('.card') as HTMLElement;

@@ -44,11 +44,11 @@ export const initializePwaUpdates = () => {
   initialized = true;
   updateServiceWorker = registerSW({
     onNeedRefresh() {
-      updateSnapshot({needRefresh: true});
+      updateSnapshot({ needRefresh: true });
     },
     onOfflineReady() {
       console.info('App ready to work offline');
-      updateSnapshot({offlineReady: true});
+      updateSnapshot({ offlineReady: true });
     },
     onRegisteredSW(_swScriptUrl, registration) {
       updateSnapshot({
@@ -57,7 +57,7 @@ export const initializePwaUpdates = () => {
       });
     },
     onRegisterError(error) {
-      updateSnapshot({registrationError: toRegistrationError(error)});
+      updateSnapshot({ registrationError: toRegistrationError(error) });
     },
   });
 };

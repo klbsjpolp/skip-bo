@@ -1,9 +1,14 @@
-import {startTransition, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore} from 'react';
+import { startTransition, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react';
 
-import {APP_VERSION} from '@/lib/appVersion';
-import {applyServiceWorkerUpdate, getPwaUpdateSnapshot, refreshServiceWorkerRegistration, subscribeToPwaUpdates} from '@/lib/pwaUpdates';
-import {fetchRuntimeConfig} from '@/lib/runtimeConfig';
-import {compareAppVersions, normalizeVersionTag} from '@/lib/versionUtils';
+import { APP_VERSION } from '@/lib/appVersion';
+import {
+  applyServiceWorkerUpdate,
+  getPwaUpdateSnapshot,
+  refreshServiceWorkerRegistration,
+  subscribeToPwaUpdates,
+} from '@/lib/pwaUpdates';
+import { fetchRuntimeConfig } from '@/lib/runtimeConfig';
+import { compareAppVersions, normalizeVersionTag } from '@/lib/versionUtils';
 
 const UPDATE_CHECK_INTERVAL_MS = 10 * 60 * 1000;
 export const AUTO_RELOAD_SESSION_STORAGE_KEY = 'skipbo:pwa-auto-reload-version';
@@ -52,16 +57,12 @@ export const usePwaVersionGate = (): PwaVersionGateState => {
     lastCheckAt: null,
   });
   const isApplyingUpdateRef = useRef(false);
-  const pwaUpdateSnapshot = useSyncExternalStore(
-    subscribeToPwaUpdates,
-    getPwaUpdateSnapshot,
-    getPwaUpdateSnapshot,
-  );
+  const pwaUpdateSnapshot = useSyncExternalStore(subscribeToPwaUpdates, getPwaUpdateSnapshot, getPwaUpdateSnapshot);
 
   const checkForUpdates = useEffectEvent(async () => {
     await refreshServiceWorkerRegistration().catch(() => undefined);
 
-    const runtimeConfig = await fetchRuntimeConfig({force: true});
+    const runtimeConfig = await fetchRuntimeConfig({ force: true });
 
     startTransition(() => {
       setRuntimeVersionSnapshot({

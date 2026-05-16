@@ -1,8 +1,8 @@
-import type {FC, ReactNode} from 'react';
-import { useCallback, useRef, useState} from 'react';
+import type { FC, ReactNode } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
-import type {Card} from '@/types';
-import {CardAnimationContext} from "./useCardAnimation";
+import type { Card } from '@/types';
+import { CardAnimationContext } from './useCardAnimation';
 
 export interface CardAnimationData {
   id: string;
@@ -42,7 +42,7 @@ export interface CardAnimationData {
 export interface AnimationContextType {
   activeAnimations: CardAnimationData[];
   startAnimation: (animationData: Omit<CardAnimationData, 'id'>) => string;
-  removeAnimation: (id:string) => void;
+  removeAnimation: (id: string) => void;
   markAnimationStarted: (id: string) => void;
   isCardBeingAnimated: (
     playerIndex: number,
@@ -64,22 +64,25 @@ export const CardAnimationProvider: FC<CardAnimationProviderProps> = ({ children
 
   const resolveAnimationWaiters = useCallback(() => {
     if (activeAnimationIds.current.size === 0) {
-      animationCompletionResolvers.current.forEach(resolve => resolve());
+      animationCompletionResolvers.current.forEach((resolve) => resolve());
       animationCompletionResolvers.current = [];
     }
   }, []);
 
-  const removeAnimation = useCallback((id: string) => {
-    if (!activeAnimationIds.current.delete(id)) {
-      return;
-    }
+  const removeAnimation = useCallback(
+    (id: string) => {
+      if (!activeAnimationIds.current.delete(id)) {
+        return;
+      }
 
-    flushSync(() => {
-      setActiveAnimations(prev => prev.filter(anim => anim.id !== id));
-    });
+      flushSync(() => {
+        setActiveAnimations((prev) => prev.filter((anim) => anim.id !== id));
+      });
 
-    resolveAnimationWaiters();
-  }, [resolveAnimationWaiters]);
+      resolveAnimationWaiters();
+    },
+    [resolveAnimationWaiters],
+  );
 
   const startAnimation = useCallback((animationData: Omit<CardAnimationData, 'id'>) => {
     const id = `animation-${Date.now()}-${Math.random()}`;
@@ -91,7 +94,7 @@ export const CardAnimationProvider: FC<CardAnimationProviderProps> = ({ children
     activeAnimationIds.current.add(id);
 
     flushSync(() => {
-      setActiveAnimations(prev => [...prev, newAnimation]);
+      setActiveAnimations((prev) => [...prev, newAnimation]);
     });
 
     return id;
@@ -108,27 +111,32 @@ export const CardAnimationProvider: FC<CardAnimationProviderProps> = ({ children
   }, []);
 
   const markAnimationStarted = useCallback((id: string) => {
-    setActiveAnimations(prev => {
-      const target = prev.find(a => a.id === id);
+    setActiveAnimations((prev) => {
+      const target = prev.find((a) => a.id === id);
       if (!target || target.hasStarted) return prev; // already marked — return same ref, no re-render
-      return prev.map(anim => anim.id === id ? { ...anim, hasStarted: true } : anim);
+      return prev.map((anim) => (anim.id === id ? { ...anim, hasStarted: true } : anim));
     });
   }, []);
 
-  const isCardBeingAnimated = useCallback((
-    playerIndex: number, 
-    source: 'hand' | 'stock' | 'discard' | 'deck' | 'build',
-    index: number, 
-    discardPileIndex?: number
-  ) => {
-    return activeAnimations.some(animation => {
-      const sourceInfo = animation.sourceInfo;
-      return sourceInfo.playerIndex === playerIndex &&
-        sourceInfo.source === source &&
-        sourceInfo.index === index &&
-        sourceInfo.discardPileIndex === discardPileIndex;
-    });
-  }, [activeAnimations]);
+  const isCardBeingAnimated = useCallback(
+    (
+      playerIndex: number,
+      source: 'hand' | 'stock' | 'discard' | 'deck' | 'build',
+      index: number,
+      discardPileIndex?: number,
+    ) => {
+      return activeAnimations.some((animation) => {
+        const sourceInfo = animation.sourceInfo;
+        return (
+          sourceInfo.playerIndex === playerIndex &&
+          sourceInfo.source === source &&
+          sourceInfo.index === index &&
+          sourceInfo.discardPileIndex === discardPileIndex
+        );
+      });
+    },
+    [activeAnimations],
+  );
 
   const value: AnimationContextType = {
     activeAnimations,
@@ -139,9 +147,5 @@ export const CardAnimationProvider: FC<CardAnimationProviderProps> = ({ children
     waitForAnimations,
   };
 
-  return (
-    <CardAnimationContext.Provider value={value}>
-      {children}
-    </CardAnimationContext.Provider>
-  );
+  return <CardAnimationContext.Provider value={value}>{children}</CardAnimationContext.Provider>;
 };

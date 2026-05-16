@@ -1,11 +1,7 @@
 import type { CardAnimationData } from '@/contexts/CardAnimationContext.tsx';
 import { getRetreatPileAngle } from '@/lib/retreatPile';
 import type { Card, GameState } from '@/types';
-import {
-  calculateAnimationDuration,
-  getBuildPilePosition,
-  getRetreatPilePosition,
-} from '@/utils/cardPositions';
+import { calculateAnimationDuration, getBuildPilePosition, getRetreatPilePosition } from '@/utils/cardPositions';
 
 let globalAnimationContext: {
   startAnimation: (animationData: Omit<CardAnimationData, 'id'>) => string;

@@ -9,10 +9,8 @@ const DEFAULT_TRACE_PROPAGATION_TARGETS: Array<string | RegExp> = [
   AWS_HTTP_API_TRACE_PROPAGATION_TARGET,
 ];
 
-const matchesTracePropagationTarget = (
-  target: string | RegExp,
-  url: string,
-): boolean => (typeof target === "string" ? url.includes(target) : target.test(url));
+const matchesTracePropagationTarget = (target: string | RegExp, url: string): boolean =>
+  typeof target === 'string' ? url.includes(target) : target.test(url);
 
 const toTracePropagationOrigin = (apiBaseUrl?: string): string | null => {
   const normalizedValue = apiBaseUrl?.trim();
@@ -28,16 +26,12 @@ const toTracePropagationOrigin = (apiBaseUrl?: string): string | null => {
   }
 };
 
-export const getSentryTracePropagationTargets = (
-  apiBaseUrl?: string,
-): Array<string | RegExp> => {
+export const getSentryTracePropagationTargets = (apiBaseUrl?: string): Array<string | RegExp> => {
   const tracePropagationOrigin = toTracePropagationOrigin(apiBaseUrl);
 
   if (
     !tracePropagationOrigin ||
-    DEFAULT_TRACE_PROPAGATION_TARGETS.some((target) =>
-      matchesTracePropagationTarget(target, tracePropagationOrigin),
-    )
+    DEFAULT_TRACE_PROPAGATION_TARGETS.some((target) => matchesTracePropagationTarget(target, tracePropagationOrigin))
   ) {
     return DEFAULT_TRACE_PROPAGATION_TARGETS;
   }
@@ -45,6 +39,4 @@ export const getSentryTracePropagationTargets = (
   return [...DEFAULT_TRACE_PROPAGATION_TARGETS, tracePropagationOrigin];
 };
 
-export const sentryTracePropagationTargets = getSentryTracePropagationTargets(
-  import.meta.env.VITE_SKIPBO_API_URL,
-);
+export const sentryTracePropagationTargets = getSentryTracePropagationTargets(import.meta.env.VITE_SKIPBO_API_URL);

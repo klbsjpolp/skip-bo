@@ -13,12 +13,15 @@ const joinRoomHandler: APIGatewayProxyHandlerV2 = async (event) => {
   try {
     const body: unknown = event.body ? JSON.parse(event.body) : {};
     const request = joinRoomRequestSchema.parse(body);
-    const response = await joinRoom({
-      broadcaster,
-      connectionRepository,
-      roomRepository,
-      websocketUrl,
-    }, request);
+    const response = await joinRoom(
+      {
+        broadcaster,
+        connectionRepository,
+        roomRepository,
+        websocketUrl,
+      },
+      request,
+    );
 
     return jsonResponse(200, response);
   } catch (error) {

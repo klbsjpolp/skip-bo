@@ -7,10 +7,7 @@ const RETREAT_PILE_ANGLE_PATTERN = [-2.5, 0, 2.5, 1.5, -1.5];
 export const getRetreatPileAngle = (index: number): number =>
   RETREAT_PILE_ANGLE_PATTERN[index % RETREAT_PILE_ANGLE_PATTERN.length];
 
-export const getCompletedBuildPileCards = (
-  gameState: GameState,
-  buildPileIndex: number,
-): Card[] | null => {
+export const getCompletedBuildPileCards = (gameState: GameState, buildPileIndex: number): Card[] | null => {
   const buildPile = gameState.buildPiles[buildPileIndex];
   const selectedCard = gameState.selectedCard;
 

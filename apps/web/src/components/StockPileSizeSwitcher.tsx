@@ -1,5 +1,10 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
-import { DEFAULT_STOCK_SIZE, getStoredStockSize, STOCK_SIZE_OPTIONS, STOCK_STORAGE_KEY } from '@/state/initialGameState.ts';
+import {
+  DEFAULT_STOCK_SIZE,
+  getStoredStockSize,
+  STOCK_SIZE_OPTIONS,
+  STOCK_STORAGE_KEY,
+} from '@/state/initialGameState.ts';
 import { useState } from 'react';
 
 interface StockPileSizeSwitcherProps {
@@ -27,7 +32,9 @@ export function StockPileSizeSwitcher({
       if (typeof globalThis === 'object' && 'localStorage' in globalThis && globalThis.localStorage) {
         globalThis.localStorage.setItem(STOCK_STORAGE_KEY, String(nextStockSize));
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   };
 
   return (
