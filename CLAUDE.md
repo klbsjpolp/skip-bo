@@ -40,6 +40,10 @@ In online mode, debug actions are allowed by the server only when `NODE_ENV !== 
 `AGENTS.md` has the full change matrix, mandatory validations, and durable invariants.  
 Read it before making cross-cutting changes.
 
+## Commit Messages
+
+Commitlint enforces a 72-character max on the header (first line). Keep titles short; put detail in the body.
+
 ## Key Environment Variables
 
 ```

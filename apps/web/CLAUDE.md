@@ -47,6 +47,8 @@ http://localhost:5173/?fixture=<name>
 
 This bypasses the game loop entirely — useful for isolated layout/visual work without playing to a specific state.
 
+Cards render as `<div class="card normal-card" data-value="N">` for N=1–12 and `<div class="card skip-bo skipbo-text">` for Skip-Bo. Use `.card.normal-card[data-value="N"]` selectors for per-value theme styling (see `metro.css`, `rainbow.css`).
+
 ## Theme Styling
 
 Each theme lives in `src/themes/<name>.css` and overrides CSS variables on a `.theme-<name>` class. The base body rule in `src/index.css` applies `bg-background` (= `var(--background)`), so every theme inherits a solid background-color.
@@ -58,6 +60,8 @@ Two rules when adding decorative gradients/textures on `body` (or any element th
 2. **Keep `--background` close to what's actually visible at the top of the page.** `useThemeColorMeta` writes `--background` into `<meta name="theme-color">`, and Tailwind's `bg-background` paints the body with the same value. A wildly off-base `--background` makes the iOS bar mismatch the page (Neon's `#0a0a0a` underneath a `#13002a → #0a0a0a` gradient is fine; Minecraft's old `#2f2418` was much darker than the dirt texture's `#866043` average — fix that, not the bar).
 
 Multi-image gradients must be **comma-separated**. Browsers silently drop a `background-image` declaration whose layers are space-separated; `candy.css` and `retro-space.css` shipped broken halos for this reason.
+
+When overriding a multi-layer `background-image`, the matching `background-size` and `background-repeat` lists must have the **same number of entries** as the layers — CSS cycles shorter lists, so a layer can silently inherit `repeat` + a tile size meant for another layer. (Rainbow's lightning shipped with the sun glow tiling four times because of this.)
 
 ## Debug Buttons
 

@@ -250,18 +250,18 @@
 }
 
 @keyframes sky-time-drift {
-0% {
-  /* Dawn Warm */
-  background-color: #ffb59d;
-}
-50% {
-  /* Midday Blue */
-  background-color: #87ceeb;
-}
-100% {
-  /* Dusk Pink */
-  background-color: #f4a8c0;
-}
+    0% {
+      /* Dawn Warm */
+      background-color: #ffb59d;
+    }
+    50% {
+      /* Midday Blue */
+      background-color: #87ceeb;
+    }
+    100% {
+      /* Dusk Pink */
+      background-color: #f4a8c0;
+    }
 }
 
 @keyframes rainbow-lightning {
