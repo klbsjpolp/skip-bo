@@ -202,7 +202,7 @@ function NewGame({ onJoinOnlineGame, onStartLocalGame, onStartOnlineGame }: NewG
                 <h2 className="font-medium">{selectedModeOption.title}</h2>
                 <p
                   id={selectedMode === 'join-online' ? 'new-game-room-code-hint' : undefined}
-                  className="mt-1 text-sm text-muted-foreground text-pretty"
+                  className="mt-1 text-muted-sm text-pretty"
                 >
                   {selectedModeOption.description}
                 </p>

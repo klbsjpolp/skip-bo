@@ -28,10 +28,10 @@ export function ForcedUpdateOverlay({
           <h2 className="text-xl font-semibold" id="forced-update-title">
             Mise à jour requise
           </h2>
-          <p className="text-sm text-muted-foreground" id="forced-update-description">
+          <p className="text-muted-sm" id="forced-update-description">
             Cette version n’est plus prise en charge. Rechargez l’application pour continuer à jouer.
           </p>
-          <div className="rounded-xl border border-border/70 bg-muted/40 p-4 text-sm text-muted-foreground">
+          <div className="rounded-xl border border-border/70 bg-muted/40 p-4 text-muted-sm">
             <p>Version actuelle: {currentVersion}</p>
             <p>Version minimale: {minimumSupportedVersion}</p>
             {latestVersion ? <p>Version disponible: {latestVersion}</p> : null}
