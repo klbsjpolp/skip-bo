@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.33.7](https://github.com/klbsjpolp/skip-bo/compare/v1.33.6...v1.33.7) (2026-05-17)
+
+
+### Bug Fixes
+
+* **retro-space:** fix rocket SVG geometry to match original CSS shape ([fde176c](https://github.com/klbsjpolp/skip-bo/commit/fde176c476946001d8fcea00bfb27b378d18b0dd))
+* **web:** use CSSProperties cast for --card-rotate inline style ([f02ed6a](https://github.com/klbsjpolp/skip-bo/commit/f02ed6aa6e172c1e6cb1d7271148d32767e02e6f))
+
+
+
 ## [1.33.6](https://github.com/klbsjpolp/skip-bo/compare/v1.33.5...v1.33.6) (2026-05-16)
 
 
