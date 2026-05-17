@@ -1,0 +1,78 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 164 44"
+  width="164"
+  height="44"
+>
+  <defs>
+    <!-- Tail gradient -->
+    <linearGradient id="tailGradient" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="transparent"/>
+      <stop offset="18%" stop-color="rgba(127,212,215,0.04)"/>
+      <stop offset="36%" stop-color="rgba(127,212,215,0.20)"/>
+      <stop offset="66%" stop-color="rgba(255,244,216,0.82)"/>
+      <stop offset="100%" stop-color="rgba(241,149,77,0.94)"/>
+    </linearGradient>
+
+    <!-- Head gradient -->
+    <linearGradient id="headGradient" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#7fd4d7"/>
+      <stop offset="18%" stop-color="#7fd4d7"/>
+      <stop offset="18%" stop-color="#f1954d"/>
+      <stop offset="72%" stop-color="#f1954d"/>
+      <stop offset="72%" stop-color="#ffd59d"/>
+      <stop offset="86%" stop-color="#ffd59d"/>
+      <stop offset="86%" stop-color="rgba(252,244,232,0.98)"/>
+      <stop offset="100%" stop-color="rgba(252,244,232,0.98)"/>
+    </linearGradient>
+
+    <!-- Glow filters -->
+    <filter id="tailBlur" x="-20%" y="-50%" width="140%" height="200%">
+      <feGaussianBlur stdDeviation="0.6"/>
+    </filter>
+
+    <filter id="headGlow" x="-40%" y="-100%" width="220%" height="300%">
+      <feDropShadow dx="0" dy="0" stdDeviation="0.5" flood-color="rgba(255,255,255,0.10)"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="rgba(127,212,215,0.16)"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="rgba(241,149,77,0.18)"/>
+    </filter>
+  </defs>
+
+  <!-- Entire effect -->
+  <g class="victory-shine">
+    <!-- Tail -->
+    <!-- Equivalent to inset: 28% 44% 28% 0 -->
+    <rect
+      x="0"
+      y="12.3"
+      width="91.8"
+      height="19.4"
+      rx="9.7"
+      fill="url(#tailGradient)"
+      filter="url(#tailBlur)"
+    />
+
+    <!-- Head -->
+    <!-- Equivalent to inset: 8% 0 8% 34% -->
+    <polygon
+      points="
+        55.8,22
+        69.9,8.3
+        109.0,8.3
+        164.0,22
+        109.0,35.7
+        69.9,35.7
+      "
+      fill="url(#headGradient)"
+      filter="url(#headGlow)"
+    />
+
+    <!-- Bright core highlight -->
+    <circle
+      cx="126.2"
+      cy="22"
+      r="4.4"
+      fill="rgba(255,255,255,0.9)"
+    />
+  </g>
+</svg>
