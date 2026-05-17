@@ -12,8 +12,7 @@
 
   .discard-pile-stack .card,
   .discard-pile-stack .placeholder {
-    @apply absolute left-0 top-0;
-    box-shadow: var(--card-shadow);
+    @apply absolute left-0 top-0 shadow-card;
   }
 
   .hoverable-card:hover {
@@ -36,13 +35,11 @@
 
 @utility card {
   @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer card-height
-  text-3xl text-shadow-sm select-none will-change-auto;
+  text-3xl text-shadow-sm select-none will-change-auto rounded-card shadow-card;
   width: var(--card-width);
   color: var(--card-color);
   background-color: var(--card-front-color);
   border: 1px solid var(--card-border-color);
-  border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow);
   transform-origin: bottom center;
   --card-rotate: inherit;
   --card-translate-y: 0px;
@@ -71,8 +68,8 @@
   }
 
   &.selected {
+    @apply shadow-selected;
     border-color: var(--selected-border-color);
-    box-shadow: var(--selected-shadow);
     --card-translate-y: -5px;
   }
 
@@ -116,11 +113,10 @@
 }
 
 @utility placeholder {
-  @apply cursor-pointer card-height flex items-center justify-center;
+  @apply cursor-pointer card-height flex items-center justify-center rounded-card;
   width: var(--card-width);
   color: var(--card-border-color);
   border: 2px dashed var(--card-border-color);
-  border-radius: var(--card-radius);
 }
 
 @utility card-corner-number {

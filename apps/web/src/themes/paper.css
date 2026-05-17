@@ -131,7 +131,7 @@
         rgba(30, 58, 138, 0.12) 14px,
         rgba(30, 58, 138, 0.12) 15px
       );
-      box-shadow: var(--card-shadow);
+      @apply shadow-card;
 
       .card-number {
         font-weight: 700;

@@ -78,6 +78,11 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+  --radius-card: var(--card-radius);
+
+  --shadow-card: var(--card-shadow);
+  --shadow-selected: var(--selected-shadow);
+  --shadow-can-drop: var(--can-drop-shadow);
 
   --text-2xs: 0.625rem;
 }

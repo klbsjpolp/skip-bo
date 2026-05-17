@@ -6,12 +6,10 @@
 */
 
 @utility drop-indicator {
-  @apply relative transition-all duration-200 ease-in-out;
-  border-radius: var(--card-radius);
+  @apply relative transition-all duration-200 ease-in-out rounded-card;
 
   &.can-drop:hover {
-    @apply cursor-pointer -translate-y-0.5;
-    box-shadow: var(--can-drop-shadow);
+    @apply cursor-pointer -translate-y-0.5 shadow-can-drop;
 
     &::after {
       @apply content-['↓'] absolute -top-6.25 left-1/2 text-lg -translate-x-1/2 font-bold z-20 animate-bounce;
@@ -27,8 +25,7 @@
 
   /* While a drag is in progress, every valid target lights up — even without a hover. */
   body[data-drag-active='true'] &.can-drop {
-    @apply -translate-y-0.5;
-    box-shadow: var(--can-drop-shadow);
+    @apply -translate-y-0.5 shadow-can-drop;
 
     &::before {
       @apply content-[''] absolute z-10 opacity-80 -inset-0.5 animate-pulse border-dashed border-2;
@@ -39,8 +36,7 @@
 
   /* Stronger highlight on the target the dragged card is currently over. */
   &.is-drag-over {
-    @apply -translate-y-1;
-    box-shadow: var(--can-drop-shadow);
+    @apply -translate-y-1 shadow-can-drop;
 
     &::after {
       @apply content-['↓'] absolute -top-6.25 left-1/2 text-lg -translate-x-1/2 font-bold z-20 animate-bounce;
@@ -73,8 +69,7 @@ body[data-drag-active='true'] {
 }
 
 body[data-drag-active='true'] .hoverable-card:hover {
-  @apply transform-none;
-  box-shadow: var(--card-shadow);
+  @apply transform-none shadow-card;
 }
 
 /* On touch devices, the default `touch-action` lets the browser scroll the

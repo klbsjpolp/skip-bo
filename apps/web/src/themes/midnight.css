@@ -160,9 +160,9 @@
 
     &.normal-card,
     &.skipbo-text {
+      @apply shadow-card;
       background-color: var(--card-front-color);
       border-color: rgb(232 189 112 / 0.72);
-      box-shadow: var(--card-shadow);
       overflow: hidden;
 
       /* a handful of faint stars on the card face */
@@ -321,7 +321,7 @@
         transparent 80%
       );
 
-      box-shadow: var(--card-shadow);
+      @apply shadow-card;
       overflow: hidden;
 
       .card-number {
