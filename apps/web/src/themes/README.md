@@ -72,6 +72,34 @@ Reasoning:
 
 **Don't ban `@apply`.** Composing Tailwind utilities into a named project class is exactly what it's for. The rule is only about CSS-variable assignments.
 
+**Other direction: prefer Tailwind utilities for literal-value properties.** When a property's value has a Tailwind utility (`position: fixed` → `fixed`, `width: 1.5rem` → `w-6`, `pointer-events: none` → `pointer-events-none`, `opacity: 0.55` → `opacity-55`, `display: none` → `hidden`, etc.), prefer the `@apply` form over the native CSS rule. It reads as one declaration line, keeps the rule aligned with how the same properties are written in component className strings, and composes naturally with breakpoint / state / dark / motion-reduce variants:
+
+```css
+/* ✅ literal values via @apply, CSS-variable values native */
+.victory-burst-piece {
+  @apply absolute top-1/2 left-1/2 opacity-0 will-change-[transform,opacity];
+  width: var(--victory-burst-size);
+  height: calc(var(--victory-burst-size) * 1.6);
+  background: var(--piece-color);
+  animation: victoryPieceBurst 3000ms cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+/* ❌ everything as native CSS when most properties had matching utilities */
+.victory-burst-piece {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--victory-burst-size);
+  height: calc(var(--victory-burst-size) * 1.6);
+  background: var(--piece-color);
+  opacity: 0;
+  animation: victoryPieceBurst 3000ms cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  will-change: transform, opacity;
+}
+```
+
+The rule remains: **`var(--foo)` values stay native CSS**; literal values prefer Tailwind utilities. Edge cases that have no Tailwind equivalent (`writing-mode: sideways-rl`, complex multi-layer `background-image`, `mask-image`, `transform` strings with custom-property interpolation, etc.) stay as native CSS too.
+
 ### 3.3 Native CSS nesting everywhere
 
 Use `&` for descendants inside `@utility` blocks and inside theme blocks. Mirror Tailwind's modifier philosophy: `&.selected`, `&::before`, `&:hover`.

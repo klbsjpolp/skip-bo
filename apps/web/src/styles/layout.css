@@ -7,32 +7,22 @@
   .hand,
   .discard-piles,
   .build-piles {
-    display: flex;
-    flex-wrap: nowrap;
+    @apply flex flex-nowrap justify-center;
     gap: calc(var(--card-width) / 7);
-    justify-content: center;
   }
 
   .discard-piles {
-    @apply card-height;
-    flex-wrap: nowrap;
+    @apply card-height flex-nowrap;
   }
 
   .retreat-pile-stack {
-    position: relative;
+    @apply relative flex-none;
     width: var(--card-width);
     height: var(--card-height);
-    flex: 0 0 auto;
   }
 
   .retreat-card-shell {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    transform-origin: center;
+    @apply absolute inset-0 flex items-center justify-center pointer-events-none origin-center;
   }
 
   .hand-area {
@@ -41,24 +31,19 @@
     height: var(--card-height); /* 1 card */
 
     &:not(.overlap-hand) {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
+      @apply flex justify-center gap-2.5;
     }
 
     &.overlap-hand {
-      position: relative;
       /* Stacking context above the stock pile (z=10) so a draw animation
          portaled into the hand-area renders above the talon as it flies in.
          Stays well below .card-animation-layer (z=1000) so play/discard
          animations still float above the hand. */
-      z-index: 11;
+      @apply relative z-[11];
       /* Remove flexbox properties that conflict with absolute positioning */
       .card {
-        position: absolute;
-        top: 0;
         /* Left positioning is handled by inline styles from Card component */
-        transition: all 0.2s ease-in-out;
+        @apply absolute top-0 transition-all duration-200 ease-in-out;
 
         &.selected {
           z-index: 101 !important;
@@ -79,16 +64,13 @@
     }
 
     &:not(.overlap-hand) {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
+      @apply flex justify-center gap-2.5;
     }
   }
 
   .player-area,
   .center-area {
-    @apply ring-transparent relative lg:p-5 p-3 rounded-lg lg:mb-5 mb-3 bg-secondary text-secondary-foreground isolate;
-    border: 2px solid transparent;
+    @apply ring-transparent relative lg:p-5 p-3 rounded-lg lg:mb-5 mb-3 bg-secondary text-secondary-foreground isolate border-2 border-transparent;
 
     .bg-layer {
       @apply absolute w-full h-full top-0 left-0 overflow-hidden pointer-events-none z-0 rounded-[inherit];

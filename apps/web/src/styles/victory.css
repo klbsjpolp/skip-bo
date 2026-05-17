@@ -16,29 +16,19 @@
   }
 
   .victory-layer {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    border-radius: inherit;
+    @apply absolute inset-0 pointer-events-none rounded-[inherit];
   }
 
   .victory-persistent-layer {
-    z-index: 0;
-    overflow: hidden;
+    @apply z-0 overflow-hidden;
   }
 
   .victory-burst-layer {
-    z-index: 1;
-    overflow: hidden;
-    @variant motion-reduce {
-      display: none;
-    }
+    @apply z-1 overflow-hidden motion-reduce:hidden;
   }
 
   .victory-burst-group {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
+    @apply absolute inset-0 pointer-events-none;
     transform: translate(var(--burst-offset-x, 0px), var(--burst-offset-y, 0px));
   }
 
@@ -73,21 +63,17 @@
   }
 
   .victory-burst-piece {
+    @apply absolute top-1/2 left-1/2 opacity-0 will-change-[transform,opacity];
     --piece-color: var(--victory-piece-1);
     --burst-delay: 0;
     --piece-index: 0;
-    position: absolute;
-    top: 50%;
-    left: 50%;
     width: var(--victory-burst-size);
     height: calc(var(--victory-burst-size) * 1.6);
     border-radius: 999px 999px 5px 5px;
     background: var(--piece-color);
-    opacity: 0;
     transform: translate3d(-50%, -50%, 0) scale(0.25) rotate(0deg);
     animation: victoryPieceBurst 3000ms cubic-bezier(0.16, 1, 0.3, 1) infinite;
     animation-delay: calc(var(--burst-delay, 0ms) + var(--piece-index) * 28ms);
-    will-change: transform, opacity;
   }
 
   :root {
