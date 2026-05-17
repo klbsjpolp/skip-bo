@@ -51,7 +51,7 @@
   body {
     font-family: 'Caveat', 'Kalam', 'Bradley Hand', 'Comic Sans MS', cursive;
     color: var(--text-color);
-    background-color: var(--background);
+    @apply bg-background;
     letter-spacing: 0.01em;
   }
 
@@ -123,7 +123,7 @@
     font-family: 'Caveat', 'Kalam', cursive;
 
     &.normal-card {
-      background-color: var(--card-front-color);
+      @apply shadow-card bg-card-front;
       background-image: repeating-linear-gradient(
         to bottom,
         transparent 0,
@@ -131,12 +131,9 @@
         rgba(30, 58, 138, 0.12) 14px,
         rgba(30, 58, 138, 0.12) 15px
       );
-      @apply shadow-card;
 
       .card-number {
-        font-weight: 700;
-        font-size: 1.45em;
-        left: -0.1em;
+        @apply font-bold text-[1.45em] left-[-0.1em];
       }
     }
 
@@ -153,14 +150,8 @@
       background-image: radial-gradient(ellipse at 50% 55%, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
 
       &::after {
-        content: '';
-        position: absolute;
-        inset: 0;
+        @apply content-[""] absolute inset-0 bg-no-repeat bg-center bg-size-[70%] pointer-events-none;
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill='%23fbf6e7' opacity='0.85'><path d='M50 18 C 36 26, 30 40, 38 54 C 28 60, 26 76, 38 84 C 52 92, 70 86, 76 72 C 88 68, 92 54, 84 44 C 90 32, 78 22, 64 24 C 58 16, 52 16, 50 18 Z'/></g></svg>");
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: 70%;
-        pointer-events: none;
       }
     }
 

@@ -244,8 +244,7 @@
   .empty-card,
   .placeholder {
     background: rgba(253, 248, 238, 0.45);
-    border-color: var(--primary);
-    color: var(--primary);
+    @apply border-primary text-primary;
   }
 
   /* Pinwheel-shaped victory burst pieces (origami confetti).

@@ -84,5 +84,11 @@
   --shadow-selected: var(--selected-shadow);
   --shadow-can-drop: var(--can-drop-shadow);
 
+  --color-drop-indicator: var(--drop-indicator-color);
+
+  /* Don't do that, not sure why (maybe the override in VictoryEffects.tsx?) but it's not working */
+  /*--color-piece: var(--piece-color);*/
+  --color-card-front: var(--card-front-color);
+
   --text-2xs: 0.625rem;
 }

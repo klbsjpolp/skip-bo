@@ -12,13 +12,11 @@
     @apply cursor-pointer -translate-y-0.5 shadow-can-drop;
 
     &::after {
-      @apply content-['↓'] absolute -top-6.25 left-1/2 text-lg -translate-x-1/2 font-bold z-20 animate-bounce;
-      color: var(--drop-indicator-color);
+      @apply content-['↓'] absolute -top-6.25 left-1/2 text-lg -translate-x-1/2 font-bold z-20 animate-bounce text-drop-indicator;
     }
 
     &::before {
-      @apply content-[''] absolute z-10 opacity-80 -inset-0.5 animate-pulse border-dashed border-2;
-      border-color: var(--drop-indicator-color);
+      @apply content-[''] absolute z-10 opacity-80 -inset-0.5 animate-pulse border-dashed border-2 border-drop-indicator;
       border-radius: calc(var(--card-radius) + 2px);
     }
   }
@@ -28,8 +26,7 @@
     @apply -translate-y-0.5 shadow-can-drop;
 
     &::before {
-      @apply content-[''] absolute z-10 opacity-80 -inset-0.5 animate-pulse border-dashed border-2;
-      border-color: var(--drop-indicator-color);
+      @apply content-[''] absolute z-10 opacity-80 -inset-0.5 animate-pulse border-dashed border-2 border-drop-indicator;
       border-radius: calc(var(--card-radius) + 2px);
     }
   }
@@ -39,13 +36,11 @@
     @apply -translate-y-1 shadow-can-drop;
 
     &::after {
-      @apply content-['↓'] absolute -top-6.25 left-1/2 text-lg -translate-x-1/2 font-bold z-20 animate-bounce;
-      color: var(--drop-indicator-color);
+      @apply content-['↓'] absolute -top-6.25 left-1/2 text-lg -translate-x-1/2 font-bold z-20 animate-bounce text-drop-indicator;
     }
 
     &::before {
-      @apply content-[''] absolute z-10 opacity-100 -inset-1 border-solid border-2;
-      border-color: var(--drop-indicator-color);
+      @apply content-[''] absolute z-10 opacity-100 -inset-1 border-solid border-2 border-drop-indicator;
       border-radius: calc(var(--card-radius) + 4px);
     }
   }
