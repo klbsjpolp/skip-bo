@@ -47,12 +47,10 @@ It binds project CSS variables (`--background`) to Tailwind names (`--color-back
 ```css
 /* ✅ project style */
 @utility card {
-  @apply flex items-center justify-center font-bold cursor-pointer text-3xl;
+  @apply flex items-center justify-center font-bold cursor-pointer text-3xl rounded-card shadow-card;
   color: var(--card-color);
   background-color: var(--card-front-color);
   border: 1px solid var(--card-border-color);
-  border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow);
 }
 
 /* ❌ avoid in this project — Tailwind allows it, but the variable usage gets
@@ -69,6 +67,17 @@ Reasoning:
 - `color: var(--card-color)` is one line of normal CSS, immediately understood without Tailwind knowledge.
 - It's grep-friendly: `rg "color: var\(--card-color"` finds it; `rg "text-\(--card-color"` is Tailwind-syntax-specific.
 - It skips one layer of class-name transformation at build time.
+
+**Promote frequently-used CSS variables into Tailwind named tokens.** When a `var(--foo)` value lives behind a `box-shadow:` / `border-radius:` / `color:` / etc. assignment in several places, register it in the `@theme` block under the matching Tailwind namespace so it becomes a real utility. This repo does it for shadows (`--shadow-card`, `--shadow-selected`, `--shadow-can-drop`), radii (`--radius-card`), and the full color palette (`--color-*`). After registration you write `@apply shadow-card` instead of `box-shadow: var(--card-shadow)`, the override stays themable (the @theme entry just forwards to the per-theme CSS variable), and components can also use `shadow-card` directly in className strings. Tailwind 4 namespaces worth knowing:
+
+- `--color-*` → `bg-*`, `text-*`, `border-*`, `ring-*`, ...
+- `--radius-*` → `rounded-*`
+- `--shadow-*` / `--inset-shadow-*` / `--drop-shadow-*`
+- `--font-*` / `--text-*` / `--tracking-*` / `--leading-*`
+- `--animate-*` / `--ease-*`
+- `--blur-*`, `--aspect-*`, `--perspective-*`
+
+The bar for promotion: ~3+ usages of the same `box-shadow: var(--foo)` (or equivalent). One-off variables stay as `box-shadow: var(--foo)` — registering them in `@theme` just adds indirection.
 
 **Don't ban `@apply`.** Composing Tailwind utilities into a named project class is exactly what it's for. The rule is only about CSS-variable assignments.
 
@@ -106,11 +115,10 @@ Use `&` for descendants inside `@utility` blocks and inside theme blocks. Mirror
 
 ```css
 @utility drop-indicator {
-  @apply relative;
-  border-radius: var(--card-radius);
+  @apply relative rounded-card;
 
   &.can-drop:hover {
-    box-shadow: var(--can-drop-shadow);
+    @apply shadow-can-drop;
 
     &::before {
       @apply content-[''] absolute z-10 border-dashed border-2;
