@@ -69,7 +69,7 @@
   --card-g3: #9381ff; /* Indigo/Purple band from back gradient */
 
   body {
-    background-color: var(--background);
+    @apply bg-background;
     background-image:
         /* Cloud Set 1 */
       radial-gradient(ellipse at 15% 25%, white 0%, transparent 8%),
