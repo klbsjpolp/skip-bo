@@ -60,7 +60,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        border-radius: var(--card-radius);
+        @apply rounded-card;
         pointer-events: none;
         z-index: 0;
         background: repeating-linear-gradient(
@@ -124,7 +124,7 @@
           transparent 2px,
           transparent 4px
         );
-        border-radius: var(--card-radius);
+        @apply rounded-card;
         pointer-events: none;
       }
 

@@ -160,8 +160,7 @@
 
     &.normal-card,
     &.skipbo-text {
-      @apply shadow-card;
-      background-color: var(--card-front-color);
+      @apply shadow-card bg-card-front;
       border-color: rgb(232 189 112 / 0.72);
       overflow: hidden;
 
@@ -195,7 +194,7 @@
           radial-gradient(circle at 70% 82%, #ffe8c4 0 0.7px, transparent 1.4px),
           radial-gradient(circle at 86% 90%, #ffffff 0 0.6px, transparent 1.2px);
         pointer-events: none;
-        border-radius: var(--card-radius);
+        @apply rounded-card;
       }
     }
 
@@ -277,16 +276,7 @@
 
       /* DARK MASK — same color as the card face so it erases the disc cleanly */
       &::after {
-        content: '';
-        position: absolute;
-        top: 6%;
-        right: 6%;
-        width: 29%;
-        aspect-ratio: 1;
-        border-radius: 50%;
-        background-color: var(--card-front-color);
-        pointer-events: none;
-        z-index: 1;
+        @apply content-[""] absolute top-[6%] right-[6%] w-[29%] aspect-square rounded-[50%] bg-card-front pointer-events-none z-1;
         transform: translateX(calc(var(--moon-phase, 0) * -7.6923%));
       }
     }
@@ -394,22 +384,16 @@
 
   /* ── Victory: shooting stars radiating outward from the winner ────── */
   .victory-burst-piece {
-    background: transparent;
-    border-radius: 0;
+    @apply bg-transparent rounded-none shadow-none;
     width: var(--victory-burst-size);
     /* tall enough to contain star + tail when upright */
     height: calc(var(--victory-burst-size) * 2.6);
     animation-name: midnightShootingStar;
     animation-duration: 2600ms;
-    box-shadow: none;
 
     /* five-point star head at the tip of the element */
     &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
+      @apply content-[""] absolute top-0 left-1/2 -translate-x-1/2;
       width: var(--victory-burst-size);
       height: var(--victory-burst-size);
       background: var(--piece-color);
@@ -419,19 +403,14 @@
 
     /* trailing streak behind the star */
     &::after {
-      content: '';
-      position: absolute;
+      @apply content-[""] absolute top-0 left-1/2 w-0.5 -translate-x-1/2 rounded-[1px];
       top: calc(var(--victory-burst-size) * 0.65);
-      left: 50%;
-      transform: translateX(-50%);
-      width: 2px;
       height: calc(var(--victory-burst-size) * 1.8);
       background: linear-gradient(
         to bottom,
         color-mix(in srgb, var(--piece-color) 80%, transparent) 0%,
         transparent 100%
       );
-      border-radius: 1px;
     }
   }
 }
