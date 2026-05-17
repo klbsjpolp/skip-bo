@@ -7,13 +7,7 @@
 
 @layer base {
   .card-animation-layer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 1000;
+    @apply fixed top-0 left-0 w-screen h-screen pointer-events-none z-[1000];
   }
 
   .animation-play {

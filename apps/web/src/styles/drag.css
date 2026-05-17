@@ -6,9 +6,8 @@
 */
 
 @utility drop-indicator {
-  @apply relative;
+  @apply relative transition-all duration-200 ease-in-out;
   border-radius: var(--card-radius);
-  transition: all 0.2s ease-in-out;
 
   &.can-drop:hover {
     @apply cursor-pointer -translate-y-0.5;
@@ -61,30 +60,20 @@
 
   /* Drop target indicator should only show on hover */
   &:hover::before {
-    content: '';
-    position: absolute;
-    top: -3px;
-    left: 0;
-    right: 0;
-    height: 3px;
+    @apply content-[''] absolute left-0 right-0 -top-[3px] h-[3px] rounded-[2px] opacity-80 z-10;
     background-color: var(--selected-border-color);
-    border-radius: 2px;
-    opacity: 0.8;
-    z-index: 10;
   }
 }
 
 /* Suppress hover-effects on the source card while a drag is active so the
    under-pointer card doesn't flash hoverable states. */
 body[data-drag-active='true'] {
-  cursor: grabbing;
   /* Stop the browser from selecting page text when the user drags a card. */
-  user-select: none;
-  -webkit-user-select: none;
+  @apply cursor-grabbing select-none;
 }
 
 body[data-drag-active='true'] .hoverable-card:hover {
-  transform: none;
+  @apply transform-none;
   box-shadow: var(--card-shadow);
 }
 
@@ -96,11 +85,11 @@ body[data-drag-active='true'] .hoverable-card:hover {
    draggable card; the user can still scroll the page by starting the touch
    on any non-draggable area. */
 [data-drag-source] {
-  touch-action: none;
+  @apply touch-none;
 }
 
 .card-drag-ghost {
-  cursor: grabbing;
+  @apply cursor-grabbing;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35) !important;
   transform: scale(1.05) rotate(-2deg);
 }

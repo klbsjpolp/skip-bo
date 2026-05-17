@@ -108,9 +108,7 @@
      .victory-flyby-layer and .victory-shine have no base rule — themes
      opt in and we always want them silenced under motion-reduce. */
   .victory-flyby-layer {
-    @variant motion-reduce {
-      display: none;
-    }
+    @apply motion-reduce:hidden;
   }
 
   .victory-shine {
