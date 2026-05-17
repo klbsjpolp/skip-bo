@@ -58,11 +58,7 @@
   /* Paper sheet: ruled lines, red margin, grain, and spiral wire binding —
      all rendered as one fixed layer behind the UI so they move together. */
   body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
+    @apply max-sm:hidden content-[""] fixed inset-0 pointer-events-none z-0;
     background-image:
       /* binding holes shadow */
       radial-gradient(
@@ -189,12 +185,6 @@
       background-size:
         78% 78%,
         cover;
-    }
-  }
-
-  body::before {
-    @variant max-sm {
-      display: none;
     }
   }
 }

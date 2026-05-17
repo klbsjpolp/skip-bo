@@ -125,9 +125,6 @@
   }
 
   .player-area .discard-piles {
-    @variant max-sm {
-      width: 100%;
-      margin-top: 20px;
-    }
+    @apply max-sm:w-full max-sm:mt-5;
   }
 }

@@ -97,9 +97,7 @@
   }
 
   .victory-burst-piece:nth-child(n + 9) {
-    @variant max-sm {
-      display: none;
-    }
+    @apply max-sm:hidden;
   }
 }
 

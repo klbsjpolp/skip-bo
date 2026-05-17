@@ -146,6 +146,29 @@ Every selector for a theme lives inside one `.theme-<name>` block. The only exce
 
   Same idea for `motion-safe`, `dark`, `sm` / `md` / `lg` / `xl` / `2xl` and their `max-*` counterparts — anything Tailwind already names as a variant. Prefer `@variant lg` over `@media (width >= 64rem)` and `@variant max-sm` over `@media (max-width: 640px)`. The one exception in this repo is the `container` utility, which gates a custom `max-width: 1400px` that falls between Tailwind's `xl` (1280px) and `2xl` (1536px) — that one stays a raw `@media (min-width: 1400px)` query because no built-in variant matches.
 
+- When the value being set has a Tailwind utility (e.g. `display: none`, `width: 1.5rem`, `position: fixed`), prefer the inline `breakpoint:utility` form inside an `@apply` chain over a `@variant <bp> { ... }` block. The override sits on the same line as the base utilities and reads as one rule:
+
+  ```css
+  /* ✅ prefer when the value has a Tailwind utility */
+  @utility vertical-text {
+    @apply transform rotate-180 flex items-center w-5 lg:w-6;
+    writing-mode: sideways-rl;
+    &:has(br) {
+      @apply w-10 lg:w-12;
+    }
+  }
+
+  /* ✅ still required when the value is a CSS variable */
+  :root {
+    @variant lg {
+      --card-width: 70px;
+      --card-height: 100px;
+    }
+  }
+  ```
+
+  Tailwind has no utility for setting a custom property, so CSS-variable responsive overrides must use `@variant <bp> { --foo: ... }`.
+
 ### 3.6 `@layer`
 
 Used only where it materially matters for cascade winning — currently `@layer utilities` in [`styles/drag.css`](../styles/drag.css) so the `is-drag-source` visibility override reliably beats the `.card` and `lg:visible` cascades. Default: no `@layer` wrapper; rely on file import order in `index.css`.
