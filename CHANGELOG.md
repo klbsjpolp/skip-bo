@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.34.0](https://github.com/klbsjpolp/skip-bo/compare/v1.33.9...v1.34.0) (2026-05-17)
+
+
+### Features
+
+* **web:** add countdown-dot progress ladder to retro-space cards ([5c64e95](https://github.com/klbsjpolp/skip-bo/commit/5c64e9563bb22524639d6fa96639b88ff374360a))
+
+
+
 ## [1.33.9](https://github.com/klbsjpolp/skip-bo/compare/v1.33.8...v1.33.9) (2026-05-17)
 
 
