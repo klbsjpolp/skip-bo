@@ -28,7 +28,7 @@ Read `docs/architecture/runtime-invariants.md` in full. The seven invariants tha
 1. **Fixed-length hands** — hand arrays keep `null` holes; cards are never spliced out.
 2. **Selection before play** — all card interactions resolve through selection first, then play or discard.
 3. **`selectedCard` destination** — kept long enough for AI resolution before clearing.
-4. **Skip-Bo wildcard rule** — `Skip-Bo` cards are playable as wildcards and are non-discardable.
+4. **Skip-Bo wildcard rule** — `Skip-Bo` cards are playable as wildcards and may be discarded (per official rules).
 5. **Start-of-turn draw timing** — draw logic is outside `END_TURN`; it runs at turn start.
 6. **Server-authoritative online play** — from the client perspective the server snapshot is canonical.
 7. **Player order ≠ render order** — `players[0]`/`players[1]` (state) differ from rendered board order.

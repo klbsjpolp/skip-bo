@@ -174,10 +174,6 @@ export const validateOnlineAction = (gameState: GameState, action: GameAction): 
         return 'Vous devez défausser une carte de votre main';
       }
 
-      if (selectedCard.card.isSkipBo) {
-        return 'Vous ne pouvez pas défausser une carte Skip-Bo';
-      }
-
       if (!hasValidSelectedSource(player, selectedCard) || !hasValidDiscardPileIndex(player, action.discardPile)) {
         return 'Défausse invalide';
       }

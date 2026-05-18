@@ -273,10 +273,16 @@ describe('gameReducer', () => {
       expect(result.message).toContain('Aucune carte sélectionnée');
     });
 
-    it('should not discard Skip-Bo cards', () => {
-      // Create state with Skip-Bo card selected
+    it('should allow discarding Skip-Bo cards (official rule)', () => {
       const stateWithSkipBo = {
         ...initialState,
+        players: [
+          {
+            ...initialState.players[0],
+            hand: [{ value: 0, isSkipBo: true }, null, null, null, null],
+          },
+          initialState.players[1],
+        ],
         selectedCard: {
           card: { value: 0, isSkipBo: true },
           source: 'hand' as const,
@@ -286,7 +292,10 @@ describe('gameReducer', () => {
 
       const result = gameReducer(stateWithSkipBo, { type: 'DISCARD_CARD', discardPile: 0 });
 
-      expect(result.message).toContain('Skip-Bo');
+      expect(result.players[0].discardPiles[0]).toHaveLength(1);
+      expect(result.players[0].discardPiles[0][0].isSkipBo).toBe(true);
+      expect(result.currentPlayerIndex).toBe(1);
+      expect(result.selectedCard).toBeNull();
     });
 
     it('should discard a valid card and end turn', () => {

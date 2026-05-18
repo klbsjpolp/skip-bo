@@ -22,7 +22,7 @@ Canonical wording lives in [docs/architecture/runtime-invariants.md](docs/archit
 - hands remain fixed-length arrays with `null` holes
 - card interactions still resolve through selection first, then play or discard
 - `selectedCard` keeps planned destinations long enough for AI resolution
-- `Skip-Bo` cards remain playable as wildcards and non-discardable
+- `Skip-Bo` cards remain playable as wildcards and may be discarded (official rule)
 - start-of-turn draws stay outside `END_TURN`
 - online play remains server-authoritative from the client perspective
 - local player order and rendered player order are not the same thing

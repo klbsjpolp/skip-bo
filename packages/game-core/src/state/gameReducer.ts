@@ -313,11 +313,6 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
         return;
       }
 
-      if (selectedCard.card.isSkipBo) {
-        draft.message = MESSAGES.INVALID_MOVE_CANNOT_DISCARD_SKIP_BO;
-        return;
-      }
-
       if (selectedCard.card.value === undefined) {
         draft.message = 'Error: Invalid card value';
         return;
