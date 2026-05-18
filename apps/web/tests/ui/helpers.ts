@@ -10,6 +10,31 @@ const cardTokens = ['--background', '--foreground', '--selected-border-color', '
 
 export const representativeThemes: Theme[] = ['theme-paper', 'theme-midnight', 'theme-glass', 'theme-retro-space'];
 
+interface GotoAppOptions {
+  theme?: Theme;
+  runtimeConfig?: Record<string, unknown>;
+}
+
+export const gotoApp = async (page: Page, { theme = 'theme-paper', runtimeConfig }: GotoAppOptions = {}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.addInitScript((activeTheme) => {
+    window.localStorage.setItem('theme', activeTheme);
+  }, theme);
+
+  if (runtimeConfig) {
+    await page.route('**/runtime-config.json', async (route) => {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify(runtimeConfig),
+      });
+    });
+  }
+
+  await page.goto('/');
+  await page.addStyleTag({ content: stableScreenshotCss });
+  await expect(page.getByTestId('app-main')).toBeVisible();
+};
+
 export const gotoFixture = async (page: Page, fixture: UiFixtureName, theme: Theme) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addInitScript(

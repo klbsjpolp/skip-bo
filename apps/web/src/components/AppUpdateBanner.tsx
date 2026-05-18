@@ -24,7 +24,7 @@ export function AppUpdateBanner({
     : 'Une nouvelle version est disponible. Rechargez l’application pour utiliser la version la plus récente.';
 
   return (
-    <Alert className="border-primary/30 bg-background/95 shadow-sm">
+    <Alert className="border-primary/30 bg-background/95 shadow-sm" data-testid="app-update-banner">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="space-y-1">
           <AlertTitle>{title}</AlertTitle>

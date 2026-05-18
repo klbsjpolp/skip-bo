@@ -13,6 +13,7 @@ html {
 .card-animation-layer,
 .animated-card,
 .victory-burst-layer,
-.victory-shine {
+.victory-shine,
+.victory-shine-inbound {
   display: none !important;
 }

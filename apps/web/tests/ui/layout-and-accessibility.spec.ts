@@ -133,11 +133,60 @@ test.describe('Layout and interaction coverage', () => {
       await expectThemeClass(page, theme);
       await expectNoHorizontalOverflow(page);
     });
+
+    test(`@mobile ${theme} selected-hand mobile layout stays readable`, async ({ page }, testInfo) => {
+      await gotoFixture(page, 'selected-hand', theme);
+      await expectThemeClass(page, theme);
+      await expect(page.locator('.card.selected')).toHaveCount(1);
+      await expect(page.locator('.build-pile.can-drop').first()).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+
+      await expectScreenshotIfBaselineExists(
+        page.getByTestId('game-board'),
+        testInfo,
+        `${theme}-selected-hand-mobile.png`,
+        { animations: 'disabled' },
+      );
+    });
+
+    test(`@mobile ${theme} ai-turn mobile layout stays readable`, async ({ page }, testInfo) => {
+      await gotoFixture(page, 'ai-turn', theme);
+      await expectThemeClass(page, theme);
+      await expect(page.getByTestId('ai-player-area')).toHaveAttribute('data-player-state', 'active');
+      await expectNoHorizontalOverflow(page);
+
+      await expectScreenshotIfBaselineExists(page.getByTestId('game-board'), testInfo, `${theme}-ai-turn-mobile.png`, {
+        animations: 'disabled',
+      });
+    });
   }
 
   test('@mobile retreat-filled fixture avoids horizontal overflow', async ({ page }) => {
     await gotoFixture(page, 'retreat-filled', 'theme-paper');
     await expectNoHorizontalOverflow(page);
+  });
+
+  test('@mobile theme switcher opens and persists', async ({ page }) => {
+    await gotoFixture(page, 'ready-human', 'theme-paper');
+
+    await page.getByTestId('theme-switcher-trigger').tap();
+    await expect(page.getByTestId('theme-switcher-content')).toBeVisible();
+    await page.getByTestId('theme-option-theme-retro-space').tap();
+    await expectThemeClass(page, 'theme-retro-space');
+
+    await page.reload();
+    await expect(page.getByTestId('app-main')).toBeVisible();
+    await expectThemeClass(page, 'theme-retro-space');
+  });
+
+  test('@mobile selected-hand build pile responds to tap', async ({ page }) => {
+    await gotoFixture(page, 'selected-hand', 'theme-paper');
+
+    const droppableBuildPile = page.locator('.build-pile.can-drop').first();
+    await expect(droppableBuildPile).toBeVisible();
+    // Tap on a droppable build pile. Fixture handlers are no-ops, so we just
+    // verify the element is hit-testable on mobile — no overlay covers it.
+    await droppableBuildPile.tap();
   });
 });
 
@@ -152,6 +201,14 @@ test.describe('Accessibility smoke', () => {
 
   test('@desktop ready-human fixture has no axe violations', async ({ page }) => {
     await assertNoViolations('theme-paper', 'ready-human', page);
+  });
+
+  test('@mobile ready-human fixture has no axe violations', async ({ page }) => {
+    await assertNoViolations('theme-paper', 'ready-human', page);
+  });
+
+  test('@mobile selected-hand fixture has no axe violations', async ({ page }) => {
+    await assertNoViolations('theme-retro-space', 'selected-hand', page);
   });
 
   test('@desktop theme switcher open state has no axe violations', async ({ page }) => {
