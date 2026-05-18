@@ -109,7 +109,10 @@ export const expectScreenshotIfBaselineExists = async (
   name: string,
   options?: { animations?: 'disabled' | 'allow' },
 ) => {
-  if (!existsSync(testInfo.snapshotPath(name))) {
+  const updateMode = testInfo.config.updateSnapshots;
+  const allowGenerate = updateMode === 'all' || updateMode === 'missing';
+
+  if (!allowGenerate && !existsSync(testInfo.snapshotPath(name))) {
     testInfo.annotations.push({
       type: 'baseline-missing',
       description: `Skipped screenshot assertion for ${name} because no committed baseline is present.`,
