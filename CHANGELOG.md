@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.37.0](https://github.com/klbsjpolp/skip-bo/compare/v1.36.3...v1.37.0) (2026-05-18)
+
+
+### Features
+
+* **settings:** add new Bash commands to settings.json ([2514bf6](https://github.com/klbsjpolp/skip-bo/commit/2514bf614ae2e3e24e6b87f4b40d8135c6f19e44))
+
+
+
 ## [1.36.3](https://github.com/klbsjpolp/skip-bo/compare/v1.36.2...v1.36.3) (2026-05-18)
 
 
