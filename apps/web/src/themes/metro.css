@@ -78,39 +78,51 @@
     &.normal-card {
       &[data-value='1'] {
         background: var(--metro-tile-1);
+        --card-corner-bg: color-mix(in srgb, var(--metro-tile-1) 65%, black);
       }
       &[data-value='2'] {
         background: var(--metro-tile-2);
+        --card-corner-bg: color-mix(in srgb, var(--metro-tile-2) 65%, black);
       }
       &[data-value='3'] {
         background: var(--metro-tile-3);
+        --card-corner-bg: color-mix(in srgb, var(--metro-tile-3) 65%, black);
       }
       &[data-value='4'] {
         background: var(--metro-tile-4);
+        --card-corner-bg: color-mix(in srgb, var(--metro-tile-4) 65%, black);
       }
       &[data-value='5'] {
         background: var(--metro-tile-5);
+        --card-corner-bg: color-mix(in srgb, var(--metro-tile-5) 65%, black);
       }
       &[data-value='6'] {
         background: var(--metro-tile-6);
+        --card-corner-bg: color-mix(in srgb, var(--metro-tile-6) 65%, black);
       }
       &[data-value='7'] {
         background: var(--metro-tile-7);
+        --card-corner-bg: color-mix(in srgb, var(--metro-tile-7) 65%, black);
       }
       &[data-value='8'] {
         background: var(--metro-tile-8);
+        --card-corner-bg: color-mix(in srgb, var(--metro-tile-8) 65%, black);
       }
       &[data-value='9'] {
         background: var(--metro-tile-9);
+        --card-corner-bg: color-mix(in srgb, var(--metro-tile-9) 65%, black);
       }
       &[data-value='10'] {
         background: var(--metro-tile-10);
+        --card-corner-bg: color-mix(in srgb, var(--metro-tile-10) 65%, black);
       }
       &[data-value='11'] {
         background: var(--metro-tile-11);
+        --card-corner-bg: color-mix(in srgb, var(--metro-tile-11) 65%, black);
       }
       &[data-value='12'] {
         background: var(--metro-tile-12);
+        --card-corner-bg: color-mix(in srgb, var(--metro-tile-12) 65%, black);
       }
     }
 
@@ -120,8 +132,9 @@
     }
 
     .card-corner-number {
-      @apply font-semibold absolute flex items-center justify-center text-2xs lg:text-xs text-white bg-black/35
-        w-4 lg:w-4.5 h-4 lg:h-4.5 top-0.5 lg:top-0.75 left-0.5 lg:left-0.75;
+      @apply font-semibold absolute flex items-center justify-center text-2xs lg:text-xs text-white
+        w-4 lg:w-4.5 h-4 lg:h-4.5 top-0 left-0;
+      background: var(--card-corner-bg);
       letter-spacing: 0;
     }
 
@@ -180,8 +193,8 @@
     transition: transform 0.15s ease-out;
   }
 
-  .card.normal-card:active,
-  .card.skip-bo:active {
+  .card.normal-card.hoverable-card:active,
+  .card.skip-bo.hoverable-card:active {
     transform: perspective(600px) rotateX(18deg) scale(0.98);
   }
 
@@ -233,55 +246,19 @@
       @apply absolute;
     }
 
+    .card.normal-card:nth-last-child(1 of .normal-card) {
+      @apply z-11!;
+    }
+
     .card.normal-card:not(:nth-last-child(1 of .normal-card)) {
-      @apply bg-transparent shadow-none border-none pointer-events-none z-10!;
+      @apply bg-transparent shadow-none border-transparent pointer-events-none z-10!;
+      transition: background-color 0.3s ease-in 0.1s !important;
 
       .card-inner,
       .card-inner-2,
       .card-number,
       .card-corner-inset {
         @apply hidden;
-      }
-
-      .card-corner-number {
-        @apply absolute top-0 left-0 flex items-center justify-center text-2xs lg:text-xs font-semibold text-white w-4 lg:w-5 h-4 lg:h-5;
-      }
-
-      &[data-value='1'] .card-corner-number {
-        background: var(--metro-tile-1);
-      }
-      &[data-value='2'] .card-corner-number {
-        background: var(--metro-tile-2);
-      }
-      &[data-value='3'] .card-corner-number {
-        background: var(--metro-tile-3);
-      }
-      &[data-value='4'] .card-corner-number {
-        background: var(--metro-tile-4);
-      }
-      &[data-value='5'] .card-corner-number {
-        background: var(--metro-tile-5);
-      }
-      &[data-value='6'] .card-corner-number {
-        background: var(--metro-tile-6);
-      }
-      &[data-value='7'] .card-corner-number {
-        background: var(--metro-tile-7);
-      }
-      &[data-value='8'] .card-corner-number {
-        background: var(--metro-tile-8);
-      }
-      &[data-value='9'] .card-corner-number {
-        background: var(--metro-tile-9);
-      }
-      &[data-value='10'] .card-corner-number {
-        background: var(--metro-tile-10);
-      }
-      &[data-value='11'] .card-corner-number {
-        background: var(--metro-tile-11);
-      }
-      &[data-value='12'] .card-corner-number {
-        background: var(--metro-tile-12);
       }
     }
   }
