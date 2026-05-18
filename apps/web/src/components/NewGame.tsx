@@ -146,11 +146,14 @@ function NewGame({ onJoinOnlineGame, onStartLocalGame, onStartOnlineGame }: NewG
         }}
       >
         <DialogTrigger asChild>
-          <Button size="sm">Nouvelle partie</Button>
+          <Button size="sm" data-testid="new-game-trigger">
+            Nouvelle partie
+          </Button>
         </DialogTrigger>
         <DialogContent
           className="w-[min(32rem,calc(100vw-1rem))] max-h-[calc(100svh-1rem)] gap-3 overflow-y-auto p-3 sm:p-4"
           aria-description="new-game"
+          data-testid="new-game-dialog"
         >
           <DialogHeader className="pr-10">
             <DialogTitle className="text-xl sm:text-2xl">Nouvelle partie</DialogTitle>
@@ -169,6 +172,7 @@ function NewGame({ onJoinOnlineGame, onStartLocalGame, onStartOnlineGame }: NewG
                   variant={isSelected ? 'default' : 'outline'}
                   className="h-10 gap-1.5 px-2"
                   aria-pressed={isSelected}
+                  data-testid={`new-game-mode-${option.key}`}
                   onClick={() => {
                     setSelectedMode(option.key);
                     setErrorMessage(null);
@@ -210,7 +214,7 @@ function NewGame({ onJoinOnlineGame, onStartLocalGame, onStartOnlineGame }: NewG
             </div>
 
             {errorMessage ? (
-              <Alert variant="destructive" className="bg-destructive/10 p-2 mt-2">
+              <Alert variant="destructive" className="bg-destructive/10 p-2 mt-2" data-testid="new-game-error">
                 <AlertTitle>{errorMessage}</AlertTitle>
               </Alert>
             ) : null}
@@ -228,6 +232,7 @@ function NewGame({ onJoinOnlineGame, onStartLocalGame, onStartOnlineGame }: NewG
                   </label>
                   <Input
                     id="new-game-room-code"
+                    data-testid="new-game-room-code-input"
                     value={roomCode}
                     onChange={(event) => {
                       setRoomCode(normalizeRoomCode(event.target.value));
@@ -241,7 +246,7 @@ function NewGame({ onJoinOnlineGame, onStartLocalGame, onStartOnlineGame }: NewG
                     aria-describedby="new-game-room-code-hint"
                     className="h-11 font-mono text-base tracking-[0.28em] uppercase sm:text-sm"
                   />
-                  <Button type="submit" className="min-w-28" disabled={isBusy}>
+                  <Button type="submit" className="min-w-28" disabled={isBusy} data-testid="new-game-join-online">
                     {isJoiningOnline ? (
                       <LoaderCircle data-icon="inline-start" className="animate-spin" />
                     ) : (
@@ -265,6 +270,7 @@ function NewGame({ onJoinOnlineGame, onStartLocalGame, onStartOnlineGame }: NewG
                   void handleStartOnline();
                 }}
                 disabled={isBusy}
+                data-testid={selectedMode === 'local' ? 'new-game-start-local' : 'new-game-create-online'}
               >
                 {selectedMode === 'local' ? (
                   <>
