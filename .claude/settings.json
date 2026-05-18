@@ -25,7 +25,9 @@
       "Skill(commit-commands:commit)",
       "Skill(commit-commands:commit:*)",
       "Bash(disown *)",
-      "Bash(qlmanage *)"
+      "Bash(qlmanage *)",
+      "Bash(gh api *)",
+      "Bash(npm view *)"
     ]
   },
   "hooks": {
