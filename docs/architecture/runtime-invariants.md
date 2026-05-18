@@ -14,7 +14,7 @@
 - Hands are fixed-length arrays. Empty slots are represented by `null`, and removing a hand card means writing `null` rather than splicing the array.
 - Most card interactions are two-step: `SELECT_CARD`, then `PLAY_CARD` or `DISCARD_CARD`.
 - `selectedCard` can carry `plannedBuildPileIndex` and `plannedDiscardPileIndex`, and AI flow depends on those planned targets surviving between selection and resolution.
-- `Skip-Bo` cards can be played as wildcards and must never be discarded.
+- `Skip-Bo` cards can be played as wildcards and may also be discarded to a discard pile (per official Skip-Bo rules).
 - Completed build piles move into `completedBuildPiles` and are reshuffled back into `deck` when more draw cards are needed.
 - Start-of-turn draws belong to the local state machine draw service. `END_TURN` only flips `currentPlayerIndex`.
 - Online rooms are server-authoritative. The browser treats incoming snapshots as canonical in online mode.

@@ -296,10 +296,6 @@ export function useSkipBoGame() {
         return { success: false, message: 'Vous devez défausser une carte de votre main' };
       }
 
-      if (currentState.selectedCard.card.isSkipBo) {
-        return { success: false, message: 'Vous ne pouvez pas défausser une carte Skip-Bo' };
-      }
-
       interactionLockRef.current = true;
 
       // Trigger discard animation, then dispatch immediately. The animation runs

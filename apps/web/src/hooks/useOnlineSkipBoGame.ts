@@ -952,11 +952,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
           return;
         }
 
-        if (currentState.selectedCard.card.isSkipBo) {
-          resolve({ success: false, message: 'Vous ne pouvez pas défausser une carte Skip-Bo' });
-          return;
-        }
-
         setInteractionLocked(true);
 
         // Trigger discard animation, then commit the optimistic view and send the
