@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.36.3](https://github.com/klbsjpolp/skip-bo/compare/v1.36.2...v1.36.3) (2026-05-18)
+
+
+### Bug Fixes
+
+* **web:** guard drag swallow-timer against jsdom teardown ([585785f](https://github.com/klbsjpolp/skip-bo/commit/585785f1070aee5546b34552313a75c9b4248577))
+
+
+
 ## [1.36.2](https://github.com/klbsjpolp/skip-bo/compare/v1.36.1...v1.36.2) (2026-05-18)
 
 
