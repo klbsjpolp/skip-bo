@@ -37,6 +37,79 @@
   --card-g3: #0066ff;
 
   .card {
+    &.normal-card {
+      .card-corner-number,
+      .card-number {
+        animation: neonTextPulse 2.4s ease-in-out infinite;
+      }
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0.4rem;
+        left: 1.4rem;
+        right: 0.25rem;
+        height: 0.5rem;
+        pointer-events: none;
+        z-index: 3;
+        --lit: 0;
+        background:
+          radial-gradient(ellipse 2% 80% at 95.83% 50%, #00ff88 0% 30%, transparent 80%),
+          radial-gradient(ellipse 2% 80% at 87.5% 50%, #0066ff 0% 30%, transparent 80%),
+          radial-gradient(ellipse 2% 80% at 79.17% 50%, #ff0099 0% 30%, transparent 80%),
+          radial-gradient(ellipse 2% 80% at 70.83% 50%, #00ff88 0% 30%, transparent 80%),
+          radial-gradient(ellipse 2% 80% at 62.5% 50%, #0066ff 0% 30%, transparent 80%),
+          radial-gradient(ellipse 2% 80% at 54.17% 50%, #ff0099 0% 30%, transparent 80%),
+          radial-gradient(ellipse 2% 80% at 45.83% 50%, #00ff88 0% 30%, transparent 80%),
+          radial-gradient(ellipse 2% 80% at 37.5% 50%, #0066ff 0% 30%, transparent 80%),
+          radial-gradient(ellipse 2% 80% at 29.17% 50%, #ff0099 0% 30%, transparent 80%),
+          radial-gradient(ellipse 2% 80% at 20.83% 50%, #00ff88 0% 30%, transparent 80%),
+          radial-gradient(ellipse 2% 80% at 12.5% 50%, #0066ff 0% 30%, transparent 80%),
+          radial-gradient(ellipse 2% 80% at 4.17% 50%, #ff0099 0% 30%, transparent 80%);
+        --reveal: calc(100% - var(--lit) * 8.3333%);
+        -webkit-mask: linear-gradient(to right, transparent var(--reveal), black var(--reveal));
+        mask: linear-gradient(to right, transparent var(--reveal), black var(--reveal));
+        animation: neonTubePulse 2.4s ease-in-out infinite;
+      }
+
+      &[data-value='1']::after {
+        --lit: 1;
+      }
+      &[data-value='2']::after {
+        --lit: 2;
+      }
+      &[data-value='3']::after {
+        --lit: 3;
+      }
+      &[data-value='4']::after {
+        --lit: 4;
+      }
+      &[data-value='5']::after {
+        --lit: 5;
+      }
+      &[data-value='6']::after {
+        --lit: 6;
+      }
+      &[data-value='7']::after {
+        --lit: 7;
+      }
+      &[data-value='8']::after {
+        --lit: 8;
+      }
+      &[data-value='9']::after {
+        --lit: 9;
+      }
+      &[data-value='10']::after {
+        --lit: 10;
+      }
+      &[data-value='11']::after {
+        --lit: 11;
+      }
+      &[data-value='12']::after {
+        --lit: 12;
+      }
+    }
+
     .back {
       background: linear-gradient(135deg, #ff0099 0%, #00ff88 25%, #0066ff 50%, #ff0099 75%, #00ff88 100%);
       overflow: hidden; /* keep glow inside rounded corners */
@@ -145,28 +218,29 @@
     position: fixed;
     left: -60%;
     right: -60%;
-    bottom: -25%;
-    height: 70vh;
+    bottom: 0;
+    height: 100vh;
     background:
       repeating-linear-gradient(
         rgba(0, 212, 255, 0.55) 0px,
         rgba(0, 212, 255, 0.55) 1px,
-        transparent 1px,
-        transparent 80px
+        transparent 0vh,
+        transparent 4vh
       ),
       repeating-linear-gradient(
         90deg,
         rgba(255, 0, 153, 0.45) 0px,
         rgba(255, 0, 153, 0.45) 1px,
         transparent 1px,
-        transparent 100px
+        transparent 10vh
       );
-    transform: perspective(400px) rotateX(50deg);
     transform-origin: top center;
     pointer-events: none;
     z-index: -1;
     opacity: 0.7;
     mask-image: linear-gradient(to top, transparent 0%, black 50%, black 60%, transparent 92%);
+    will-change: transform;
+    animation: backgroundMoving 60s linear infinite;
   }
 
   /* Fade the grid into the background at the very bottom of the viewport */
@@ -199,6 +273,38 @@
       0 0 22px var(--piece-color);
     filter: saturate(1.15);
     animation-duration: 1050ms;
+  }
+}
+
+@keyframes neonTubePulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes neonTextPulse {
+  0%,
+  100% {
+    text-shadow: none;
+  }
+  50% {
+    text-shadow:
+      0 0 2px currentColor,
+      0 0 6px currentColor,
+      0 0 12px color-mix(in srgb, currentColor 70%, transparent);
+  }
+}
+
+@keyframes backgroundMoving {
+  from {
+    transform: perspective(400px) rotateX(50deg) translateY(0);
+  }
+  to {
+    transform: perspective(400px) rotateX(50deg) translateY(-80px);
   }
 }
 
