@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.35.0](https://github.com/klbsjpolp/skip-bo/compare/v1.34.0...v1.35.0) (2026-05-18)
+
+
+### Features
+
+* **game-core:** allow discarding Skip-Bo cards per official rules ([3e1921e](https://github.com/klbsjpolp/skip-bo/commit/3e1921e6ab03ebc269638be1c1b6d7142e1fff73))
+
+
+
 # [1.34.0](https://github.com/klbsjpolp/skip-bo/compare/v1.33.9...v1.34.0) (2026-05-17)
 
 
