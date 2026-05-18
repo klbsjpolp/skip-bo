@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [1.36.0](https://github.com/klbsjpolp/skip-bo/compare/v1.35.0...v1.36.0) (2026-05-18)
+
+
+### Features
+
+* **css:** simplify card corner styling and hover states in metro theme ([0b88053](https://github.com/klbsjpolp/skip-bo/commit/0b88053fc68ed3d5e49bd1c51d8f542a99890f90))
+
+
+
 # [1.35.0](https://github.com/klbsjpolp/skip-bo/compare/v1.34.0...v1.35.0) (2026-05-18)
 
 
