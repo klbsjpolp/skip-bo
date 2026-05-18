@@ -14,3 +14,8 @@ onlyBuiltDependencies:
   - '@swc/core'
   - '@tailwindcss/oxide'
   - esbuild
+
+overrides:
+  esbuild: 0.27.7
+  lodash: '>=4.17.23'
+  tmp: '>=0.2.4'
