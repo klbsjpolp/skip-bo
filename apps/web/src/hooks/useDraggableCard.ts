@@ -149,6 +149,8 @@ export function useDraggableCard(options: UseDraggableCardOptions): DraggableCar
         window.addEventListener('click', swallow, { capture: true, once: true });
         // Fallback in case no click event follows (e.g. touch + scroll cancel).
         window.setTimeout(() => {
+          // Guard against jsdom teardown where `window` is gone before the timer fires.
+          if (typeof window === 'undefined') return;
           window.removeEventListener('click', swallow, { capture: true });
         }, 50);
       };
