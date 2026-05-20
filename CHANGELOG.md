@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.37.2](https://github.com/klbsjpolp/skip-bo/compare/v1.37.1...v1.37.2) (2026-05-20)
+
+
+### Bug Fixes
+
+* **web:** mask just-completed 12 on retreat pile during play animation ([d922088](https://github.com/klbsjpolp/skip-bo/commit/d9220889f664b3fc20a2cecb0ddaa3845678b061))
+
+
+
 ## [1.37.1](https://github.com/klbsjpolp/skip-bo/compare/v1.37.0...v1.37.1) (2026-05-20)
 
 
