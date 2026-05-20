@@ -16,9 +16,22 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
   const { activeAnimations } = useCardAnimation();
   const { session: dragSession } = useDrag();
   const isDragActive = dragSession !== null;
-  const pendingRetreatCardsCount = activeAnimations.filter(
-    (animation) => animation.animationType === 'complete',
+  // A settled "play" animation whose targetPileLength is 0 means the play
+  // landed on a build pile that was just cleared by completion — i.e. the
+  // card it carries is already in completedBuildPiles in the committed view.
+  // Hide it on the retreat pile until the play animation lands; otherwise it
+  // flashes there before the play animation visually delivers it. This
+  // closes the microtask gap between commitView and
+  // triggerCompletedBuildPileAnimation in useOnlineSkipBoGame.
+  const pendingCompletionPlayCount = activeAnimations.filter(
+    (animation) =>
+      animation.animationType === 'play' &&
+      animation.targetSettledInState &&
+      animation.targetInfo?.source === 'build' &&
+      animation.targetPileLength === 0,
   ).length;
+  const pendingRetreatCardsCount =
+    activeAnimations.filter((animation) => animation.animationType === 'complete').length + pendingCompletionPlayCount;
   // Keep the deck back visible while draw animations are still leaving the
   // deck. In online mode the server snapshot drops deck.length to 0 before
   // the staggered draw animations finish, which would otherwise flash "Vide".
