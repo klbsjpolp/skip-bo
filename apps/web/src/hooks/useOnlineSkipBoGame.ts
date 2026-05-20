@@ -104,7 +104,7 @@ interface DrawTransition {
   playerIndex: number;
 }
 
-interface OpponentTransition {
+export interface OpponentTransition {
   action: Extract<GameAction, { type: 'DISCARD_CARD' | 'PLAY_CARD' }>;
   animationCard: Card;
   completedBuildPileIndex?: number;
@@ -196,7 +196,7 @@ const collectDrawTransitions = (previousState: GameState, nextState: GameState):
   });
 };
 
-const inferOpponentTransition = (previousState: GameState, nextState: GameState): OpponentTransition | null => {
+export const inferOpponentTransition = (previousState: GameState, nextState: GameState): OpponentTransition | null => {
   if (previousState.players.length !== nextState.players.length) {
     return null;
   }
