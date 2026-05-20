@@ -123,12 +123,19 @@ const CardComponent: React.FC<CardProps> = ({
       <div className="back"></div>
     );
 
+  // Skip-Bo's visual treatment varies wildly across themes (wordmark, glyph,
+  // texture). Pin the accessible name to always include "Skip-Bo" so screen
+  // readers and contrast tooling can identify the wildcard regardless of how
+  // the theme renders it. Positional hints get appended.
+  const isRevealedSkipBo = card?.isSkipBo === true && isRevealed;
+  const skipBoLabel = isRevealedSkipBo ? (hint ? `Skip-Bo wild card, ${hint}` : 'Skip-Bo wild card') : undefined;
+
   const interactiveProps: HTMLAttributes<HTMLDivElement> = onClick
     ? {
         onClick,
         role: 'button',
         tabIndex: 0,
-        'aria-label': hint ?? cardValue,
+        'aria-label': skipBoLabel ?? hint ?? cardValue,
         'aria-pressed': isSelected ? true : undefined,
         onKeyDown: (event) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -137,7 +144,9 @@ const CardComponent: React.FC<CardProps> = ({
           }
         },
       }
-    : {};
+    : skipBoLabel
+      ? { 'aria-label': skipBoLabel }
+      : {};
 
   if (card && shouldMorph) {
     const fromOpacity = morphing === 'yes' ? 1 : 0;

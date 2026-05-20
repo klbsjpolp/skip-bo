@@ -58,6 +58,8 @@ Two rules that get violated most often — keep them in your head:
 1. **Use `background-image:` — never the `background:` shorthand on body or anywhere that needs a stable `background-color`.** The shorthand resets `background-color` to transparent; iOS Safari samples that color for the status bar tint.
 2. **Multi-layer gradients must be comma-separated**, and `background-size` / `background-repeat` lists must have the same number of entries as the layers (CSS silently cycles shorter lists).
 
+Themes also have a **readability contract** — filled card values and the turn-state prompt must meet ≥ 3:1 contrast, the selected card must visibly differ from unselected ones, and the Skip-Bo wildcard must keep its accessible name. Enforced by [`tests/ui/readability.spec.ts`](tests/ui/readability.spec.ts); see [`src/themes/README.md`](src/themes/README.md#11-readability-contract) §11 for the full rules. `.card.empty-card` (the `Vide` placeholder) is intentionally exempt — it should recede.
+
 ## Debug Buttons
 
 `DebugStrip` renders in `DEV` mode only, in both local and online game screens:
