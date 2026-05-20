@@ -19,6 +19,12 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
   const pendingRetreatCardsCount = activeAnimations.filter(
     (animation) => animation.animationType === 'complete',
   ).length;
+  // Keep the deck back visible while draw animations are still leaving the
+  // deck. In online mode the server snapshot drops deck.length to 0 before
+  // the staggered draw animations finish, which would otherwise flash "Vide".
+  const deckIsDealing = activeAnimations.some(
+    (animation) => animation.sourceInfo.source === 'deck' && !animation.hasStarted,
+  );
   const visibleCompletedBuildPileCount = Math.max(gameState.completedBuildPiles.length - pendingRetreatCardsCount, 0);
   const visibleCompletedBuildPiles =
     visibleCompletedBuildPileCount === gameState.completedBuildPiles.length
@@ -36,7 +42,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
             Pioche ({gameState.deck.length})
           </h2>
           <div className="deck">
-            {gameState.deck.length > 0 ? (
+            {gameState.deck.length > 0 || deckIsDealing ? (
               <Card hint="Deck" card={{ value: 0, isSkipBo: false }} isRevealed={false} canBeGrabbed={false} />
             ) : (
               <EmptyCard canDropCard={false} />
