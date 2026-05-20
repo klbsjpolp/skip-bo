@@ -253,6 +253,53 @@ describe('Online animation masking', () => {
     expect(visibleCardValues).toEqual(['3', '7']);
   });
 
+  test('hides the just-completed 12 on the retreat pile while the play animation is still in flight', () => {
+    // Scenario: an opponent just played a 12 that completed build pile 0.
+    // The snapshot has landed (commitView already happened), so:
+    //   - buildPiles[0] is empty (cleared by completion)
+    //   - completedBuildPiles contains the 12 cards (including the 12 on top)
+    // But triggerCompletedBuildPileAnimation hasn't scheduled its complete
+    // animations yet (microtask gap after triggerAIAnimation resolves), so
+    // activeAnimations only contains the in-flight play animation.
+    // Without masking, the retreat pile would briefly render the 12 before
+    // the play animation visually delivers it.
+    const gameState = createGameState();
+    gameState.buildPiles[0] = [];
+    gameState.completedBuildPiles = [
+      card(1),
+      card(2),
+      card(3),
+      card(4),
+      card(5),
+      card(6),
+      card(7),
+      card(8),
+      card(9),
+      card(10),
+      card(11),
+      card(12),
+    ];
+
+    const playAnimationLandingOnCompletedPile = {
+      ...createSettledIncomingBuildAnimation(0, 0),
+      card: card(12),
+    };
+
+    render(
+      <CardAnimationContext.Provider value={createAnimationContext([playAnimationLandingOnCompletedPile])}>
+        <CenterArea
+          gameState={gameState}
+          playCard={vi.fn(async () => ({ success: true, message: 'ok' }))}
+          canPlayCard={vi.fn(() => false)}
+        />
+      </CardAnimationContext.Provider>,
+    );
+
+    const retreatPile = screen.getByTestId('retreat-pile');
+
+    expect(retreatPile.querySelector('.card[data-value="12"]')).toBeNull();
+  });
+
   test('shows a face-down stock card instead of a revealed placeholder during stock animations', () => {
     const gameState = createGameState();
     gameState.players[0].stockPile = [card(0), card(7)];
