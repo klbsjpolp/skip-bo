@@ -10,7 +10,7 @@ import {
   type ServerMessage,
 } from '@skipbo/multiplayer-protocol';
 
-import { useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
+import { inferOpponentTransition, useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
 
 const {
   activeAnimationsState,
@@ -18,6 +18,7 @@ const {
   removeAnimation,
   startAnimation,
   triggerAIAnimation,
+  triggerCompletedBuildPileAnimation,
   triggerMultipleDrawAnimations,
   waitForAnimations,
 } = vi.hoisted(() => ({
@@ -28,6 +29,7 @@ const {
   removeAnimation: vi.fn(),
   startAnimation: vi.fn(),
   triggerAIAnimation: vi.fn(async () => 0),
+  triggerCompletedBuildPileAnimation: vi.fn(() => 0),
   triggerMultipleDrawAnimations: vi.fn(async () => 0),
   waitForAnimations: vi.fn(async () => undefined),
 }));
@@ -49,7 +51,7 @@ vi.mock('@/services/drawAnimationService', () => ({
 
 vi.mock('@/services/completedBuildPileAnimationService', () => ({
   setGlobalCompletedPileAnimationContext: vi.fn(),
-  triggerCompletedBuildPileAnimation: vi.fn(() => 0),
+  triggerCompletedBuildPileAnimation,
 }));
 
 vi.mock('@/services/aiAnimationService', () => ({
@@ -397,6 +399,9 @@ describe('useOnlineSkipBoGame', () => {
     removeAnimation.mockClear();
     startAnimation.mockClear();
     triggerAIAnimation.mockClear();
+    triggerAIAnimation.mockImplementation(async () => 0);
+    triggerCompletedBuildPileAnimation.mockClear();
+    triggerCompletedBuildPileAnimation.mockImplementation(() => 0);
     triggerMultipleDrawAnimations.mockClear();
     calculateMultipleDrawAnimationDuration.mockClear();
     waitForAnimations.mockClear();
@@ -1056,5 +1061,130 @@ describe('useOnlineSkipBoGame', () => {
 
     expect(result.current.lobbyRemovalReason).toBeNull();
     expect(result.current.lastError).toBe('Invalid move');
+  });
+
+  describe('opponent build pile completion (12)', () => {
+    const createOpponentCompletionStates = (): { previousState: GameState; nextState: GameState } => {
+      const previousState = initialGameState();
+      previousState.currentPlayerIndex = 1;
+      previousState.players[1].isAI = false;
+      previousState.players[1].hand = [card(12), null, null, null, null];
+      previousState.buildPiles = [
+        [card(1), card(2), card(3), card(4), card(5), card(6), card(7), card(8), card(9), card(10), card(11)],
+        [],
+        [],
+        [],
+      ];
+      previousState.completedBuildPiles = [];
+      previousState.selectedCard = {
+        card: card(12),
+        source: 'hand',
+        index: 0,
+      };
+      previousState.message = 'Sélectionnez une destination';
+
+      const nextState = gameReducer(previousState, { type: 'PLAY_CARD', buildPile: 0 });
+
+      return { previousState, nextState };
+    };
+
+    it('extracts completion metadata from the 12-on-11 snapshot pair', () => {
+      const { previousState, nextState } = createOpponentCompletionStates();
+
+      // Sanity: the reducer must actually clear the pile and move 12 cards to completed.
+      expect(nextState.buildPiles[0]).toEqual([]);
+      expect(nextState.completedBuildPiles).toHaveLength(12);
+
+      const transition = inferOpponentTransition(previousState, nextState);
+
+      expect(transition).not.toBeNull();
+      expect(transition?.action).toEqual({ type: 'PLAY_CARD', buildPile: 0 });
+      expect(transition?.animationCard.value).toBe(12);
+      expect(transition?.completedBuildPileIndex).toBe(0);
+      expect(transition?.completedCards).toHaveLength(12);
+      expect(transition?.completedCards?.at(-1)?.value).toBe(12);
+      expect(transition?.sourceRevealed).toBe(false);
+      // The build pile is empty in nextState (cards moved to completedBuildPiles).
+      // This contract is what CenterArea masking reads; if it ever changes,
+      // re-verify that the 12 is still hidden on the retreat pile until the
+      // play animation lands.
+      expect(transition?.targetPileLength).toBe(0);
+    });
+
+    it('returns null when neither buildPiles nor discardPiles changed', () => {
+      const { previousState } = createOpponentCompletionStates();
+      const unchanged: GameState = { ...previousState, selectedCard: null };
+
+      expect(inferOpponentTransition(previousState, unchanged)).toBeNull();
+    });
+
+    it('schedules completion animation after the opponent play animation on a 12 snapshot', async () => {
+      const session = createSession();
+      const { previousState, nextState } = createOpponentCompletionStates();
+      const previousView = createOnlineView(previousState, 1);
+      const nextView = createOnlineView(nextState, 2);
+
+      const PLAY_DURATION = 320;
+      triggerAIAnimation.mockImplementationOnce(async () => PLAY_DURATION);
+
+      renderHook(() => useOnlineSkipBoGame(session));
+
+      await act(async () => {
+        vi.runOnlyPendingTimers();
+      });
+
+      const socket = MockWebSocket.instances[0];
+      expect(socket).toBeDefined();
+
+      await act(async () => {
+        socket.open();
+        socket.emitMessage({ type: 'snapshot', view: previousView });
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        socket.emitMessage({ type: 'snapshot', view: nextView });
+        // Flush the microtask chain so the .then() handler after
+        // triggerAIAnimation gets a chance to schedule the completion.
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(triggerAIAnimation).toHaveBeenCalledTimes(1);
+      expect(triggerAIAnimation).toHaveBeenCalledWith(
+        expect.anything(),
+        { type: 'PLAY_CARD', buildPile: 0 },
+        expect.objectContaining({
+          targetSettledInStateOverride: true,
+          targetPileLengthOverride: 0,
+        }),
+      );
+
+      expect(triggerCompletedBuildPileAnimation).toHaveBeenCalledTimes(1);
+      const completionCall = triggerCompletedBuildPileAnimation.mock.calls[0] as unknown as [
+        GameState,
+        number,
+        Card[],
+        number,
+        number,
+        number,
+      ];
+      const [, completedBuildPileIndex, completedCards, initialCompletedCount, staggerDelay, baseDelay] =
+        completionCall;
+
+      expect(completedBuildPileIndex).toBe(0);
+      expect(completedCards).toHaveLength(12);
+      expect(completedCards.at(-1)?.value).toBe(12);
+      expect(initialCompletedCount).toBe(0);
+      expect(staggerDelay).toBe(100);
+      // baseDelay must equal the duration returned by triggerAIAnimation so the
+      // retreat animation only starts once the play animation has landed.
+      expect(baseDelay).toBe(PLAY_DURATION);
+
+      // Ordering: play animation registered before completion animation.
+      const playOrder = triggerAIAnimation.mock.invocationCallOrder[0];
+      const completionOrder = triggerCompletedBuildPileAnimation.mock.invocationCallOrder[0];
+      expect(playOrder).toBeLessThan(completionOrder);
+    });
   });
 });
