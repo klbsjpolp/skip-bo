@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.37.1](https://github.com/klbsjpolp/skip-bo/compare/v1.37.0...v1.37.1) (2026-05-20)
+
+
+### Bug Fixes
+
+* **web:** keep deck back visible during staggered draw animations ([c6ac3b9](https://github.com/klbsjpolp/skip-bo/commit/c6ac3b98fba9e3cc0e864d2a67fb00f635a53bc9))
+
+
+
 # [1.37.0](https://github.com/klbsjpolp/skip-bo/compare/v1.36.3...v1.37.0) (2026-05-18)
 
 
