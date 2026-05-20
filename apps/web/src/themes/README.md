@@ -382,6 +382,7 @@ Each theme can declare additional tokens that are only read inside its own block
 4. Add an `@import './themes/<name>.css';` line to [`index.css`](../index.css), alphabetical.
 5. Run `pnpm --filter @skipbo/web exec playwright test tests/ui/theme-contract.spec.ts --project=chromium-desktop`. The first run generates the baseline PNG snapshot — commit it.
 6. If the theme is one of the [`representativeThemes`](../../tests/ui/helpers.ts) used by `layout-and-accessibility.spec.ts`, also commit those snapshots.
+7. Run `pnpm --filter @skipbo/web exec playwright test tests/ui/readability.spec.ts --project=chromium-desktop` to confirm the new theme meets the [readability contract](#11-readability-contract).
 
 ## 8. Visual regression workflow
 
@@ -409,7 +410,76 @@ These all have shown up in past incidents or get debated in review. Skip them.
 - Splitting a theme into multiple sibling `.theme-<name> selector { ... }` rules instead of one nested block (see §3.4).
 - Space-separated multi-layer gradients (see §4.3).
 
-## 11. Tooling
+## 11. Readability contract
+
+Themes have a lot of artistic freedom, but three elements must remain readable
+regardless of theme art. These are enforced by
+[`tests/ui/readability.spec.ts`](../../tests/ui/readability.spec.ts).
+
+### 11.1 Filled card values must meet contrast
+
+`.card.normal-card .card-number` is the canonical place card values are read.
+Its computed `color` (from `--card-g1` / `--card-g2` / `--card-g3`) must reach
+**≥ 3:1 contrast** against the effective card background (WCAG AA for large
+text — card values render at `text-3xl`/bold).
+
+**`.card.empty-card` is exempt.** The `Vide` placeholder is a hint, not
+information; it _should_ recede so it does not compete with real card values.
+Selectors in the spec explicitly skip `.empty-card`. The slot outline itself
+(`.placeholder` dashed border) still needs to be perceivable — if your theme
+suppresses it, restore it some other way.
+
+### 11.2 The turn-state prompt must meet contrast
+
+`[data-testid="game-message"]` (e.g. "Sélectionnez une carte", "L'IA joue")
+must reach **≥ 3:1 contrast** against the effective board background. This is
+the only visible cue for whose turn it is on themes that don't strongly tint
+the active-player band.
+
+### 11.3 The selected card must be visibly different from unselected
+
+`.card.selected` must differ from a sibling `.card.normal-card:not(.selected)`
+in at least one of: `border-color`, `box-shadow`, or `transform`. The default
+`--selected-shadow` + `--selected-border-color` + `translateY(-5px)` from
+[`styles/card.css`](../styles/card.css) already provides this; a theme that
+overrides `&.card.selected { ... }` must preserve a perceivable delta.
+
+If a theme genuinely cannot meet 11.1 or 11.2 due to its visual identity, the
+fix is to adjust the token (`--card-g*`, `--card-front-color`,
+`--text-color`), not to relax the threshold. The threshold lives in one
+place: `MIN_LARGE_TEXT_CONTRAST` in `readability.spec.ts`.
+
+### 11.4 UI chrome contrast
+
+Buttons and dialog body text must also be readable in every theme. The spec
+opens the New Game dialog and asserts ≥ **4.5:1** contrast (WCAG AA normal
+text) on:
+
+- The toolbar triggers: `[data-testid="new-game-trigger"]`,
+  `[data-testid="theme-switcher-trigger"]`,
+  `[data-testid="theme-randomizer-button"]`.
+- Every `<button>` inside `[data-testid="new-game-dialog"]`.
+- Body copy (headings, paragraphs, labels) inside the dialog.
+
+The threshold is higher here than for cards (4.5 vs 3) because button labels
+and dialog copy render at `text-sm` / `text-base` — they do not qualify as
+"large text" under WCAG.
+
+If a theme tints `--primary`, `--secondary`, `--card`, or `--popover`, verify
+both the surface color **and** the matching `*-foreground` token together —
+they form the contrast pair the spec measures.
+
+### 11.5 Skip-Bo wildcard accessible name
+
+The Skip-Bo card's visual treatment varies wildly across themes (wordmark
+clipped on Metro's tile pattern, swords on Minecraft, fold on Origami).
+[`Card.tsx`](../components/Card.tsx) pins the accessible name to
+`"Skip-Bo wild card"` whenever a Skip-Bo card is rendered face-up, so screen
+readers and the readability spec can identify the wildcard regardless of the
+theme's art. **Do not hide that text via `display: none` / `text-indent: -9999px`
+in a theme override** — replace the visual treatment, but keep the DOM text.
+
+## 12. Tooling
 
 - **`.editorconfig`** at the repo root locks `indent_size = 2` for everyone.
 - **Prettier** (`.prettierrc.json`) formats `.ts`, `.tsx`, `.js`, `.json`, `.md`, `.css`, `.yml`. Run `pnpm format` (write) or `pnpm format:check` (CI).
