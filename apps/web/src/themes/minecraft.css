@@ -13,13 +13,13 @@
   --primary-foreground: #e6e6e6;
   --secondary: #3c401d;
   --secondary-foreground: hsl(0 0% 100%);
-  --success: #9adf5a;
+  --success: hsl(91 68% 61%);
   --success-foreground: #1a1a1a;
   --foreground: #e6e6e6;
   --card-foreground: #e6e6e6;
   --popover: #3d2e1e;
   --popover-foreground: #e6e6e6;
-  --muted: hsl(30 12% 18%);
+  --muted: hsl(91 32% 92%);
   --muted-foreground: hsl(
     0 0% 85%
   ); /* lightened so close/muted button text reaches ≥4.5:1 on the dirt-brown surfaces */
