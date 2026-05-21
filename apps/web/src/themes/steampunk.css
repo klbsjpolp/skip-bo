@@ -3,12 +3,17 @@
   /* Core palette */
   --primary: hsl(37 61% 47%); /* brass */
   --primary-foreground: hsl(30 20% 10%);
+  /* SelectTrigger uses bg-input/75 over the dark charcoal body, which damps the brass.
+     Override --input to a brighter brass so the composite carries the dark fg at ≥4.5:1. */
+  --input: hsl(40 75% 65%);
   --secondary: hsl(27 32% 32%); /* oiled bronze */
   --secondary-foreground: #e7d9b9;
   --success: hsl(165 32% 34%);
   --success-foreground: hsl(45 60% 92%);
   --muted: hsl(27 15% 18%);
-  --muted-foreground: hsl(42 20% 50%);
+  --muted-foreground: hsl(
+    42 30% 80%
+  ); /* lightened so body copy and muted text in dialogs read ≥4.5:1 on bronze surfaces */
 
   /* Surfaces and text */
   --background: #1f1a14; /* workshop charcoal */

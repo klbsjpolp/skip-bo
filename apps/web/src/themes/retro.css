@@ -1,8 +1,13 @@
 .theme-retro {
-  --primary: hsl(174 59% 39%);
+  --primary: hsl(174 65% 26%); /* deepened teal so the near-white fg reaches ≥4.5:1 */
   --primary-foreground: hsl(0 0% 95%);
+  /* SelectTrigger uses bg-input/75, so the trigger surface is brighter than --primary alone.
+     Override --input independently with a much deeper teal so the composite (which lands
+     on retro's bright striped body) still passes ≥4.5:1 with near-white fg. */
+  --input: hsl(174 80% 12%);
   --secondary: #e9c46a;
   --secondary-foreground: #264653;
+  --muted-foreground: #3a4552; /* deepened (default gray was too light on retro's cream/yellow surfaces) for close/muted text */
   --success: #2a9d8f;
   --success-foreground: hsl(0 0% 100%);
   --border: #e76f51;
@@ -55,8 +60,8 @@
 
   --skipbo-text: hsl(40 80% 80%);
   --skipbo-bg: var(--card-front-color);
-  --card-g1: #2a9d8f;
-  --card-g2: #e76f51;
+  --card-g1: #0d5953;
+  --card-g2: #6b1d0e;
   --card-g3: #264653;
 
   body {

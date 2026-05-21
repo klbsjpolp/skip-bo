@@ -1,5 +1,5 @@
 .theme-origami {
-  --primary: #a82960;
+  --primary: #861a4a; /* deepened so SelectTrigger bg-input/75 over the cream dialog still reaches ≥4.5:1 with the cream fg */
   --primary-foreground: #fdf8ee;
   --secondary: #f7dde3;
   --secondary-foreground: #2c2030;

@@ -1,8 +1,8 @@
 @import './utils/liquid-glass.css';
 
 .theme-glass {
-  --primary: #6786d3;
-  --primary-foreground: hsl(0, 0%, 90%);
+  --primary: #738fd8; /* lightened so dark navy fg reaches ≥4.5:1 on the brand surface */
+  --primary-foreground: #0a1530; /* deep navy on glass blue */
   --secondary: hsl(0, 0%, 32%, 30%);
   --success: #7ee9c8;
   --success-foreground: #0f2b3d;
@@ -13,7 +13,9 @@
   --text-color: #ffffff; /* light gray text */
   --title-color: #f3f4f6; /* headings a touch brighter */
   --muted: hsl(213 38% 20%);
-  --muted-foreground: hsl(213 10% 55%);
+  --muted-foreground: hsl(
+    213 30% 90%
+  ); /* lightened so muted/close button text reads ≥4.5:1 on glass's mid-blue surfaces */
 
   --active-turn-color: white;
 

@@ -469,6 +469,35 @@ If a theme tints `--primary`, `--secondary`, `--card`, or `--popover`, verify
 both the surface color **and** the matching `*-foreground` token together —
 they form the contrast pair the spec measures.
 
+Three patterns surfaced repeatedly while bringing every theme up to ≥4.5:1.
+Watch for them when authoring a new theme or rebalancing an existing one:
+
+1. **`--primary-foreground` is the most-failed pair.** Most themes default to
+   white/cream foreground on a saturated mid-tone primary, which lands around
+   2.5–4.0:1. The fix is almost always to either deepen `--primary` (when the
+   theme's brand color tolerates it) or flip `--primary-foreground` to a dark
+   value matching the theme's text. Rainbow, candy, glass, retro-space, and
+   origami all use the "flip to dark fg" approach; metro, neon, retro,
+   minecraft use the "deepen primary" approach.
+
+2. **`--input` needs its own value when the trigger sits over a coloured
+   body.** [`ui/select.tsx`](../components/ui/select.tsx) styles the
+   `SelectTrigger` with `bg-input/75 text-input-foreground` — the 75% alpha
+   means the trigger surface is composited with whatever is behind it. The
+   default `--input: var(--primary)` works when the body is light, but fails
+   when the body is dark (the composite is muddier than the primary alone)
+   or when the body is bright (the composite is washed out). Themes with
+   coloured bodies — retro, retro-space, steampunk, glass — override
+   `--input` independently of `--primary` so the trigger reads on its own.
+
+3. **`--muted-foreground` defaults to a light gray that fails on themed
+   surfaces.** The shadcn default `hsl(0 0% 45.1%)` (≈ `#737373`) is tuned
+   for a near-white body and falls below 4.5:1 against most coloured
+   dialogs, popovers, or close-button backgrounds. Themes with non-white
+   bodies should set their own `--muted-foreground` — typically a deeper
+   gray for light themes (e.g. retro `#3a4552`) and a lighter gray for dark
+   themes (e.g. neon `hsl(0 0% 65%)`).
+
 ### 11.5 Skip-Bo wildcard accessible name
 
 The Skip-Bo card's visual treatment varies wildly across themes (wordmark

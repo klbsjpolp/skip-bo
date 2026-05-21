@@ -1,6 +1,6 @@
 .theme-candy {
   --primary: #ff76a5;
-  --primary-foreground: #fff8fc;
+  --primary-foreground: #4a1130; /* dark wine on candy pink — ~5.5:1 contrast */
   --secondary: rgb(255 243 249 / 0.92);
   --secondary-foreground: hsl(334 42% 24%);
   --success: #45bf9c;
@@ -46,9 +46,9 @@
   --victory-shine-duration: 3.4s;
 
   --skipbo-text: #fff5fb;
-  --skipbo-bg: #ff8fb7;
-  --card-g1: #45bf9c;
-  --card-g2: #ff648f;
+  --skipbo-bg: var(--card-front-color);
+  --card-g1: #138569;
+  --card-g2: #d63b6a;
   --card-g3: #9b79f3;
 
   body {
@@ -132,18 +132,15 @@
 
   .card {
     overflow: hidden;
-    background-color: #fffafc;
 
-    &.normal-card {
-      .card-inner::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background:
-          radial-gradient(circle at top, rgb(255 255 255 / 0.9), rgb(255 255 255 / 0) 42%),
-          linear-gradient(180deg, rgb(255 255 255 / 0.08), rgb(255 182 210 / 0.14));
-        pointer-events: none;
-      }
+    .card-inner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top, rgb(255 255 255 / 0.9), rgb(255 255 255 / 0) 42%),
+        linear-gradient(180deg, rgb(255 255 255 / 0.08), rgb(255 182 210 / 0.14));
+      pointer-events: none;
     }
 
     .back {
@@ -160,7 +157,6 @@
     }
 
     &.skipbo-text {
-      background: linear-gradient(180deg, #fff8fb 0%, #fff1f7 100%);
       isolation: isolate;
       --lollipop-size: calc(var(--card-width) * 0.68);
       --lollipop-center-x: 50%;
@@ -223,7 +219,7 @@
           0 2px 6px rgb(171 118 53 / 0.18);
       }
 
-      .card-inner::after {
+      .card-inner-2::after {
         content: '';
         position: absolute;
         left: var(--lollipop-center-x);
@@ -265,7 +261,7 @@
         filter: saturate(1.15) contrast(1.04);
       }
 
-      .card-inner::before {
+      .card-inner-2::before {
         content: '';
         position: absolute;
         left: var(--lollipop-center-x);

@@ -1,5 +1,5 @@
 .theme-neon {
-  --primary: #ff0099;
+  --primary: #c2007c; /* deepened neon magenta — white text reads ≥6:1 while keeping the glow vibe */
   --primary-foreground: hsl(0 0% 100%);
   --secondary: #1a1a1a;
   --secondary-foreground: hsl(0 0% 100%);
@@ -7,7 +7,9 @@
   --success-foreground: hsl(0 0% 0%);
 
   --muted: #161616;
-  --muted-foreground: hsl(0 0% 38%);
+  --muted-foreground: hsl(
+    0 0% 65%
+  ); /* lightened so muted text (e.g. close button) reaches ≥4.5:1 on neon's dark surfaces */
 
   --background: #0a0a0a;
   --foreground: hsl(0 0% 90%);

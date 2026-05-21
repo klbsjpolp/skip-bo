@@ -1,6 +1,10 @@
 .theme-retro-space {
   --primary: #d87939;
-  --primary-foreground: #fcf4e8;
+  --primary-foreground: #1a0f08; /* dark text on the burnt-orange brand — ~5.7:1 */
+  --muted-foreground: hsl(0 0% 65%); /* lightened so muted/close text reads ≥4.5:1 on the dark navy surfaces */
+  /* SelectTrigger uses bg-input/75 composited over the dark body, which dims the surface.
+     Override --input to a brighter orange so the composite stays light enough for dark fg. */
+  --input: #f5a36a;
   --secondary: #122134;
   --secondary-foreground: hsl(42 48% 93%);
   --success: #7fd4d7;

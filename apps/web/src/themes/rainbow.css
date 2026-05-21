@@ -1,27 +1,28 @@
 .theme-rainbow {
   --primary: hsl(32 88% 52%);
-  --primary-foreground: hsl(0 0% 100%);
+  --primary-foreground: #1a1330; /* dark text on the brand orange — mirrors the dark-on-pastel card treatment */
   --secondary: #ffffff88;
-  --secondary-foreground: #333333;
-  --success: #4caf50;
-  --success-foreground: hsl(0 0% 100%);
+  --secondary-foreground: #1a1330;
+  --success: oklch(0.78 0.16 145); /* pastel jade — sampled from the rainbow palette band */
+  --success-foreground: #1a1330;
   --border: hsl(32 78% 62%);
 
   --background: #87ceeb; /* Sky Blue */
-  --text-color: #333333;
-  --title-color: #c2410c;
-  --card-front-color: #ffffff;
-  --card-border-color: #9381ff;
+  --muted-foreground: #5a4870; /* darker than the global default so outline/muted button text stays ≥4.5:1 on the sky body */
+  --text-color: #1a1330; /* matches card numbers — unified dark-indigo body text */
+  --title-color: #791a05; /* deepened further so dialog body text (4.5:1 threshold) also passes on the sky body */
+  --card-border-color: oklch(0.85 0.05 285); /* soft lavender — calmer outline around the bright pastel fronts */
   --card-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
   --card-radius: 12px;
   --card-back-color: #6a5acd;
   --selected-border-color: #ff8000;
   --victory-border: #ffb347;
   --victory-accent: #ffd166;
-  --victory-piece-1: #fff176;
-  --victory-piece-2: #ffb347;
-  --victory-piece-3: #5d9cec;
-  --victory-piece-4: #9381ff;
+  /* Confetti sampled across the OKLCH rainbow palette so it reads as the same family as the cards. */
+  --victory-piece-1: var(--rainbow-1);
+  --victory-piece-2: var(--rainbow-4);
+  --victory-piece-3: var(--rainbow-7);
+  --victory-piece-4: var(--rainbow-11);
   --victory-pattern-opacity: 0.3;
   --victory-pattern-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round' stroke-width='4'%3E%3Cpath d='M16 18 28 6l-5 13h10L19 38l4-12H13z' stroke='%23fff6b7'/%3E%3Cpath d='M49 44 58 34l-4 10h8L51 58l3-8h-8z' stroke='%239381ff'/%3E%3Cpath d='M42 16 49 8l-3 8h7L44 27l2-6h-6z' stroke='%235d9cec'/%3E%3C/g%3E%3C/svg%3E");
   --victory-pattern-size: 48px 48px;
@@ -63,10 +64,17 @@
     radial-gradient(circle at 96% 4%, rgba(255, 215, 140, 0.55), rgba(255, 200, 140, 0) 48%),
     /* base stormy sky */ linear-gradient(180deg, #2d3a58 0%, #1a2342 100%);
 
-  --skipbo-text: white;
-  --card-g1: #ff6b6b; /* Red band from back gradient */
-  --card-g2: #4caf50; /* Green band from back gradient */
-  --card-g3: #9381ff; /* Indigo/Purple band from back gradient */
+  /* Skip-Bo matches the dark-text-on-bright-pastel treatment used by the
+     normal cards (see the OKLCH palette below). The bg is a very light
+     near-white so the rainbow arc reads against a calm base. */
+  --skipbo-text: #1a1330;
+  --skipbo-bg: #fbfaff;
+  /* card-range tints — barely used by rainbow because both .card-number and
+     .card-corner-number override color to dark indigo, but they remain part
+     of the universal token contract. Mapped to palette stops for harmony. */
+  --card-g1: var(--rainbow-1);
+  --card-g2: var(--rainbow-5);
+  --card-g3: var(--rainbow-10);
 
   body {
     @apply bg-background;
@@ -155,78 +163,111 @@
     }
   }
 
-  /* 14 evenly-spaced rainbow stops (HSL hue 0..360 / 14 steps) */
-  --rainbow-0: hsl(0 85% 58%);
-  --rainbow-1: hsl(25.7 85% 58%);
-  --rainbow-2: hsl(51.4 85% 55%);
-  --rainbow-3: hsl(77.1 72% 50%);
-  --rainbow-4: hsl(102.9 65% 48%);
-  --rainbow-5: hsl(128.6 60% 48%);
-  --rainbow-6: hsl(154.3 65% 45%);
-  --rainbow-7: hsl(180 70% 45%);
-  --rainbow-8: hsl(205.7 80% 55%);
-  --rainbow-9: hsl(231.4 78% 62%);
-  --rainbow-10: hsl(257.1 70% 65%);
-  --rainbow-11: hsl(282.9 65% 62%);
-  --rainbow-12: hsl(308.6 70% 60%);
-  --rainbow-13: hsl(334.3 80% 62%);
+  /* 14 evenly-spaced rainbow stops in OKLCH.
+       HSL hue is perceptually uneven — the green region (60°–180°) feels
+       visually compressed, which made adjacent cards (e.g. 4 → 6) look like
+       "green to green". OKLCH hue is perceptually uniform, so 360°/14 ≈ 25.71°
+       steps produce visibly distinct adjacent stops everywhere on the wheel.
+       Lightness is held at 0.78 so every stop reads as a bright, friendly
+       rainbow rather than a dark/saturated one. Chroma 0.16 stays within the
+       sRGB gamut for most hues; blues get gamut-mapped down slightly.
+       Card-number text uses a dark color (see below) — at this lightness,
+       dark text reaches ≥ 5:1 contrast on every stop. */
+  --rainbow-0: oklch(0.78 0.16 25);
+  --rainbow-1: oklch(0.78 0.16 50.71);
+  --rainbow-2: oklch(0.78 0.16 76.43);
+  --rainbow-3: oklch(0.78 0.16 102.14);
+  --rainbow-4: oklch(0.78 0.16 127.86);
+  --rainbow-5: oklch(0.78 0.16 153.57);
+  --rainbow-6: oklch(0.78 0.16 179.29);
+  --rainbow-7: oklch(0.78 0.16 205);
+  --rainbow-8: oklch(0.78 0.16 230.71);
+  --rainbow-9: oklch(0.78 0.16 256.43);
+  --rainbow-10: oklch(0.78 0.16 282.14);
+  --rainbow-11: oklch(0.78 0.16 307.86);
+  --rainbow-12: oklch(0.78 0.16 333.57);
+  --rainbow-13: oklch(0.78 0.16 359.29);
+
+  --card-front-color: var(--rainbow-6);
 
   .card.normal-card {
     &[data-value='1'] {
+      background-color: var(--rainbow-1);
       background-image: linear-gradient(90deg, var(--rainbow-0), var(--rainbow-1), var(--rainbow-2));
     }
     &[data-value='2'] {
+      background-color: var(--rainbow-2);
       background-image: linear-gradient(106deg, var(--rainbow-1), var(--rainbow-2), var(--rainbow-3));
     }
     &[data-value='3'] {
+      background-color: var(--rainbow-3);
       background-image: linear-gradient(123deg, var(--rainbow-2), var(--rainbow-3), var(--rainbow-4));
     }
     &[data-value='4'] {
+      background-color: var(--rainbow-4);
       background-image: linear-gradient(139deg, var(--rainbow-3), var(--rainbow-4), var(--rainbow-5));
     }
     &[data-value='5'] {
+      background-color: var(--rainbow-5);
       background-image: linear-gradient(155deg, var(--rainbow-4), var(--rainbow-5), var(--rainbow-6));
     }
     &[data-value='6'] {
+      background-color: var(--rainbow-6);
       background-image: linear-gradient(172deg, var(--rainbow-5), var(--rainbow-6), var(--rainbow-7));
     }
     &[data-value='7'] {
+      background-color: var(--rainbow-7);
       background-image: linear-gradient(188deg, var(--rainbow-6), var(--rainbow-7), var(--rainbow-8));
     }
     &[data-value='8'] {
+      background-color: var(--rainbow-8);
       background-image: linear-gradient(205deg, var(--rainbow-7), var(--rainbow-8), var(--rainbow-9));
     }
     &[data-value='9'] {
+      background-color: var(--rainbow-9);
       background-image: linear-gradient(221deg, var(--rainbow-8), var(--rainbow-9), var(--rainbow-10));
     }
     &[data-value='10'] {
+      background-color: var(--rainbow-10);
       background-image: linear-gradient(237deg, var(--rainbow-9), var(--rainbow-10), var(--rainbow-11));
     }
     &[data-value='11'] {
+      background-color: var(--rainbow-11);
       background-image: linear-gradient(254deg, var(--rainbow-10), var(--rainbow-11), var(--rainbow-12));
     }
     &[data-value='12'] {
+      background-color: var(--rainbow-12);
       background-image: linear-gradient(270deg, var(--rainbow-11), var(--rainbow-12), var(--rainbow-13));
     }
 
+    /* Dark text on the brighter rainbow stops — light text never reached
+       ≥3:1 contrast against the warm middle bands. The soft white halo keeps
+       the numbers legible across the entire gradient. */
     .card-number {
-      color: #ffffff;
+      color: #1a1330;
       text-shadow:
-        0 1px 2px rgba(0, 0, 0, 0.45),
-        0 0 6px rgba(0, 0, 0, 0.25);
+        0 1px 0 rgba(255, 255, 255, 0.55),
+        0 0 6px rgba(255, 255, 255, 0.45);
     }
 
     .card-corner-number {
-      color: #ffffff;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      color: #1a1330;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
     }
   }
 
   .card {
     &.skipbo-text {
-      @apply text-shadow-black;
-      /* Big rainbow arc seen edge-on: center far past the bottom-right of the card,
-           bands tuned so only the bottom-left → top-right diagonal slice falls on the card. */
+      /* Soft white halo so the dark Skip-Bo lettering stays crisp where the
+         rainbow arc crosses behind it. */
+      text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.7),
+        0 0 6px rgba(255, 255, 255, 0.55);
+
+      /* Big rainbow arc seen edge-on: center far past the bottom-right of the
+         card, bands tuned so only the bottom-left → top-right diagonal slice
+         falls on the card. Uses the same OKLCH palette as the numbered cards
+         so the wildcard reads as part of the family. */
       --inner: 70%;
       --band: 3%;
 
@@ -239,32 +280,27 @@
         z-index: 0;
         overflow: hidden;
 
-        background-image:
-          linear-gradient(#ffffff40, #ffffff40),
-          radial-gradient(
-            circle at 250% 250%,
-            var(--card-front-color) 0 var(--inner),
-            #ff0000 var(--inner) calc(var(--inner) + var(--band)),
-            #ff7f00 calc(var(--inner) + var(--band)) calc(var(--inner) + var(--band) * 2),
-            #ffff00 calc(var(--inner) + var(--band) * 2) calc(var(--inner) + var(--band) * 3),
-            #00ff00 calc(var(--inner) + var(--band) * 3) calc(var(--inner) + var(--band) * 4),
-            #0077ff calc(var(--inner) + var(--band) * 4) calc(var(--inner) + var(--band) * 5),
-            #4b0082 calc(var(--inner) + var(--band) * 5) calc(var(--inner) + var(--band) * 6),
-            #8f00ff calc(var(--inner) + var(--band) * 6) calc(var(--inner) + var(--band) * 7),
-            transparent calc(var(--inner) + var(--band) * 7) 100%
-          );
-        background-size:
-          100% 100%,
-          100% 100%;
+        background-image: radial-gradient(
+          circle at 250% 250%,
+          transparent 0 var(--inner),
+          var(--rainbow-0) var(--inner) calc(var(--inner) + var(--band)),
+          var(--rainbow-2) calc(var(--inner) + var(--band)) calc(var(--inner) + var(--band) * 2),
+          var(--rainbow-4) calc(var(--inner) + var(--band) * 2) calc(var(--inner) + var(--band) * 3),
+          var(--rainbow-6) calc(var(--inner) + var(--band) * 3) calc(var(--inner) + var(--band) * 4),
+          var(--rainbow-8) calc(var(--inner) + var(--band) * 4) calc(var(--inner) + var(--band) * 5),
+          var(--rainbow-10) calc(var(--inner) + var(--band) * 5) calc(var(--inner) + var(--band) * 6),
+          var(--rainbow-12) calc(var(--inner) + var(--band) * 6) calc(var(--inner) + var(--band) * 7),
+          transparent calc(var(--inner) + var(--band) * 7) 100%
+        );
+        background-size: 100% 100%;
         background-repeat: no-repeat;
-        background-position: center, center;
-        filter: saturate(1.15);
-        opacity: 0.85;
+        background-position: center;
+        opacity: 0.9;
       }
 
       .card-number {
         position: relative;
-        z-index: 1; /* au-dessus des gradients */
+        z-index: 1; /* above the gradient arc */
       }
     }
 
