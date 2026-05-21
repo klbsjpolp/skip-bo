@@ -360,65 +360,6 @@
           radial-gradient(circle at center, transparent 0 48%, rgb(241 149 77 / 0.16) 48% 49.4%, transparent 50%);
         opacity: 0.94;
       }
-
-      /* Countdown dots — 12-step progress ladder in the top-right band.
-         Lit dots (currentColor) up to value/12; remaining dots stay dim.
-         The row sits inside the discard-pile stack band so each buried
-         card still shows its own progress. */
-      &::after {
-        @apply content-[''] absolute max-lg:invisible opacity-90 pointer-events-none z-2;
-        top: calc(var(--card-width) * 0.15);
-        right: calc(var(--card-width) * 0.1);
-        width: calc(var(--card-width) * 0.55);
-        height: calc(var(--card-width) * 0.045);
-        background: linear-gradient(
-          to right,
-          currentColor 0 calc(var(--countdown, 0) / 12 * 100%),
-          color-mix(in srgb, currentColor 20%, transparent) calc(var(--countdown, 0) / 12 * 100%) 100%
-        );
-        mask: repeating-linear-gradient(
-          to right,
-          black 0 calc(100% / 12 * 0.62),
-          transparent calc(100% / 12 * 0.62) calc(100% / 12)
-        );
-      }
-
-      &[data-value='1'] {
-        --countdown: 1;
-      }
-      &[data-value='2'] {
-        --countdown: 2;
-      }
-      &[data-value='3'] {
-        --countdown: 3;
-      }
-      &[data-value='4'] {
-        --countdown: 4;
-      }
-      &[data-value='5'] {
-        --countdown: 5;
-      }
-      &[data-value='6'] {
-        --countdown: 6;
-      }
-      &[data-value='7'] {
-        --countdown: 7;
-      }
-      &[data-value='8'] {
-        --countdown: 8;
-      }
-      &[data-value='9'] {
-        --countdown: 9;
-      }
-      &[data-value='10'] {
-        --countdown: 10;
-      }
-      &[data-value='11'] {
-        --countdown: 11;
-      }
-      &[data-value='12'] {
-        --countdown: 12;
-      }
     }
 
     &.skipbo-text {

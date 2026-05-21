@@ -33,7 +33,7 @@
   --card-shadow: 0 2px 0 rgba(0, 0, 0, 0.2), 0 4px 0 rgba(0, 0, 0, 0.1);
   --card-radius: 0;
   --card-back-color: #8c8c8c; /* stone base color (not really visible with texture) */
-  --minecraft-text-outline: white;
+  --minecraft-text-outline: #ccc;
 
   /* card color groups keep vibrant, slightly gamey colors */
   --card-g1: #2e8b0e; /* 1‑4 */
@@ -389,12 +389,6 @@
     box-shadow:
       inset 1px 1px 0 rgba(255, 255, 255, 0.08),
       2px 2px 0 rgba(0, 0, 0, 0.3);
-    text-shadow:
-      1px 0 0 var(--minecraft-text-outline),
-      -1px 0 0 var(--minecraft-text-outline),
-      0 1px 0 var(--minecraft-text-outline),
-      0 -1px 0 var(--minecraft-text-outline),
-      1px 1px 0 var(--minecraft-text-outline);
   }
 }
 

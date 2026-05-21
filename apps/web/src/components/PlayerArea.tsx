@@ -440,7 +440,7 @@ export function StockPile({
         <EmptyCard />
       )}
       {/* Stock Pile Indicator */}
-      <div className="w-1 bg-primary-foreground flex ml-1 rounded-t-sm card-height stock-pile-indicator">
+      <div className="w-1 bg-muted flex ml-1 rounded-t-sm card-height stock-pile-indicator">
         <div
           className="w-1 self-end rounded-t-sm bg-primary transition-[height] duration-300 ease-out motion-reduce:transition-none stock-pile-progress"
           style={{
