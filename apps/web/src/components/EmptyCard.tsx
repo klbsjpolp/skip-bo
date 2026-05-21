@@ -14,7 +14,7 @@ export function EmptyCard({ onClick, canDropCard = false, className, hideLabel =
   return (
     <div
       className={cn(
-        'card empty-card opacity-50',
+        'card empty-card',
         canDropCard && 'hoverable-card cursor-pointer',
         !canDropCard && 'cursor-default',
         className,

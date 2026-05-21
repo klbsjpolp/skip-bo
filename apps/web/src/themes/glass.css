@@ -10,8 +10,8 @@
   --foreground: #f0f4f8;
   --popover: hsl(211 55% 28%);
   --popover-foreground: #f0f4f8;
-  --text-color: #ffffff; /* light gray text */
-  --title-color: #f3f4f6; /* headings a touch brighter */
+  --text-color: #ffffff;
+  --title-color: #f3f4f6;
   --muted: hsl(213 38% 20%);
   --muted-foreground: hsl(
     213 30% 90%
@@ -132,6 +132,10 @@
     @apply backdrop-blur-lg bg-current/8 *:text-white;
     @apply after:absolute  after:inset-0  after:rounded-[inherit]  after:backdrop-blur-xl;
     @apply before:absolute before:inset-0 before:rounded-[inherit] before:bg-linear-to-b before:from-white/15 before:to-transparent;
+
+    &.empty-card {
+      @apply bg-transparent backdrop-blur-none before:invisible after:invisible border-white;
+    }
   }
 
   .card .back::after {
