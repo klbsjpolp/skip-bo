@@ -9,6 +9,12 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],
+  expect: {
+    // Allow up to ~1.5% pixel drift in visual baselines to absorb cross-machine
+    // font/antialiasing differences between local macOS and the CI macOS runner.
+    // Real theme regressions are typically several percent and still fail.
+    toHaveScreenshot: { maxDiffPixelRatio: 0.015 },
+  },
   use: {
     baseURL,
     trace: 'retain-on-failure',
