@@ -49,5 +49,28 @@ test.describe('Theme contract', () => {
         { animations: 'disabled' },
       );
     });
+
+    test(`@desktop ${theme} renders the new-game dialog (local + join tabs)`, async ({ page }, testInfo) => {
+      await gotoFixture(page, 'ready-human', theme);
+      await expectThemeClass(page, theme);
+
+      await page.getByTestId('new-game-trigger').click();
+      const dialog = page.getByTestId('new-game-dialog');
+      await expect(dialog).toBeVisible();
+
+      // Local tab is selected by default — capture it as the baseline.
+      await expect(page.getByTestId('new-game-mode-local')).toHaveAttribute('aria-pressed', 'true');
+      await expectScreenshotIfBaselineExists(dialog, testInfo, `${theme}-new-game-dialog-local.png`, {
+        animations: 'disabled',
+      });
+
+      // Switch to "Rejoindre" (join-online) and capture the room-code form layout.
+      await page.getByTestId('new-game-mode-join-online').click();
+      await expect(page.getByTestId('new-game-mode-join-online')).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.getByTestId('new-game-room-code-input')).toBeVisible();
+      await expectScreenshotIfBaselineExists(dialog, testInfo, `${theme}-new-game-dialog-join.png`, {
+        animations: 'disabled',
+      });
+    });
   }
 });
