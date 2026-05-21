@@ -69,6 +69,7 @@
      near-white so the rainbow arc reads against a calm base. */
   --skipbo-text: #1a1330;
   --skipbo-bg: #fbfaff;
+  --card-front-color: var(--skipbo-bg);
   /* card-range tints — barely used by rainbow because both .card-number and
      .card-corner-number override color to dark indigo, but they remain part
      of the universal token contract. Mapped to palette stops for harmony. */
@@ -187,8 +188,6 @@
   --rainbow-11: oklch(0.78 0.16 307.86);
   --rainbow-12: oklch(0.78 0.16 333.57);
   --rainbow-13: oklch(0.78 0.16 359.29);
-
-  --card-front-color: var(--rainbow-6);
 
   .card.normal-card {
     &[data-value='1'] {
