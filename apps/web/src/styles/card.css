@@ -77,7 +77,7 @@
   }
 
   &.empty-card {
-    @apply lg:text-2xl text-xl;
+    @apply lg:text-2xl text-xl opacity-50;
   }
 
   .card-number {
