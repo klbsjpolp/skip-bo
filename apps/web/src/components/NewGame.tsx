@@ -199,7 +199,7 @@ function NewGame({ onJoinOnlineGame, onStartLocalGame, onStartOnlineGame }: NewG
 
           <section className="rounded-xl border bg-card/40 p-3 bg-secondary text-secondary-foreground">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/50 text-primary-foreground">
                 <SelectedModeIcon className="size-5" />
               </div>
               <div className="min-w-0">
