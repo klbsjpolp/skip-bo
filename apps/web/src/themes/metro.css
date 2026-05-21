@@ -1,7 +1,7 @@
 .theme-metro {
-  --primary: #00a300;
+  --primary: #007a00; /* deepened Metro-green so white text reaches ≥4.5:1 */
   --primary-foreground: hsl(0 0% 100%);
-  --secondary: #0a8588;
+  --secondary: #086b6e; /* deepened teal so outline mode buttons (bg-background = bg-secondary) reach ≥4.5:1 */
   --secondary-foreground: hsl(0 0% 100%);
   --success: #00a300;
   --success-foreground: hsl(0 0% 100%);
@@ -32,12 +32,12 @@
   --card-g2: #b91d47;
   --card-g3: #e3a21a;
 
-  --metro-tile-1: #99b433;
-  --metro-tile-2: #00a300;
+  --metro-tile-1: #00a300;
+  --metro-tile-2: #687d00;
   --metro-tile-3: #1e7145;
-  --metro-tile-4: #00aba9;
-  --metro-tile-5: #1ba1e2;
-  --metro-tile-6: #2d89ef;
+  --metro-tile-4: #00787a;
+  --metro-tile-5: #2d89ef;
+  --metro-tile-6: #0f76b0;
   --metro-tile-7: #2b5797;
   --metro-tile-8: #603cba;
   --metro-tile-9: #9f00a7;

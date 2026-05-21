@@ -147,17 +147,22 @@ interface ContrastSamples {
 const collectContrastSamples = async (page: Page): Promise<ContrastSamples> =>
   page.evaluate(() => {
     const parseColor = (value: string): { r: number; g: number; b: number; a: number } | null => {
-      const match = value.match(/rgba?\(([^)]+)\)/i);
-      if (!match) return null;
-      const parts = match[1].split(',').map((part) => part.trim());
-      if (parts.length < 3) return null;
-      const [r, g, b, a] = parts;
-      return {
-        r: Number(r),
-        g: Number(g),
-        b: Number(b),
-        a: a === undefined ? 1 : Number(a),
-      };
+      // Computed colors come back in many forms: `rgb(r, g, b)`, `rgb(r g b / a)`,
+      // `oklab(...)`, `oklch(...)`, `lab(...)`, `color(display-p3 ...)`, etc.
+      // Paint onto a 1×1 canvas and read the pixel back to normalize them all
+      // to straight RGBA.
+      if (!value || value === 'transparent') return { r: 0, g: 0, b: 0, a: 0 };
+      const canvas = document.createElement('canvas');
+      canvas.width = 1;
+      canvas.height = 1;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+      ctx.clearRect(0, 0, 1, 1);
+      ctx.fillStyle = '#000';
+      ctx.fillStyle = value;
+      ctx.fillRect(0, 0, 1, 1);
+      const data = ctx.getImageData(0, 0, 1, 1).data;
+      return { r: data[0], g: data[1], b: data[2], a: data[3] / 255 };
     };
 
     const channelLuminance = (channel: number) => {

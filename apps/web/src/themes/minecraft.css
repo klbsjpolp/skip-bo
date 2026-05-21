@@ -9,7 +9,7 @@
   --text-2xl: calc(var(--text-base) * 1.5);
 
   /* Core palette inspired by the provided textures */
-  --primary: #7a5a35;
+  --primary: #5a4326; /* deepened wood-brown — light fg reaches ≥4.5:1 */
   --primary-foreground: #e6e6e6;
   --secondary: #3c401d;
   --secondary-foreground: hsl(0 0% 100%);
@@ -20,9 +20,11 @@
   --popover: #3d2e1e;
   --popover-foreground: #e6e6e6;
   --muted: hsl(30 12% 18%);
-  --muted-foreground: hsl(0 0% 52%);
+  --muted-foreground: hsl(
+    0 0% 85%
+  ); /* lightened so close/muted button text reaches ≥4.5:1 on the dirt-brown surfaces */
 
-  --background: #866043; /* avg of dirt.webp */
+  --background: #74543a; /* deepened from #866043 so outline buttons (bg-background) reach ≥4.5:1 with the light fg; still matches dirt tone */
   --text-color: #e6e6e6;
   --title-color: #ffffff;
 
@@ -31,12 +33,12 @@
   --card-shadow: 0 2px 0 rgba(0, 0, 0, 0.2), 0 4px 0 rgba(0, 0, 0, 0.1);
   --card-radius: 0;
   --card-back-color: #8c8c8c; /* stone base color (not really visible with texture) */
-  --minecraft-text-outline: #1a1a1a;
+  --minecraft-text-outline: white;
 
   /* card color groups keep vibrant, slightly gamey colors */
-  --card-g1: hsl(135 100% 64%); /* 1‑4 */
-  --card-g2: hsl(2 100% 76%); /* 5‑8 */
-  --card-g3: hsl(216 100% 75%); /* 9‑12 */
+  --card-g1: #2e8b0e; /* 1‑4 */
+  --card-g2: #c92b1a; /* 5‑8 */
+  --card-g3: #1d4ed8; /* 9‑12 */
 
   --selected-border-color: #9adf5a; /* bright grassy highlight */
   --victory-border: #9adf5a;
