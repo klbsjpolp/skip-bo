@@ -30,12 +30,23 @@ export const setGlobalAnimationContext = (context: typeof globalAnimationContext
   globalAnimationContext = context;
 };
 
-// Function to trigger AI animations
-export const triggerAIAnimation = async (
+// Function to trigger AI animations.
+//
+// This function is intentionally synchronous: it reads DOM layout, registers a
+// single animation with the global animation context, and returns the computed
+// duration. Callers rely on synchronous behavior to register follow-up
+// animations (e.g. completion retreat, hand refill draws) in the SAME tick so
+// React commits them all in one render. Introducing a microtask boundary here
+// causes a one-frame flash where the play animation is registered against a
+// view that already shows completion side-effects (e.g. the 12 backdrop on a
+// just-cleared build pile, or completed cards leaking onto the retreat pile).
+// See useOnlineSkipBoGame snapshot handling for the call site that depends on
+// this contract.
+export const triggerAIAnimation = (
   gameState: GameState,
   action: GameAction,
   options: TriggerAIAnimationOptions = {},
-): Promise<number> => {
+): number => {
   if (!globalAnimationContext) {
     console.warn('Animation context not available for AI action');
     return 0;

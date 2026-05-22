@@ -343,9 +343,10 @@ export const gameMachine = createMachine(
 
         // Check if PLAY_CARD will empty the hand and trigger draw animations
         if (action.type === 'PLAY_CARD' && willPlayCardEmptyHand(input.G)) {
-          // First trigger the play card animation
+          // First trigger the play card animation. triggerAIAnimation is
+          // synchronous — the actual wait happens via waitForAnimations().
           if (input.G.selectedCard) {
-            await triggerAIAnimation(input.G, action);
+            triggerAIAnimation(input.G, action);
             await animationServiceBridge.waitForAnimations();
           }
 
@@ -383,9 +384,11 @@ export const gameMachine = createMachine(
             }
           }
         } else {
-          // Trigger animation for other AI actions that need it
+          // Trigger animation for other AI actions that need it.
+          // triggerAIAnimation is synchronous — the actual wait happens via
+          // waitForAnimations().
           if ((action.type === 'PLAY_CARD' || action.type === 'DISCARD_CARD') && input.G.selectedCard) {
-            await triggerAIAnimation(input.G, action);
+            triggerAIAnimation(input.G, action);
             await animationServiceBridge.waitForAnimations();
           }
 

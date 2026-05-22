@@ -28,7 +28,7 @@ const {
   calculateMultipleDrawAnimationDuration: vi.fn(() => 0),
   removeAnimation: vi.fn(),
   startAnimation: vi.fn(),
-  triggerAIAnimation: vi.fn(async () => 0),
+  triggerAIAnimation: vi.fn(() => 0),
   triggerCompletedBuildPileAnimation: vi.fn(() => 0),
   triggerMultipleDrawAnimations: vi.fn(async () => 0),
   waitForAnimations: vi.fn(async () => undefined),
@@ -399,7 +399,7 @@ describe('useOnlineSkipBoGame', () => {
     removeAnimation.mockClear();
     startAnimation.mockClear();
     triggerAIAnimation.mockClear();
-    triggerAIAnimation.mockImplementation(async () => 0);
+    triggerAIAnimation.mockImplementation(() => 0);
     triggerCompletedBuildPileAnimation.mockClear();
     triggerCompletedBuildPileAnimation.mockImplementation(() => 0);
     triggerMultipleDrawAnimations.mockClear();
@@ -764,14 +764,9 @@ describe('useOnlineSkipBoGame', () => {
     const { previousState, nextState } = createOpponentDiscardHandoffStates();
     const previousView = createOnlineView(previousState, 1);
     const nextView = createOnlineView(nextState, 2);
-    let resolveOpponentAnimation: (() => void) | null = null;
 
-    triggerAIAnimation.mockImplementationOnce(
-      () =>
-        new Promise<number>((resolve) => {
-          resolveOpponentAnimation = () => resolve(200);
-        }),
-    );
+    triggerAIAnimation.mockImplementationOnce(() => 200);
+    // Slowest pending animation drives the turn-presentation timer.
     calculateMultipleDrawAnimationDuration.mockReturnValueOnce(700);
 
     const { result } = renderHook(() => useOnlineSkipBoGame(session));
@@ -795,16 +790,14 @@ describe('useOnlineSkipBoGame', () => {
       socket.emitMessage({ type: 'snapshot', view: nextView });
     });
 
-    expect(result.current.gameState.message).toBe(previousView.message);
-    expect(result.current.gameState.currentPlayerIndex).toBe(previousView.currentPlayerIndex);
-
-    await act(async () => {
-      resolveOpponentAnimation?.();
-      await Promise.resolve();
-    });
-
+    // Synchronous registration: as soon as the snapshot is applied, the play
+    // and draw animations are queued together — so triggerMultipleDrawAnimations
+    // is invoked in the same tick. The turn-presentation override holds the
+    // previous opponent's message until the slowest animation completes.
+    expect(triggerAIAnimation).toHaveBeenCalledTimes(1);
     expect(triggerMultipleDrawAnimations).toHaveBeenCalledTimes(1);
     expect(result.current.gameState.message).toBe(previousView.message);
+    expect(result.current.gameState.currentPlayerIndex).toBe(previousView.currentPlayerIndex);
 
     await act(async () => {
       vi.advanceTimersByTime(699);
@@ -1125,7 +1118,7 @@ describe('useOnlineSkipBoGame', () => {
       const nextView = createOnlineView(nextState, 2);
 
       const PLAY_DURATION = 320;
-      triggerAIAnimation.mockImplementationOnce(async () => PLAY_DURATION);
+      triggerAIAnimation.mockImplementationOnce(() => PLAY_DURATION);
 
       renderHook(() => useOnlineSkipBoGame(session));
 
@@ -1185,6 +1178,106 @@ describe('useOnlineSkipBoGame', () => {
       const playOrder = triggerAIAnimation.mock.invocationCallOrder[0];
       const completionOrder = triggerCompletedBuildPileAnimation.mock.invocationCallOrder[0];
       expect(playOrder).toBeLessThan(completionOrder);
+    });
+
+    it('registers play and completion animations in the same synchronous tick (no microtask gap)', async () => {
+      // Regression: previously triggerAIAnimation was async, and completion
+      // was scheduled in a .then() microtask after it. That one-microtask gap
+      // let React paint a frame where the play animation was registered but
+      // completion wasn't — causing the "12" backdrop to appear on the build
+      // pile, and the just-retreated cards to briefly leak onto the retreat
+      // pile, before the play animation visually landed. The animations must
+      // now register synchronously so both land in the same React commit as
+      // the snapshot's commitView.
+      const session = createSession();
+      const { previousState, nextState } = createOpponentCompletionStates();
+      const previousView = createOnlineView(previousState, 1);
+      const nextView = createOnlineView(nextState, 2);
+
+      triggerAIAnimation.mockImplementationOnce(() => 300);
+
+      renderHook(() => useOnlineSkipBoGame(session));
+
+      await act(async () => {
+        vi.runOnlyPendingTimers();
+      });
+
+      const socket = MockWebSocket.instances[0];
+
+      await act(async () => {
+        socket.open();
+        socket.emitMessage({ type: 'snapshot', view: previousView });
+        await Promise.resolve();
+      });
+
+      // Emit the snapshot synchronously, WITHOUT awaiting any microtasks
+      // afterwards inside the act() callback. We then assert from outside
+      // act() that both animations were already registered.
+      await act(async () => {
+        socket.emitMessage({ type: 'snapshot', view: nextView });
+      });
+
+      // Without flushing microtasks, both calls must already have fired.
+      expect(triggerAIAnimation).toHaveBeenCalledTimes(1);
+      expect(triggerCompletedBuildPileAnimation).toHaveBeenCalledTimes(1);
+    });
+
+    it('schedules opponent hand refill with baseDelay equal to the play animation duration', async () => {
+      // When the opponent plays the LAST card from their hand and the
+      // refilled slot must animate in, the draw animations should be queued
+      // so their initialDelay equals the play (+ completion) duration —
+      // otherwise the refilled card pops into the opponent's hand before
+      // (or while) the played card is still in flight.
+      const previousState = initialGameState();
+      previousState.currentPlayerIndex = 1;
+      previousState.players[1].isAI = false;
+      previousState.players[1].hand = [null, null, null, null, card(7)];
+      previousState.deck = [card(2), card(3), card(4), card(5), card(8)];
+      previousState.buildPiles = [[card(1), card(2), card(3), card(4), card(5), card(6)], [], [], []];
+      previousState.selectedCard = {
+        card: card(7),
+        source: 'hand',
+        index: 4,
+      };
+      previousState.message = 'Sélectionnez une destination';
+
+      const nextState = gameReducer(previousState, { type: 'PLAY_CARD', buildPile: 0 });
+
+      const session = createSession();
+      const previousView = createOnlineView(previousState, 1);
+      const nextView = createOnlineView(nextState, 2);
+
+      const PLAY_DURATION = 280;
+      triggerAIAnimation.mockImplementationOnce(() => PLAY_DURATION);
+
+      renderHook(() => useOnlineSkipBoGame(session));
+
+      await act(async () => {
+        vi.runOnlyPendingTimers();
+      });
+
+      const socket = MockWebSocket.instances[0];
+
+      await act(async () => {
+        socket.open();
+        socket.emitMessage({ type: 'snapshot', view: previousView });
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        socket.emitMessage({ type: 'snapshot', view: nextView });
+      });
+
+      // The hand refill must be queued exactly once for the opponent, with
+      // baseDelay = play duration so the refilled card appears AFTER the
+      // played card has landed on the build pile.
+      expect(triggerMultipleDrawAnimations).toHaveBeenCalledTimes(1);
+      const args = triggerMultipleDrawAnimations.mock.calls[0] as unknown as [number, Card[], number[], number, number];
+      const [opponentIndex, , handIndices, , baseDelay] = args;
+      expect(opponentIndex).toBe(1);
+      // The slot the opponent emptied (index 4) must be refilled.
+      expect(handIndices).toContain(4);
+      expect(baseDelay).toBe(PLAY_DURATION);
     });
   });
 });
