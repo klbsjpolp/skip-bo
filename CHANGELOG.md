@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.37.4](https://github.com/klbsjpolp/skip-bo/compare/v1.37.3...v1.37.4) (2026-05-22)
+
+
+### Bug Fixes
+
+* **web:** batch opponent animations to remove play/completion race ([64f96d5](https://github.com/klbsjpolp/skip-bo/commit/64f96d5d8569a101f68443829f2aa3dc1e64cfa3))
+
+
+
 ## [1.37.3](https://github.com/klbsjpolp/skip-bo/compare/v1.37.2...v1.37.3) (2026-05-21)
 
 
