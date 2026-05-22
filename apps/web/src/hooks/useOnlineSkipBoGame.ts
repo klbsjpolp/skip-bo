@@ -513,38 +513,41 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                   // visible as a brief card-back flash before the new top
                   // appears.
                   commitView(message.view);
-                  void triggerAIAnimation(previousState, opponentTransition.action, {
+                  // Register play, completion, draw refill, and the turn
+                  // presentation timer SYNCHRONOUSLY so they all batch into
+                  // the same React commit as the new view. A microtask gap
+                  // here (e.g. awaiting triggerAIAnimation) lets React paint
+                  // a frame where the play animation is registered but the
+                  // completion / draw animations are not — causing visible
+                  // glitches like the "12" backdrop appearing on the build
+                  // pile before the play card lands, or completed cards
+                  // leaking onto the retreat pile while the play is still
+                  // in flight.
+                  const opponentAnimationDuration = triggerAIAnimation(previousState, opponentTransition.action, {
                     cardOverride: opponentTransition.animationCard,
                     sourceRevealedOverride: opponentTransition.sourceRevealed,
                     targetSettledInStateOverride: true,
                     targetPileLengthOverride: opponentTransition.targetPileLength,
                     targetRevealedOverride: true,
-                  }).then((opponentAnimationDuration) => {
-                    if (opponentTransition.completedCards && opponentTransition.completedBuildPileIndex !== undefined) {
-                      // Register completion animations immediately with
-                      // baseDelay=opponentAnimationDuration so the cards are
-                      // tracked as in-flight as soon as state lands. Otherwise
-                      // CenterArea would briefly render the new top card on
-                      // the retreat pile during the play animation, before
-                      // the retreat animation begins.
-                      triggerCompletedBuildPileAnimation(
-                        previousState,
-                        opponentTransition.completedBuildPileIndex,
-                        opponentTransition.completedCards,
-                        previousState.completedBuildPiles.length,
-                        100,
-                        opponentAnimationDuration,
-                      );
-                    }
-
-                    scheduleDrawAnimations(drawTransitions, opponentAnimationDuration);
-                    applyTurnPresentationDelay(
-                      Math.max(
-                        opponentAnimationDuration,
-                        getMaxDrawAnimationDuration(drawTransitions, opponentAnimationDuration),
-                      ),
-                    );
                   });
+                  if (opponentTransition.completedCards && opponentTransition.completedBuildPileIndex !== undefined) {
+                    triggerCompletedBuildPileAnimation(
+                      previousState,
+                      opponentTransition.completedBuildPileIndex,
+                      opponentTransition.completedCards,
+                      previousState.completedBuildPiles.length,
+                      100,
+                      opponentAnimationDuration,
+                    );
+                  }
+
+                  scheduleDrawAnimations(drawTransitions, opponentAnimationDuration);
+                  applyTurnPresentationDelay(
+                    Math.max(
+                      opponentAnimationDuration,
+                      getMaxDrawAnimationDuration(drawTransitions, opponentAnimationDuration),
+                    ),
+                  );
                 } else {
                   const drawAnimationDuration = getMaxDrawAnimationDuration(drawTransitions);
                   if (drawAnimationDuration > 0) {

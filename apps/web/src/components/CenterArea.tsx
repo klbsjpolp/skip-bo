@@ -21,14 +21,26 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
   // card it carries is already in completedBuildPiles in the committed view.
   // Hide it on the retreat pile until the play animation lands; otherwise it
   // flashes there before the play animation visually delivers it. This
-  // closes the microtask gap between commitView and
-  // triggerCompletedBuildPileAnimation in useOnlineSkipBoGame.
+  // closes the microtask gap that exists when the snapshot handler registers
+  // the play animation before the completion animations (e.g. in older paths
+  // or any future caller that doesn't batch them in one tick).
+  //
+  // When matching 'complete' animations are already registered for the same
+  // build pile, the play card is conceptually one of the cards being
+  // retreated (it ends up in completedBuildPiles right behind the others),
+  // so it would be double-counted with the 'complete' count below — skip it.
   const pendingCompletionPlayCount = activeAnimations.filter(
     (animation) =>
       animation.animationType === 'play' &&
       animation.targetSettledInState &&
       animation.targetInfo?.source === 'build' &&
-      animation.targetPileLength === 0,
+      animation.targetPileLength === 0 &&
+      !activeAnimations.some(
+        (other) =>
+          other.animationType === 'complete' &&
+          other.sourceInfo.source === 'build' &&
+          other.sourceInfo.index === animation.targetInfo?.index,
+      ),
   ).length;
   const pendingRetreatCardsCount =
     activeAnimations.filter((animation) => animation.animationType === 'complete').length + pendingCompletionPlayCount;
@@ -147,17 +159,16 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                       canBeGrabbed={false}
                       displayValue={visiblePileLength.toString()}
                     />
-                  ) : buildPileIsCompleting ? (
-                    // Pile cleared in state before animation runs — keep showing the
-                    // completed "12" card as a static backdrop while cards fly off.
-                    <Card
-                      hint={`Construction pile ${index + 1}`}
-                      card={{ value: gameState.config.CARD_VALUES_MAX, isSkipBo: false }}
-                      isRevealed={true}
-                      canBeGrabbed={false}
-                      displayValue={gameState.config.CARD_VALUES_MAX.toString()}
-                    />
                   ) : shouldMaskIncomingPlay && pile.length === 0 ? (
+                    // A play animation is in flight toward this build pile,
+                    // and the committed view already shows it cleared by the
+                    // upcoming completion (targetPileLength === 0). Show the
+                    // pre-completion "11" backdrop until the play animation
+                    // visually delivers the final card. This branch wins over
+                    // `buildPileIsCompleting` because the play animation
+                    // hasn't yet landed — switching to the "12" backdrop now
+                    // would make the final card appear on the pile before
+                    // the card it is being carried by arrives.
                     <Card
                       hint={`Construction pile ${index + 1}`}
                       card={{
@@ -167,6 +178,16 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                       isRevealed={true}
                       canBeGrabbed={false}
                       displayValue={(gameState.config.CARD_VALUES_MAX - 1).toString()}
+                    />
+                  ) : buildPileIsCompleting ? (
+                    // Pile cleared in state before animation runs — keep showing the
+                    // completed "12" card as a static backdrop while cards fly off.
+                    <Card
+                      hint={`Construction pile ${index + 1}`}
+                      card={{ value: gameState.config.CARD_VALUES_MAX, isSkipBo: false }}
+                      isRevealed={true}
+                      canBeGrabbed={false}
+                      displayValue={gameState.config.CARD_VALUES_MAX.toString()}
                     />
                   ) : (
                     <EmptyCard
