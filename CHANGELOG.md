@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.37.9](https://github.com/klbsjpolp/skip-bo/compare/v1.37.8...v1.37.9) (2026-05-23)
+
+
+### Bug Fixes
+
+* **theme:** make active-player ring visible in wool theme ([c7c5c65](https://github.com/klbsjpolp/skip-bo/commit/c7c5c658158c87674e5e63edebfad0bebf9673e4)), closes [#c9c9c9](https://github.com/klbsjpolp/skip-bo/issues/c9c9c9)
+
+
+
 ## [1.37.8](https://github.com/klbsjpolp/skip-bo/compare/v1.37.7...v1.37.8) (2026-05-23)
 
 
