@@ -19,7 +19,7 @@ Produce a formatted release-notes draft for the next version by doing the follow
 
 2. **Read context**
    - Read the top 80 lines of `CHANGELOG.md` to confirm scope and format conventions.
-   - Note the Angular conventional commit scopes used: `web`, `realtime-api`, `game-core`,
+   - Note the conventional commit scopes used: `web`, `realtime-api`, `game-core`,
      `multiplayer-protocol`, `ci`, `playwright`, `infra`.
 
 3. **Group commits** by type then by scope:
