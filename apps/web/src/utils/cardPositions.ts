@@ -158,7 +158,7 @@ export const getDiscardTopCardPosition = (discardContainer: HTMLElement, pileInd
   }
 
   const allCards = Array.from(pileElement.querySelectorAll<HTMLElement>('.card'));
-  const realCards = allCards.filter((el) => !el.classList.contains('opacity-50'));
+  const realCards = allCards.filter((el) => !el.classList.contains('empty-card'));
 
   if (realCards.length === 0) {
     const placeholder = allCards[0];
@@ -178,9 +178,9 @@ export const getNextDiscardCardPosition = (discardContainer: HTMLElement, pileIn
     return getElementCenter(discardContainer);
   }
 
-  // Determine how many real cards are in the pile (exclude placeholder which has opacity-50)
+  // Determine how many real cards are in the pile (exclude the empty-card placeholder)
   const allCards = Array.from(pileElement.querySelectorAll<HTMLElement>('.card'));
-  const realCards = allCards.filter((el) => !el.classList.contains('opacity-50'));
+  const realCards = allCards.filter((el) => !el.classList.contains('empty-card'));
 
   if (realCards.length === 0) {
     // Empty pile: land on the base position (placeholder center)
