@@ -143,12 +143,12 @@
        backdrop on every translateY frame, producing dark/light bands;
        rotated cards were unaffected because rotation already promotes
        them to a GPU layer that caches the filter output. */
-    @apply bg-current/8 *:text-white backdrop-blur-xl;
-    @apply after:absolute  after:inset-0  after:rounded-[inherit]  after:will-change-auto after:translate-z-0 after:transform after:-z-1;
+    @apply backdrop-blur-xl bg-current/8 *:text-white;
+    @apply after:absolute  after:inset-0  after:rounded-[inherit];
     @apply before:absolute before:inset-0 before:rounded-[inherit] before:bg-linear-to-t before:from-white/15 before:to-transparent;
 
     &.empty-card {
-      @apply bg-transparent before:invisible after:invisible border-white;
+      @apply bg-transparent backdrop-blur-none before:invisible after:invisible border-white;
     }
 
     &.normal-card {
