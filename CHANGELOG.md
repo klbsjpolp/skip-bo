@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.37.8](https://github.com/klbsjpolp/skip-bo/compare/v1.37.7...v1.37.8) (2026-05-23)
+
+
+### Bug Fixes
+
+* **web:** land discard animation on empty pile placeholder center ([298bb60](https://github.com/klbsjpolp/skip-bo/commit/298bb603ec1ea2edd35c042d9743011589d6c86a))
+
+
+
 ## [1.37.7](https://github.com/klbsjpolp/skip-bo/compare/v1.37.6...v1.37.7) (2026-05-23)
 
 
