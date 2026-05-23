@@ -16,7 +16,7 @@ importers:
       '@commitlint/cli':
         specifier: ^21.0.1
         version: 21.0.1(@types/node@25.9.1)(conventional-commits-parser@6.4.0)(typescript@6.0.3)
-      '@commitlint/config-angular':
+      '@commitlint/config-conventional':
         specifier: ^21.0.1
         version: 21.0.1
       '@eslint/js':
@@ -925,12 +925,8 @@ packages:
     engines: {node: '>=22.12.0'}
     hasBin: true
 
-  '@commitlint/config-angular-type-enum@21.0.1':
-    resolution: {integrity: sha512-xTQlgHTaQyXfFpPI3w2dI7ppuTDWmF++1W/kgNohRpxhBzAoJxc6Q/2P7EjvJodtVl7+38xHyu0STtV4ERXdhg==}
-    engines: {node: '>=22.12.0'}
-
-  '@commitlint/config-angular@21.0.1':
-    resolution: {integrity: sha512-3e4HZ1JX8WkotNVuTJ1KYJcjLLkDmj6DCrjx+AFIiAIOUqUjbp1y+498A71J9kFBZIkiMZ45VKwB2yywztLreg==}
+  '@commitlint/config-conventional@21.0.1':
+    resolution: {integrity: sha512-gRorrkfWOh/+V5X8GYWWbQvrzPczopGMS4CCNrQdHkK4xWElv82BDvIsDhJZWTlI7TazOlYea6VATufCsFs+sw==}
     engines: {node: '>=22.12.0'}
 
   '@commitlint/config-validator@21.0.1':
@@ -2932,6 +2928,10 @@ packages:
   conventional-changelog-conventionalcommits@6.1.0:
     resolution: {integrity: sha512-3cS3GEtR78zTfMzk0AizXKKIdN4OvSh7ibNz6/DPbhWWQu7LqE/8+/GqSodV+sywUR2gpJAdP/1JFf4XtN7Zpw==}
     engines: {node: '>=14'}
+
+  conventional-changelog-conventionalcommits@9.3.1:
+    resolution: {integrity: sha512-dTYtpIacRpcZgrvBYvBfArMmK2xvIpv2TaxM0/ZI5CBtNUzvF2x0t15HsbRABWprS6UPmvj+PzHVjSx4qAVKyw==}
+    engines: {node: '>=18'}
 
   conventional-changelog-core@5.0.2:
     resolution: {integrity: sha512-RhQOcDweXNWvlRwUDCpaqXzbZemKPKncCWZG50Alth72WITVd6nhVk9MJ6w1k9PFNBcZ3YwkdkChE+8+ZwtUug==}
@@ -6303,11 +6303,10 @@ snapshots:
       - conventional-commits-parser
       - typescript
 
-  '@commitlint/config-angular-type-enum@21.0.1': {}
-
-  '@commitlint/config-angular@21.0.1':
+  '@commitlint/config-conventional@21.0.1':
     dependencies:
-      '@commitlint/config-angular-type-enum': 21.0.1
+      '@commitlint/types': 21.0.1
+      conventional-changelog-conventionalcommits: 9.3.1
 
   '@commitlint/config-validator@21.0.1':
     dependencies:
@@ -8246,6 +8245,10 @@ snapshots:
   conventional-changelog-config-spec@2.1.0: {}
 
   conventional-changelog-conventionalcommits@6.1.0:
+    dependencies:
+      compare-func: 2.0.0
+
+  conventional-changelog-conventionalcommits@9.3.1:
     dependencies:
       compare-func: 2.0.0
 
