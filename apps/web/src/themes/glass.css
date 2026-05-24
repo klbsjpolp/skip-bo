@@ -60,60 +60,6 @@
     @apply bg-secondary rounded text-secondary-foreground pl-1 pt-0.5 pr-1 pb-0.5;
   }
 
-  .skipbo-text {
-    .card-inner::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      /* layout */
-      --m-gap: calc(var(--card-width) / 18);
-      --m-w: calc((100% - var(--m-gap)) / 2);
-      --m-h: calc((100% - (var(--m-gap) * 2)) / 2);
-
-      /* panel colors */
-      --p1: hsla(208, 87%, 53%, 0.28); /* light azure */
-      --p2: hsla(14, 100%, 55%, 0.28); /* coral */
-      --p3: hsla(158, 100%, 54%, 0.28); /* mint */
-      --p4: hsla(43, 100%, 55%, 0.28); /* amber */
-      --p5: hsla(263, 100%, 59%, 0.28); /* lavender */
-      --p6: hsla(320, 100%, 55%, 0.28); /* pink */
-
-      background-image:
-        linear-gradient(var(--p1), var(--p1)), linear-gradient(var(--p2), var(--p2)),
-        linear-gradient(var(--p3), var(--p3)), linear-gradient(var(--p4), var(--p4)),
-        linear-gradient(var(--p5), var(--p5)), linear-gradient(var(--p6), var(--p6));
-      background-size:
-        var(--m-w) var(--m-h),
-        var(--m-w) var(--m-h),
-        var(--m-w) var(--m-h),
-        var(--m-w) var(--m-h),
-        var(--m-w) var(--m-h),
-        var(--m-w) var(--m-h);
-      background-position:
-        left 0 top 0,
-        right 0 top 0,
-        left 0 top calc(var(--m-h) + var(--m-gap)),
-        right 0 top calc(var(--m-h) + var(--m-gap)),
-        left 0 top calc((var(--m-h) + var(--m-gap)) * 2),
-        right 0 top calc((var(--m-h) + var(--m-gap)) * 2);
-      background-repeat: no-repeat;
-
-      /* glass feel */
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
-      backdrop-filter: blur(3px) saturate(1.2);
-      -webkit-backdrop-filter: blur(3px) saturate(1.2);
-      border-radius: inherit;
-      pointer-events: none;
-    }
-  }
-
-  /* keep text above mosaic */
-  .card.skipbo-text > span,
-  .card.skipbo-text .card-corner-number {
-    z-index: 1;
-  }
-
   /* Apply animated liquid glass panels to player areas */
   .player-area,
   .center-area {
@@ -188,23 +134,64 @@
       }
     }
 
-    &.skip-bo.skipbo-text {
+    &.skipbo-text {
       @apply bg-current/15;
+
       /* Same engraved-in-glass treatment for the Skip-Bo wordmark. */
       > .card-number,
       > .card-corner-number {
-        color: rgba(255, 255, 255, 0.78);
+        @apply text-white/78 bg-transparent;
         text-shadow:
           0 -1px 1px rgba(0, 0, 0, 0.6),
           0 1px 0 rgba(255, 255, 255, 0.9),
           0 0 8px rgba(220, 235, 255, 0.55);
-        background-color: transparent;
       }
 
       > .card-corner-number {
         text-shadow:
           0 1px 1px rgba(0, 0, 0, 0.55),
           0 0 4px rgba(220, 235, 255, 0.45);
+      }
+
+      .card-inner::before {
+        @apply content-[''] absolute inset-0 z-0 rounded-[inherit] pointer-events-none;
+
+        /* layout */
+        --m-gap: calc(var(--card-width) / 18);
+        --m-w: calc((100% - var(--m-gap)) / 2);
+        --m-h: calc((100% - (var(--m-gap) * 2)) / 2);
+
+        /* panel colors */
+        --p1: hsla(208, 87%, 53%, 0.28); /* light azure */
+        --p2: hsla(14, 100%, 55%, 0.28); /* coral */
+        --p3: hsla(158, 100%, 54%, 0.28); /* mint */
+        --p4: hsla(43, 100%, 55%, 0.28); /* amber */
+        --p5: hsla(263, 100%, 59%, 0.28); /* lavender */
+        --p6: hsla(320, 100%, 55%, 0.28); /* pink */
+
+        background-image:
+          linear-gradient(var(--p1), var(--p1)), linear-gradient(var(--p2), var(--p2)),
+          linear-gradient(var(--p3), var(--p3)), linear-gradient(var(--p4), var(--p4)),
+          linear-gradient(var(--p5), var(--p5)), linear-gradient(var(--p6), var(--p6));
+        background-size:
+          var(--m-w) var(--m-h),
+          var(--m-w) var(--m-h),
+          var(--m-w) var(--m-h),
+          var(--m-w) var(--m-h),
+          var(--m-w) var(--m-h),
+          var(--m-w) var(--m-h);
+        background-position:
+          left 0 top 0,
+          right 0 top 0,
+          left 0 top calc(var(--m-h) + var(--m-gap)),
+          right 0 top calc(var(--m-h) + var(--m-gap)),
+          left 0 top calc((var(--m-h) + var(--m-gap)) * 2),
+          right 0 top calc((var(--m-h) + var(--m-gap)) * 2);
+        background-repeat: no-repeat;
+
+        /* glass feel */
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(3px) saturate(1.2);
       }
     }
 
@@ -307,28 +294,27 @@
   }
 
   .victory-burst-layer {
-    display: none;
+    @apply hidden;
   }
 
   .victory-accent {
-    inset: 0;
+    @apply inset-0 opacity-100;
     background: linear-gradient(
       180deg,
       rgba(255, 243, 210, 0.32) 0%,
       rgba(243, 212, 136, 0.24) 38%,
       rgba(187, 132, 48, 0.22) 100%
     );
-    opacity: 1;
   }
 
   .victory-pattern {
+    @apply mix-blend-screen animate-none;
     mix-blend-mode: screen;
-    animation: none;
   }
 
   .victory-shine,
   .victory-sunburst {
-    display: none;
+    @apply hidden;
   }
 }
 
