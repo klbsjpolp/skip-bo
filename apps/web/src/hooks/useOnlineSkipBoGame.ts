@@ -719,6 +719,10 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     [sendAction],
   );
 
+  const debugFillHandSkipBo = useCallback((): void => {
+    sendAction({ type: 'DEBUG_FILL_HAND_SKIPBO' });
+  }, [sendAction]);
+
   const debugWin = useCallback((): void => {
     sendAction({ type: 'DEBUG_WIN' });
   }, [sendAction]);
@@ -1093,6 +1097,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     connectedSeats,
     connectionStatus,
     debugFillBuildPile,
+    debugFillHandSkipBo,
     debugWin,
     disconnectedSeats,
     gameState,

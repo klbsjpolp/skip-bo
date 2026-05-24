@@ -110,6 +110,10 @@ export const gameMachine = createMachine(
                 actions: 'apply',
                 guard: 'isHumanAction',
               },
+              DEBUG_FILL_HAND_SKIPBO: {
+                actions: 'apply',
+                guard: 'isHumanAction',
+              },
               RESET: {
                 actions: 'apply',
                 target: '#skipbo.setup',

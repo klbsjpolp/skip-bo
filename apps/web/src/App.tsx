@@ -138,8 +138,16 @@ function LocalGameScreen({
   onStartOnlineGame,
   updateNotice,
 }: SessionScreenProps) {
-  const { clearSelection, debugFillBuildPile, debugWin, discardCard, gameState, playCard, selectCard } =
-    useLocalSkipBoGame();
+  const {
+    clearSelection,
+    debugFillBuildPile,
+    debugFillHandSkipBo,
+    debugWin,
+    discardCard,
+    gameState,
+    playCard,
+    selectCard,
+  } = useLocalSkipBoGame();
   const gameBoard = (
     <LocalGameBoard
       gameState={gameState}
@@ -153,7 +161,13 @@ function LocalGameScreen({
 
   return (
     <AppShell
-      debugStrip={<DebugStrip debugFillBuildPile={() => debugFillBuildPile(0)} debugWin={debugWin} />}
+      debugStrip={
+        <DebugStrip
+          debugFillBuildPile={() => debugFillBuildPile(0)}
+          debugFillHandSkipBo={debugFillHandSkipBo}
+          debugWin={debugWin}
+        />
+      }
       gameBoard={gameBoard}
       isGameOver={gameState.gameIsOver}
       onJoinOnlineGame={onJoinOnlineGame}
@@ -185,6 +199,7 @@ function OnlineGameScreen({
     connectedSeats,
     connectionStatus,
     debugFillBuildPile,
+    debugFillHandSkipBo,
     debugWin,
     discardCard,
     disconnectedSeats,
@@ -253,7 +268,13 @@ function OnlineGameScreen({
         seatCapacity={seatCapacity}
       />
       <AppShell
-        debugStrip={<DebugStrip debugFillBuildPile={() => debugFillBuildPile(0)} debugWin={debugWin} />}
+        debugStrip={
+          <DebugStrip
+            debugFillBuildPile={() => debugFillBuildPile(0)}
+            debugFillHandSkipBo={debugFillHandSkipBo}
+            debugWin={debugWin}
+          />
+        }
         gameBoard={gameBoard}
         isGameOver={gameState.gameIsOver}
         onJoinOnlineGame={onJoinOnlineGame}

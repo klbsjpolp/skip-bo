@@ -153,6 +153,17 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       return;
     }
 
+    case 'DEBUG_FILL_HAND_SKIPBO': {
+      const player = draft.players[draft.currentPlayerIndex];
+      player.hand = Array.from({ length: draft.config.HAND_SIZE }, () => ({
+        value: 0,
+        isSkipBo: true,
+      }));
+      draft.selectedCard = null;
+      draft.message = 'Main remplie de Skip-Bo (debug)';
+      return;
+    }
+
     case 'DEBUG_WIN': {
       const winnerIndex = draft.currentPlayerIndex;
       const winner = draft.players[winnerIndex];
