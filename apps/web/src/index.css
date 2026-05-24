@@ -89,6 +89,10 @@
   /* Don't do that, not sure why (maybe the override in VictoryEffects.tsx?) but it's not working */
   /*--color-piece: var(--piece-color);*/
   --color-card-front: var(--card-front-color);
+  --color-title: var(--title-color);
 
   --text-2xs: 0.625rem;
+
+  --height-card: var(--card-height);
+  --width-card: var(--card-width);
 }

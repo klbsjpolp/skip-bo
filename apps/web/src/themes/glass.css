@@ -1,5 +1,3 @@
-@import './utils/liquid-glass.css';
-
 .theme-glass {
   --primary: #738fd8; /* lightened so dark navy fg reaches ≥4.5:1 on the brand surface */
   --primary-foreground: #0a1530; /* deep navy on glass blue */
@@ -74,12 +72,12 @@
       --m-h: calc((100% - (var(--m-gap) * 2)) / 2);
 
       /* panel colors */
-      --p1: hsla(208, 87%, 73%, 0.28); /* light azure */
-      --p2: hsla(14, 100%, 75%, 0.28); /* coral */
-      --p3: hsla(158, 100%, 74%, 0.28); /* mint */
-      --p4: hsla(43, 100%, 75%, 0.28); /* amber */
-      --p5: hsla(263, 100%, 79%, 0.28); /* lavender */
-      --p6: hsla(320, 100%, 75%, 0.28); /* pink */
+      --p1: hsla(208, 87%, 53%, 0.28); /* light azure */
+      --p2: hsla(14, 100%, 55%, 0.28); /* coral */
+      --p3: hsla(158, 100%, 54%, 0.28); /* mint */
+      --p4: hsla(43, 100%, 55%, 0.28); /* amber */
+      --p5: hsla(263, 100%, 59%, 0.28); /* lavender */
+      --p6: hsla(320, 100%, 55%, 0.28); /* pink */
 
       background-image:
         linear-gradient(var(--p1), var(--p1)), linear-gradient(var(--p2), var(--p2)),
@@ -119,33 +117,43 @@
   /* Apply animated liquid glass panels to player areas */
   .player-area,
   .center-area {
-    --liquid-glass-bg-color: var(--secondary);
-    @apply rounded-4xl ring-0 liquid-glass;
+    --area-background: var(--secondary);
+    @apply rounded-4xl ring-0 border-0;
+    background-color: hsl(from var(--area-background) h s l / 0.25);
 
     &.active-turn {
-      --liquid-glass-bg-color: var(--active-turn-color);
+      --area-background: var(--active-turn-color);
       @apply ring-0;
     }
   }
 
   .card {
-    /* Single backdrop-blur layer behind everything (after:-z-1) so the
-       white-gradient highlight ::before renders sharply on top of it.
-       Stacking two backdrop-filters (one on .card, one on ::after)
-       produced a dark flash in the upper half of the card during the
-       select/deselect translateY. The ::before gradient is flipped to
-       `to-t` so the white highlight stays at the BOTTOM of the card —
-       which is where it visually sat in the original double-blur setup.
-
-       Force the backdrop-blur ::after onto its own compositor layer
-       (will-change + translateZ). Without this, axis-aligned cards
-       (talon top, centre of the hand — no rotation) re-sampled the
-       backdrop on every translateY frame, producing dark/light bands;
-       rotated cards were unaffected because rotation already promotes
-       them to a GPU layer that caches the filter output. */
-    @apply backdrop-blur-xl bg-current/8 *:text-white;
-    @apply after:absolute  after:inset-0  after:rounded-[inherit];
+    @apply backdrop-blur-sm *:text-white;
     @apply before:absolute before:inset-0 before:rounded-[inherit] before:bg-linear-to-t before:from-white/15 before:to-transparent;
+
+    &[data-value='1'],
+    &[data-value='5'],
+    &[data-value='9'] {
+      background-color: hsl(from currentColor h s calc(l - 10) / 15%);
+    }
+
+    &[data-value='2'],
+    &[data-value='6'],
+    &[data-value='10'] {
+      background-color: hsl(from currentColor h s l / 15%);
+    }
+
+    &[data-value='3'],
+    &[data-value='7'],
+    &[data-value='11'] {
+      background-color: hsl(from currentColor h s calc(l + 10) / 15%);
+    }
+
+    &[data-value='4'],
+    &[data-value='8'],
+    &[data-value='12'] {
+      background-color: hsl(from currentColor h s calc(l + 20) / 15%);
+    }
 
     &.empty-card {
       @apply bg-transparent backdrop-blur-none before:invisible after:invisible border-white;
@@ -181,6 +189,7 @@
     }
 
     &.skip-bo.skipbo-text {
+      @apply bg-current/15;
       /* Same engraved-in-glass treatment for the Skip-Bo wordmark. */
       > .card-number,
       > .card-corner-number {

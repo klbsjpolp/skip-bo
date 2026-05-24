@@ -90,13 +90,11 @@
   }
 
   h1 {
-    @apply text-center font-bold text-lg lg:text-xl;
-    color: var(--title-color);
+    @apply text-center font-bold text-lg lg:text-xl text-title;
   }
 
   h2 {
-    @apply text-xs lg:text-base;
-    color: var(--title-color);
+    @apply text-xs lg:text-base text-title;
   }
 
   * {

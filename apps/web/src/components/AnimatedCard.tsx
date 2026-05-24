@@ -156,18 +156,7 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
       ref={rootRef}
       className={cn('animated-card', `animation-${animation.animationType}`)}
       style={{
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        // Give the root explicit card dimensions so its transform-origin
-        // (default 50% 50%) resolves to the card's geometric center. Without
-        // this, an empty 0×0 root rotates around its top-left corner, which
-        // offsets the rendered card by ~(h/2·sin θ, h/2·(1−cos θ)) — invisible
-        // at 0° but visible at the ±8° extremity slots.
-        width: 'var(--card-width)',
-        height: 'var(--card-height)',
         zIndex,
-        pointerEvents: 'none',
       }}
     >
       {needsFlip ? (
