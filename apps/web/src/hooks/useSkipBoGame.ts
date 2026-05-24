@@ -70,6 +70,10 @@ export function useSkipBoGame() {
     [dispatch],
   );
 
+  const debugFillHandSkipBo = useCallback(() => {
+    dispatch({ type: 'DEBUG_FILL_HAND_SKIPBO' });
+  }, [dispatch]);
+
   const debugWin = useCallback(() => {
     dispatch({ type: 'DEBUG_WIN' });
   }, [dispatch]);
@@ -386,6 +390,7 @@ export function useSkipBoGame() {
     gameState: state,
     initializeGame,
     debugFillBuildPile,
+    debugFillHandSkipBo,
     debugWin,
     selectCard,
     playCard,

@@ -64,7 +64,10 @@ const isCardSelectable = (gameState: GameState, action: Extract<GameAction, { ty
 };
 
 export const isDebugAction = (action: GameAction): boolean =>
-  action.type === 'DEBUG_SET_AI_HAND' || action.type === 'DEBUG_FILL_BUILD_PILE' || action.type === 'DEBUG_WIN';
+  action.type === 'DEBUG_SET_AI_HAND' ||
+  action.type === 'DEBUG_FILL_BUILD_PILE' ||
+  action.type === 'DEBUG_FILL_HAND_SKIPBO' ||
+  action.type === 'DEBUG_WIN';
 
 const isSupportedOnlineAction = (action: GameAction): boolean => {
   if (
@@ -189,6 +192,7 @@ export const validateOnlineAction = (gameState: GameState, action: GameAction): 
       return 'Cette action n’est pas autorisée en multijoueur';
     case 'DEBUG_SET_AI_HAND':
     case 'DEBUG_FILL_BUILD_PILE':
+    case 'DEBUG_FILL_HAND_SKIPBO':
     case 'DEBUG_WIN':
       return null;
   }
