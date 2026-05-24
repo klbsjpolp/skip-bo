@@ -440,7 +440,7 @@ export function StockPile({
         <EmptyCard />
       )}
       {/* Stock Pile Indicator */}
-      <div className="w-1 bg-muted flex ml-1 rounded-t-sm card-height stock-pile-indicator">
+      <div className="w-1 bg-muted flex ml-1 rounded-t-sm h-card stock-pile-indicator">
         <div
           className="w-1 self-end rounded-t-sm bg-primary transition-[height] duration-300 ease-out motion-reduce:transition-none stock-pile-progress"
           style={{
@@ -557,7 +557,7 @@ export function HandSection({
       <div className={cn('hand-area', handOverlaps && 'overlap-hand')}>
         {player.hand.map((card, index) => (
           <div
-            className="card-holder inline-flex flex-nowrap w-[calc(var(--hand-area-width)/5)] h-(--card-height)"
+            className="card-holder inline-flex flex-nowrap w-[calc(var(--hand-area-width)/5)] h-card"
             key={`hand-${index}`}
             data-card-index={index}
             style={{

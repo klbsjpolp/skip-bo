@@ -29,14 +29,9 @@
   }
 }
 
-@utility card-height {
-  height: var(--card-height);
-}
-
 @utility card {
-  @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer card-height
+  @apply text-center leading-none flex items-center justify-center font-bold cursor-pointer h-card w-card
   text-3xl text-shadow-sm select-none will-change-auto rounded-card shadow-card bg-card-front;
-  width: var(--card-width);
   color: var(--card-color);
   border: 1px solid var(--card-border-color);
   transform-origin: bottom center;
@@ -86,7 +81,7 @@
 }
 
 @utility animated-card {
-  @apply shadow-2xl fixed pointer-events-none will-change-auto;
+  @apply shadow-2xl pointer-events-none will-change-auto absolute left-0 top-0 w-card h-card;
 }
 
 @utility card-range-1 {
@@ -112,8 +107,7 @@
 }
 
 @utility placeholder {
-  @apply cursor-pointer card-height flex items-center justify-center rounded-card;
-  width: var(--card-width);
+  @apply cursor-pointer h-card w-card flex items-center justify-center rounded-card;
   color: var(--card-border-color);
   border: 2px dashed var(--card-border-color);
 }
@@ -131,8 +125,7 @@
 }
 
 @utility card-morph-wrapper {
-  @apply relative card-height;
-  width: var(--card-width);
+  @apply relative h-card w-card;
 }
 
 @utility card-morph-layer {

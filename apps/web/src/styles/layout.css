@@ -12,13 +12,11 @@
   }
 
   .discard-piles {
-    @apply card-height flex-nowrap;
+    @apply h-card flex-nowrap;
   }
 
   .retreat-pile-stack {
-    @apply relative flex-none;
-    width: var(--card-width);
-    height: var(--card-height);
+    @apply relative flex-none w-card h-card;
   }
 
   .retreat-card-shell {
@@ -26,9 +24,9 @@
   }
 
   .hand-area {
+    @apply h-card;
     --hand-area-width: calc(var(--card-width) * (4 + 3 * 1 / 7)); /* 4 cards + gaps */
     width: var(--hand-area-width);
-    height: var(--card-height); /* 1 card */
 
     &:not(.overlap-hand) {
       @apply flex justify-center gap-2.5;
