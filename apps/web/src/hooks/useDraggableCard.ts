@@ -24,7 +24,7 @@ const computeValidTargets = (card: Card, source: DragSource, gameState: GameStat
     if (canPlayCard(card, i, gameState)) validBuildPiles.add(i);
   }
   const validDiscardPiles = new Set<number>();
-  if (source.kind === 'hand' && !card.isSkipBo) {
+  if (source.kind === 'hand') {
     for (let i = 0; i < gameState.config.DISCARD_PILES_COUNT; i++) {
       validDiscardPiles.add(i);
     }
