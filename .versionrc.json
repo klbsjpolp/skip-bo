@@ -1,5 +1,4 @@
 {
-  "preset": "conventionalcommits",
   "tagPrefix": "v",
   "releaseCommitMessageFormat": "chore(release): {{currentTag}} [skip ci]"
 }
