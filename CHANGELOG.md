@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.39.0](https://github.com/klbsjpolp/skip-bo/compare/v1.38.0...v1.39.0) (2026-05-25)
+
+
+### Features
+
+* **debug:** add button to fill hand with Skip-Bo cards ([61da895](https://github.com/klbsjpolp/skip-bo/commit/61da89583f178cf5b49fcb2e7bbf833718445ceb))
+
+
+### Bug Fixes
+
+* **drag:** allow dragging Skip-Bo wildcard onto discard piles ([6ff94cb](https://github.com/klbsjpolp/skip-bo/commit/6ff94cbdf430727f345316b7c65ef19adb13dc2b))
+* **release:** drop explicit conventionalcommits preset ([b526c8d](https://github.com/klbsjpolp/skip-bo/commit/b526c8d7a29da9ee511aac4204bdabf40bc1863d))
+
 # [1.38.0](https://github.com/klbsjpolp/skip-bo/compare/v1.37.9...v1.38.0) (2026-05-23)
 
 
