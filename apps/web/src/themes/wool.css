@@ -24,11 +24,12 @@
     inset 0 0 5px rgba(0, 0, 0, 0.2), /* A soft, dark inner shadow for depth */ inset 0 0 5px rgba(255, 255, 255, 0.5); /* A soft, light inner shadow for highlight */
   --card-radius: calc(var(--card-height) / 10);
   --card-back-color: var(--background);
+  --selected-border-color: var(--active-turn-color);
 
   --skipbo-text: #ddd;
   --skipbo-bg: var(--card-front-color);
   --card-g1: hsl(152, 45%, 32%); /* 1‑4 */
-  --card-g2: hsl(355 55% 40%); /* 5‑8 */
+  --card-g2: var(--active-turn-color); /* 5‑8 */
   --card-g3: hsl(272 51% 42%); /* 9‑12 */
   --victory-piece-1: #d7dade;
   --victory-piece-2: #c3c7cb;
