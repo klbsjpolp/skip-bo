@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.40.0](https://github.com/klbsjpolp/skip-bo/compare/v1.39.0...v1.40.0) (2026-05-25)
+
+
+### Features
+
+* **wool:** update card group color and refine selected border style ([62b9734](https://github.com/klbsjpolp/skip-bo/commit/62b973409dc9038e65f0bca9bd6e5b10788cbd54))
+
 ## [1.39.0](https://github.com/klbsjpolp/skip-bo/compare/v1.38.0...v1.39.0) (2026-05-25)
 
 
