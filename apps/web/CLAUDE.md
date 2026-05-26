@@ -81,9 +81,12 @@ pnpm --filter @skipbo/web test:e2e
 pnpm --filter @skipbo/web test:e2e -- --grep "test name"
 
 # Visual contract (run when fixture-visible layout changes)
-pnpm --filter @skipbo/web exec playwright test tests/ui/theme-contract.spec.ts --project=chromium-desktop
+# Always run BOTH projects — CI fails if mobile baselines drift.
+pnpm --filter @skipbo/web test:visual
 
-# Update visual baselines
+# Update visual baselines (covers chromium-desktop + chromium-mobile,
+# uses --update-snapshots=all because Playwright ≥1.59 defaults the
+# bare flag to "missing" and silently skips existing baselines).
 pnpm test:visual:update
 ```
 
