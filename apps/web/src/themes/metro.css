@@ -241,9 +241,28 @@
     }
   }
 
-  /* Use the default stacked-card layout (shared base) so each card shows its
-     top sliver beneath the card above — important for Skip-Bo cards stacked
-     between numbered cards, which would otherwise disappear entirely. */
+  .discard-pile-stack {
+    /* The topmost real card (numbered or Skip-Bo) wins z-order. */
+    .card:not(.empty-card):nth-last-child(1 of :not(.empty-card)) {
+      @apply z-11!;
+    }
+
+    /* Collapse non-top NUMBERED cards down to just their corner number
+       (card-corner-number is bumped to `visible` from card.css). Skip-Bo
+       cards are intentionally excluded so their top sliver remains
+       visible when stacked between or beneath numbered cards. */
+    .card.normal-card:not(:nth-last-child(1 of :not(.empty-card))) {
+      @apply bg-transparent shadow-none border-transparent pointer-events-none z-10!;
+      transition: background-color 0.3s ease-in 0.1s !important;
+
+      .card-inner,
+      .card-inner-2,
+      .card-number,
+      .card-corner-inset {
+        @apply hidden;
+      }
+    }
+  }
 
   .player-area.winner {
     @apply shadow-none;
