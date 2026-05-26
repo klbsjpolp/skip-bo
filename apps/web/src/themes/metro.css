@@ -241,28 +241,9 @@
     }
   }
 
-  .discard-pile-stack {
-    .card.normal-card,
-    .card.skip-bo {
-      @apply absolute;
-    }
-
-    .card:not(.empty-card):nth-last-child(1 of :not(.empty-card)) {
-      @apply z-11!;
-    }
-
-    .card:not(.empty-card):not(:nth-last-child(1 of :not(.empty-card))) {
-      @apply bg-transparent bg-none shadow-none border-transparent pointer-events-none z-10!;
-      transition: background-color 0.3s ease-in 0.1s !important;
-
-      .card-inner,
-      .card-inner-2,
-      .card-number,
-      .card-corner-inset {
-        @apply hidden;
-      }
-    }
-  }
+  /* Use the default stacked-card layout (shared base) so each card shows its
+     top sliver beneath the card above — important for Skip-Bo cards stacked
+     between numbered cards, which would otherwise disappear entirely. */
 
   .player-area.winner {
     @apply shadow-none;
