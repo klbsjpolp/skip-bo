@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.40.1](https://github.com/klbsjpolp/skip-bo/compare/v1.40.0...v1.40.1) (2026-05-26)
+
+
+### Bug Fixes
+
+* **card:** show buried corner number when top of pile is a Skip-Bo ([48b76b6](https://github.com/klbsjpolp/skip-bo/commit/48b76b6bf1768c8fef7193bd0300e5538b9264fe))
+* **theme-metro:** keep Skip-Bo visible when stacked under numbered cards ([e53c064](https://github.com/klbsjpolp/skip-bo/commit/e53c0648e4beec26b9d9b490d87563f22d9c0079))
+* **theme-metro:** show Skip-Bo card on top of discard piles ([037e896](https://github.com/klbsjpolp/skip-bo/commit/037e896af6ebffcfc66c0269ae5de20364a379a4))
+* **theme-metro:** use default stacked-card layout on discard piles ([7fba249](https://github.com/klbsjpolp/skip-bo/commit/7fba24982300d5d8c425c3abc5046f310854bdde))
+
 ## [1.40.0](https://github.com/klbsjpolp/skip-bo/compare/v1.39.0...v1.40.0) (2026-05-25)
 
 
