@@ -242,16 +242,17 @@
   }
 
   .discard-pile-stack {
-    .card.normal-card {
+    .card.normal-card,
+    .card.skip-bo {
       @apply absolute;
     }
 
-    .card.normal-card:nth-last-child(1 of .normal-card) {
+    .card:not(.empty-card):nth-last-child(1 of :not(.empty-card)) {
       @apply z-11!;
     }
 
-    .card.normal-card:not(:nth-last-child(1 of .normal-card)) {
-      @apply bg-transparent shadow-none border-transparent pointer-events-none z-10!;
+    .card:not(.empty-card):not(:nth-last-child(1 of :not(.empty-card))) {
+      @apply bg-transparent bg-none shadow-none border-transparent pointer-events-none z-10!;
       transition: background-color 0.3s ease-in 0.1s !important;
 
       .card-inner,
