@@ -55,7 +55,7 @@ const createBaseState = (): GameState => ({
       isAI: false,
       stockPile: [card(12), card(11), card(10), card(9), card(8), card(7)],
       hand: [card(1), card(5), card(7), card(0, true), card(12)],
-      discardPiles: [[card(3), card(0, true)], [card(8)], [], [card(2), card(6)]],
+      discardPiles: [[card(3), card(0, true)], [card(8)], [], [card(2), card(0, true), card(6)]],
     }),
     createPlayer({
       isAI: true,
