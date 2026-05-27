@@ -24,7 +24,7 @@
     inset 0 0 5px rgba(0, 0, 0, 0.2), /* A soft, dark inner shadow for depth */ inset 0 0 5px rgba(255, 255, 255, 0.5); /* A soft, light inner shadow for highlight */
   --card-radius: calc(var(--card-height) / 10);
   --card-back-color: var(--background);
-  --selected-border-color: var(--active-turn-color);
+  --selected-border-color: hsl(210 30% 32%); /* muted slate-blue — quiet cool accent against the wool-grey */
 
   --skipbo-text: #ddd;
   --skipbo-bg: var(--card-front-color);

@@ -31,6 +31,16 @@
     }
   }
 
+  /* Empty-pile placeholders are drop targets too, but lifting them during a
+     drag reads as the "Vide" card itself bouncing. Keep the dashed border
+     pulse, drop the translate — for both an EmptyCard that is itself the
+     drop-indicator, and any drop-indicator parent (e.g. build-pile,
+     discard-pile-stack) whose only visible content is an EmptyCard. */
+  body[data-drag-active='true'] &.can-drop.empty-card,
+  body[data-drag-active='true'] &.can-drop:has(> .empty-card:only-child) {
+    @apply translate-y-0;
+  }
+
   /* Stronger highlight on the target the dragged card is currently over. */
   &.is-drag-over {
     @apply -translate-y-1 shadow-can-drop;
