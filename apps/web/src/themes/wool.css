@@ -11,7 +11,7 @@
   ); /* deepened so muted body copy reaches ≥4.5:1 on wool's mid-steel secondary surfaces */
   --destructive: hsl(0 49% 49%);
   --destructive-foreground: #c9c9c9;
-  --active-turn-color: hsl(355 55% 40%); /* deep yarn-red — visible against the wool-grey background */
+  --active-turn-color: hsl(336 65% 52%); /* rose fuchsia éclatant — chaleureux sans être criard */
 
   --background: hsl(
     206 13% 72%
@@ -29,7 +29,7 @@
   --skipbo-text: #ddd;
   --skipbo-bg: var(--card-front-color);
   --card-g1: hsl(152, 45%, 32%); /* 1‑4 */
-  --card-g2: var(--active-turn-color); /* 5‑8 */
+  --card-g2: hsl(355 55% 40%); /* 5‑8 — deep yarn-red */
   --card-g3: hsl(272 51% 42%); /* 9‑12 */
   --victory-piece-1: #d7dade;
   --victory-piece-2: #c3c7cb;
