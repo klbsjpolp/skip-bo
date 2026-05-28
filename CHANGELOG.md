@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.40.2](https://github.com/klbsjpolp/skip-bo/compare/v1.40.1...v1.40.2) (2026-05-28)
+
+
+### Bug Fixes
+
+* **web:** hug discard-pile-stack height to its top card ([bd7c6e0](https://github.com/klbsjpolp/skip-bo/commit/bd7c6e08254f2752db8fd6020c6468d287cbb95e))
+
 ## [1.40.1](https://github.com/klbsjpolp/skip-bo/compare/v1.40.0...v1.40.1) (2026-05-26)
 
 
