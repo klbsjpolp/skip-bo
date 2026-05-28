@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.41.0](https://github.com/klbsjpolp/skip-bo/compare/v1.40.2...v1.41.0) (2026-05-28)
+
+
+### Features
+
+* **game-core:** introduce selectors layer ([9bf9d7c](https://github.com/klbsjpolp/skip-bo/commit/9bf9d7c949292d7f568ca98a80aca9069bd5caae))
+* **protocol:** introduce explicit PROTOCOL_VERSION handshake ([4cab8f3](https://github.com/klbsjpolp/skip-bo/commit/4cab8f3c6ab22f214ee95420e8d57e7d6aef867e))
+
+
+### Bug Fixes
+
+* **protocol:** make version gate enforceable when MIN bumps past 1 ([14e5f30](https://github.com/klbsjpolp/skip-bo/commit/14e5f303f6b27dc0af6101cc445d63a61d9094bd))
+
 ## [1.40.2](https://github.com/klbsjpolp/skip-bo/compare/v1.40.1...v1.40.2) (2026-05-28)
 
 
