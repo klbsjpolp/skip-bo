@@ -3,10 +3,9 @@ import { useEffect, useState } from 'react';
 
 import type { DisconnectedSeatInfo } from '@skipbo/multiplayer-protocol';
 
+import { DISCONNECT_GRACE_MS } from '@/config/timing';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
-const GRACE_MS = 5 * 60 * 1000;
 
 interface DisconnectedPlayer {
   displayName: string;
@@ -151,7 +150,7 @@ export function OnlineStatusStrip({
       {visibleDisconnectedSeats.length > 0 && (
         <div className="flex flex-row gap-1 items-center" data-testid="online-disconnected-seats">
           {visibleDisconnectedSeats.map((entry) => {
-            const remainingMs = GRACE_MS - (now - new Date(entry.disconnectedAt).getTime());
+            const remainingMs = DISCONNECT_GRACE_MS - (now - new Date(entry.disconnectedAt).getTime());
             const seatLabel = getSeatLabel(entry.seatIndex, playersBySeatIndex);
             const isExpired = remainingMs <= 0;
             const text = isExpired

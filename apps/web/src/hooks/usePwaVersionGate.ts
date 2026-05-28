@@ -9,8 +9,7 @@ import {
 } from '@/lib/pwaUpdates';
 import { fetchRuntimeConfig } from '@/lib/runtimeConfig';
 import { compareAppVersions, normalizeVersionTag } from '@/lib/versionUtils';
-
-const UPDATE_CHECK_INTERVAL_MS = 10 * 60 * 1000;
+import { PWA_UPDATE_CHECK_INTERVAL_MS } from '@/config/timing';
 export const AUTO_RELOAD_SESSION_STORAGE_KEY = 'skipbo:pwa-auto-reload-version';
 
 const readAutoReloadVersion = (): string | null => {
@@ -101,7 +100,7 @@ export const usePwaVersionGate = (): PwaVersionGateState => {
 
     const intervalId = globalThis.setInterval(() => {
       void checkForUpdates();
-    }, UPDATE_CHECK_INTERVAL_MS);
+    }, PWA_UPDATE_CHECK_INTERVAL_MS);
 
     return () => {
       globalThis.clearInterval(intervalId);
