@@ -161,6 +161,41 @@ test.describe('Layout and interaction coverage', () => {
     });
   }
 
+  // Regression: the discard-pile-stack reserved 20px per stacked card via an
+  // inline height, but the actual per-card offset is `--stack-diff` (16px on
+  // mobile, 20px on desktop). On mobile that left empty space below the top
+  // card, which the drop-indicator dashed border honored — making the border
+  // visibly taller than the visible stack. Assert the container hugs the
+  // bottom of the top card so the dashed border can't grow past the stack.
+  for (const viewport of ['@desktop', '@mobile'] as const) {
+    test(`${viewport} discard-pile-stack height matches its top card`, async ({ page }) => {
+      await gotoFixture(page, 'selected-hand', 'theme-paper');
+
+      const measurements = await page
+        .locator('[data-testid="human-player-area"] .discard-pile-stack')
+        .evaluateAll((stacks) =>
+          stacks.map((stack) => {
+            const cards = stack.querySelectorAll<HTMLElement>('.card:not(.empty-card)');
+            if (cards.length === 0) {
+              return { cardCount: 0, gap: 0 };
+            }
+            const stackRect = stack.getBoundingClientRect();
+            const topCardRect = cards[cards.length - 1].getBoundingClientRect();
+            return {
+              cardCount: cards.length,
+              gap: Math.round(stackRect.bottom - topCardRect.bottom),
+            };
+          }),
+        );
+
+      const stacked = measurements.filter((m) => m.cardCount > 1);
+      expect(stacked.length).toBeGreaterThan(0);
+      for (const m of stacked) {
+        expect(m.gap, `stack with ${m.cardCount} cards should not reserve extra space below the top card`).toBe(0);
+      }
+    });
+  }
+
   test('@mobile retreat-filled fixture avoids horizontal overflow', async ({ page }) => {
     await gotoFixture(page, 'retreat-filled', 'theme-paper');
     await expectNoHorizontalOverflow(page);
