@@ -186,7 +186,9 @@ function DiscardPile({
           handleDiscardPilePress();
         }
       }}
-      style={{ height: `calc(var(--card-height) + ${(pile.length <= 1 ? 0 : pile.length - 1) * 20}px)` }}
+      style={{
+        height: `calc(var(--card-height) + var(--stack-diff) * ${pile.length <= 1 ? 0 : pile.length - 1})`,
+      }}
     >
       <EmptyCard
         canDropCard={computedPiles.length === 0}
