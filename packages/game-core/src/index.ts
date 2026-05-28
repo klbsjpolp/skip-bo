@@ -1,6 +1,7 @@
 export * from './lib/config.js';
 export * from './lib/handRefill.js';
 export * from './lib/retreatPile.js';
+export * from './lib/shuffle.js';
 export * from './lib/validators.js';
 export * from './state/deck.js';
 export * from './state/gameActions.js';
