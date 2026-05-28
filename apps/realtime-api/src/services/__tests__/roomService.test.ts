@@ -8,8 +8,8 @@ import {
   type ConnectionRepository,
   type RoomRecord,
   type RoomRepository,
-} from '../src/repositories/types.js';
-import type { RealtimeBroadcaster } from '../src/services/broadcaster.js';
+} from '../../repositories/types.js';
+import type { RealtimeBroadcaster } from '../broadcaster.js';
 import {
   authenticateConnection,
   createRoom,
@@ -21,7 +21,7 @@ import {
   joinRoom,
   rejectAction,
   startGame,
-} from '../src/services/roomService.js';
+} from '../roomService.js';
 
 class InMemoryRoomRepository implements RoomRepository {
   readonly rooms = new Map<string, RoomRecord>();

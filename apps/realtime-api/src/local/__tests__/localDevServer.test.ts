@@ -4,8 +4,8 @@ import WebSocket from 'ws';
 
 import type { CreateRoomResponse, JoinRoomResponse, ServerMessage } from '@skipbo/multiplayer-protocol';
 
-import type { LocalRealtimeDevServer } from '../src/local/devServer.js';
-import { startLocalRealtimeDevServer } from '../src/local/devServer.js';
+import type { LocalRealtimeDevServer } from '../devServer.js';
+import { startLocalRealtimeDevServer } from '../devServer.js';
 
 const silentLogger = {
   error: () => undefined,
