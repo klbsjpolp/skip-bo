@@ -5,7 +5,10 @@ import { initialGameState } from '@skipbo/game-core';
 import {
   HIDDEN_CARD,
   MAX_PLAYER_NAME_LENGTH,
+  MIN_SUPPORTED_PROTOCOL_VERSION,
+  PROTOCOL_VERSION,
   createRoomRequestSchema,
+  isProtocolVersionSupported,
   isValidRoomCode,
   joinRoomRequestSchema,
   normalizeRoomCode,
@@ -148,5 +151,22 @@ describe('joinRoomRequestSchema', () => {
       playerName: 'Bob',
       roomCode: 'abc',
     });
+  });
+});
+
+describe('isProtocolVersionSupported', () => {
+  it('treats an undefined client version as v1 (the assumed legacy baseline)', () => {
+    // Today: MIN === 1, so undefined passes. The point of asserting this is to
+    // guarantee the legacy path is the *same* as a literal `1`, not a free
+    // pass — so the gate becomes enforceable as soon as MIN moves past 1.
+    expect(isProtocolVersionSupported(undefined)).toBe(isProtocolVersionSupported(1));
+  });
+
+  it('accepts the current PROTOCOL_VERSION', () => {
+    expect(isProtocolVersionSupported(PROTOCOL_VERSION)).toBe(true);
+  });
+
+  it('rejects versions below MIN_SUPPORTED_PROTOCOL_VERSION', () => {
+    expect(isProtocolVersionSupported(MIN_SUPPORTED_PROTOCOL_VERSION - 1)).toBe(false);
   });
 });
