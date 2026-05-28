@@ -43,6 +43,10 @@ interface AIConfig {
     discardCardScoreWindow: number;
     searchScoreWindow: number;
   };
+  // Score added to a state where the AI (or subtracted when an opponent) has
+  // emptied their stock pile. Large enough to dominate the search heuristics
+  // so any winning line is preferred over any positional gain.
+  stockWinBonus: number;
 }
 
 const config: AIConfig = {
@@ -88,6 +92,7 @@ const config: AIConfig = {
     discardCardScoreWindow: 1.5,
     searchScoreWindow: 3,
   },
+  stockWinBonus: 5000,
 };
 
 export const getWeights = (): AIWeights => config.weights;
@@ -97,3 +102,5 @@ export const getDelay = (delayType: keyof AIConfig['delays']): number => config.
 export const getSearchDepth = (): number => config.searchDepth;
 
 export const getRandomnessWindow = (windowType: keyof AIConfig['randomness']): number => config.randomness[windowType];
+
+export const getStockWinBonus = (): number => config.stockWinBonus;

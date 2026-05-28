@@ -3,7 +3,7 @@ import type { GameAction } from '@/state/gameActions';
 import { gameReducer } from '@/state/gameReducer';
 import { canPlayCard } from '@/lib/validators';
 import { evaluateDiscardMove } from './discardUtils';
-import { getRandomnessWindow, getWeights } from './aiConfig';
+import { getRandomnessWindow, getStockWinBonus, getWeights } from './aiConfig';
 import {
   getAccessibleSkipBoCount,
   getAIPlayer,
@@ -27,8 +27,6 @@ interface SearchResult {
   score: number;
   move: MoveEvaluation | null;
 }
-
-const STOCK_WIN_BONUS = 5000;
 
 const getCardForMove = (gameState: GameState, move: MoveEvaluation): Card | null => {
   const aiPlayer = getAIPlayer(gameState);
@@ -307,7 +305,7 @@ const getOpponentThreatPenalty = (
     let playerPenalty = countPlayableTopDiscards(gameState, playerIndex) * weights.opponentPlayableDiscardPenalty;
 
     if (player.stockPile.length === 0) {
-      return penalty + STOCK_WIN_BONUS;
+      return penalty + getStockWinBonus();
     }
 
     const stockGap = getClosestGapToStock(gameState, playerIndex);
@@ -328,7 +326,7 @@ const evaluateState = (gameState: GameState, aiPlayerIndex: number = gameState.c
   const aiPlayer = getAIPlayer(gameState, aiPlayerIndex);
 
   if (aiPlayer.stockPile.length === 0) {
-    return STOCK_WIN_BONUS;
+    return getStockWinBonus();
   }
 
   let score = -aiPlayer.stockPile.length * weights.stockStateBonus;
