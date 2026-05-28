@@ -1,5 +1,6 @@
+import { memo, type MouseEventHandler } from 'react';
+
 import { cn } from '@/lib/utils';
-import type { MouseEventHandler } from 'react';
 
 interface EmptyCardProps {
   onClick?: MouseEventHandler;
@@ -10,7 +11,7 @@ interface EmptyCardProps {
   hideLabel?: boolean;
 }
 
-export function EmptyCard({ onClick, canDropCard = false, className, hideLabel = false }: EmptyCardProps) {
+function EmptyCardComponent({ onClick, canDropCard = false, className, hideLabel = false }: EmptyCardProps) {
   return (
     <div
       className={cn(
@@ -25,3 +26,5 @@ export function EmptyCard({ onClick, canDropCard = false, className, hideLabel =
     </div>
   );
 }
+
+export const EmptyCard = memo(EmptyCardComponent);
