@@ -1,18 +1,10 @@
 import type { Card, GameConfig } from '../types/index.js';
+import { shuffle } from '../lib/shuffle.js';
 
 export const createCard = (value: number, isSkipBo: boolean): Card => ({
   value,
   isSkipBo,
 });
-
-export const shuffle = <T>(array: T[]): T[] => {
-  const a = [...array];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-};
 
 export const createDeck = (config: GameConfig): Card[] => {
   const deck: Card[] = [];

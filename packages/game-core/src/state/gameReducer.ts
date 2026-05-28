@@ -3,6 +3,7 @@ import type { Card, GameState, Player, SelectedCard } from '../types/index.js';
 import type { GameAction } from './gameActions.js';
 import { initialGameState } from './initialGameState.js';
 import { MESSAGES } from '../lib/config.js';
+import { shuffleInPlace } from '../lib/shuffle.js';
 import { canPlayCard } from '../lib/validators.js';
 
 const cardsMatch = (candidate: Card | null | undefined, selectedCard: Card): boolean =>
@@ -86,11 +87,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
         draft.deck.push(...draft.completedBuildPiles);
         draft.completedBuildPiles = [];
 
-        // Shuffle deck
-        for (let i = draft.deck.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [draft.deck[i], draft.deck[j]] = [draft.deck[j], draft.deck[i]];
-        }
+        shuffleInPlace(draft.deck);
 
         // Draw remaining cards to fill empty slots
         for (let i = 0; i < player.hand.length && remainingToDraw > 0 && draft.deck.length > 0; i++) {
@@ -273,11 +270,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
           draft.deck.push(...draft.completedBuildPiles);
           draft.completedBuildPiles = [];
 
-          // Shuffle deck
-          for (let i = draft.deck.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [draft.deck[i], draft.deck[j]] = [draft.deck[j], draft.deck[i]];
-          }
+          shuffleInPlace(draft.deck);
 
           // Draw remaining cards to fill empty slots
           for (let i = 0; i < player.hand.length && remainingToDraw > 0 && draft.deck.length > 0; i++) {

@@ -7,6 +7,7 @@ import type {
   LobbySeatInfo,
   ServerMessage,
 } from '@skipbo/multiplayer-protocol';
+import { shuffle } from '@skipbo/game-core';
 import { normalizePlayerName, normalizeRoomCode, serializeClientGameView } from '@skipbo/multiplayer-protocol';
 
 import {
@@ -42,15 +43,6 @@ const DEFAULT_SEAT_CAPACITY = 4;
 const DEFAULT_HOST_SEAT_INDEX = 0;
 const ROOM_UPDATE_MAX_ATTEMPTS = 5;
 export const DISCONNECT_GRACE_MS = 5 * 60 * 1000;
-
-const shuffleArray = <T>(array: T[]): T[] => {
-  const result = [...array];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-};
 
 const createExpiryTimestamp = (updatedAt: string): number =>
   Math.floor((new Date(updatedAt).getTime() + ROOM_TTL_MS) / 1000);
@@ -478,7 +470,7 @@ export const startGame = async (
       throw new ClientError('Only the host can start the room', 403);
     }
 
-    const connectedSeats = shuffleArray(getAuthenticatedSeats(room));
+    const connectedSeats = shuffle(getAuthenticatedSeats(room));
 
     if (!allAuthenticatedSeatsReady(room)) {
       throw new ClientError('Tous les joueurs doivent être prêts pour démarrer', 409);

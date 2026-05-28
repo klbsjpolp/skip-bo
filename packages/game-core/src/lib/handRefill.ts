@@ -1,16 +1,10 @@
 import type { Card } from '../types/index.js';
+import { shuffleInPlace } from './shuffle.js';
 
 export interface HandRefillAnimationPlan {
   cards: Card[];
   handIndices: number[];
 }
-
-const shuffleCards = (cards: Card[]): void => {
-  for (let i = cards.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [cards[i], cards[j]] = [cards[j], cards[i]];
-  }
-};
 
 export const planHandRefill = (
   hand: (Card | null)[],
@@ -43,7 +37,7 @@ export const planHandRefill = (
 
   if (remainingToDraw > 0 && completedBuildPiles.length > 0) {
     deckCopy.push(...completedBuildPiles);
-    shuffleCards(deckCopy);
+    shuffleInPlace(deckCopy);
 
     for (let i = 0; i < handCopy.length && remainingToDraw > 0; i++) {
       if (handCopy[i] === null && deckCopy.length > 0) {
