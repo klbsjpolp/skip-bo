@@ -3,6 +3,7 @@ export * from './lib/handRefill.js';
 export * from './lib/retreatPile.js';
 export * from './lib/shuffle.js';
 export * from './lib/validators.js';
+export * from './selectors/index.js';
 export * from './state/deck.js';
 export * from './state/gameActions.js';
 export * from './state/gameReducer.js';
