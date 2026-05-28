@@ -43,10 +43,9 @@ import {
 } from '@/utils/cardPositions';
 import { clearOnlineSession } from '@/state/sessionPersistence';
 
-type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
+import { RECONNECT_DELAYS_MS, WEBSOCKET_PING_INTERVAL_MS } from '@/config/timing';
 
-const WEBSOCKET_PING_INTERVAL_MS = 4 * 60 * 1000;
-const RECONNECT_DELAYS_MS = [1_000, 2_000, 5_000];
+type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
 const cloneGameStateFromView = (view: ClientGameView): GameState => ({
   buildPiles: view.buildPiles.map((pile) => pile.map((card) => ({ ...card }))),
