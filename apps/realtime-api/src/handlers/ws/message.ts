@@ -38,6 +38,7 @@ const messageHandler: APIGatewayProxyWebsocketHandlerV2 = async (event) => {
       case 'auth':
         await authenticateConnection(dependencies, {
           connectionId,
+          protocolVersion: message.protocolVersion,
           roomCode: message.roomCode,
           seatIndex: message.seatIndex,
           seatToken: message.seatToken,

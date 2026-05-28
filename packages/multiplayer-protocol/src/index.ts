@@ -1,4 +1,5 @@
 export * from './code.js';
+export * from './version.js';
 export * from './http/index.js';
 export * from './playerName.js';
 export * from './schemas/http.js';

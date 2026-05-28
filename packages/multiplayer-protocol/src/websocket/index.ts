@@ -3,6 +3,7 @@ import type { GameAction } from '@skipbo/game-core';
 import type { ClientGameView, RoomStatus, RoomSummary } from '../views/index.js';
 
 export interface AuthClientMessage {
+  protocolVersion?: number;
   roomCode: string;
   seatIndex: number;
   seatToken: string;

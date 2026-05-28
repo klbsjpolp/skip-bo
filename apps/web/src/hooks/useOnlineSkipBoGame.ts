@@ -9,6 +9,7 @@ import {
   type DisconnectedSeatInfo,
   type LobbyReadyState,
   type LobbySeatInfo,
+  PROTOCOL_VERSION,
   type ServerMessage,
 } from '@skipbo/multiplayer-protocol';
 
@@ -174,6 +175,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         currentSocket.send(
           JSON.stringify({
             type: 'auth',
+            protocolVersion: PROTOCOL_VERSION,
             roomCode: session.roomCode,
             seatIndex: session.seatIndex,
             seatToken: session.seatToken,

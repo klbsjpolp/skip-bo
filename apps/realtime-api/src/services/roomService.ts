@@ -8,7 +8,13 @@ import type {
   ServerMessage,
 } from '@skipbo/multiplayer-protocol';
 import { shuffle } from '@skipbo/game-core';
-import { normalizePlayerName, normalizeRoomCode, serializeClientGameView } from '@skipbo/multiplayer-protocol';
+import {
+  isProtocolVersionSupported,
+  normalizePlayerName,
+  normalizeRoomCode,
+  PROTOCOL_VERSION,
+  serializeClientGameView,
+} from '@skipbo/multiplayer-protocol';
 
 import {
   RoomVersionConflictError,
@@ -369,11 +375,19 @@ export const authenticateConnection = async (
   dependencies: RoomServiceDependencies,
   input: {
     connectionId: string;
+    protocolVersion?: number;
     roomCode: string;
     seatIndex: number;
     seatToken: string;
   },
 ): Promise<void> => {
+  if (!isProtocolVersionSupported(input.protocolVersion)) {
+    throw new ClientError(
+      `Unsupported protocol version (client=${input.protocolVersion ?? 'unknown'}, server=${PROTOCOL_VERSION})`,
+      426,
+    );
+  }
+
   const room = await dependencies.roomRepository.get(normalizeRoomCode(input.roomCode));
 
   if (!room) {
