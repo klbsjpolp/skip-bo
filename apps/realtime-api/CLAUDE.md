@@ -43,7 +43,7 @@ Seat 0 is always the host. `handleAction` uses an optimistic-retry loop (up to 5
 pnpm --filter @skipbo/realtime-api test
 ```
 
-Tests live in `tests/`. When changing room lifecycle, protocol shapes, or redaction:
+Tests live in `src/**/__tests__/` (co-located with the code under test). When changing room lifecycle, protocol shapes, or redaction:
 
 1. Update tests here
 2. Update `packages/multiplayer-protocol/tests`

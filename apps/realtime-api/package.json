@@ -7,7 +7,7 @@
   "scripts": {
     "build": "node ./scripts/build.mjs",
     "dev": "tsx watch ./src/local-dev.ts",
-    "lint": "eslint src tests --ext ts --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint src --ext ts --report-unused-disable-directives --max-warnings 0",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
