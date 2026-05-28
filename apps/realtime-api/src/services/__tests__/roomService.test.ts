@@ -223,6 +223,21 @@ describe('roomService', () => {
     await expect(joinRoom(dependencies, { roomCode: created.roomCode })).rejects.toThrow('Room is full');
   });
 
+  it('rejects authentication when the client protocol version is too old', async () => {
+    const dependencies = createDependencies();
+    const created = await createRoom(dependencies);
+
+    await expect(
+      authenticateConnection(dependencies, {
+        connectionId: 'c-old',
+        protocolVersion: 0,
+        roomCode: created.roomCode,
+        seatIndex: created.seatIndex,
+        seatToken: created.seatToken,
+      }),
+    ).rejects.toThrow(/protocol version/i);
+  });
+
   it('waits for an explicit host start before accepting actions', async () => {
     const dependencies = createDependencies();
     const created = await createRoom(dependencies);
