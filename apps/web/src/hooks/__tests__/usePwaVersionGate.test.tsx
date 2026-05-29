@@ -64,6 +64,7 @@ describe('usePwaVersionGate', () => {
     refreshServiceWorkerRegistrationMock.mockResolvedValue(undefined);
 
     globalThis.sessionStorage?.clear();
+    globalThis.localStorage?.clear();
 
     Object.defineProperty(document, 'visibilityState', {
       configurable: true,
@@ -110,6 +111,89 @@ describe('usePwaVersionGate', () => {
 
     expect(result.current.hasPendingServiceWorkerUpdate).toBe(true);
     expect(result.current.shouldShowSoftUpdate).toBe(true);
+  });
+
+  it('flags isUpdatePending for a soft update but not for a blocking minimum-version gate', async () => {
+    fetchRuntimeConfigMock.mockResolvedValue({ appVersion: 'v1.1.0' });
+
+    const { result, rerender } = renderHook(() => usePwaVersionGate());
+
+    await waitFor(() => {
+      expect(result.current.isUpdatePending).toBe(true);
+    });
+    expect(result.current.isHardUpdateRequired).toBe(false);
+
+    fetchRuntimeConfigMock.mockResolvedValue({ appVersion: 'v1.2.0', minimumSupportedVersion: 'v1.1.0' });
+
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+
+    await waitFor(() => {
+      expect(result.current.isHardUpdateRequired).toBe(true);
+    });
+    rerender();
+
+    expect(result.current.isUpdatePending).toBe(false);
+  });
+
+  it('applies a pending soft update at most once per target version', async () => {
+    applyServiceWorkerUpdateMock.mockResolvedValue(true);
+
+    const { result } = renderHook(() => usePwaVersionGate());
+
+    await waitFor(() => {
+      expect(fetchRuntimeConfigMock).toHaveBeenCalledTimes(1);
+    });
+
+    act(() => {
+      emitPwaSnapshot({ needRefresh: true });
+    });
+
+    await waitFor(() => {
+      expect(result.current.isUpdatePending).toBe(true);
+    });
+
+    await act(async () => {
+      result.current.applyUpdateOnceForCurrentTarget();
+      result.current.applyUpdateOnceForCurrentTarget();
+      await Promise.resolve();
+    });
+
+    expect(applyServiceWorkerUpdateMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports the previous version when the build just moved to a newer one', async () => {
+    globalThis.localStorage?.setItem('skipbo:last-seen-version', 'v0.9.0');
+
+    const { result } = renderHook(() => usePwaVersionGate());
+
+    expect(result.current.justUpdatedFromVersion).toBe('v0.9.0');
+
+    await waitFor(() => {
+      expect(globalThis.localStorage?.getItem('skipbo:last-seen-version')).toBe('v1.0.0');
+    });
+
+    act(() => {
+      result.current.dismissJustUpdated();
+    });
+
+    expect(result.current.justUpdatedFromVersion).toBeNull();
+  });
+
+  it('does not report a just-updated notice on first launch or an unchanged version', async () => {
+    const { result, unmount } = renderHook(() => usePwaVersionGate());
+
+    expect(result.current.justUpdatedFromVersion).toBeNull();
+
+    await waitFor(() => {
+      expect(globalThis.localStorage?.getItem('skipbo:last-seen-version')).toBe('v1.0.0');
+    });
+
+    unmount();
+
+    const { result: secondResult } = renderHook(() => usePwaVersionGate());
+    expect(secondResult.current.justUpdatedFromVersion).toBeNull();
   });
 
   it('attempts an immediate reload when the minimum supported version is ahead of the current build', async () => {

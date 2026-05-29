@@ -5,7 +5,7 @@ import type { CreateRoomResponse } from '@skipbo/multiplayer-protocol';
 import { useLocalSkipBoGame } from '@/hooks/useLocalSkipBoGame';
 import { useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
 import type { GameType } from '@/app/types';
-import { AppUpdateBanner } from '@/components/AppUpdateBanner';
+import { AppUpdatedBanner } from '@/components/AppUpdatedBanner';
 import { ForcedUpdateOverlay } from '@/components/ForcedUpdateOverlay';
 import { LobbyDialog, LobbyRemovedDialog } from '@/components/LobbyDialog';
 import { OnlineStatusStrip } from '@/components/OnlineStatusStrip';
@@ -34,6 +34,7 @@ interface AppShellProps {
   fixtureName?: UiFixtureName;
   gameBoard: ReactNode;
   isGameOver: boolean;
+  isUpdatePending?: boolean;
   onJoinOnlineGame: (roomCode: string) => Promise<void>;
   onReplay: () => Promise<void> | void;
   onStartLocalGame: () => void;
@@ -47,6 +48,7 @@ function AppShell({
   fixtureName,
   gameBoard,
   isGameOver,
+  isUpdatePending = false,
   onJoinOnlineGame,
   onReplay,
   onStartLocalGame,
@@ -88,7 +90,18 @@ function AppShell({
         <div className="mt-4 flex items-center gap-3 justify-between">
           {debugStrip}
           <div className="grow"></div>
-          <p className="app-version-badge text-xs text-muted-foreground/80 tabular-nums" data-testid="app-version">
+          <p
+            className="app-version-badge flex items-center gap-1.5 text-xs text-muted-foreground/80 tabular-nums"
+            data-testid="app-version"
+          >
+            {!isUpdatePending ? (
+              <span
+                aria-label="Mise à jour prête, elle sera appliquée à la prochaine partie"
+                className="inline-block size-2 shrink-0 rounded-full bg-primary"
+                data-testid="app-version-update-dot"
+                title="Mise à jour prête, elle sera appliquée à la prochaine partie"
+              />
+            ) : null}
             Version {APP_VERSION}
           </p>
         </div>
@@ -124,6 +137,7 @@ function FixtureApp({ fixtureName }: { fixtureName: UiFixtureName }) {
 }
 
 interface SessionScreenProps {
+  isUpdatePending?: boolean;
   onJoinOnlineGame: (roomCode: string) => Promise<void>;
   onReplay: () => Promise<void>;
   onStartLocalGame: () => void;
@@ -132,6 +146,7 @@ interface SessionScreenProps {
 }
 
 function LocalGameScreen({
+  isUpdatePending,
   onJoinOnlineGame,
   onReplay,
   onStartLocalGame,
@@ -174,6 +189,7 @@ function LocalGameScreen({
       }
       gameBoard={gameBoard}
       isGameOver={gameState.gameIsOver}
+      isUpdatePending={isUpdatePending}
       onJoinOnlineGame={onJoinOnlineGame}
       onReplay={onReplay}
       onStartLocalGame={onStartLocalGame}
@@ -184,11 +200,14 @@ function LocalGameScreen({
 }
 
 interface OnlineGameScreenProps extends SessionScreenProps {
+  applyUpdateWhenSafe: () => void;
   onLeaveSession: () => void;
   session: CreateRoomResponse;
 }
 
 function OnlineGameScreen({
+  applyUpdateWhenSafe,
+  isUpdatePending,
   onJoinOnlineGame,
   onLeaveSession,
   onReplay,
@@ -227,6 +246,18 @@ function OnlineGameScreen({
     lobbyRemovalReason,
   } = useOnlineSkipBoGame(session);
   const { gameState: localGameState } = useLocalSkipBoGame();
+
+  // Online state is rebuilt from the server snapshot after a reload, so applying
+  // a pending update is lossless. Only do it at a "safe" moment — never while it
+  // is the local player's active turn (index 0 in the recentred view), to avoid
+  // cutting off an in-progress action.
+  const isSafeToApplyUpdate = roomStatus === 'WAITING' || gameState.gameIsOver || gameState.currentPlayerIndex !== 0;
+
+  useEffect(() => {
+    if (isUpdatePending && isSafeToApplyUpdate) {
+      applyUpdateWhenSafe();
+    }
+  }, [isUpdatePending, isSafeToApplyUpdate, applyUpdateWhenSafe]);
 
   const handleLeave = () => {
     leaveLobby();
@@ -285,6 +316,7 @@ function OnlineGameScreen({
         }
         gameBoard={gameBoard}
         isGameOver={gameState.gameIsOver}
+        isUpdatePending={isUpdatePending}
         onJoinOnlineGame={onJoinOnlineGame}
         onReplay={onReplay}
         onStartLocalGame={onStartLocalGame}
@@ -318,15 +350,16 @@ function LiveApp() {
     loadOnlineSession(),
   );
   const {
+    applyUpdateOnceForCurrentTarget,
     currentAppVersion,
-    dismissSoftUpdate,
-    hasPendingServiceWorkerUpdate,
+    dismissJustUpdated,
     isApplyingUpdate,
     isHardUpdateRequired,
+    isUpdatePending,
+    justUpdatedFromVersion,
     latestAppVersion,
     minimumSupportedVersion,
     reloadToUpdate,
-    shouldShowSoftUpdate,
   } = usePwaVersionGate();
 
   useEffect(() => {
@@ -334,6 +367,13 @@ function LiveApp() {
   }, [waitForAnimations]);
 
   const startLocalGame = () => {
+    // Starting a fresh local game is a lossless moment to apply a pending update:
+    // the reload boots straight into a new local game, so the intent is honoured.
+    if (isUpdatePending) {
+      reloadToUpdate();
+      return;
+    }
+
     setCurrentGameType('local-ai');
     setLocalSessionVersion((currentValue) => currentValue + 1);
   };
@@ -383,6 +423,7 @@ function LiveApp() {
   };
 
   const showResumeBanner = pendingResumeSession !== null && onlineSession === null;
+  const showUpdatedBanner = justUpdatedFromVersion !== null;
   const updateNotice = (
     <>
       {showResumeBanner ? (
@@ -393,24 +434,19 @@ function LiveApp() {
           roomCode={pendingResumeSession.roomCode}
         />
       ) : null}
-      {shouldShowSoftUpdate ? (
-        <AppUpdateBanner
-          currentVersion={currentAppVersion}
-          hasPendingServiceWorkerUpdate={hasPendingServiceWorkerUpdate}
-          isReloading={isApplyingUpdate}
-          latestVersion={latestAppVersion}
-          onDismiss={dismissSoftUpdate}
-          onReload={reloadToUpdate}
-        />
+      {showUpdatedBanner ? (
+        <AppUpdatedBanner currentVersion={currentAppVersion} onDismiss={dismissJustUpdated} />
       ) : null}
     </>
   );
-  const hasUpdateNotice = showResumeBanner || shouldShowSoftUpdate;
+  const hasUpdateNotice = showResumeBanner || showUpdatedBanner;
 
   const screen =
     currentGameType === 'online-human' && onlineSession ? (
       <OnlineGameScreen
         key={`${onlineSession.roomCode}-${onlineSession.seatToken}`}
+        applyUpdateWhenSafe={applyUpdateOnceForCurrentTarget}
+        isUpdatePending={isUpdatePending}
         onJoinOnlineGame={joinGame}
         onLeaveSession={leaveOnlineSession}
         onReplay={replayCurrentGame}
@@ -422,6 +458,7 @@ function LiveApp() {
     ) : (
       <LocalGameScreen
         key={`local-${localSessionVersion}`}
+        isUpdatePending={isUpdatePending}
         onJoinOnlineGame={joinGame}
         onReplay={replayCurrentGame}
         onStartLocalGame={startLocalGame}
