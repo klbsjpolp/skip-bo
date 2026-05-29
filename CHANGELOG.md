@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.42.0](https://github.com/klbsjpolp/skip-bo/compare/v1.41.0...v1.42.0) (2026-05-29)
+
+
+### Features
+
+* add clear stock pile debug buttons ([c5adb02](https://github.com/klbsjpolp/skip-bo/commit/c5adb02d5c39c7b70d1ed6c650f80b2c9646699c))
+
 ## [1.41.0](https://github.com/klbsjpolp/skip-bo/compare/v1.40.2...v1.41.0) (2026-05-28)
 
 
