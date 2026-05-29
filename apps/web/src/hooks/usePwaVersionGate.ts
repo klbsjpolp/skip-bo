@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react';
+import { startTransition, useCallback, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react';
 
 import { APP_VERSION } from '@/lib/appVersion';
 import {
@@ -11,6 +11,8 @@ import { fetchRuntimeConfig } from '@/lib/runtimeConfig';
 import { compareAppVersions, normalizeVersionTag } from '@/lib/versionUtils';
 import { PWA_UPDATE_CHECK_INTERVAL_MS } from '@/config/timing';
 export const AUTO_RELOAD_SESSION_STORAGE_KEY = 'skipbo:pwa-auto-reload-version';
+export const SOFT_AUTO_RELOAD_SESSION_STORAGE_KEY = 'skipbo:pwa-soft-auto-reload-key';
+export const LAST_SEEN_VERSION_STORAGE_KEY = 'skipbo:last-seen-version';
 
 const readAutoReloadVersion = (): string | null => {
   try {
@@ -23,6 +25,38 @@ const readAutoReloadVersion = (): string | null => {
 const writeAutoReloadVersion = (version: string) => {
   try {
     globalThis.sessionStorage?.setItem(AUTO_RELOAD_SESSION_STORAGE_KEY, version);
+  } catch {
+    // private mode / disabled storage — silently no-op
+  }
+};
+
+const readSoftAutoReloadKey = (): string | null => {
+  try {
+    return globalThis.sessionStorage?.getItem(SOFT_AUTO_RELOAD_SESSION_STORAGE_KEY) ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const writeSoftAutoReloadKey = (key: string) => {
+  try {
+    globalThis.sessionStorage?.setItem(SOFT_AUTO_RELOAD_SESSION_STORAGE_KEY, key);
+  } catch {
+    // private mode / disabled storage — silently no-op
+  }
+};
+
+const readLastSeenVersion = (): string | null => {
+  try {
+    return globalThis.localStorage?.getItem(LAST_SEEN_VERSION_STORAGE_KEY) ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const writeLastSeenVersion = (version: string) => {
+  try {
+    globalThis.localStorage?.setItem(LAST_SEEN_VERSION_STORAGE_KEY, version);
   } catch {
     // private mode / disabled storage — silently no-op
   }
@@ -41,7 +75,11 @@ export interface PwaVersionGateState {
   hasPendingServiceWorkerUpdate: boolean;
   isApplyingUpdate: boolean;
   isHardUpdateRequired: boolean;
+  isUpdatePending: boolean;
+  justUpdatedFromVersion: string | null;
   lastCheckAt: number | null;
+  applyUpdateOnceForCurrentTarget: () => void;
+  dismissJustUpdated: () => void;
   dismissSoftUpdate: () => void;
   reloadToUpdate: () => void;
   shouldShowSoftUpdate: boolean;
@@ -50,6 +88,10 @@ export interface PwaVersionGateState {
 export const usePwaVersionGate = (): PwaVersionGateState => {
   const [dismissedUpdateKey, setDismissedUpdateKey] = useState<string | null>(null);
   const [isApplyingUpdate, setIsApplyingUpdate] = useState(false);
+  const [justUpdatedFromVersion, setJustUpdatedFromVersion] = useState<string | null>(() => {
+    const lastSeen = readLastSeenVersion();
+    return lastSeen && compareAppVersions(lastSeen, APP_VERSION) < 0 ? lastSeen : null;
+  });
   const [runtimeVersionSnapshot, setRuntimeVersionSnapshot] = useState<RuntimeVersionSnapshot>({
     latestAppVersion: null,
     minimumSupportedVersion: null,
@@ -72,7 +114,7 @@ export const usePwaVersionGate = (): PwaVersionGateState => {
     });
   });
 
-  const runReloadToUpdate = async () => {
+  const runReloadToUpdate = useCallback(async () => {
     if (isApplyingUpdateRef.current) {
       return;
     }
@@ -89,7 +131,7 @@ export const usePwaVersionGate = (): PwaVersionGateState => {
       isApplyingUpdateRef.current = false;
       setIsApplyingUpdate(false);
     }
-  };
+  }, []);
 
   const reloadToUpdate = useEffectEvent(() => {
     void runReloadToUpdate();
@@ -141,6 +183,35 @@ export const usePwaVersionGate = (): PwaVersionGateState => {
         ? `runtime:${runtimeVersionSnapshot.latestAppVersion}`
         : null;
   const shouldShowSoftUpdate = !!updateKey && !isHardUpdateRequired && dismissedUpdateKey !== updateKey;
+  // A non-blocking update is available (waiting service worker or a newer runtime
+  // version), as opposed to the blocking minimum-version gate.
+  const isUpdatePending = !!updateKey && !isHardUpdateRequired;
+
+  // Remember the version this tab last loaded so the next launch can tell whether
+  // it just came up on a newer build (used to show the "update installed" notice).
+  useEffect(() => {
+    writeLastSeenVersion(APP_VERSION);
+  }, []);
+
+  // Apply a pending soft update at most once per target version. The
+  // sessionStorage guard survives `location.reload()`, so a deploy that
+  // advertises a version it isn't actually serving yet can't reload-loop.
+  const applyUpdateOnceForCurrentTarget = useCallback(() => {
+    if (!isUpdatePending || !updateKey) {
+      return;
+    }
+
+    if (readSoftAutoReloadKey() === updateKey) {
+      return;
+    }
+
+    writeSoftAutoReloadKey(updateKey);
+    void runReloadToUpdate();
+  }, [isUpdatePending, updateKey, runReloadToUpdate]);
+
+  const dismissJustUpdated = useCallback(() => {
+    setJustUpdatedFromVersion(null);
+  }, []);
 
   useEffect(() => {
     if (!isHardUpdateRequired || !runtimeVersionSnapshot.minimumSupportedVersion) {
@@ -165,7 +236,11 @@ export const usePwaVersionGate = (): PwaVersionGateState => {
     hasPendingServiceWorkerUpdate: pwaUpdateSnapshot.needRefresh,
     isApplyingUpdate,
     isHardUpdateRequired,
+    isUpdatePending,
+    justUpdatedFromVersion,
     lastCheckAt: runtimeVersionSnapshot.lastCheckAt,
+    applyUpdateOnceForCurrentTarget,
+    dismissJustUpdated,
     dismissSoftUpdate: () => {
       if (updateKey) {
         setDismissedUpdateKey(updateKey);
