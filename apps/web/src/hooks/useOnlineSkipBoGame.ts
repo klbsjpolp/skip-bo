@@ -494,6 +494,14 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     sendAction({ type: 'DEBUG_FILL_HAND_SKIPBO' });
   }, [sendAction]);
 
+  const debugClearStockPile = useCallback((): void => {
+    sendAction({ type: 'DEBUG_CLEAR_STOCK_PILE' });
+  }, [sendAction]);
+
+  const debugClearAiStockPile = useCallback((): void => {
+    sendAction({ type: 'DEBUG_CLEAR_AI_STOCK_PILE' });
+  }, [sendAction]);
+
   const debugWin = useCallback((): void => {
     sendAction({ type: 'DEBUG_WIN' });
   }, [sendAction]);
@@ -869,6 +877,8 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     connectionStatus,
     debugFillBuildPile,
     debugFillHandSkipBo,
+    debugClearStockPile,
+    debugClearAiStockPile,
     debugWin,
     disconnectedSeats,
     gameState,

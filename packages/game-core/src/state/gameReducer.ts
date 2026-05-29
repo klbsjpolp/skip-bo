@@ -161,6 +161,29 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       return;
     }
 
+    case 'DEBUG_CLEAR_STOCK_PILE': {
+      const player = draft.players[0];
+      player.stockPile = [{ value: 0, isSkipBo: true }];
+      draft.selectedCard = null;
+      draft.message = 'Pile de réserve vidée (debug)';
+      return;
+    }
+
+    case 'DEBUG_CLEAR_AI_STOCK_PILE': {
+      const aiIndex = draft.players.findIndex((p) => p.isAI);
+      if (aiIndex === -1) {
+        draft.message = MESSAGES.INVALID_MOVE;
+        return;
+      }
+
+      draft.players[aiIndex].stockPile = [{ value: 0, isSkipBo: true }];
+      // Hand the turn to the AI so it plays its last stock card and wins.
+      draft.currentPlayerIndex = aiIndex;
+      draft.selectedCard = null;
+      draft.message = 'Pile de réserve IA vidée (debug)';
+      return;
+    }
+
     case 'DEBUG_WIN': {
       const winnerIndex = draft.currentPlayerIndex;
       const winner = draft.players[winnerIndex];

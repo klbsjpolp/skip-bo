@@ -74,6 +74,14 @@ export function useSkipBoGame() {
     dispatch({ type: 'DEBUG_FILL_HAND_SKIPBO' });
   }, [dispatch]);
 
+  const debugClearStockPile = useCallback(() => {
+    dispatch({ type: 'DEBUG_CLEAR_STOCK_PILE' });
+  }, [dispatch]);
+
+  const debugClearAiStockPile = useCallback(() => {
+    dispatch({ type: 'DEBUG_CLEAR_AI_STOCK_PILE' });
+  }, [dispatch]);
+
   const debugWin = useCallback(() => {
     dispatch({ type: 'DEBUG_WIN' });
   }, [dispatch]);
@@ -391,6 +399,8 @@ export function useSkipBoGame() {
     initializeGame,
     debugFillBuildPile,
     debugFillHandSkipBo,
+    debugClearStockPile,
+    debugClearAiStockPile,
     debugWin,
     selectCard,
     playCard,

@@ -67,6 +67,8 @@ export const isDebugAction = (action: GameAction): boolean =>
   action.type === 'DEBUG_SET_AI_HAND' ||
   action.type === 'DEBUG_FILL_BUILD_PILE' ||
   action.type === 'DEBUG_FILL_HAND_SKIPBO' ||
+  action.type === 'DEBUG_CLEAR_STOCK_PILE' ||
+  action.type === 'DEBUG_CLEAR_AI_STOCK_PILE' ||
   action.type === 'DEBUG_WIN';
 
 const isSupportedOnlineAction = (action: GameAction): boolean => {
@@ -193,6 +195,8 @@ export const validateOnlineAction = (gameState: GameState, action: GameAction): 
     case 'DEBUG_SET_AI_HAND':
     case 'DEBUG_FILL_BUILD_PILE':
     case 'DEBUG_FILL_HAND_SKIPBO':
+    case 'DEBUG_CLEAR_STOCK_PILE':
+    case 'DEBUG_CLEAR_AI_STOCK_PILE':
     case 'DEBUG_WIN':
       return null;
   }

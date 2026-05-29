@@ -20,4 +20,6 @@ export type GameAction =
   | { type: 'DEBUG_SET_AI_HAND'; hand: Card[] }
   | { type: 'DEBUG_FILL_BUILD_PILE'; buildPile: number }
   | { type: 'DEBUG_FILL_HAND_SKIPBO' }
+  | { type: 'DEBUG_CLEAR_STOCK_PILE' }
+  | { type: 'DEBUG_CLEAR_AI_STOCK_PILE' }
   | { type: 'DEBUG_WIN' };

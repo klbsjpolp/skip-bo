@@ -44,6 +44,8 @@ export const gameActionSchema = z.discriminatedUnion('type', [
     buildPile: z.number().int().min(0),
   }),
   z.object({ type: z.literal('DEBUG_FILL_HAND_SKIPBO') }),
+  z.object({ type: z.literal('DEBUG_CLEAR_STOCK_PILE') }),
+  z.object({ type: z.literal('DEBUG_CLEAR_AI_STOCK_PILE') }),
   z.object({ type: z.literal('DEBUG_WIN') }),
 ]);
 
