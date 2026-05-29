@@ -114,6 +114,16 @@ export const gameMachine = createMachine(
                 actions: 'apply',
                 guard: 'isHumanAction',
               },
+              DEBUG_CLEAR_STOCK_PILE: {
+                actions: 'apply',
+                guard: 'isHumanAction',
+              },
+              DEBUG_CLEAR_AI_STOCK_PILE: {
+                // Reducer empties the AI stock to a single Skip-Bo and hands the
+                // turn to the AI; route into botTurn so it plays that card and wins.
+                actions: 'apply',
+                target: '#skipbo.botTurn',
+              },
               RESET: {
                 actions: 'apply',
                 target: '#skipbo.setup',

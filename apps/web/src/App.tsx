@@ -142,6 +142,8 @@ function LocalGameScreen({
     clearSelection,
     debugFillBuildPile,
     debugFillHandSkipBo,
+    debugClearStockPile,
+    debugClearAiStockPile,
     debugWin,
     discardCard,
     gameState,
@@ -165,6 +167,8 @@ function LocalGameScreen({
         <DebugStrip
           debugFillBuildPile={() => debugFillBuildPile(0)}
           debugFillHandSkipBo={debugFillHandSkipBo}
+          debugClearStockPile={debugClearStockPile}
+          debugClearAiStockPile={debugClearAiStockPile}
           debugWin={debugWin}
         />
       }
@@ -200,6 +204,8 @@ function OnlineGameScreen({
     connectionStatus,
     debugFillBuildPile,
     debugFillHandSkipBo,
+    debugClearStockPile,
+    debugClearAiStockPile,
     debugWin,
     discardCard,
     disconnectedSeats,
@@ -272,6 +278,8 @@ function OnlineGameScreen({
           <DebugStrip
             debugFillBuildPile={() => debugFillBuildPile(0)}
             debugFillHandSkipBo={debugFillHandSkipBo}
+            debugClearStockPile={debugClearStockPile}
+            debugClearAiStockPile={debugClearAiStockPile}
             debugWin={debugWin}
           />
         }
