@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.43.0](https://github.com/klbsjpolp/skip-bo/compare/v1.42.0...v1.43.0) (2026-05-29)
+
+
+### Features
+
+* **web:** apply PWA updates automatically at safe moments ([f872938](https://github.com/klbsjpolp/skip-bo/commit/f87293851c380c5f5ab97c42123bf5cc38509ec5))
+
+
+### Bug Fixes
+
+* **web:** show version dot when update is pending, not when idle ([f860aa6](https://github.com/klbsjpolp/skip-bo/commit/f860aa6942803415227c78ec2d66827a5095cd7e))
+
 ## [1.42.0](https://github.com/klbsjpolp/skip-bo/compare/v1.41.0...v1.42.0) (2026-05-29)
 
 
