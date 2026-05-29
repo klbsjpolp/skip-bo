@@ -35,12 +35,12 @@
     "typecheck": "pnpm --filter @skipbo/game-core typecheck && pnpm --filter @skipbo/multiplayer-protocol typecheck && pnpm --filter @skipbo/realtime-api typecheck && pnpm --filter @skipbo/web typecheck"
   },
   "devDependencies": {
-    "@commitlint/cli": "^21.0.1",
-    "@commitlint/config-conventional": "^21.0.1",
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
     "@eslint/js": "^10.0.1",
     "@types/node": "^25.9.1",
-    "@typescript-eslint/eslint-plugin": "^8.59.4",
-    "@typescript-eslint/parser": "^8.59.4",
+    "@typescript-eslint/eslint-plugin": "^8.60.0",
+    "@typescript-eslint/parser": "^8.60.0",
     "commit-and-tag-version": "^12.7.3",
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
