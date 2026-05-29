@@ -94,7 +94,7 @@ function AppShell({
             className="app-version-badge flex items-center gap-1.5 text-xs text-muted-foreground/80 tabular-nums"
             data-testid="app-version"
           >
-            {!isUpdatePending ? (
+            {isUpdatePending ? (
               <span
                 aria-label="Mise à jour prête, elle sera appliquée à la prochaine partie"
                 className="inline-block size-2 shrink-0 rounded-full bg-primary"
