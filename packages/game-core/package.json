@@ -11,12 +11,14 @@
     "build": "tsc -p tsconfig.json",
     "lint": "eslint src tests --ext ts --report-unused-disable-directives --max-warnings 0",
     "test": "vitest run --passWithNoTests",
+    "test:coverage": "vitest run --coverage --passWithNoTests",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "immer": "^11.1.8"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.7",
     "vite": "^8.0.14",
     "vitest": "^4.1.7"
   }
