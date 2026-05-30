@@ -48,8 +48,10 @@ jobs:
       - name: Run lint
         run: pnpm lint
 
-      - name: Run tests with coverage
-        run: pnpm test:coverage
+      # Coverage output is Node-independent, so only instrument on the floor
+      # version; the newer node just verifies the suite passes.
+      - name: Run tests
+        run: ${{ matrix.node-version == '22.x' && 'pnpm test:coverage' || 'pnpm test' }}
 
       - name: Run typecheck
         run: pnpm typecheck

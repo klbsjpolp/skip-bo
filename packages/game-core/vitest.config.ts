@@ -4,9 +4,11 @@ export default defineConfig({
   test: {
     coverage: {
       provider: 'v8',
+      all: true,
       reporter: ['text-summary', 'text'],
       include: ['src/**/*.ts'],
-      exclude: ['src/**/__tests__/**', 'src/**/*.test.ts', 'src/**/*.d.ts'],
+      // Tests live in tests/, outside src/, so no in-src test globs to exclude.
+      exclude: ['src/**/*.d.ts'],
     },
   },
 });

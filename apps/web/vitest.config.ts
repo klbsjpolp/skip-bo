@@ -21,6 +21,7 @@ export default defineConfig({
     exclude: [...configDefaults.exclude, 'tests/ui/**'],
     coverage: {
       provider: 'v8',
+      all: true,
       reporter: ['text-summary', 'text'],
       include: ['src/**/*.{ts,tsx}'],
       exclude: ['src/**/__tests__/**', 'src/**/*.test.{ts,tsx}', 'src/testing/**', 'src/**/*.d.ts'],
