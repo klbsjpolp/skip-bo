@@ -26,6 +26,7 @@
     "tofu:plan": "pnpm --dir infra/terraform plan:prod",
     "tofu:validate": "pnpm --dir infra/terraform validate:prod",
     "test": "pnpm --filter @skipbo/game-core test && pnpm --filter @skipbo/multiplayer-protocol test && pnpm --filter @skipbo/realtime-api test && pnpm --filter @skipbo/web test",
+    "test:coverage": "pnpm --filter @skipbo/game-core test:coverage && pnpm --filter @skipbo/multiplayer-protocol test:coverage && pnpm --filter @skipbo/realtime-api test:coverage && pnpm --filter @skipbo/web test:coverage",
     "test:e2e": "pnpm --filter @skipbo/web test:e2e",
     "test:e2e:ui": "pnpm --filter @skipbo/web test:e2e:ui",
     "test:ui": "pnpm --filter @skipbo/web test:ui",
