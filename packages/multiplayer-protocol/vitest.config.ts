@@ -4,7 +4,6 @@ export default defineConfig({
   test: {
     coverage: {
       provider: 'v8',
-      all: true,
       reporter: ['text-summary', 'text'],
       include: ['src/**/*.ts'],
       // Tests live in tests/, outside src/, so no in-src test globs to exclude.
