@@ -250,8 +250,10 @@ function OnlineGameScreen({
   // Online state is rebuilt from the server snapshot after a reload, so applying
   // a pending update is lossless. Only do it at a "safe" moment — never while it
   // is the local player's active turn (index 0 in the recentred view), to avoid
-  // cutting off an in-progress action.
-  const isSafeToApplyUpdate = roomStatus === 'WAITING' || gameState.gameIsOver || gameState.currentPlayerIndex !== 0;
+  // cutting off an in-progress action, and never on a finished game so the
+  // victory/defeat screen is preserved. The update then lands during an
+  // opponent's turn, in the next lobby, or on the user's next deliberate action.
+  const isSafeToApplyUpdate = !gameState.gameIsOver && (roomStatus === 'WAITING' || gameState.currentPlayerIndex !== 0);
 
   useEffect(() => {
     if (isUpdatePending && isSafeToApplyUpdate) {
@@ -349,6 +351,10 @@ function LiveApp() {
   const [pendingResumeSession, setPendingResumeSession] = useState<CreateRoomResponse | null>(() =>
     loadOnlineSession(),
   );
+  // A local single-player game can't be rebuilt after a reload, so we hold off the
+  // blocking minimum-version auto-reload while in local mode and apply it on the
+  // next deliberate action instead (see the game-start handlers below).
+  const isLocalMode = currentGameType === 'local-ai';
   const {
     applyUpdateOnceForCurrentTarget,
     currentAppVersion,
@@ -360,7 +366,7 @@ function LiveApp() {
     latestAppVersion,
     minimumSupportedVersion,
     reloadToUpdate,
-  } = usePwaVersionGate();
+  } = usePwaVersionGate({ deferHardUpdate: isLocalMode });
 
   useEffect(() => {
     animationServiceBridge.waitForAnimations = waitForAnimations;
@@ -369,7 +375,8 @@ function LiveApp() {
   const startLocalGame = () => {
     // Starting a fresh local game is a lossless moment to apply a pending update:
     // the reload boots straight into a new local game, so the intent is honoured.
-    if (isUpdatePending) {
+    // Hard updates were deferred while in local mode — apply them here too.
+    if (isUpdatePending || isHardUpdateRequired) {
       reloadToUpdate();
       return;
     }
@@ -379,6 +386,13 @@ function LiveApp() {
   };
 
   const startOnlineGame = async (stockSize = getStoredStockSize()) => {
+    // Never contact the server on a build below the protocol floor — apply the
+    // deferred hard update first (the reload aborts this start).
+    if (isHardUpdateRequired) {
+      reloadToUpdate();
+      return;
+    }
+
     const session = await createOnlineRoom(stockSize);
     saveOnlineSession(session);
     setPendingResumeSession(null);
@@ -387,6 +401,11 @@ function LiveApp() {
   };
 
   const joinGame = async (roomCode: string) => {
+    if (isHardUpdateRequired) {
+      reloadToUpdate();
+      return;
+    }
+
     const session = await joinOnlineRoom(roomCode);
     saveOnlineSession(session);
     setPendingResumeSession(null);
@@ -470,7 +489,7 @@ function LiveApp() {
   return (
     <>
       {screen}
-      {isHardUpdateRequired && minimumSupportedVersion ? (
+      {isHardUpdateRequired && !isLocalMode && minimumSupportedVersion ? (
         <ForcedUpdateOverlay
           currentVersion={currentAppVersion}
           isReloading={isApplyingUpdate}

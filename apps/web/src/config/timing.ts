@@ -13,3 +13,9 @@ export const DISCONNECT_GRACE_MS = 5 * 60 * 1000;
 // How often usePwaVersionGate polls runtime-config + the service worker to
 // detect that a new web release has been deployed.
 export const PWA_UPDATE_CHECK_INTERVAL_MS = 10 * 60 * 1000;
+
+// Minimum gap between event-driven update rechecks (visibility/pageshow/online).
+// Mobile app-switching fires these in bursts; this throttle collapses redundant
+// `registration.update()` + runtime-config fetches. The periodic poll above is
+// unaffected.
+export const PWA_UPDATE_RECHECK_MIN_INTERVAL_MS = 30 * 1000;

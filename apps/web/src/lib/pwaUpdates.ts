@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react';
 import { registerSW } from 'virtual:pwa-register';
 
 type Listener = () => void;
@@ -57,6 +58,7 @@ export const initializePwaUpdates = () => {
       });
     },
     onRegisterError(error) {
+      Sentry.captureException(toRegistrationError(error));
       updateSnapshot({ registrationError: toRegistrationError(error) });
     },
   });
@@ -77,17 +79,19 @@ export const refreshServiceWorkerRegistration = async (): Promise<void> => {
 
 const SERVICE_WORKER_INSTALL_TIMEOUT_MS = 8000;
 
-const waitForInstallingWorker = (worker: ServiceWorker, timeoutMs: number): Promise<void> =>
-  new Promise<void>((resolve) => {
+type InstallWaitResult = 'settled' | 'timeout';
+
+const waitForInstallingWorker = (worker: ServiceWorker, timeoutMs: number): Promise<InstallWaitResult> =>
+  new Promise<InstallWaitResult>((resolve) => {
     if (worker.state !== 'installing') {
-      resolve();
+      resolve('settled');
       return;
     }
 
     const handleStateChange = () => {
       if (worker.state !== 'installing') {
         cleanup();
-        resolve();
+        resolve('settled');
       }
     };
 
@@ -98,7 +102,7 @@ const waitForInstallingWorker = (worker: ServiceWorker, timeoutMs: number): Prom
 
     const timeoutId = globalThis.setTimeout(() => {
       cleanup();
-      resolve();
+      resolve('timeout');
     }, timeoutMs);
 
     worker.addEventListener('statechange', handleStateChange);
@@ -110,13 +114,20 @@ export const applyServiceWorkerUpdate = async (): Promise<boolean> => {
     return false;
   }
 
-  await registration.update().catch(() => undefined);
+  Sentry.addBreadcrumb({ category: 'pwa', message: 'apply-update:start', level: 'info' });
+
+  await registration.update().catch((error: unknown) => {
+    Sentry.captureException(error);
+  });
 
   // `registration.update()` resolves before a freshly fetched worker leaves
   // `installing`. Wait it out so the `waiting`/`needRefresh` check below
   // doesn't false-negative and skip an available update.
   if (registration.installing) {
-    await waitForInstallingWorker(registration.installing, SERVICE_WORKER_INSTALL_TIMEOUT_MS);
+    const installResult = await waitForInstallingWorker(registration.installing, SERVICE_WORKER_INSTALL_TIMEOUT_MS);
+    if (installResult === 'timeout') {
+      Sentry.captureMessage('pwa.apply-update.install-timeout', 'warning');
+    }
   }
 
   if (snapshot.needRefresh || registration.waiting) {
@@ -124,5 +135,10 @@ export const applyServiceWorkerUpdate = async (): Promise<boolean> => {
     return true;
   }
 
+  // No worker is staged yet: this is the runtime-config channel advertising a
+  // version the service worker hasn't fetched (see usePwaVersionGate's updateKey
+  // self-heal note). The caller's per-key guard prevents a reload loop; surface
+  // it so a genuinely stuck client is visible in telemetry rather than silent.
+  Sentry.captureMessage('pwa.apply-update.no-waiting-worker', 'warning');
   return false;
 };

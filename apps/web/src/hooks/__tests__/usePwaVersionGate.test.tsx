@@ -43,13 +43,21 @@ vi.mock('@/lib/pwaUpdates', () => ({
   },
 }));
 
+import { PWA_UPDATE_RECHECK_MIN_INTERVAL_MS } from '@/config/timing';
+
 import { AUTO_RELOAD_SESSION_STORAGE_KEY, usePwaVersionGate } from '../usePwaVersionGate';
+
+// Throttling keys off Date.now; freeze it so tests advance the clock explicitly.
+let currentTime = 0;
 
 describe('usePwaVersionGate', () => {
   beforeEach(() => {
     fetchRuntimeConfigMock.mockReset();
     applyServiceWorkerUpdateMock.mockReset();
     refreshServiceWorkerRegistrationMock.mockReset();
+
+    currentTime = 1_700_000_000_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => currentTime);
 
     pwaSnapshot = {
       needRefresh: false,
@@ -73,6 +81,7 @@ describe('usePwaVersionGate', () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     vi.clearAllMocks();
   });
 
@@ -125,6 +134,7 @@ describe('usePwaVersionGate', () => {
 
     fetchRuntimeConfigMock.mockResolvedValue({ appVersion: 'v1.2.0', minimumSupportedVersion: 'v1.1.0' });
 
+    currentTime += PWA_UPDATE_RECHECK_MIN_INTERVAL_MS;
     act(() => {
       document.dispatchEvent(new Event('visibilitychange'));
     });
@@ -258,6 +268,7 @@ describe('usePwaVersionGate', () => {
       expect(fetchRuntimeConfigMock).toHaveBeenCalledTimes(1);
     });
 
+    currentTime += PWA_UPDATE_RECHECK_MIN_INTERVAL_MS;
     act(() => {
       document.dispatchEvent(new Event('visibilitychange'));
     });
@@ -268,6 +279,77 @@ describe('usePwaVersionGate', () => {
 
     await waitFor(() => {
       expect(result.current.latestAppVersion).toBe('v1.1.0');
+    });
+  });
+
+  it('throttles event-driven rechecks within the minimum interval', async () => {
+    const { result } = renderHook(() => usePwaVersionGate());
+
+    await waitFor(() => {
+      expect(fetchRuntimeConfigMock).toHaveBeenCalledTimes(1);
+    });
+
+    // A focus event inside the throttle window is collapsed — no extra fetch.
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await Promise.resolve();
+    expect(fetchRuntimeConfigMock).toHaveBeenCalledTimes(1);
+
+    // Past the window, the next event re-checks.
+    fetchRuntimeConfigMock.mockResolvedValue({ appVersion: 'v1.1.0' });
+    currentTime += PWA_UPDATE_RECHECK_MIN_INTERVAL_MS;
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+
+    await waitFor(() => {
+      expect(fetchRuntimeConfigMock).toHaveBeenCalledTimes(2);
+    });
+    await waitFor(() => {
+      expect(result.current.latestAppVersion).toBe('v1.1.0');
+    });
+  });
+
+  it('does not auto-reload a required hard update while it is deferred', async () => {
+    fetchRuntimeConfigMock.mockResolvedValue({
+      appVersion: 'v1.2.0',
+      minimumSupportedVersion: 'v1.1.0',
+    });
+
+    const { result } = renderHook(() => usePwaVersionGate({ deferHardUpdate: true }));
+
+    await waitFor(() => {
+      expect(result.current.isHardUpdateRequired).toBe(true);
+    });
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(applyServiceWorkerUpdateMock).not.toHaveBeenCalled();
+    expect(globalThis.sessionStorage?.getItem(AUTO_RELOAD_SESSION_STORAGE_KEY)).toBeNull();
+  });
+
+  it('applies the deferred hard update once it is no longer deferred', async () => {
+    fetchRuntimeConfigMock.mockResolvedValue({
+      appVersion: 'v1.2.0',
+      minimumSupportedVersion: 'v1.1.0',
+    });
+    applyServiceWorkerUpdateMock.mockResolvedValue(true);
+
+    const { result, rerender } = renderHook(({ deferHardUpdate }) => usePwaVersionGate({ deferHardUpdate }), {
+      initialProps: { deferHardUpdate: true },
+    });
+
+    await waitFor(() => {
+      expect(result.current.isHardUpdateRequired).toBe(true);
+    });
+    expect(applyServiceWorkerUpdateMock).not.toHaveBeenCalled();
+
+    rerender({ deferHardUpdate: false });
+
+    await waitFor(() => {
+      expect(applyServiceWorkerUpdateMock).toHaveBeenCalledTimes(1);
     });
   });
 });
