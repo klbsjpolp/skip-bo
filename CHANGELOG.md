@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.43.3](https://github.com/klbsjpolp/skip-bo/compare/v1.43.2...v1.43.3) (2026-05-30)
+
+
+### Bug Fixes
+
+* **coverage:** drop invalid all:true coverage option ([786eca1](https://github.com/klbsjpolp/skip-bo/commit/786eca18b9741b4ecaf410f3fa1d636cf076ab3c))
+
 ## [1.43.2](https://github.com/klbsjpolp/skip-bo/compare/v1.43.1...v1.43.2) (2026-05-30)
 
 
