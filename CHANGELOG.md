@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.43.2](https://github.com/klbsjpolp/skip-bo/compare/v1.43.1...v1.43.2) (2026-05-30)
+
+
+### Bug Fixes
+
+* **web:** don't block local New Game when soft update can't apply ([917be55](https://github.com/klbsjpolp/skip-bo/commit/917be5520475c1cd8b25b300aba4ca5efef0aa17))
+* **web:** harden PWA auto-update for local games and victory screens ([559e2cf](https://github.com/klbsjpolp/skip-bo/commit/559e2cfd2476e983056a12573f23cb136e1be6b5))
+
 ## [1.43.1](https://github.com/klbsjpolp/skip-bo/compare/v1.43.0...v1.43.1) (2026-05-29)
 
 ## [1.43.0](https://github.com/klbsjpolp/skip-bo/compare/v1.42.0...v1.43.0) (2026-05-29)
