@@ -58,8 +58,9 @@ export const initializePwaUpdates = () => {
       });
     },
     onRegisterError(error) {
-      Sentry.captureException(toRegistrationError(error));
-      updateSnapshot({ registrationError: toRegistrationError(error) });
+      const registrationError = toRegistrationError(error);
+      Sentry.captureException(registrationError);
+      updateSnapshot({ registrationError });
     },
   });
 };
