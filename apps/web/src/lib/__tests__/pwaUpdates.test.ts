@@ -17,6 +17,16 @@ vi.mock('virtual:pwa-register', () => ({
   },
 }));
 
+const sentryAddBreadcrumb = vi.fn();
+const sentryCaptureException = vi.fn();
+const sentryCaptureMessage = vi.fn();
+
+vi.mock('@sentry/react', () => ({
+  addBreadcrumb: (...args: unknown[]) => sentryAddBreadcrumb(...args),
+  captureException: (...args: unknown[]) => sentryCaptureException(...args),
+  captureMessage: (...args: unknown[]) => sentryCaptureMessage(...args),
+}));
+
 class FakeServiceWorker extends EventTarget implements Partial<ServiceWorker> {
   state: ServiceWorkerState = 'installing';
 
@@ -51,6 +61,9 @@ describe('pwaUpdates', () => {
   beforeEach(() => {
     updateServiceWorkerMock.mockReset();
     updateServiceWorkerMock.mockResolvedValue(undefined);
+    sentryAddBreadcrumb.mockClear();
+    sentryCaptureException.mockClear();
+    sentryCaptureMessage.mockClear();
   });
 
   afterEach(() => {
@@ -69,6 +82,27 @@ describe('pwaUpdates', () => {
     expect(registration.update).toHaveBeenCalledTimes(1);
     expect(updateServiceWorkerMock).not.toHaveBeenCalled();
     expect(applied).toBe(false);
+    expect(sentryCaptureMessage).toHaveBeenCalledWith('pwa.apply-update.no-waiting-worker', 'warning');
+  });
+
+  it('reports a captured exception when the registration update rejects', async () => {
+    const { initializePwaUpdates, applyServiceWorkerUpdate } = await loadPwaUpdates();
+    initializePwaUpdates();
+
+    const registration = buildFakeRegistration();
+    const updateError = new Error('network down');
+    registration.update.mockRejectedValue(updateError);
+    registration.waiting = new FakeServiceWorker();
+    registration.waiting.state = 'installed';
+
+    registerOptions.onRegisteredSW?.('/sw.js', registration as unknown as ServiceWorkerRegistration);
+
+    const applied = await applyServiceWorkerUpdate();
+
+    expect(sentryCaptureException).toHaveBeenCalledWith(updateError);
+    // A waiting worker is still present, so the update is applied despite the
+    // failed `registration.update()` refresh.
+    expect(applied).toBe(true);
   });
 
   it('waits for an installing worker to finish before applying the update', async () => {
@@ -153,5 +187,6 @@ describe('pwaUpdates', () => {
 
     expect(updateServiceWorkerMock).not.toHaveBeenCalled();
     expect(applied).toBe(false);
+    expect(sentryCaptureMessage).toHaveBeenCalledWith('pwa.apply-update.install-timeout', 'warning');
   });
 });
