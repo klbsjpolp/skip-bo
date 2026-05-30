@@ -373,12 +373,19 @@ function LiveApp() {
   }, [waitForAnimations]);
 
   const startLocalGame = () => {
-    // Starting a fresh local game is a lossless moment to apply a pending update:
-    // the reload boots straight into a new local game, so the intent is honoured.
-    // Hard updates were deferred while in local mode — apply them here too.
-    if (isUpdatePending || isHardUpdateRequired) {
+    // A required hard update was deferred while in local mode — apply it now and
+    // abort the start (the reload boots into a fresh local game).
+    if (isHardUpdateRequired) {
       reloadToUpdate();
       return;
+    }
+
+    // Starting a fresh local game is a lossless moment to apply a pending soft
+    // update — but the `runtime:` channel can report a version before the service
+    // worker has staged it, in which case `reloadToUpdate()` is a no-op. Fire it
+    // and still start the game so a lagging SW can't leave "New Game" stuck.
+    if (isUpdatePending) {
+      reloadToUpdate();
     }
 
     setCurrentGameType('local-ai');
