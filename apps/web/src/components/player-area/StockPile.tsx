@@ -22,6 +22,15 @@ export interface StockPileProps {
 const isHiddenMultiplayerCard = (card: CardType | null | undefined): card is CardType =>
   card !== null && card !== undefined && card.value === 0 && !card.isSkipBo;
 
+// Identity key for the stock-top Card. The slot reuses a single DOM node across
+// renders, so a value-bound key forces React to remount when the revealed card
+// changes — restarting per-value CSS animations (e.g. neon's `neonTextPulse`,
+// whose glow uses `currentColor`). Without the remount, WebKit keeps the
+// previous card's glow color (a magenta 5–8 glow lingering on a blue 9–12), so
+// the freshly revealed card shows the wrong-colored halo.
+const stockCardIdentityKey = (card: CardType | null | undefined): string =>
+  card ? (card.isSkipBo ? 'skipbo' : `v${card.value}`) : 'empty';
+
 export function StockPile({
   player,
   playerIndex,
@@ -62,6 +71,7 @@ export function StockPile({
           {isCardBeingAnimated(playerIndex, 'stock', player.stockPile.length - 1) ? (
             player.stockPile.length > 1 ? (
               <Card
+                key={stockCardIdentityKey(player.stockPile[player.stockPile.length - 2])}
                 hint={player.stockPile.length === 2 ? 'Second card in stock' : 'Second card in stock (hidden)'}
                 card={player.stockPile[player.stockPile.length - 2]}
                 isRevealed={!isHiddenMultiplayerCard(player.stockPile[player.stockPile.length - 2])}
@@ -70,6 +80,7 @@ export function StockPile({
             ) : null
           ) : isHuman && isCurrentPlayer && player.stockPile[player.stockPile.length - 1] ? (
             <DraggableStockTop
+              key={stockCardIdentityKey(player.stockPile[player.stockPile.length - 1])}
               card={player.stockPile[player.stockPile.length - 1]}
               stockTopIndex={player.stockPile.length - 1}
               playerIndex={playerIndex}
@@ -81,6 +92,7 @@ export function StockPile({
             />
           ) : (
             <Card
+              key={stockCardIdentityKey(player.stockPile[player.stockPile.length - 1])}
               hint={player.stockPile.length === 1 ? 'Top card in stock' : 'Top card in stock (hidden)'}
               card={player.stockPile[player.stockPile.length - 1]}
               isRevealed={true}
