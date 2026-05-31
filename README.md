@@ -1,5 +1,13 @@
 # Skip-Bo
 
+[![CI](https://github.com/klbsjpolp/skip-bo/actions/workflows/ci.yml/badge.svg)](https://github.com/klbsjpolp/skip-bo/actions/workflows/ci.yml)
+[![Deploy](https://github.com/klbsjpolp/skip-bo/actions/workflows/deploy.yml/badge.svg)](https://github.com/klbsjpolp/skip-bo/actions/workflows/deploy.yml)
+[![codecov](https://codecov.io/gh/klbsjpolp/skip-bo/branch/main/graph/badge.svg)](https://codecov.io/gh/klbsjpolp/skip-bo)
+[![Latest release](https://img.shields.io/github/v/release/klbsjpolp/skip-bo)](https://github.com/klbsjpolp/skip-bo/releases)
+[![License: GPL v3](https://img.shields.io/github/license/klbsjpolp/skip-bo)](LICENSE)
+[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+
 ## Document Contract
 
 - Purpose: onboard human contributors and point them to the right code and docs quickly.

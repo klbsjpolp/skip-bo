@@ -9,7 +9,7 @@
     "dev": "tsx watch ./src/local-dev.ts",
     "lint": "eslint src --ext ts --report-unused-disable-directives --max-warnings 0",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage --coverage.reporter=lcovonly --coverage.reporter=text-summary",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {

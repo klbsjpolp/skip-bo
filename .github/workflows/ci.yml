@@ -53,6 +53,13 @@ jobs:
       - name: Run tests (coverage on 22.x)
         run: ${{ matrix.node-version == '22.x' && 'pnpm test:coverage' || 'pnpm test' }}
 
+      - name: Upload coverage to Codecov
+        if: matrix.node-version == '22.x'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
       - name: Run typecheck
         run: pnpm typecheck
 
