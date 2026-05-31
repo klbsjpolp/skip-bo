@@ -12,8 +12,10 @@ on:
 
 jobs:
   claude-review:
-    # Disabled: re-enable by removing this `if: false`.
-    if: false
+    # Skip draft PRs and Dependabot's automated bumps.
+    if: |
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
     # Optional: Filter by PR author
     # if: |
     #   github.event.pull_request.user.login == 'external-contributor' ||
