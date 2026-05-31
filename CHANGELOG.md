@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.43.4](https://github.com/klbsjpolp/skip-bo/compare/v1.43.3...v1.43.4) (2026-05-31)
+
+
+### Bug Fixes
+
+* **web:** reset neon stock glow by remounting card on value change ([3850369](https://github.com/klbsjpolp/skip-bo/commit/38503694f38b17081d310543ae2b7178919c0d8b))
+
 ## [1.43.3](https://github.com/klbsjpolp/skip-bo/compare/v1.43.2...v1.43.3) (2026-05-30)
 
 
