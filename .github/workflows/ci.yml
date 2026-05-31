@@ -59,6 +59,11 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
+          files: |
+            packages/game-core/coverage/lcov.info
+            packages/multiplayer-protocol/coverage/lcov.info
+            apps/realtime-api/coverage/lcov.info
+            apps/web/coverage/lcov.info
 
       - name: Run typecheck
         run: pnpm typecheck
