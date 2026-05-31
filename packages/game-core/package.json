@@ -11,7 +11,7 @@
     "build": "tsc -p tsconfig.json",
     "lint": "eslint src tests --ext ts --report-unused-disable-directives --max-warnings 0",
     "test": "vitest run --passWithNoTests",
-    "test:coverage": "vitest run --coverage --passWithNoTests",
+    "test:coverage": "vitest run --passWithNoTests --coverage --coverage.reporter=lcovonly --coverage.reporter=text-summary",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
