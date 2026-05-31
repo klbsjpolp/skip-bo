@@ -26,8 +26,7 @@ const isHiddenMultiplayerCard = (card: CardType | null | undefined): card is Car
 // renders, so a value-bound key forces React to remount when the revealed card
 // changes — restarting per-value CSS animations (e.g. neon's `neonTextPulse`,
 // whose glow uses `currentColor`). Without the remount, WebKit keeps the
-// previous card's glow color (a magenta 5–8 glow lingering on a blue 9–12), so
-// the freshly revealed card shows the wrong-colored halo.
+// previous card's glow color: a magenta 5–8 glow lingering on a blue 9–12.
 const stockCardIdentityKey = (card: CardType | null | undefined): string =>
   card ? (card.isSkipBo ? 'skipbo' : `v${card.value}`) : 'empty';
 
