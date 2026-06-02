@@ -5,6 +5,7 @@ import type { Theme } from '@/types';
 import { themes } from '@/types';
 import { CardAnimationProvider } from '@/contexts/CardAnimationContext.tsx';
 import { DragProvider } from '@/contexts/DragContext.tsx';
+import { SoundProvider } from '@/sound/SoundProvider.tsx';
 import { CardAnimationLayer } from '@/components/CardAnimationLayer.tsx';
 import { DragGhost } from '@/components/DragGhost.tsx';
 import { migrateLegacyThemeValue } from '@/lib/themeMigration';
@@ -24,13 +25,15 @@ function Root() {
           defaultTheme={'theme-rummy' satisfies Theme}
           themes={themes.map((t) => t.value)}
         >
-          <CardAnimationProvider>
-            <DragProvider>
-              <App />
-              <CardAnimationLayer />
-              <DragGhost />
-            </DragProvider>
-          </CardAnimationProvider>
+          <SoundProvider>
+            <CardAnimationProvider>
+              <DragProvider>
+                <App />
+                <CardAnimationLayer />
+                <DragGhost />
+              </DragProvider>
+            </CardAnimationProvider>
+          </SoundProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </React.StrictMode>

@@ -2,6 +2,7 @@ import type { CardAnimationData } from '@/contexts/CardAnimationContext.tsx';
 import { getRetreatPileAngle } from '@/lib/retreatPile';
 import type { Card, GameState } from '@/types';
 import { calculateAnimationDuration, getBuildPilePosition, getRetreatPilePosition } from '@/utils/cardPositions';
+import { playSound } from '@/sound/controller';
 
 let globalAnimationContext: {
   startAnimation: (animationData: Omit<CardAnimationData, 'id'>) => string;
@@ -40,6 +41,13 @@ export const triggerCompletedBuildPileAnimation = (
     const startPosition = getBuildPilePosition(centerAreaElement, buildPileIndex);
     const endPosition = getRetreatPilePosition(centerAreaElement);
     const duration = calculateAnimationDuration(startPosition, endPosition);
+
+    // One reward chime per completion, timed to when the retreat sequence
+    // starts. Fired here (not per-card in AnimatedCard) so the staggered cards
+    // don't machine-gun the sound.
+    if (typeof window !== 'undefined') {
+      window.setTimeout(() => playSound('pile-complete'), baseDelay);
+    }
 
     return cards.reduce((maxDuration, card, index) => {
       // Stagger each card by staggerDelay ms (default 100ms).

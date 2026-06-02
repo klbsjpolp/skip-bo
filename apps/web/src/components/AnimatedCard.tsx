@@ -4,6 +4,29 @@ import { Card } from '@/components/Card';
 import type { CardAnimationData } from '@/contexts/CardAnimationContext';
 import { useCardAnimation } from '@/contexts/useCardAnimation';
 import { cn } from '@/lib/utils';
+import { playSound } from '@/sound/controller';
+import type { SoundEventId } from '@/sound/types';
+
+// Map a card animation to the sound it should make when its travel begins.
+// `complete` (pile-completion retreats) is intentionally excluded: it staggers
+// many cards, so its single reward chime is fired once from the
+// completedBuildPileAnimationService instead of per-card here.
+const soundForAnimation = (animation: CardAnimationData): SoundEventId | null => {
+  switch (animation.animationType) {
+    case 'play':
+      return animation.card?.isSkipBo ? 'skipbo-accent' : 'build-snap';
+    case 'discard':
+      return 'discard';
+    case 'draw':
+      return 'draw';
+    case 'complete':
+      // Pile-completion retreats; their single chime is fired once from the
+      // completedBuildPileAnimationService, not per-card here.
+      return null;
+    default:
+      return null;
+  }
+};
 
 interface AnimatedCardProps {
   animation: CardAnimationData;
@@ -65,6 +88,13 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
     const { animation, needsFlip, portalTarget, markAnimationStarted, removeAnimation } = effectInputsRef.current;
 
     markAnimationStarted(animation.id);
+
+    // Fire the matching sound exactly when this card starts travelling, so
+    // staggered sequences (multi-draws) play spread out rather than all at once.
+    const soundEvent = soundForAnimation(animation);
+    if (soundEvent) {
+      playSound(soundEvent);
+    }
 
     const el = rootRef.current;
     if (!el) return;
