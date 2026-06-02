@@ -5,28 +5,7 @@ import type { CardAnimationData } from '@/contexts/CardAnimationContext';
 import { useCardAnimation } from '@/contexts/useCardAnimation';
 import { cn } from '@/lib/utils';
 import { playSound } from '@/sound/controller';
-import type { SoundEventId } from '@/sound/types';
-
-// Map a card animation to the sound it should make when its travel begins.
-// `complete` (pile-completion retreats) is intentionally excluded: it staggers
-// many cards, so its single reward chime is fired once from the
-// completedBuildPileAnimationService instead of per-card here.
-const soundForAnimation = (animation: CardAnimationData): SoundEventId | null => {
-  switch (animation.animationType) {
-    case 'play':
-      return animation.card?.isSkipBo ? 'skipbo-accent' : 'build-snap';
-    case 'discard':
-      return 'discard';
-    case 'draw':
-      return 'draw';
-    case 'complete':
-      // Pile-completion retreats; their single chime is fired once from the
-      // completedBuildPileAnimationService, not per-card here.
-      return null;
-    default:
-      return null;
-  }
-};
+import { soundForAnimation } from '@/sound/soundForAnimation';
 
 interface AnimatedCardProps {
   animation: CardAnimationData;

@@ -44,4 +44,18 @@ describe('SoundController gating + resolution', () => {
     playSound('discard');
     expect(playRecipe).toHaveBeenCalledTimes(1);
   });
+
+  it('falls through to the real engine when no test backend is set', () => {
+    soundController.__setBackendForTests(null);
+    soundController.setEnabled(true);
+    // No Web Audio in jsdom ⇒ engine is a silent no-op; assert it does not throw.
+    expect(() => playSound('build-snap')).not.toThrow();
+  });
+
+  it('unlock() is a no-op while disabled and safe while enabled', () => {
+    soundController.setEnabled(false);
+    expect(() => soundController.unlock()).not.toThrow();
+    soundController.setEnabled(true);
+    expect(() => soundController.unlock()).not.toThrow();
+  });
 });
