@@ -1,6 +1,6 @@
 import * as Lucide from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useSound } from '@/sound/useSound';
+import { Toggle } from '@/components/ui/toggle';
 
 /** Mute/unmute toggle for game audio. Lives in the app toolbar next to the theme switcher. */
 export function SoundToggle() {
@@ -8,17 +8,14 @@ export function SoundToggle() {
   const label = enabled ? 'Couper le son' : 'Activer le son';
 
   return (
-    <Button
-      type="button"
+    <Toggle
       size="sm"
-      variant={enabled ? 'default' : 'outline'}
-      onClick={() => setEnabled(!enabled)}
-      aria-label={label}
-      aria-pressed={enabled}
+      onPressedChange={(pressed) => setEnabled(pressed)}
+      pressed={enabled}
       title={label}
       data-testid="sound-toggle"
     >
       {enabled ? <Lucide.Volume2 className="h-4 w-4" /> : <Lucide.VolumeX className="h-4 w-4" />}
-    </Button>
+    </Toggle>
   );
 }
