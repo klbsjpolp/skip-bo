@@ -5,7 +5,7 @@ const SOUND_VOLUME_KEY = 'skipbo_sound_volume';
 // Audio is opt-in: a PWA should not play sound on first load. See
 // docs/architecture/sound-design.md.
 const SOUND_ENABLED_DEFAULT = false;
-const SOUND_VOLUME_DEFAULT = 0.6;
+const SOUND_VOLUME_DEFAULT = 0.8;
 
 export const getStoredPlayerName = (): string => {
   try {

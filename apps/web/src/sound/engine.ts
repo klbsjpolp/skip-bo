@@ -12,7 +12,7 @@ export class SoundEngine {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private muted = false;
-  private volume = 0.6;
+  private volume = 0.8;
   private noiseBuffer: AudioBuffer | null = null;
 
   /** Whether the underlying AudioContext is running (i.e. unlocked). */

@@ -15,8 +15,8 @@ describe('sound preferences persistence', () => {
     expect(getStoredSoundEnabled()).toBe(false);
   });
 
-  it('defaults volume to 0.6', () => {
-    expect(getStoredSoundVolume()).toBeCloseTo(0.6);
+  it('defaults volume to 0.8', () => {
+    expect(getStoredSoundVolume()).toBeCloseTo(0.8);
   });
 
   it('round-trips the enabled flag', () => {
