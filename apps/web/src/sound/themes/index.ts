@@ -1,6 +1,7 @@
 import type { SoundEventId, SoundRecipe, SoundTheme, SoundThemeId } from '../types';
 import { baseTheme } from './base';
 import { retroTheme } from './retro';
+import { paperTheme } from './paper';
 
 /**
  * Registry of sound themes keyed by sound-theme id (`base` + the visual
@@ -9,6 +10,7 @@ import { retroTheme } from './retro';
  */
 const soundThemes: Partial<Record<SoundThemeId, SoundTheme>> = {
   'theme-retro': retroTheme,
+  'theme-paper': paperTheme,
 };
 
 /**
@@ -20,4 +22,4 @@ export function resolveRecipe(themeId: SoundThemeId, eventId: SoundEventId): Sou
   return soundThemes[themeId]?.[eventId] ?? baseTheme[eventId] ?? null;
 }
 
-export { baseTheme, retroTheme, soundThemes };
+export { baseTheme, retroTheme, paperTheme, soundThemes };

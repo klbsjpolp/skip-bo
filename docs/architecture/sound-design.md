@@ -1,7 +1,7 @@
 # Sound Design
 
-Status: **base system + `retro` reference theme implemented.** Remaining flavored
-themes are specced here but not yet authored.
+Status: **base system + `retro` and `paper` themes implemented.** Remaining
+flavored themes are specced here but not yet authored.
 
 ## Goals
 
@@ -20,9 +20,19 @@ Pure oscillators + envelopes are exactly how 8-bit consoles produced sound, so a
 chiptune palette synthesizes _authentically_ rather than as a compromise. That
 makes `retro` the simplest and safest first flavored theme: square/pulse/triangle
 blips and arpeggiated fanfares are trivially convincing with the primitives we
-already need for the engine. Sample-hungry palettes (realistic card foley for
-`paper`, recognizable `minecraft` SFX) are the hardest to synthesize and are
-deferred — they fall back to the neutral `base` theme until/unless authored.
+already need for the engine.
+
+`paper` (the default visual theme) was originally deferred as the hardest to
+synthesize, but it turns out to fit synthesis well once you treat paper as what
+it acoustically is: pitchless broadband **noise** shaped by filtering, plus a
+soft low contact thud. The one catch is realism under repetition — `build-snap`
+fires on every card play, and replaying the same noise buffer from offset 0
+sounds obviously cloned. The engine now starts each noise burst at a **random
+offset into the reusable buffer**, which makes repeated taps sound naturally
+varied. With that, an all-noise palette is convincing without samples.
+
+Genuinely sample-hungry palettes (recognizable `minecraft` SFX) remain deferred
+and fall back to the neutral `base` theme until/unless authored.
 
 ## Architecture
 
@@ -156,7 +166,7 @@ override. Only `base` and `theme-retro` are implemented today.
 | `theme-neon`        | Synthwave                  | Saw + lowpass sweep, reverb-ish feedback delay           | planned  |
 | `theme-minecraft`   | Blocky / wood-stone clicks | Short noise bursts w/ bandpass; hard to nail w/o samples | deferred |
 | `theme-wool`        | Soft, muffled, cozy        | Lowpassed sines, very short envelopes                    | planned  |
-| `theme-paper`       | Realistic card foley       | Filtered noise riffle — weakest fit for synthesis        | deferred |
+| `theme-paper`       | Card foley (rustle + thud) | All filtered-noise; randomized buffer offset per burst   | **done** |
 | `theme-steampunk`   | Mechanical clicks, brass   | Metallic FM-ish tones, noisy clanks                      | planned  |
 | `theme-candy`       | Bright, bubbly, playful    | High sines, pitch-bend "pops", xylophone fanfare         | planned  |
 | `theme-glass`       | Crystalline                | High sine bells with long decay                          | planned  |

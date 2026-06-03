@@ -85,6 +85,7 @@ class FakeAudioContext {
     return {
       sampleRate,
       length,
+      duration: length / sampleRate,
       getChannelData: () => data,
     } as unknown as AudioBuffer;
   }
@@ -157,6 +158,19 @@ describe('SoundEngine', () => {
     expect(ctx.bufferSources[0].buffer).not.toBeNull();
     expect(ctx.filters).toHaveLength(1);
     expect(ctx.filters[0].type).toBe('bandpass');
+  });
+
+  it('starts noise from a randomized buffer offset so repeats are not cloned', async () => {
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const engine = new SoundEngine();
+    await engine.resume();
+    engine.playRecipe(noiseRecipe);
+    const src = FakeAudioContext.instances[0].bufferSources[0];
+    // start(when, offset, duration) — offset is randomized into the buffer.
+    expect(src.start).toHaveBeenCalledWith(expect.any(Number), expect.any(Number), expect.any(Number));
+    const offset = src.start.mock.calls[0][1] as number;
+    expect(offset).toBeGreaterThan(0);
+    randomSpy.mockRestore();
   });
 
   it('reuses the noise buffer across plays', async () => {

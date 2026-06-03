@@ -152,7 +152,11 @@ export class SoundEngine {
     }
     tail.connect(gain);
     gain.connect(master);
-    src.start(start);
-    src.stop(start + voice.duration + 0.02);
+    // Start from a random offset into the reusable buffer so repeated noise
+    // bursts (e.g. paper rustle on every card play) don't replay an identical
+    // waveform and sound cloned/synthetic.
+    const maxOffset = Math.max(0, (src.buffer?.duration ?? 1) - voice.duration - 0.05);
+    const offset = Math.random() * maxOffset;
+    src.start(start, offset, voice.duration + 0.02);
   }
 }

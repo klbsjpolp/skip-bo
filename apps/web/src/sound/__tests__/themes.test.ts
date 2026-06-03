@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { baseTheme, resolveRecipe, retroTheme } from '@/sound/themes';
+import { baseTheme, paperTheme, resolveRecipe, retroTheme } from '@/sound/themes';
 import type { SoundEventId } from '@/sound/types';
 
 const ALL_EVENTS: SoundEventId[] = [
@@ -39,6 +39,20 @@ describe('sound theme resolution', () => {
   it('retro overrides resolve for every event it defines', () => {
     for (const event of Object.keys(retroTheme) as SoundEventId[]) {
       expect(resolveRecipe('theme-retro', event)).toBe(retroTheme[event]);
+    }
+  });
+
+  it('paper overrides resolve for every event it defines', () => {
+    for (const event of Object.keys(paperTheme) as SoundEventId[]) {
+      expect(resolveRecipe('theme-paper', event)).toBe(paperTheme[event]);
+    }
+  });
+
+  it('paper is an all-noise palette (no tonal voices)', () => {
+    for (const event of Object.keys(paperTheme) as SoundEventId[]) {
+      const recipe = paperTheme[event];
+      expect(recipe?.voices.length).toBeGreaterThan(0);
+      expect(recipe?.voices.every((voice) => voice.type === 'noise')).toBe(true);
     }
   });
 });
