@@ -85,7 +85,15 @@ export class SoundEngine {
   playRecipe(recipe: SoundRecipe): void {
     if (this.muted) return;
     const handles = this.ensureContext();
-    if (!handles || handles.ctx.state !== 'running') return; // not unlocked yet
+    if (!handles) return; // no Web Audio
+    if (handles.ctx.state !== 'running') {
+      // Not running — e.g. Safari suspended it on tab blur. Kick a resume so the
+      // next sound works, but drop this one rather than queue it.
+      if (handles.ctx.state === 'suspended') {
+        void this.resume();
+      }
+      return;
+    }
     const { ctx, master } = handles;
     const now = ctx.currentTime;
     const jitter = recipe.jitter ?? 0;

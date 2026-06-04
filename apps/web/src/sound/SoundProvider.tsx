@@ -29,15 +29,31 @@ export const SoundProvider: FC<{ children: ReactNode }> = ({ children }) => {
     soundController.setThemeId(active ?? 'base');
   }, [resolvedTheme, theme]);
 
-  // Autoplay unlock: resume the AudioContext on the first user gesture.
+  // Keep the AudioContext unlocked. Two cases to cover:
+  //   1. First user gesture (autoplay policy) unlocks a freshly-created context.
+  //   2. Safari (and some mobile browsers) SUSPEND the context when the tab is
+  //      backgrounded and do NOT auto-resume on return — so every sound is
+  //      silently dropped until something resumes it again.
+  // The listeners are intentionally persistent (not `once`): resume() is a cheap
+  // no-op when the context is already running, so re-firing on every gesture and
+  // whenever the tab becomes visible again keeps audio alive across tab switches.
   useEffect(() => {
     const unlock = () => soundController.unlock();
-    const opts = { once: true, passive: true } as const;
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        soundController.unlock();
+      }
+    };
+    const opts = { passive: true } as const;
     window.addEventListener('pointerdown', unlock, opts);
     window.addEventListener('keydown', unlock, opts);
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('focus', unlock, opts);
     return () => {
       window.removeEventListener('pointerdown', unlock);
       window.removeEventListener('keydown', unlock);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('focus', unlock);
     };
   }, []);
 

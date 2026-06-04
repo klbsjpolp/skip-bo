@@ -134,6 +134,20 @@ describe('SoundEngine', () => {
     expect(ctx?.oscillators ?? []).toHaveLength(0);
   });
 
+  it('auto-resumes a suspended context when a sound is requested', async () => {
+    const engine = new SoundEngine();
+    await engine.resume(); // create + run the context
+    const ctx = FakeAudioContext.instances[0];
+    // Simulate Safari suspending the context on tab blur.
+    ctx.state = 'suspended';
+    ctx.resume.mockClear();
+    // Requesting a sound while suspended should kick a resume for the next one,
+    // and drop the current one rather than queue it.
+    engine.playRecipe(toneRecipe);
+    expect(ctx.resume).toHaveBeenCalled();
+    expect(ctx.oscillators).toHaveLength(0);
+  });
+
   it('plays a tone voice once running', async () => {
     const engine = new SoundEngine();
     await engine.resume();

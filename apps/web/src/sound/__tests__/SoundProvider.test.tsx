@@ -101,6 +101,26 @@ describe('SoundProvider', () => {
     expect(unlockSpy).toHaveBeenCalled();
   });
 
+  it('re-unlocks on repeated gestures (listener is not once-only)', () => {
+    renderWithProviders(<Probe />);
+    act(() => {
+      window.dispatchEvent(new Event('pointerdown'));
+      window.dispatchEvent(new Event('pointerdown'));
+    });
+    // Safari suspends on tab blur; a single-shot listener would not recover.
+    expect(unlockSpy.mock.calls.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('re-unlocks when the tab becomes visible again', () => {
+    renderWithProviders(<Probe />);
+    unlockSpy.mockClear();
+    act(() => {
+      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    expect(unlockSpy).toHaveBeenCalled();
+  });
+
   it('throws if useSound is used outside the provider', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(() => render(<Probe />)).toThrow(/SoundProvider/);
