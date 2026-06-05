@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.0.0](https://github.com/klbsjpolp/skip-bo/compare/v1.43.7...v2.0.0) (2026-06-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* PROTOCOL_VERSION is 2. Operators must bump the
+PWA_MINIMUM_SUPPORTED_VERSION repo variable at deploy so v1 PWA clients hard-update;
+v1 clients are otherwise rejected at auth (HTTP 426).
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+* **web:** requires the relay server (PROTOCOL_VERSION 2).
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+* **realtime-api:** the WebSocket protocol is replaced (relay/setTurn/snapshot/endGame
+instead of action/snapshot). PROTOCOL_VERSION is 2; v1 clients are rejected at auth.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+
+* **realtime-api:** rewrite server as a game-agnostic relay ([4d21bfa](https://github.com/klbsjpolp/skip-bo/commit/4d21bfacaae47133aade2bd4c2ab546064e00dbc))
+* remove multiplayer-protocol; retarget tooling and docs to the relay model ([0c647b8](https://github.com/klbsjpolp/skip-bo/commit/0c647b88a925076fcbc2ce90aee49e6da07dd3ca))
+* **web:** host-authoritative online client ([0ef74a5](https://github.com/klbsjpolp/skip-bo/commit/0ef74a53616360ccd247e2a97a7456cc8c719d2e))
+
+
+### Features
+
+* **realtime-core:** add game-agnostic relay protocol package ([5d3f1bd](https://github.com/klbsjpolp/skip-bo/commit/5d3f1bd26a3748f3df3ccf0e5fbe2c9163c4d7ce))
+* **skipbo-runtime:** add host-authoritative Skip-Bo runtime ([ef8c9dd](https://github.com/klbsjpolp/skip-bo/commit/ef8c9dd2efe2e1538f509bab603af7ec223b8e5b))
+
+
+### Bug Fixes
+
+* **web:** delay next-player draw until the local discard animation ends ([a62f206](https://github.com/klbsjpolp/skip-bo/commit/a62f206fa9a7a7e2187ac92c9878585e7ea4fb82))
+
 ## [1.43.7](https://github.com/klbsjpolp/skip-bo/compare/v1.43.6...v1.43.7) (2026-06-05)
 
 
