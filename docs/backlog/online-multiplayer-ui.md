@@ -10,7 +10,7 @@
 ## Current Behavior
 
 - Local games are still human vs AI and should keep the current heads-up board.
-- Online games currently reuse the same heads-up board even though the runtime is server-authoritative.
+- Online games currently reuse the same heads-up board even though the runtime is host-authoritative.
 - The existing online status strip is the only always-visible room control surface on the play screen.
 
 Related stable docs:
