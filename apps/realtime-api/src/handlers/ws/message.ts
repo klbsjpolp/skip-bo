@@ -1,17 +1,20 @@
 import type { APIGatewayProxyWebsocketHandlerV2 } from 'aws-lambda';
 import { ZodError } from 'zod';
 
-import { clientMessageSchema } from '@skipbo/multiplayer-protocol';
+import { clientMessageSchema } from '@skipbo/realtime-core';
 
 import { isClientError } from '../../errors/clientError.js';
 import { captureBackendException, withSentry } from '../../monitoring/sentry.js';
 import {
   authenticateConnection,
-  handleAction,
+  handleEndGame,
   handleKickSeat,
   handleLeaveLobby,
+  handleRelay,
   handleSetReady,
+  handleSetTurn,
   handleSetUnready,
+  handleSnapshot,
   rejectAction,
   startGame,
 } from '../../services/roomService.js';
@@ -24,15 +27,16 @@ const messageHandler: APIGatewayProxyWebsocketHandlerV2 = async (event) => {
     return { statusCode: 400, body: 'missing connection id' };
   }
 
+  const dependencies = {
+    broadcaster,
+    connectionRepository,
+    roomRepository,
+    websocketUrl,
+  };
+
   try {
     const body: unknown = event.body ? JSON.parse(event.body) : {};
     const message = clientMessageSchema.parse(body);
-    const dependencies = {
-      broadcaster,
-      connectionRepository,
-      roomRepository,
-      websocketUrl,
-    };
 
     switch (message.type) {
       case 'auth':
@@ -44,16 +48,25 @@ const messageHandler: APIGatewayProxyWebsocketHandlerV2 = async (event) => {
           seatToken: message.seatToken,
         });
         break;
-      case 'action':
-        await handleAction(dependencies, {
-          action: message.action,
+      case 'relay':
+        await handleRelay(dependencies, {
           connectionId,
+          kind: message.kind,
+          payload: message.payload,
+          toSeats: message.toSeats,
         });
         break;
+      case 'setTurn':
+        await handleSetTurn(dependencies, { connectionId, currentSeatIndex: message.currentSeatIndex });
+        break;
+      case 'snapshot':
+        await handleSnapshot(dependencies, { connectionId, payload: message.payload });
+        break;
+      case 'endGame':
+        await handleEndGame(dependencies, { connectionId, winnerSeatIndex: message.winnerSeatIndex });
+        break;
       case 'startGame':
-        await startGame(dependencies, {
-          connectionId,
-        });
+        await startGame(dependencies, { connectionId });
         break;
       case 'ping':
         break;
@@ -74,16 +87,7 @@ const messageHandler: APIGatewayProxyWebsocketHandlerV2 = async (event) => {
     return { statusCode: 200, body: 'ok' };
   } catch (error) {
     if (error instanceof ZodError) {
-      await rejectAction(
-        {
-          broadcaster,
-          connectionRepository,
-          roomRepository,
-          websocketUrl,
-        },
-        connectionId,
-        error.message,
-      );
+      await rejectAction(dependencies, connectionId, error.message);
       return { statusCode: 400, body: error.message };
     }
 
@@ -96,16 +100,7 @@ const messageHandler: APIGatewayProxyWebsocketHandlerV2 = async (event) => {
       });
     }
 
-    await rejectAction(
-      {
-        broadcaster,
-        connectionRepository,
-        roomRepository,
-        websocketUrl,
-      },
-      connectionId,
-      error instanceof Error ? error.message : 'Unknown error',
-    );
+    await rejectAction(dependencies, connectionId, error instanceof Error ? error.message : 'Unknown error');
 
     return { statusCode: 200, body: 'rejected' };
   }

@@ -10,19 +10,22 @@ import {
   createRoomRequestSchema,
   joinRoomRequestSchema,
   type ClientMessage,
-} from '@skipbo/multiplayer-protocol';
+} from '@skipbo/realtime-core';
 
 import { isClientError } from '../errors/clientError.js';
 import { captureBackendException } from '../monitoring/sentry.js';
 import {
   authenticateConnection,
   createRoom,
-  handleAction,
   handleDisconnect,
+  handleEndGame,
   handleKickSeat,
   handleLeaveLobby,
+  handleRelay,
   handleSetReady,
+  handleSetTurn,
   handleSetUnready,
+  handleSnapshot,
   joinRoom,
   rejectAction,
   startGame,
@@ -221,11 +224,22 @@ export const startLocalRealtimeDevServer = async (
                 seatToken: message.seatToken,
               });
               break;
-            case 'action':
-              await handleAction(dependencies, {
-                action: message.action,
+            case 'relay':
+              await handleRelay(dependencies, {
                 connectionId,
+                kind: message.kind,
+                payload: message.payload,
+                toSeats: message.toSeats,
               });
+              break;
+            case 'setTurn':
+              await handleSetTurn(dependencies, { connectionId, currentSeatIndex: message.currentSeatIndex });
+              break;
+            case 'snapshot':
+              await handleSnapshot(dependencies, { connectionId, payload: message.payload });
+              break;
+            case 'endGame':
+              await handleEndGame(dependencies, { connectionId, winnerSeatIndex: message.winnerSeatIndex });
               break;
             case 'startGame':
               await startGame(dependencies, {

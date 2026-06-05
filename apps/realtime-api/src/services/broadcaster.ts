@@ -3,7 +3,7 @@ import {
   DeleteConnectionCommand,
   PostToConnectionCommand,
 } from '@aws-sdk/client-apigatewaymanagementapi';
-import type { ServerMessage } from '@skipbo/multiplayer-protocol';
+import type { ServerMessage } from '@skipbo/realtime-core';
 
 export interface RealtimeBroadcaster {
   disconnect(connectionId: string): Promise<void>;

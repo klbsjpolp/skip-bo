@@ -17,8 +17,7 @@
     "@aws-sdk/client-dynamodb": "^3.1056.0",
     "@aws-sdk/lib-dynamodb": "^3.1056.0",
     "@sentry/aws-serverless": "^10.55.0",
-    "@skipbo/game-core": "workspace:*",
-    "@skipbo/multiplayer-protocol": "workspace:*",
+    "@skipbo/realtime-core": "workspace:*",
     "ws": "^8.21.0",
     "zod": "^4.4.3"
   },

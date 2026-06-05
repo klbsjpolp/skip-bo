@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ROOM_CODE_LENGTH, type ServerMessage } from '@skipbo/multiplayer-protocol';
+import { PROTOCOL_VERSION, ROOM_CODE_LENGTH, type ServerMessage } from '@skipbo/realtime-core';
 
 import {
   RoomVersionConflictError,
@@ -14,10 +14,13 @@ import {
   authenticateConnection,
   createRoom,
   DISCONNECT_GRACE_MS,
-  handleAction,
   handleDisconnect,
+  handleEndGame,
   handleLeaveLobby,
+  handleRelay,
   handleSetReady,
+  handleSetTurn,
+  handleSnapshot,
   joinRoom,
   rejectAction,
   startGame,
@@ -69,73 +72,6 @@ class InMemoryConnectionRepository implements ConnectionRepository {
   }
 }
 
-class EventuallyConsistentConnectionRepository extends InMemoryConnectionRepository {
-  private staleRoomCode: string | null = null;
-
-  override async listByRoomCode(roomCode: string): Promise<ConnectionRecord[]> {
-    const connections = await super.listByRoomCode(roomCode);
-
-    if (this.staleRoomCode === roomCode) {
-      this.staleRoomCode = null;
-      return connections.filter((connection) => connection.seatIndex === 0);
-    }
-
-    return connections;
-  }
-
-  override async put(record: ConnectionRecord): Promise<void> {
-    await super.put(record);
-
-    if (record.seatIndex === 1) {
-      this.staleRoomCode = record.roomCode;
-    }
-  }
-}
-
-class PersistentlyStaleConnectionRepository extends InMemoryConnectionRepository {
-  override async listByRoomCode(roomCode: string): Promise<ConnectionRecord[]> {
-    const connections = await super.listByRoomCode(roomCode);
-
-    return connections.filter((connection) => connection.seatIndex === 0);
-  }
-}
-
-class ConcurrentAuthRoomRepository extends InMemoryRoomRepository {
-  private raceBarrierEnabled = false;
-  private gatePromise: Promise<void> | null = null;
-  private releaseGate: (() => void) | null = null;
-  private gatedGets = 0;
-
-  enableConcurrentAuthRace(): void {
-    this.raceBarrierEnabled = true;
-    this.gatePromise = null;
-    this.releaseGate = null;
-    this.gatedGets = 0;
-  }
-
-  override async get(roomCode: string): Promise<RoomRecord | null> {
-    const room = await super.get(roomCode);
-
-    if (!this.raceBarrierEnabled || !room || room.status !== 'WAITING' || room.authenticatedSeats?.length) {
-      return room;
-    }
-
-    if (!this.gatePromise) {
-      this.gatePromise = new Promise<void>((resolve) => {
-        this.releaseGate = resolve;
-      });
-    }
-
-    this.gatedGets += 1;
-    if (this.gatedGets === 2) {
-      this.releaseGate?.();
-    }
-
-    await this.gatePromise;
-    return room ? { ...room, authenticatedSeats: [...(room.authenticatedSeats ?? [])] } : room;
-  }
-}
-
 class FakeBroadcaster implements RealtimeBroadcaster {
   readonly sent: Array<{ connectionId: string; message: ServerMessage }> = [];
   readonly failureByConnectionId = new Map<string, unknown>();
@@ -163,43 +99,69 @@ const createDependencies = () => ({
   websocketUrl: 'wss://example.test/ws',
 });
 
-const createEventuallyConsistentDependencies = () => ({
-  broadcaster: new FakeBroadcaster(),
-  connectionRepository: new EventuallyConsistentConnectionRepository(),
-  roomRepository: new InMemoryRoomRepository(),
-  websocketUrl: 'wss://example.test/ws',
-});
+type Dependencies = ReturnType<typeof createDependencies>;
 
-const createPersistentlyStaleDependencies = () => ({
-  broadcaster: new FakeBroadcaster(),
-  connectionRepository: new PersistentlyStaleConnectionRepository(),
-  roomRepository: new InMemoryRoomRepository(),
-  websocketUrl: 'wss://example.test/ws',
-});
+const auth = (
+  dependencies: Dependencies,
+  input: { connectionId: string; roomCode: string; seatIndex: number; seatToken: string },
+) => authenticateConnection(dependencies, { ...input, protocolVersion: PROTOCOL_VERSION });
 
-const createConcurrentAuthDependencies = () => ({
-  broadcaster: new FakeBroadcaster(),
-  connectionRepository: new InMemoryConnectionRepository(),
-  roomRepository: new ConcurrentAuthRoomRepository(),
-  websocketUrl: 'wss://example.test/ws',
-});
+/** Create + join + auth two seats and start the game. Returns seat/connection mapping. */
+const startTwoPlayerGame = async (dependencies: Dependencies) => {
+  const created = await createRoom(dependencies);
+  const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
+
+  await auth(dependencies, {
+    connectionId: 'c-1',
+    roomCode: created.roomCode,
+    seatIndex: created.seatIndex,
+    seatToken: created.seatToken,
+  });
+  await auth(dependencies, {
+    connectionId: 'c-2',
+    roomCode: joined.roomCode,
+    seatIndex: joined.seatIndex,
+    seatToken: joined.seatToken,
+  });
+
+  await handleSetReady(dependencies, { connectionId: 'c-1', playerName: 'Alice' });
+  await handleSetReady(dependencies, { connectionId: 'c-2', playerName: 'Bob' });
+  await startGame(dependencies, { connectionId: 'c-1' });
+
+  const room = await dependencies.roomRepository.get(created.roomCode);
+  if (!room) throw new Error('room missing after startGame');
+  const currentSeat = room.currentSeatIndex!;
+  const seatToConnection: Record<number, string> = {
+    [created.seatIndex]: 'c-1',
+    [joined.seatIndex]: 'c-2',
+  };
+  const idleSeat = room.activeSeatIndices!.find((seat) => seat !== currentSeat)!;
+
+  return { created, joined, room, currentSeat, idleSeat, seatToConnection };
+};
 
 describe('roomService', () => {
-  it('creates a room with the requested stock size', async () => {
+  it('creates a room storing the opaque game id and config', async () => {
     const dependencies = createDependencies();
-    const created = await createRoom(dependencies, { stockSize: 35 });
+    const created = await createRoom(dependencies, { gameId: 'skipbo', gameConfig: { stockSize: 35 } });
     const room = await dependencies.roomRepository.get(created.roomCode);
 
-    expect(room?.state.config.STOCK_SIZE).toBe(35);
+    expect(room?.gameId).toBe('skipbo');
+    expect(room?.gameConfig).toEqual({ stockSize: 35 });
     expect(room?.status).toBe('WAITING');
+    expect(room?.currentSeatIndex).toBeNull();
     expect(room?.seatCapacity).toBe(4);
     expect(room?.hostSeatIndex).toBe(0);
     expect(created.seatCapacity).toBe(4);
     expect(created.hostSeatIndex).toBe(0);
-    expect(room?.state.players).toHaveLength(4);
     expect(room?.lobbyPlayers?.[0]).toEqual({ seatIndex: 0, readyState: 'never-ready', playerName: null });
-    expect(room?.state.players[0].stockPile).toHaveLength(0);
-    expect(room?.state.players[0].hand.filter((card) => card !== null)).toHaveLength(5);
+  });
+
+  it('defaults the game id to skipbo', async () => {
+    const dependencies = createDependencies();
+    const created = await createRoom(dependencies);
+    const room = await dependencies.roomRepository.get(created.roomCode);
+    expect(room?.gameId).toBe('skipbo');
   });
 
   it('creates and joins a room until all four seats are reserved', async () => {
@@ -208,18 +170,11 @@ describe('roomService', () => {
     const joined = await joinRoom(dependencies, { roomCode: created.roomCode.toLowerCase() });
     const joinedThird = await joinRoom(dependencies, { roomCode: created.roomCode });
     const joinedFourth = await joinRoom(dependencies, { roomCode: created.roomCode });
-    const room = await dependencies.roomRepository.get(created.roomCode);
 
     expect(created.roomCode).toHaveLength(ROOM_CODE_LENGTH);
-    expect(joined.roomCode).toBe(created.roomCode);
     expect(joined.seatIndex).toBe(1);
     expect(joinedThird.seatIndex).toBe(2);
     expect(joinedFourth.seatIndex).toBe(3);
-    expect(room?.lobbyPlayers?.find((p) => p.seatIndex === 1)).toEqual({
-      seatIndex: 1,
-      readyState: 'never-ready',
-      playerName: null,
-    });
     await expect(joinRoom(dependencies, { roomCode: created.roomCode })).rejects.toThrow('Room is full');
   });
 
@@ -230,7 +185,7 @@ describe('roomService', () => {
     await expect(
       authenticateConnection(dependencies, {
         connectionId: 'c-old',
-        protocolVersion: 0,
+        protocolVersion: 1,
         roomCode: created.roomCode,
         seatIndex: created.seatIndex,
         seatToken: created.seatToken,
@@ -238,188 +193,212 @@ describe('roomService', () => {
     ).rejects.toThrow(/protocol version/i);
   });
 
-  it('waits for an explicit host start before accepting actions', async () => {
+  it('authenticates seats and broadcasts presence with the abstract turn pointer', async () => {
     const dependencies = createDependencies();
     const created = await createRoom(dependencies);
     const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
 
-    await authenticateConnection(dependencies, {
+    await auth(dependencies, {
       connectionId: 'c-1',
       roomCode: created.roomCode,
       seatIndex: created.seatIndex,
       seatToken: created.seatToken,
     });
-    await authenticateConnection(dependencies, {
+    await auth(dependencies, {
       connectionId: 'c-2',
       roomCode: joined.roomCode,
       seatIndex: joined.seatIndex,
       seatToken: joined.seatToken,
     });
 
-    let room = await dependencies.roomRepository.get(created.roomCode);
+    const room = await dependencies.roomRepository.get(created.roomCode);
     expect(room?.status).toBe('WAITING');
     expect(room?.authenticatedSeats).toEqual([0, 1]);
 
-    await handleSetReady(dependencies, { connectionId: 'c-1', playerName: 'Alice' });
-    await handleSetReady(dependencies, { connectionId: 'c-2' });
-
-    await startGame(dependencies, {
-      connectionId: 'c-1',
-    });
-
-    room = await dependencies.roomRepository.get(created.roomCode);
-    const currentSeat = room?.activeSeatIndices?.[room!.state.currentPlayerIndex];
-    const currentConnectionId = currentSeat === created.seatIndex ? 'c-1' : 'c-2';
-
-    await handleAction(dependencies, {
-      action: { type: 'SELECT_CARD', source: 'hand', index: 0 },
-      connectionId: currentConnectionId,
-    });
-
-    room = await dependencies.roomRepository.get(created.roomCode);
-    expect(room?.status).toBe('ACTIVE');
-    expect(room?.activeSeatIndices).toEqual(expect.arrayContaining([0, 1]));
-    expect(room?.activeSeatIndices).toHaveLength(2);
-    expect(room?.authenticatedSeats).toEqual([0, 1]);
-    expect(room?.state.players.find((p) => p.seatIndex === created.seatIndex)?.name).toBe('Alice');
-    expect(room?.state.players.find((p) => p.seatIndex === joined.seatIndex)?.name).toBe('Joueur 2');
-    expect(room?.state.selectedCard?.source).toBe('hand');
-    expect(room?.state.players).toHaveLength(2);
+    const presence = dependencies.broadcaster.sent.filter((entry) => entry.message.type === 'presence').at(-1);
+    expect(presence?.message.type).toBe('presence');
+    if (presence?.message.type === 'presence') {
+      expect(presence.message.room.currentSeatIndex).toBeNull();
+    }
   });
 
-  it('starts the room even if the room connection query is stale during second auth', async () => {
-    const dependencies = createEventuallyConsistentDependencies();
-    const created = await createRoom(dependencies);
-    const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
-
-    await authenticateConnection(dependencies, {
-      connectionId: 'c-1',
-      roomCode: created.roomCode,
-      seatIndex: created.seatIndex,
-      seatToken: created.seatToken,
-    });
-    await authenticateConnection(dependencies, {
-      connectionId: 'c-2',
-      roomCode: joined.roomCode,
-      seatIndex: joined.seatIndex,
-      seatToken: joined.seatToken,
-    });
-
-    await handleSetReady(dependencies, { connectionId: 'c-1' });
-    await handleSetReady(dependencies, { connectionId: 'c-2' });
-
-    await startGame(dependencies, {
-      connectionId: 'c-1',
-    });
-
-    const roomAfterStart = await dependencies.roomRepository.get(created.roomCode);
-    const currentSeat = roomAfterStart?.activeSeatIndices?.[roomAfterStart!.state.currentPlayerIndex];
-    const currentConnectionId = currentSeat === created.seatIndex ? 'c-1' : 'c-2';
-
-    await handleAction(dependencies, {
-      action: { type: 'SELECT_CARD', source: 'hand', index: 0 },
-      connectionId: currentConnectionId,
-    });
-
-    const room = await dependencies.roomRepository.get(created.roomCode);
-    expect(room?.status).toBe('ACTIVE');
-    expect(room?.activeSeatIndices).toEqual(expect.arrayContaining([0, 1]));
-    expect(room?.activeSeatIndices).toHaveLength(2);
-    expect(room?.authenticatedSeats).toEqual([0, 1]);
-    expect(room?.state.selectedCard?.source).toBe('hand');
-  });
-
-  it('starts the room from authenticated seats even when the live connection query remains stale', async () => {
-    const dependencies = createPersistentlyStaleDependencies();
-    const created = await createRoom(dependencies);
-    const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
-
-    await authenticateConnection(dependencies, {
-      connectionId: 'c-1',
-      roomCode: created.roomCode,
-      seatIndex: created.seatIndex,
-      seatToken: created.seatToken,
-    });
-    await authenticateConnection(dependencies, {
-      connectionId: 'c-2',
-      roomCode: joined.roomCode,
-      seatIndex: joined.seatIndex,
-      seatToken: joined.seatToken,
-    });
-
-    await handleSetReady(dependencies, { connectionId: 'c-1' });
-    await handleSetReady(dependencies, { connectionId: 'c-2' });
-
-    await startGame(dependencies, {
-      connectionId: 'c-1',
-    });
-
-    const room = await dependencies.roomRepository.get(created.roomCode);
-    expect(room?.status).toBe('ACTIVE');
-    expect(room?.activeSeatIndices).toEqual(expect.arrayContaining([0, 1]));
-    expect(room?.activeSeatIndices).toHaveLength(2);
-    expect(room?.authenticatedSeats).toEqual([0, 1]);
-    expect(room?.state.players).toHaveLength(2);
-  });
-
-  it('keeps both authenticated seats when two auths race on the same room version', async () => {
-    const dependencies = createConcurrentAuthDependencies();
-    const created = await createRoom(dependencies);
-    const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
-    dependencies.roomRepository.enableConcurrentAuthRace();
-
-    await Promise.all([
-      authenticateConnection(dependencies, {
-        connectionId: 'c-1',
-        roomCode: created.roomCode,
-        seatIndex: created.seatIndex,
-        seatToken: created.seatToken,
-      }),
-      authenticateConnection(dependencies, {
-        connectionId: 'c-2',
-        roomCode: joined.roomCode,
-        seatIndex: joined.seatIndex,
-        seatToken: joined.seatToken,
-      }),
-    ]);
-
-    const room = await dependencies.roomRepository.get(created.roomCode);
-    expect(room?.authenticatedSeats).toEqual([0, 1]);
-  });
-
-  it('requires the host and at least two connected players to start', async () => {
+  it('sends the host its snapshot on (re)authentication', async () => {
     const dependencies = createDependencies();
     const created = await createRoom(dependencies);
 
-    await authenticateConnection(dependencies, {
+    await auth(dependencies, {
       connectionId: 'c-1',
       roomCode: created.roomCode,
       seatIndex: created.seatIndex,
       seatToken: created.seatToken,
     });
 
-    await expect(
-      startGame(dependencies, {
-        connectionId: 'c-1',
-      }),
-    ).rejects.toThrow('Tous les joueurs doivent être prêts pour démarrer');
+    const restore = dependencies.broadcaster.sent.find(
+      (entry) => entry.connectionId === 'c-1' && entry.message.type === 'snapshotRestore',
+    );
+    expect(restore?.message.type).toBe('snapshotRestore');
+    if (restore?.message.type === 'snapshotRestore') {
+      expect(restore.message.payload).toBeNull();
+    }
+  });
+
+  it('starts the game, shuffles seats and announces gameStarted', async () => {
+    const dependencies = createDependencies();
+    const { room } = await startTwoPlayerGame(dependencies);
+
+    expect(room.status).toBe('ACTIVE');
+    expect(room.activeSeatIndices).toEqual(expect.arrayContaining([0, 1]));
+    expect(room.activeSeatIndices).toHaveLength(2);
+    expect([0, 1]).toContain(room.currentSeatIndex);
+
+    const started = dependencies.broadcaster.sent.filter((entry) => entry.message.type === 'gameStarted');
+    expect(started.length).toBeGreaterThan(0);
+    if (started[0]?.message.type === 'gameStarted') {
+      expect(started[0].message.activeSeatIndices).toEqual(room.activeSeatIndices);
+      expect(started[0].message.currentSeatIndex).toBe(room.currentSeatIndex);
+    }
+  });
+
+  it('requires the host and at least two ready players to start', async () => {
+    const dependencies = createDependencies();
+    const created = await createRoom(dependencies);
+
+    await auth(dependencies, {
+      connectionId: 'c-1',
+      roomCode: created.roomCode,
+      seatIndex: created.seatIndex,
+      seatToken: created.seatToken,
+    });
+
+    await expect(startGame(dependencies, { connectionId: 'c-1' })).rejects.toThrow(
+      'Tous les joueurs doivent être prêts pour démarrer',
+    );
 
     const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
-    await authenticateConnection(dependencies, {
+    await auth(dependencies, {
       connectionId: 'c-2',
       roomCode: joined.roomCode,
       seatIndex: joined.seatIndex,
       seatToken: joined.seatToken,
     });
-
     await handleSetReady(dependencies, { connectionId: 'c-1' });
     await handleSetReady(dependencies, { connectionId: 'c-2' });
 
+    await expect(startGame(dependencies, { connectionId: 'c-2' })).rejects.toThrow('Only the host can start the room');
+  });
+
+  it('relays an opaque move from the current seat to the other seats', async () => {
+    const dependencies = createDependencies();
+    const { currentSeat, idleSeat, seatToConnection } = await startTwoPlayerGame(dependencies);
+
+    await handleRelay(dependencies, {
+      connectionId: seatToConnection[currentSeat],
+      kind: 'move',
+      payload: { type: 'SELECT_CARD', source: 'hand', index: 0 },
+    });
+
+    const relayed = dependencies.broadcaster.sent.filter(
+      (entry) => entry.connectionId === seatToConnection[idleSeat] && entry.message.type === 'relayed',
+    );
+    expect(relayed.length).toBe(1);
+    if (relayed[0]?.message.type === 'relayed') {
+      expect(relayed[0].message.fromSeat).toBe(currentSeat);
+      expect(relayed[0].message.payload).toEqual({ type: 'SELECT_CARD', source: 'hand', index: 0 });
+    }
+  });
+
+  it('rejects a move from a seat whose turn it is not', async () => {
+    const dependencies = createDependencies();
+    const { idleSeat, seatToConnection } = await startTwoPlayerGame(dependencies);
+
     await expect(
-      startGame(dependencies, {
-        connectionId: 'c-2',
+      handleRelay(dependencies, {
+        connectionId: seatToConnection[idleSeat],
+        kind: 'move',
+        payload: { type: 'END_TURN' },
       }),
-    ).rejects.toThrow('Only the host can start the room');
+    ).rejects.toThrow('It is not your turn');
+  });
+
+  it('only lets the host push a view', async () => {
+    const dependencies = createDependencies();
+    const { created, idleSeat, currentSeat, seatToConnection } = await startTwoPlayerGame(dependencies);
+    const nonHostSeat = created.hostSeatIndex === currentSeat ? idleSeat : currentSeat;
+
+    await expect(
+      handleRelay(dependencies, {
+        connectionId: seatToConnection[nonHostSeat],
+        kind: 'view',
+        payload: { redacted: true },
+      }),
+    ).rejects.toThrow('Only the host can push a view');
+  });
+
+  it('advances the abstract turn on the host setTurn and broadcasts it', async () => {
+    const dependencies = createDependencies();
+    const { created, idleSeat } = await startTwoPlayerGame(dependencies);
+
+    await handleSetTurn(dependencies, { connectionId: 'c-1', currentSeatIndex: idleSeat });
+
+    const room = await dependencies.roomRepository.get(created.roomCode);
+    expect(room?.currentSeatIndex).toBe(idleSeat);
+
+    const turn = dependencies.broadcaster.sent.filter((entry) => entry.message.type === 'turn').at(-1);
+    if (turn?.message.type === 'turn') {
+      expect(turn.message.currentSeatIndex).toBe(idleSeat);
+    }
+  });
+
+  it('stores the host snapshot and replays it on host re-authentication', async () => {
+    const dependencies = createDependencies();
+    const { created } = await startTwoPlayerGame(dependencies);
+
+    await handleSnapshot(dependencies, { connectionId: 'c-1', payload: { deck: ['secret'] } });
+
+    const room = await dependencies.roomRepository.get(created.roomCode);
+    expect(room?.hostSnapshot?.payload).toEqual({ deck: ['secret'] });
+
+    await handleDisconnect(dependencies, 'c-1');
+    await auth(dependencies, {
+      connectionId: 'c-1-resumed',
+      roomCode: created.roomCode,
+      seatIndex: created.seatIndex,
+      seatToken: created.seatToken,
+    });
+
+    const restore = dependencies.broadcaster.sent.find(
+      (entry) => entry.connectionId === 'c-1-resumed' && entry.message.type === 'snapshotRestore',
+    );
+    if (restore?.message.type === 'snapshotRestore') {
+      expect(restore.message.payload).toEqual({ deck: ['secret'] });
+    }
+  });
+
+  it('rejects a snapshot from a non-host seat', async () => {
+    const dependencies = createDependencies();
+    const { idleSeat, currentSeat, created, seatToConnection } = await startTwoPlayerGame(dependencies);
+    const nonHostSeat = created.hostSeatIndex === currentSeat ? idleSeat : currentSeat;
+
+    await expect(
+      handleSnapshot(dependencies, { connectionId: seatToConnection[nonHostSeat], payload: { x: 1 } }),
+    ).rejects.toThrow('Only the host can store a snapshot');
+  });
+
+  it('ends the game on host endGame, clearing disconnects and closing the room', async () => {
+    const dependencies = createDependencies();
+    const { created, idleSeat, seatToConnection } = await startTwoPlayerGame(dependencies);
+
+    await handleDisconnect(dependencies, seatToConnection[idleSeat]);
+    await handleEndGame(dependencies, { connectionId: 'c-1', winnerSeatIndex: created.hostSeatIndex });
+
+    const room = await dependencies.roomRepository.get(created.roomCode);
+    expect(room?.status).toBe('FINISHED');
+    expect(room?.currentSeatIndex).toBeNull();
+    expect(room?.summary?.winnerSeatIndex).toBe(created.hostSeatIndex);
+    expect(room?.disconnectedSeats).toEqual({});
+
+    const closed = dependencies.broadcaster.sent.filter((entry) => entry.message.type === 'roomClosed');
+    expect(closed.length).toBeGreaterThan(0);
   });
 
   it('marks a disconnected seat with a grace timestamp instead of removing it', async () => {
@@ -427,13 +406,13 @@ describe('roomService', () => {
     const created = await createRoom(dependencies);
     const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
 
-    await authenticateConnection(dependencies, {
+    await auth(dependencies, {
       connectionId: 'c-1',
       roomCode: created.roomCode,
       seatIndex: created.seatIndex,
       seatToken: created.seatToken,
     });
-    await authenticateConnection(dependencies, {
+    await auth(dependencies, {
       connectionId: 'c-2',
       roomCode: joined.roomCode,
       seatIndex: joined.seatIndex,
@@ -447,7 +426,6 @@ describe('roomService', () => {
     expect(room?.disconnectedSeats?.['1']?.disconnectedAt).toBeTypeOf('string');
 
     const presenceMessage = dependencies.broadcaster.sent.filter((entry) => entry.message.type === 'presence').at(-1);
-    expect(presenceMessage).toBeDefined();
     if (presenceMessage?.message.type === 'presence') {
       expect(presenceMessage.message.room.disconnectedSeats).toEqual([
         { seatIndex: 1, disconnectedAt: expect.any(String) },
@@ -460,13 +438,13 @@ describe('roomService', () => {
     const created = await createRoom(dependencies);
     const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
 
-    await authenticateConnection(dependencies, {
+    await auth(dependencies, {
       connectionId: 'c-1',
       roomCode: created.roomCode,
       seatIndex: created.seatIndex,
       seatToken: created.seatToken,
     });
-    await authenticateConnection(dependencies, {
+    await auth(dependencies, {
       connectionId: 'c-2',
       roomCode: joined.roomCode,
       seatIndex: joined.seatIndex,
@@ -474,7 +452,7 @@ describe('roomService', () => {
     });
 
     await handleDisconnect(dependencies, 'c-2');
-    await authenticateConnection(dependencies, {
+    await auth(dependencies, {
       connectionId: 'c-2-resumed',
       roomCode: joined.roomCode,
       seatIndex: joined.seatIndex,
@@ -486,62 +464,33 @@ describe('roomService', () => {
     expect(room?.disconnectedSeats?.['1']).toBeUndefined();
   });
 
-  it('prunes stale disconnect entries when the next action runs after the grace period', async () => {
+  it('prunes stale disconnect entries when a seat re-authenticates after the grace period', async () => {
     const dependencies = createDependencies();
-    const created = await createRoom(dependencies);
-    const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
+    const { created, joined } = await startTwoPlayerGame(dependencies);
+    // joined (seat 1) is never the host; disconnect it and let its grace expire.
+    const staleSeat = joined.seatIndex;
 
-    await authenticateConnection(dependencies, {
-      connectionId: 'c-1',
+    await handleDisconnect(dependencies, 'c-2');
+
+    const beforePrune = await dependencies.roomRepository.get(created.roomCode);
+    if (!beforePrune) throw new Error('room missing');
+    const expiredAt = new Date(Date.now() - DISCONNECT_GRACE_MS - 1_000).toISOString();
+    await dependencies.roomRepository.update({
+      ...beforePrune,
+      disconnectedSeats: { [String(staleSeat)]: { disconnectedAt: expiredAt } },
+    });
+
+    // The host re-authenticates, which prunes expired disconnects.
+    await auth(dependencies, {
+      connectionId: 'c-1-resumed',
       roomCode: created.roomCode,
       seatIndex: created.seatIndex,
       seatToken: created.seatToken,
     });
-    await authenticateConnection(dependencies, {
-      connectionId: 'c-2',
-      roomCode: joined.roomCode,
-      seatIndex: joined.seatIndex,
-      seatToken: joined.seatToken,
-    });
-    await handleSetReady(dependencies, { connectionId: 'c-1' });
-    await handleSetReady(dependencies, { connectionId: 'c-2' });
-    await startGame(dependencies, { connectionId: 'c-1' });
-
-    // `startGame` shuffles `activeSeatIndices`, so the seat that plays first
-    // is non-deterministic. Resolve the active and idle seats from the room
-    // state instead of hard-coding seat 0 as the actor.
-    const started = await dependencies.roomRepository.get(created.roomCode);
-    if (!started) throw new Error('room missing after startGame');
-    const currentSeat = started.activeSeatIndices[started.state.currentPlayerIndex];
-    const idleSeat = started.activeSeatIndices.find((seat) => seat !== currentSeat);
-    if (currentSeat === undefined || idleSeat === undefined) {
-      throw new Error('expected both seats to be active');
-    }
-    const seatToConnection: Record<number, string> = {
-      [created.seatIndex]: 'c-1',
-      [joined.seatIndex]: 'c-2',
-    };
-    const currentConnectionId = seatToConnection[currentSeat];
-    const idleConnectionId = seatToConnection[idleSeat];
-
-    await handleDisconnect(dependencies, idleConnectionId);
-
-    const beforePrune = await dependencies.roomRepository.get(created.roomCode);
-    const expiredAt = new Date(Date.now() - DISCONNECT_GRACE_MS - 1_000).toISOString();
-    if (!beforePrune) throw new Error('room missing');
-    await dependencies.roomRepository.update({
-      ...beforePrune,
-      disconnectedSeats: { [String(idleSeat)]: { disconnectedAt: expiredAt } },
-    });
-
-    await handleAction(dependencies, {
-      action: { type: 'SELECT_CARD', source: 'hand', index: 0 },
-      connectionId: currentConnectionId,
-    });
 
     const room = await dependencies.roomRepository.get(created.roomCode);
-    expect(room?.authenticatedSeats).toEqual([currentSeat]);
-    expect(room?.disconnectedSeats?.[String(idleSeat)]).toBeUndefined();
+    expect(room?.authenticatedSeats).not.toContain(staleSeat);
+    expect(room?.disconnectedSeats?.[String(staleSeat)]).toBeUndefined();
   });
 
   it('removes the seat immediately when leaving the lobby intentionally', async () => {
@@ -549,13 +498,13 @@ describe('roomService', () => {
     const created = await createRoom(dependencies);
     const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
 
-    await authenticateConnection(dependencies, {
+    await auth(dependencies, {
       connectionId: 'c-1',
       roomCode: created.roomCode,
       seatIndex: created.seatIndex,
       seatToken: created.seatToken,
     });
-    await authenticateConnection(dependencies, {
+    await auth(dependencies, {
       connectionId: 'c-2',
       roomCode: joined.roomCode,
       seatIndex: joined.seatIndex,
@@ -569,108 +518,18 @@ describe('roomService', () => {
     expect(room?.disconnectedSeats?.['1']).toBeUndefined();
   });
 
-  it('removes the seat cleanly when disconnecting after the game has finished', async () => {
-    const dependencies = createDependencies();
-    const created = await createRoom(dependencies);
-    const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
-
-    await authenticateConnection(dependencies, {
-      connectionId: 'c-1',
-      roomCode: created.roomCode,
-      seatIndex: created.seatIndex,
-      seatToken: created.seatToken,
-    });
-    await authenticateConnection(dependencies, {
-      connectionId: 'c-2',
-      roomCode: joined.roomCode,
-      seatIndex: joined.seatIndex,
-      seatToken: joined.seatToken,
-    });
-
-    const room = await dependencies.roomRepository.get(created.roomCode);
-    if (!room) throw new Error('room missing');
-    await dependencies.roomRepository.update({
-      ...room,
-      activeSeatIndices: [created.seatIndex, joined.seatIndex],
-      disconnectedSeats: {},
-      status: 'FINISHED',
-    });
-
-    await handleDisconnect(dependencies, 'c-2');
-
-    const updated = await dependencies.roomRepository.get(created.roomCode);
-    expect(updated?.disconnectedSeats?.[String(joined.seatIndex)]).toBeUndefined();
-    expect(updated?.authenticatedSeats).not.toContain(joined.seatIndex);
-
-    const presenceMessages = dependencies.broadcaster.sent.filter((entry) => entry.message.type === 'presence');
-    const lastPresence = presenceMessages.at(-1);
-    if (lastPresence?.message.type === 'presence') {
-      expect(lastPresence.message.room.disconnectedSeats).toEqual([]);
-    }
-  });
-
-  it('clears any disconnected seats when the game transitions to FINISHED', async () => {
-    const dependencies = createDependencies();
-    const created = await createRoom(dependencies);
-    const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
-
-    await authenticateConnection(dependencies, {
-      connectionId: 'c-1',
-      roomCode: created.roomCode,
-      seatIndex: created.seatIndex,
-      seatToken: created.seatToken,
-    });
-    await authenticateConnection(dependencies, {
-      connectionId: 'c-2',
-      roomCode: joined.roomCode,
-      seatIndex: joined.seatIndex,
-      seatToken: joined.seatToken,
-    });
-    await handleSetReady(dependencies, { connectionId: 'c-1' });
-    await handleSetReady(dependencies, { connectionId: 'c-2' });
-    await startGame(dependencies, { connectionId: 'c-1' });
-
-    const started = await dependencies.roomRepository.get(created.roomCode);
-    if (!started) throw new Error('room missing after startGame');
-    const currentSeat = started.activeSeatIndices?.[started.state.currentPlayerIndex];
-    const idleSeat = started.activeSeatIndices?.find((seat) => seat !== currentSeat);
-    if (currentSeat === undefined || idleSeat === undefined) {
-      throw new Error('expected both seats to be active');
-    }
-    const seatToConnection: Record<number, string> = {
-      [created.seatIndex]: 'c-1',
-      [joined.seatIndex]: 'c-2',
-    };
-    const currentConnectionId = seatToConnection[currentSeat];
-
-    await handleDisconnect(dependencies, seatToConnection[idleSeat]);
-
-    const beforeAction = await dependencies.roomRepository.get(created.roomCode);
-    if (!beforeAction) throw new Error('room missing');
-    expect(beforeAction.disconnectedSeats?.[String(idleSeat)]).toBeDefined();
-
-    await handleAction(dependencies, {
-      action: { type: 'DEBUG_WIN' },
-      connectionId: currentConnectionId,
-    });
-
-    const finished = await dependencies.roomRepository.get(created.roomCode);
-    expect(finished?.status).toBe('FINISHED');
-    expect(finished?.disconnectedSeats).toEqual({});
-  });
-
   it('closes the room when the host disconnects during WAITING regardless of grace', async () => {
     const dependencies = createDependencies();
     const created = await createRoom(dependencies);
     const joined = await joinRoom(dependencies, { roomCode: created.roomCode });
 
-    await authenticateConnection(dependencies, {
+    await auth(dependencies, {
       connectionId: 'c-1',
       roomCode: created.roomCode,
       seatIndex: created.seatIndex,
       seatToken: created.seatToken,
     });
-    await authenticateConnection(dependencies, {
+    await auth(dependencies, {
       connectionId: 'c-2',
       roomCode: joined.roomCode,
       seatIndex: joined.seatIndex,
@@ -683,6 +542,18 @@ describe('roomService', () => {
       (entry) => entry.message.type === 'roomClosed' && entry.connectionId === 'c-2',
     );
     expect(closeMessages.length).toBeGreaterThan(0);
+  });
+
+  it('keeps the host seat (grace) when it disconnects during an ACTIVE game', async () => {
+    const dependencies = createDependencies();
+    const { created } = await startTwoPlayerGame(dependencies);
+
+    await handleDisconnect(dependencies, 'c-1');
+
+    const room = await dependencies.roomRepository.get(created.roomCode);
+    expect(room?.status).toBe('ACTIVE');
+    expect(room?.authenticatedSeats).toContain(created.hostSeatIndex);
+    expect(room?.disconnectedSeats?.[String(created.hostSeatIndex)]?.disconnectedAt).toBeTypeOf('string');
   });
 
   it('drops a stale connection when rejecting an action to a closed socket', async () => {

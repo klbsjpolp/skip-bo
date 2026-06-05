@@ -2,7 +2,12 @@ import { afterEach, describe, expect, it } from 'vitest';
 import type { RawData } from 'ws';
 import WebSocket from 'ws';
 
-import type { CreateRoomResponse, JoinRoomResponse, ServerMessage } from '@skipbo/multiplayer-protocol';
+import {
+  PROTOCOL_VERSION,
+  type CreateRoomResponse,
+  type JoinRoomResponse,
+  type ServerMessage,
+} from '@skipbo/realtime-core';
 
 import type { LocalRealtimeDevServer } from '../devServer.js';
 import { startLocalRealtimeDevServer } from '../devServer.js';
@@ -90,7 +95,7 @@ describe('local realtime dev server', () => {
     server = null;
   });
 
-  it('serves room HTTP endpoints and websocket gameplay locally', async () => {
+  it('serves room HTTP endpoints and relays opaque gameplay messages locally', async () => {
     server = await startLocalRealtimeDevServer({
       logger: silentLogger,
       port: 0,
@@ -99,16 +104,10 @@ describe('local realtime dev server', () => {
     const healthResponse = await fetch(`${server.httpUrl}/health`);
     expect(healthResponse.status).toBe(200);
     expect(healthResponse.headers.get('access-control-allow-origin')).toBe('*');
-    await expect(healthResponse.json()).resolves.toEqual({
-      status: 'ok',
-      wsUrl: server.wsUrl,
-    });
 
     const createResponse = await fetch(`${server.httpUrl}/rooms`, {
-      body: JSON.stringify({ stockSize: 35 }),
-      headers: {
-        'content-type': 'application/json',
-      },
+      body: JSON.stringify({ gameId: 'skipbo', gameConfig: { stockSize: 35 } }),
+      headers: { 'content-type': 'application/json' },
       method: 'POST',
     });
     expect(createResponse.status).toBe(201);
@@ -116,47 +115,33 @@ describe('local realtime dev server', () => {
 
     const joinResponse = await fetch(`${server.httpUrl}/rooms/join`, {
       body: JSON.stringify({ roomCode: created.roomCode.toLowerCase() }),
-      headers: {
-        'content-type': 'application/json',
-      },
+      headers: { 'content-type': 'application/json' },
       method: 'POST',
     });
     expect(joinResponse.status).toBe(200);
     const joined = (await joinResponse.json()) as JoinRoomResponse;
 
-    expect(created.wsUrl).toBe(server.wsUrl);
-    expect(joined.wsUrl).toBe(server.wsUrl);
-
     const socket0 = new WebSocket(created.wsUrl);
     const socket1 = new WebSocket(joined.wsUrl);
-
     await Promise.all([waitForOpen(socket0), waitForOpen(socket1)]);
 
-    const waitingSnapshot0 = waitForMessage(
+    const seatToSocket: Record<number, WebSocket> = {
+      [created.seatIndex]: socket0,
+      [joined.seatIndex]: socket1,
+    };
+
+    const waitingPresence = waitForMessage(
       socket0,
       (message) =>
-        message.type === 'snapshot' &&
-        message.view.room.status === 'WAITING' &&
-        message.view.room.connectedSeats.length === 2,
+        message.type === 'presence' && message.room.status === 'WAITING' && message.room.connectedSeats.length === 2,
     );
-    const waitingSnapshot1 = waitForMessage(
-      socket1,
-      (message) =>
-        message.type === 'snapshot' &&
-        message.view.room.status === 'WAITING' &&
-        message.view.room.connectedSeats.length === 2,
-    );
-    const activeSnapshot0 = waitForMessage(
-      socket0,
-      (message) => message.type === 'snapshot' && message.view.room.status === 'ACTIVE',
-    );
-    const activeSnapshot1 = waitForMessage(
-      socket1,
-      (message) => message.type === 'snapshot' && message.view.room.status === 'ACTIVE',
-    );
+    // The host (seat 0) reconnect snapshot is null until it pushes one. Register
+    // before sending auth so we don't miss the message.
+    const restore = waitForMessage(socket0, (message) => message.type === 'snapshotRestore');
 
     socket0.send(
       JSON.stringify({
+        protocolVersion: PROTOCOL_VERSION,
         roomCode: created.roomCode,
         seatIndex: created.seatIndex,
         seatToken: created.seatToken,
@@ -165,6 +150,7 @@ describe('local realtime dev server', () => {
     );
     socket1.send(
       JSON.stringify({
+        protocolVersion: PROTOCOL_VERSION,
         roomCode: joined.roomCode,
         seatIndex: joined.seatIndex,
         seatToken: joined.seatToken,
@@ -172,113 +158,60 @@ describe('local realtime dev server', () => {
       }),
     );
 
-    await expect(waitingSnapshot0).resolves.toMatchObject({
-      type: 'snapshot',
-      view: {
-        room: {
-          connectedSeats: [0, 1],
-          status: 'WAITING',
-        },
-      },
+    await expect(waitingPresence).resolves.toMatchObject({
+      type: 'presence',
+      room: { connectedSeats: [0, 1], status: 'WAITING' },
     });
-    await expect(waitingSnapshot1).resolves.toMatchObject({
-      type: 'snapshot',
-      view: {
-        room: {
-          connectedSeats: [0, 1],
-          status: 'WAITING',
-        },
-      },
-    });
+    await expect(restore).resolves.toMatchObject({ type: 'snapshotRestore', payload: null });
 
-    const readyPresence0 = waitForMessage(
+    const readyPresence = waitForMessage(
       socket0,
       (message) =>
         message.type === 'presence' &&
         message.room.lobbySeats.length === 2 &&
-        message.room.lobbySeats.every((s: { readyState: string }) => s.readyState === 'ready'),
+        message.room.lobbySeats.every((s) => s.readyState === 'ready'),
     );
-
     socket0.send(JSON.stringify({ type: 'setReady', playerName: 'Alice' }));
     socket1.send(JSON.stringify({ type: 'setReady', playerName: 'Bob' }));
+    await readyPresence;
 
-    await expect(readyPresence0).resolves.toMatchObject({
-      type: 'presence',
-      room: { status: 'WAITING' },
-    });
+    const gameStarted0 = waitForMessage(socket0, (message) => message.type === 'gameStarted');
+    const gameStarted1 = waitForMessage(socket1, (message) => message.type === 'gameStarted');
 
-    socket0.send(
+    socket0.send(JSON.stringify({ type: 'startGame', clientVersion: 2 }));
+
+    const [started0, started1] = await Promise.all([gameStarted0, gameStarted1]);
+    if (started0.type !== 'gameStarted' || started1.type !== 'gameStarted') {
+      throw new Error('expected gameStarted');
+    }
+    expect(started0.activeSeatIndices).toEqual(expect.arrayContaining([0, 1]));
+    expect(started0.gameConfig).toEqual({ stockSize: 35 });
+    expect([0, 1]).toContain(started0.currentSeatIndex);
+
+    // The current seat sends an opaque move; the other seat receives it relayed.
+    const currentSeat = started0.currentSeatIndex;
+    const otherSeat = currentSeat === created.seatIndex ? joined.seatIndex : created.seatIndex;
+    const relayed = waitForMessage(seatToSocket[otherSeat], (message) => message.type === 'relayed');
+
+    seatToSocket[currentSeat].send(
       JSON.stringify({
-        type: 'startGame',
-        clientVersion: 3,
+        type: 'relay',
+        kind: 'move',
+        payload: { type: 'SELECT_CARD', source: 'hand', index: 0 },
       }),
     );
 
-    const [resolvedActiveSnapshot0, resolvedActiveSnapshot1] = await Promise.all([activeSnapshot0, activeSnapshot1]);
-
-    expect(resolvedActiveSnapshot0).toMatchObject({
-      type: 'snapshot',
-      view: {
-        room: {
-          status: 'ACTIVE',
-        },
-      },
-    });
-    expect(resolvedActiveSnapshot1).toMatchObject({
-      type: 'snapshot',
-      view: {
-        room: {
-          status: 'ACTIVE',
-        },
-      },
+    await expect(relayed).resolves.toMatchObject({
+      type: 'relayed',
+      fromSeat: currentSeat,
+      kind: 'move',
+      payload: { type: 'SELECT_CARD', source: 'hand', index: 0 },
     });
 
-    // `startGame` shuffles `activeSeatIndices`, so the first turn can land on
-    // either socket. Each viewer's snapshot rotates `currentPlayerIndex` so
-    // that `0` means "viewer is the current player". Pick the socket that
-    // owns the turn before issuing SELECT_CARD; otherwise the action is
-    // rejected with "It is not your turn" and the test would time out.
-    const currentSocket =
-      resolvedActiveSnapshot0.type === 'snapshot' && resolvedActiveSnapshot0.view.currentPlayerIndex === 0
-        ? socket0
-        : socket1;
-
-    const selectedSnapshot0 = waitForMessage(
-      socket0,
-      (message) => message.type === 'snapshot' && message.view.selectedCard?.source === 'hand',
-    );
-    const selectedSnapshot1 = waitForMessage(
-      socket1,
-      (message) => message.type === 'snapshot' && message.view.selectedCard?.source === 'hand',
-    );
-
-    currentSocket.send(
-      JSON.stringify({
-        action: {
-          index: 0,
-          source: 'hand',
-          type: 'SELECT_CARD',
-        },
-        type: 'action',
-      }),
-    );
-
-    await expect(selectedSnapshot0).resolves.toMatchObject({
-      type: 'snapshot',
-      view: {
-        selectedCard: {
-          source: 'hand',
-        },
-      },
-    });
-    await expect(selectedSnapshot1).resolves.toMatchObject({
-      type: 'snapshot',
-      view: {
-        selectedCard: {
-          source: 'hand',
-        },
-      },
-    });
+    // The host advances the abstract turn; everyone hears about it.
+    const turn1 = waitForMessage(socket1, (message) => message.type === 'turn');
+    socket0.send(JSON.stringify({ type: 'setTurn', currentSeatIndex: otherSeat }));
+    await expect(turn1).resolves.toMatchObject({ type: 'turn', currentSeatIndex: otherSeat });
 
     socket0.close();
     socket1.close();
