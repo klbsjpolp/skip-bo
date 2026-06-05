@@ -1,4 +1,4 @@
-import { type CreateRoomRequest, type CreateRoomResponse, type JoinRoomResponse } from '@skipbo/multiplayer-protocol';
+import { type CreateRoomRequest, type CreateRoomResponse, type JoinRoomResponse } from '@skipbo/realtime-core';
 import { clearRuntimeConfigCache, fetchRuntimeConfig } from '@/lib/runtimeConfig';
 
 const ONLINE_CONFIGURATION_ERROR = 'Le jeu en ligne n’est pas configuré pour cette installation.';
@@ -42,7 +42,7 @@ const parseJsonResponse = async <T>(response: Response): Promise<T> => {
 };
 
 export const createOnlineRoom = async (stockSize: number): Promise<CreateRoomResponse> => {
-  const request: CreateRoomRequest = { stockSize };
+  const request: CreateRoomRequest = { gameId: 'skipbo', gameConfig: { stockSize } };
   const apiBaseUrl = await getApiBaseUrl();
   const response = await fetch(`${apiBaseUrl}/rooms`, {
     method: 'POST',

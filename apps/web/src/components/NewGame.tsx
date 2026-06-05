@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button.tsx';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { getStoredStockSize } from '@/state/initialGameState.ts';
-import { ROOM_CODE_LENGTH, isValidRoomCode, normalizeRoomCode } from '@skipbo/multiplayer-protocol';
+import { ROOM_CODE_LENGTH, isValidRoomCode, normalizeRoomCode } from '@skipbo/realtime-core';
 import { Alert, AlertTitle } from '@/components/ui/alert.tsx';
 
 interface NewGameProps {

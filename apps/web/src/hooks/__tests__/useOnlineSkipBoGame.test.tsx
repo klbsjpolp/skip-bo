@@ -2,13 +2,8 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gameReducer, initialGameState, type Card, type GameState } from '@skipbo/game-core';
-import {
-  serializeClientGameView,
-  type ClientGameView,
-  type CreateRoomResponse,
-  type LobbySeatInfo,
-  type ServerMessage,
-} from '@skipbo/multiplayer-protocol';
+import type { CreateRoomResponse, LobbySeatInfo, RoomSummary, ServerMessage } from '@skipbo/realtime-core';
+import { serializeClientGameView, type ClientGameView } from '@skipbo/skipbo-runtime';
 
 import { inferOpponentTransition, useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
 
@@ -72,45 +67,32 @@ const createOnlineView = (gameState: GameState, version: number): ClientGameView
     viewerSeatIndex: 0,
   });
 
-const createWaitingView = (connectedSeats: number[], version: number, lobbySeats?: LobbySeatInfo[]): ClientGameView => {
-  const state = initialGameState({ playerCount: 4 });
+const waitingRoomSummary = (connectedSeats: number[], version: number, lobbySeats?: LobbySeatInfo[]): RoomSummary => ({
+  connectedSeats,
+  currentSeatIndex: null,
+  disconnectedSeats: [],
+  expiresAt: '2026-04-05T12:00:00.000Z',
+  hostSeatIndex: 0,
+  lobbySeats:
+    lobbySeats ?? connectedSeats.map((seatIndex) => ({ seatIndex, readyState: 'never-ready', displayName: null })),
+  roomCode: 'ABC',
+  seatCapacity: 4,
+  status: 'WAITING',
+  version,
+});
 
-  state.deck = [];
-  state.buildPiles = state.buildPiles.map(() => []);
-  state.completedBuildPiles = [];
-  state.players = state.players.map((player, playerIndex) => ({
-    ...player,
-    discardPiles: player.discardPiles.map(() => []),
-    isAI: playerIndex !== 0,
-    kind: 'human',
-    seatIndex: playerIndex,
-    stockPile: [],
-  }));
-  state.message = 'En attente d’au moins un autre joueur';
-
-  return serializeClientGameView({
-    connectedSeats,
-    expiresAt: '2026-04-05T12:00:00.000Z',
-    gameState: state,
-    hostSeatIndex: 0,
-    lobbySeats,
-    roomCode: 'ABC',
-    seatCapacity: 4,
-    status: 'WAITING',
-    version,
-    viewerSeatIndex: 0,
-  });
-};
-
+// The local player is a GUEST (seat 1); the host (seat 0) relays redacted views.
 const createSession = (): CreateRoomResponse => ({
   expiresAt: '2026-04-05T12:00:00.000Z',
   hostSeatIndex: 0,
   roomCode: 'ABC',
   seatCapacity: 4,
-  seatIndex: 0,
+  seatIndex: 1,
   seatToken: 'seat-token',
   wsUrl: 'ws://example.test/game',
 });
+
+const createHostSession = (): CreateRoomResponse => ({ ...createSession(), seatIndex: 0 });
 
 const createSelectedLastCardState = (): GameState => {
   const state = initialGameState();
@@ -376,6 +358,11 @@ class MockWebSocket {
     this.emit('message', { data: JSON.stringify(message) });
   }
 
+  /** Convenience: deliver an authoritative view as the host would relay it. */
+  emitView(view: ClientGameView): void {
+    this.emitMessage({ type: 'relayed', fromSeat: 0, kind: 'view', payload: view });
+  }
+
   private emit(type: string, event?: unknown): void {
     for (const listener of this.listeners.get(type) ?? []) {
       listener(event);
@@ -383,10 +370,16 @@ class MockWebSocket {
   }
 }
 
-const getActionMessages = (socket: MockWebSocket) =>
+interface RelayMessage {
+  type: string;
+  kind?: string;
+  payload?: { type?: string };
+}
+
+const getMoveMessages = (socket: MockWebSocket): RelayMessage[] =>
   socket.sent
-    .map((message) => JSON.parse(message) as { type: string; action?: { type: string } })
-    .filter((message) => message.type === 'action');
+    .map((message) => JSON.parse(message) as RelayMessage)
+    .filter((message) => message.type === 'relay' && message.kind === 'move');
 
 describe('useOnlineSkipBoGame', () => {
   const originalWebSocket = globalThis.WebSocket;
@@ -414,7 +407,7 @@ describe('useOnlineSkipBoGame', () => {
     globalThis.WebSocket = originalWebSocket;
   });
 
-  it('waits for the authoritative snapshot before animating a hand refill online', async () => {
+  it('waits for the authoritative view before animating a hand refill online', async () => {
     const session = createSession();
 
     const initialState = createSelectedLastCardState();
@@ -433,7 +426,7 @@ describe('useOnlineSkipBoGame', () => {
 
     await act(async () => {
       socket.open();
-      socket.emitMessage({ type: 'snapshot', view: initialView });
+      socket.emitView(initialView);
       await Promise.resolve();
     });
 
@@ -452,12 +445,13 @@ describe('useOnlineSkipBoGame', () => {
 
     const playMessage = JSON.parse(socket.sent.at(-1) ?? '{}');
     expect(playMessage).toMatchObject({
-      type: 'action',
-      action: { type: 'PLAY_CARD', buildPile: 0 },
+      type: 'relay',
+      kind: 'move',
+      payload: { type: 'PLAY_CARD', buildPile: 0 },
     });
 
     await act(async () => {
-      socket.emitMessage({ type: 'snapshot', view: nextView });
+      socket.emitView(nextView);
       await Promise.resolve();
     });
 
@@ -492,7 +486,7 @@ describe('useOnlineSkipBoGame', () => {
 
     await act(async () => {
       socket.open();
-      socket.emitMessage({ type: 'snapshot', view: initialView });
+      socket.emitView(initialView);
       await Promise.resolve();
     });
 
@@ -517,7 +511,7 @@ describe('useOnlineSkipBoGame', () => {
     });
   });
 
-  it('tags snapshot-driven opponent build animations with the settled pile length', async () => {
+  it('tags view-driven opponent build animations with the settled pile length', async () => {
     const session = createSession();
 
     const previousState = initialGameState();
@@ -546,12 +540,12 @@ describe('useOnlineSkipBoGame', () => {
 
     await act(async () => {
       socket.open();
-      socket.emitMessage({ type: 'snapshot', view: previousView });
+      socket.emitView(previousView);
       await Promise.resolve();
     });
 
     await act(async () => {
-      socket.emitMessage({ type: 'snapshot', view: nextView });
+      socket.emitView(nextView);
       await Promise.resolve();
     });
 
@@ -584,7 +578,7 @@ describe('useOnlineSkipBoGame', () => {
 
     await act(async () => {
       socket.open();
-      socket.emitMessage({ type: 'snapshot', view: initialView });
+      socket.emitView(initialView);
       await Promise.resolve();
     });
 
@@ -627,7 +621,7 @@ describe('useOnlineSkipBoGame', () => {
 
     await act(async () => {
       socket.open();
-      socket.emitMessage({ type: 'snapshot', view: initialView });
+      socket.emitView(initialView);
       await Promise.resolve();
     });
 
@@ -636,27 +630,25 @@ describe('useOnlineSkipBoGame', () => {
       expect(moveResult).toEqual({ success: true, message: 'Carte jouée' });
     });
 
-    // The play action was sent immediately; while the visual animation runs in
-    // the background, the user can already pick the next card.
     act(() => {
       result.current.selectCard('hand', 0);
     });
 
     expect(result.current.gameState.selectedCard?.source).toBe('hand');
-    expect(getActionMessages(socket)).toContainEqual({
-      type: 'action',
-      action: { type: 'PLAY_CARD', buildPile: 0 },
-      clientVersion: 1,
+    expect(getMoveMessages(socket)).toContainEqual({
+      type: 'relay',
+      kind: 'move',
+      payload: { type: 'PLAY_CARD', buildPile: 0 },
     });
-    expect(getActionMessages(socket)).toContainEqual({
-      type: 'action',
-      action: {
+    expect(getMoveMessages(socket)).toContainEqual({
+      type: 'relay',
+      kind: 'move',
+      payload: {
         type: 'SELECT_CARD',
         source: 'hand',
         index: 0,
         discardPileIndex: undefined,
       },
-      clientVersion: 1,
     });
   });
 
@@ -679,7 +671,7 @@ describe('useOnlineSkipBoGame', () => {
 
     await act(async () => {
       socket.open();
-      socket.emitMessage({ type: 'snapshot', view: initialView });
+      socket.emitView(initialView);
       await Promise.resolve();
     });
 
@@ -702,7 +694,7 @@ describe('useOnlineSkipBoGame', () => {
     });
   });
 
-  it('accepts new selections while snapshot-driven animations are still active online', async () => {
+  it('accepts new selections while view-driven animations are still active online', async () => {
     const session = createSession();
 
     activeAnimationsState.current = [
@@ -736,7 +728,7 @@ describe('useOnlineSkipBoGame', () => {
 
     await act(async () => {
       socket.open();
-      socket.emitMessage({ type: 'snapshot', view: initialView });
+      socket.emitView(initialView);
       await Promise.resolve();
     });
 
@@ -744,18 +736,16 @@ describe('useOnlineSkipBoGame', () => {
       result.current.selectCard('hand', 0);
     });
 
-    // Animations no longer block selection — the user can prepare their next
-    // move while opponent / completion animations are still in flight.
     expect(result.current.gameState.selectedCard?.source).toBe('hand');
-    expect(getActionMessages(socket)).toContainEqual({
-      type: 'action',
-      action: {
+    expect(getMoveMessages(socket)).toContainEqual({
+      type: 'relay',
+      kind: 'move',
+      payload: {
         type: 'SELECT_CARD',
         source: 'hand',
         index: 0,
         discardPileIndex: undefined,
       },
-      clientVersion: 1,
     });
   });
 
@@ -766,7 +756,6 @@ describe('useOnlineSkipBoGame', () => {
     const nextView = createOnlineView(nextState, 2);
 
     triggerAIAnimation.mockImplementationOnce(() => 200);
-    // Slowest pending animation drives the turn-presentation timer.
     calculateMultipleDrawAnimationDuration.mockReturnValueOnce(700);
 
     const { result } = renderHook(() => useOnlineSkipBoGame(session));
@@ -780,20 +769,16 @@ describe('useOnlineSkipBoGame', () => {
 
     await act(async () => {
       socket.open();
-      socket.emitMessage({ type: 'snapshot', view: previousView });
+      socket.emitView(previousView);
       await Promise.resolve();
     });
 
     expect(result.current.gameState.message).toBe(previousView.message);
 
     await act(async () => {
-      socket.emitMessage({ type: 'snapshot', view: nextView });
+      socket.emitView(nextView);
     });
 
-    // Synchronous registration: as soon as the snapshot is applied, the play
-    // and draw animations are queued together — so triggerMultipleDrawAnimations
-    // is invoked in the same tick. The turn-presentation override holds the
-    // previous opponent's message until the slowest animation completes.
     expect(triggerAIAnimation).toHaveBeenCalledTimes(1);
     expect(triggerMultipleDrawAnimations).toHaveBeenCalledTimes(1);
     expect(result.current.gameState.message).toBe(previousView.message);
@@ -814,13 +799,11 @@ describe('useOnlineSkipBoGame', () => {
   });
 
   it('allows the host to start a waiting room as soon as all connected players are ready', async () => {
-    const session = createSession();
-    const waitingForHostOnly = createWaitingView([0], 1);
+    const session = createHostSession();
     const allReadyLobbySeats: LobbySeatInfo[] = [
       { seatIndex: 0, readyState: 'ready', displayName: 'Alice' },
       { seatIndex: 1, readyState: 'ready', displayName: 'Bob' },
     ];
-    const waitingForTwoPlayers = createWaitingView([0, 1], 2, allReadyLobbySeats);
 
     const { result } = renderHook(() => useOnlineSkipBoGame(session));
 
@@ -833,7 +816,7 @@ describe('useOnlineSkipBoGame', () => {
 
     await act(async () => {
       socket.open();
-      socket.emitMessage({ type: 'snapshot', view: waitingForHostOnly });
+      socket.emitMessage({ type: 'presence', room: waitingRoomSummary([0], 1) });
       await Promise.resolve();
     });
 
@@ -842,10 +825,7 @@ describe('useOnlineSkipBoGame', () => {
     expect(result.current.canStartGame).toBe(false);
 
     await act(async () => {
-      socket.emitMessage({
-        type: 'presence',
-        room: waitingForTwoPlayers.room,
-      });
+      socket.emitMessage({ type: 'presence', room: waitingRoomSummary([0, 1], 2, allReadyLobbySeats) });
       await Promise.resolve();
     });
 
@@ -863,29 +843,6 @@ describe('useOnlineSkipBoGame', () => {
         return parsed.type === 'startGame' && parsed.clientVersion === 2;
       }),
     ).toBe(true);
-  });
-
-  it('keeps the local waiting-room hand visible before the game starts', async () => {
-    const session = createSession();
-    const waitingView = createWaitingView([0, 1], 1);
-
-    const { result } = renderHook(() => useOnlineSkipBoGame(session));
-
-    await act(async () => {
-      vi.runOnlyPendingTimers();
-    });
-
-    const socket = MockWebSocket.instances[0];
-    expect(socket).toBeDefined();
-
-    await act(async () => {
-      socket.open();
-      socket.emitMessage({ type: 'snapshot', view: waitingView });
-      await Promise.resolve();
-    });
-
-    expect(result.current.roomStatus).toBe('WAITING');
-    expect(result.current.gameState.players[0].hand.filter((card) => card !== null)).toHaveLength(5);
   });
 
   it('sends the correct message for each lobby action', async () => {
@@ -953,13 +910,12 @@ describe('useOnlineSkipBoGame', () => {
     expect(MockWebSocket.instances.length).toBe(1);
   });
 
-  it('exposes lobbySeats and myReadyState from a waiting snapshot', async () => {
+  it('exposes lobbySeats and myReadyState from a waiting presence', async () => {
     const session = createSession();
     const lobbySeats: LobbySeatInfo[] = [
       { seatIndex: 0, readyState: 'ready', displayName: 'Alice' },
-      { seatIndex: 1, readyState: 'never-ready', displayName: null },
+      { seatIndex: 1, readyState: 'ready', displayName: 'Bob' },
     ];
-    const waitingView = createWaitingView([0, 1], 1, lobbySeats);
 
     const { result } = renderHook(() => useOnlineSkipBoGame(session));
 
@@ -970,17 +926,17 @@ describe('useOnlineSkipBoGame', () => {
     const socket = MockWebSocket.instances[0];
     await act(async () => {
       socket.open();
-      socket.emitMessage({ type: 'snapshot', view: waitingView });
+      socket.emitMessage({ type: 'presence', room: waitingRoomSummary([0, 1], 1, lobbySeats) });
       await Promise.resolve();
     });
 
     expect(result.current.lobbySeats).toEqual(lobbySeats);
+    // Local seat is 1 (guest), which is ready.
     expect(result.current.myReadyState).toBe('ready');
   });
 
   it('sets lobbyRemovalReason to host-left on roomClosed during WAITING', async () => {
     const session = createSession();
-    const waitingView = createWaitingView([0, 1], 1);
 
     const { result } = renderHook(() => useOnlineSkipBoGame(session));
 
@@ -991,7 +947,7 @@ describe('useOnlineSkipBoGame', () => {
     const socket = MockWebSocket.instances[0];
     await act(async () => {
       socket.open();
-      socket.emitMessage({ type: 'snapshot', view: waitingView });
+      socket.emitMessage({ type: 'presence', room: waitingRoomSummary([0, 1], 1) });
       await Promise.resolve();
     });
 
@@ -1005,7 +961,6 @@ describe('useOnlineSkipBoGame', () => {
 
   it('sets lobbyRemovalReason to kicked on actionRejected during WAITING and prevents reconnect', async () => {
     const session = createSession();
-    const waitingView = createWaitingView([0, 1], 1);
 
     const { result } = renderHook(() => useOnlineSkipBoGame(session));
 
@@ -1016,7 +971,7 @@ describe('useOnlineSkipBoGame', () => {
     const socket = MockWebSocket.instances[0];
     await act(async () => {
       socket.open();
-      socket.emitMessage({ type: 'snapshot', view: waitingView });
+      socket.emitMessage({ type: 'presence', room: waitingRoomSummary([0, 1], 1) });
       await Promise.resolve();
     });
 
@@ -1043,7 +998,7 @@ describe('useOnlineSkipBoGame', () => {
     const socket = MockWebSocket.instances[0];
     await act(async () => {
       socket.open();
-      socket.emitMessage({ type: 'snapshot', view: activeView });
+      socket.emitView(activeView);
       await Promise.resolve();
     });
 
@@ -1081,10 +1036,9 @@ describe('useOnlineSkipBoGame', () => {
       return { previousState, nextState };
     };
 
-    it('extracts completion metadata from the 12-on-11 snapshot pair', () => {
+    it('extracts completion metadata from the 12-on-11 view pair', () => {
       const { previousState, nextState } = createOpponentCompletionStates();
 
-      // Sanity: the reducer must actually clear the pile and move 12 cards to completed.
       expect(nextState.buildPiles[0]).toEqual([]);
       expect(nextState.completedBuildPiles).toHaveLength(12);
 
@@ -1097,10 +1051,6 @@ describe('useOnlineSkipBoGame', () => {
       expect(transition?.completedCards).toHaveLength(12);
       expect(transition?.completedCards?.at(-1)?.value).toBe(12);
       expect(transition?.sourceRevealed).toBe(false);
-      // The build pile is empty in nextState (cards moved to completedBuildPiles).
-      // This contract is what CenterArea masking reads; if it ever changes,
-      // re-verify that the 12 is still hidden on the retreat pile until the
-      // play animation lands.
       expect(transition?.targetPileLength).toBe(0);
     });
 
@@ -1111,7 +1061,7 @@ describe('useOnlineSkipBoGame', () => {
       expect(inferOpponentTransition(previousState, unchanged)).toBeNull();
     });
 
-    it('schedules completion animation after the opponent play animation on a 12 snapshot', async () => {
+    it('schedules completion animation after the opponent play animation on a 12 view', async () => {
       const session = createSession();
       const { previousState, nextState } = createOpponentCompletionStates();
       const previousView = createOnlineView(previousState, 1);
@@ -1131,14 +1081,12 @@ describe('useOnlineSkipBoGame', () => {
 
       await act(async () => {
         socket.open();
-        socket.emitMessage({ type: 'snapshot', view: previousView });
+        socket.emitView(previousView);
         await Promise.resolve();
       });
 
       await act(async () => {
-        socket.emitMessage({ type: 'snapshot', view: nextView });
-        // Flush the microtask chain so the .then() handler after
-        // triggerAIAnimation gets a chance to schedule the completion.
+        socket.emitView(nextView);
         await Promise.resolve();
         await Promise.resolve();
       });
@@ -1170,25 +1118,14 @@ describe('useOnlineSkipBoGame', () => {
       expect(completedCards.at(-1)?.value).toBe(12);
       expect(initialCompletedCount).toBe(0);
       expect(staggerDelay).toBe(100);
-      // baseDelay must equal the duration returned by triggerAIAnimation so the
-      // retreat animation only starts once the play animation has landed.
       expect(baseDelay).toBe(PLAY_DURATION);
 
-      // Ordering: play animation registered before completion animation.
       const playOrder = triggerAIAnimation.mock.invocationCallOrder[0];
       const completionOrder = triggerCompletedBuildPileAnimation.mock.invocationCallOrder[0];
       expect(playOrder).toBeLessThan(completionOrder);
     });
 
     it('registers play and completion animations in the same synchronous tick (no microtask gap)', async () => {
-      // Regression: previously triggerAIAnimation was async, and completion
-      // was scheduled in a .then() microtask after it. That one-microtask gap
-      // let React paint a frame where the play animation was registered but
-      // completion wasn't — causing the "12" backdrop to appear on the build
-      // pile, and the just-retreated cards to briefly leak onto the retreat
-      // pile, before the play animation visually landed. The animations must
-      // now register synchronously so both land in the same React commit as
-      // the snapshot's commitView.
       const session = createSession();
       const { previousState, nextState } = createOpponentCompletionStates();
       const previousView = createOnlineView(previousState, 1);
@@ -1206,28 +1143,19 @@ describe('useOnlineSkipBoGame', () => {
 
       await act(async () => {
         socket.open();
-        socket.emitMessage({ type: 'snapshot', view: previousView });
+        socket.emitView(previousView);
         await Promise.resolve();
       });
 
-      // Emit the snapshot synchronously, WITHOUT awaiting any microtasks
-      // afterwards inside the act() callback. We then assert from outside
-      // act() that both animations were already registered.
       await act(async () => {
-        socket.emitMessage({ type: 'snapshot', view: nextView });
+        socket.emitView(nextView);
       });
 
-      // Without flushing microtasks, both calls must already have fired.
       expect(triggerAIAnimation).toHaveBeenCalledTimes(1);
       expect(triggerCompletedBuildPileAnimation).toHaveBeenCalledTimes(1);
     });
 
     it('schedules opponent hand refill with baseDelay equal to the play animation duration', async () => {
-      // When the opponent plays the LAST card from their hand and the
-      // refilled slot must animate in, the draw animations should be queued
-      // so their initialDelay equals the play (+ completion) duration —
-      // otherwise the refilled card pops into the opponent's hand before
-      // (or while) the played card is still in flight.
       const previousState = initialGameState();
       previousState.currentPlayerIndex = 1;
       previousState.players[1].isAI = false;
@@ -1260,22 +1188,18 @@ describe('useOnlineSkipBoGame', () => {
 
       await act(async () => {
         socket.open();
-        socket.emitMessage({ type: 'snapshot', view: previousView });
+        socket.emitView(previousView);
         await Promise.resolve();
       });
 
       await act(async () => {
-        socket.emitMessage({ type: 'snapshot', view: nextView });
+        socket.emitView(nextView);
       });
 
-      // The hand refill must be queued exactly once for the opponent, with
-      // baseDelay = play duration so the refilled card appears AFTER the
-      // played card has landed on the build pile.
       expect(triggerMultipleDrawAnimations).toHaveBeenCalledTimes(1);
       const args = triggerMultipleDrawAnimations.mock.calls[0] as unknown as [number, Card[], number[], number, number];
       const [opponentIndex, , handIndices, , baseDelay] = args;
       expect(opponentIndex).toBe(1);
-      // The slot the opponent emptied (index 4) must be refilled.
       expect(handIndices).toContain(4);
       expect(baseDelay).toBe(PLAY_DURATION);
     });

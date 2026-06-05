@@ -1,4 +1,4 @@
-import type { CreateRoomResponse } from '@skipbo/multiplayer-protocol';
+import type { CreateRoomResponse } from '@skipbo/realtime-core';
 
 const STORAGE_KEY = 'skipbo_online_session';
 const SCHEMA_VERSION = 1;
