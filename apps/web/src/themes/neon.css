@@ -264,7 +264,9 @@
     transform: perspective(400px) rotateX(50deg) translateY(0);
   }
   to {
-    transform: perspective(400px) rotateX(50deg) translateY(-80px);
+    /* Translate by an exact multiple of the grid's 4vh repeat period so the
+       loop point lands on an identical copy of the pattern — no flicker. */
+    transform: perspective(400px) rotateX(50deg) translateY(-8vh);
   }
 }
 
