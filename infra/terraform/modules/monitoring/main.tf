@@ -24,83 +24,11 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   })
 }
 
-resource "aws_cloudwatch_metric_alarm" "lambda_throttles" {
-  for_each = toset(var.lambda_function_names)
-
-  alarm_name          = "${var.app_name}-lambda-${replace(each.value, "/", "-")}-throttles"
-  alarm_description   = "Throttles detected in lambda ${each.value}"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = 1
-  metric_name         = "Throttles"
-  namespace           = "AWS/Lambda"
-  period              = 300
-  statistic           = "Sum"
-  threshold           = 1
-  treat_missing_data  = "notBreaching"
-
-  dimensions = {
-    FunctionName = each.value
-  }
-
-  alarm_actions = var.alarm_topic_arn == null ? [] : [var.alarm_topic_arn]
-  ok_actions    = var.alarm_topic_arn == null ? [] : [var.alarm_topic_arn]
-
-  tags = merge(var.tags, {
-    Name = "${var.app_name}-lambda-${replace(each.value, "/", "-")}-throttles"
-  })
-}
-
-resource "aws_cloudwatch_metric_alarm" "dynamodb_read_throttles" {
-  for_each = toset(var.dynamodb_table_names)
-
-  alarm_name          = "${var.app_name}-dynamodb-${each.value}-read-throttles"
-  alarm_description   = "Read throttles detected in dynamodb table ${each.value}"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = 1
-  metric_name         = "ReadThrottleEvents"
-  namespace           = "AWS/DynamoDB"
-  period              = 300
-  statistic           = "Sum"
-  threshold           = 1
-  treat_missing_data  = "notBreaching"
-
-  dimensions = {
-    TableName = each.value
-  }
-
-  alarm_actions = var.alarm_topic_arn == null ? [] : [var.alarm_topic_arn]
-  ok_actions    = var.alarm_topic_arn == null ? [] : [var.alarm_topic_arn]
-
-  tags = merge(var.tags, {
-    Name = "${var.app_name}-dynamodb-${each.value}-read-throttles"
-  })
-}
-
-resource "aws_cloudwatch_metric_alarm" "dynamodb_write_throttles" {
-  for_each = toset(var.dynamodb_table_names)
-
-  alarm_name          = "${var.app_name}-dynamodb-${each.value}-write-throttles"
-  alarm_description   = "Write throttles detected in dynamodb table ${each.value}"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = 1
-  metric_name         = "WriteThrottleEvents"
-  namespace           = "AWS/DynamoDB"
-  period              = 300
-  statistic           = "Sum"
-  threshold           = 1
-  treat_missing_data  = "notBreaching"
-
-  dimensions = {
-    TableName = each.value
-  }
-
-  alarm_actions = var.alarm_topic_arn == null ? [] : [var.alarm_topic_arn]
-  ok_actions    = var.alarm_topic_arn == null ? [] : [var.alarm_topic_arn]
-
-  tags = merge(var.tags, {
-    Name = "${var.app_name}-dynamodb-${each.value}-write-throttles"
-  })
-}
+# NOTE: Lambda throttle and DynamoDB read/write throttle alarms were intentionally
+# removed to stay within CloudWatch's 10 always-free alarm metrics. The Lambda
+# functions run at low volume and the DynamoDB tables are PAY_PER_REQUEST
+# (on-demand), so capacity throttling effectively cannot occur. Errors and system
+# errors are still alarmed below.
 
 resource "aws_cloudwatch_metric_alarm" "dynamodb_system_errors" {
   for_each = toset(var.dynamodb_table_names)
