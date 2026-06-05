@@ -134,9 +134,12 @@ importers:
       '@skipbo/game-core':
         specifier: workspace:*
         version: link:../../packages/game-core
-      '@skipbo/multiplayer-protocol':
+      '@skipbo/realtime-core':
         specifier: workspace:*
-        version: link:../../packages/multiplayer-protocol
+        version: link:../../packages/realtime-core
+      '@skipbo/skipbo-runtime':
+        specifier: workspace:*
+        version: link:../../packages/skipbo-runtime
       '@tanstack/react-query':
         specifier: ^5.100.14
         version: 5.100.14(react@19.2.6)

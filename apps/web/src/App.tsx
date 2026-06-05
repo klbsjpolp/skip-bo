@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useState } from 'react';
 
-import type { CreateRoomResponse } from '@skipbo/multiplayer-protocol';
+import type { CreateRoomResponse } from '@skipbo/realtime-core';
 
 import { useLocalSkipBoGame } from '@/hooks/useLocalSkipBoGame';
 import { useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';

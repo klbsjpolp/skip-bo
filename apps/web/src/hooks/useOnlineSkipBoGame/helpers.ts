@@ -1,5 +1,5 @@
 import { type Card, gameReducer, type GameState, initialGameState } from '@skipbo/game-core';
-import { type ClientGameView, serializeClientGameView } from '@skipbo/multiplayer-protocol';
+import { type ClientGameView, serializeClientGameView } from '@skipbo/skipbo-runtime';
 
 import type { GameAction } from '@/state/gameActions';
 import { calculateMultipleDrawAnimationDuration, triggerMultipleDrawAnimations } from '@/services/drawAnimationService';

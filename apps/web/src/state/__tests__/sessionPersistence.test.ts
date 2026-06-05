@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import type { CreateRoomResponse } from '@skipbo/multiplayer-protocol';
+import type { CreateRoomResponse } from '@skipbo/realtime-core';
 
 import { clearOnlineSession, loadOnlineSession, saveOnlineSession } from '@/state/sessionPersistence';
 

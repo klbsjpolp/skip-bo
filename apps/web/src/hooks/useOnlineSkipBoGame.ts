@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { canPlayCard, type Card, getCompletedBuildPileCards, type MoveResult } from '@skipbo/game-core';
+import { canPlayCard, type Card, getCompletedBuildPileCards, type GameState, type MoveResult } from '@skipbo/game-core';
 
 import type { GameAction } from '@/state/gameActions';
 import {
-  type ClientGameView,
+  PROTOCOL_VERSION,
   type CreateRoomResponse,
   type DisconnectedSeatInfo,
   type LobbyReadyState,
   type LobbySeatInfo,
-  PROTOCOL_VERSION,
+  type RoomSummary,
   type ServerMessage,
-} from '@skipbo/multiplayer-protocol';
+} from '@skipbo/realtime-core';
+import { isDebugAction, SkipboHost, type ClientGameView, type HostRoomMeta } from '@skipbo/skipbo-runtime';
 
 import { useCardAnimation } from '@/contexts/useCardAnimation';
 import {
@@ -51,8 +52,29 @@ export { inferOpponentTransition, type OpponentTransition };
 
 type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
+/** Opaque blob the host stores on the server for its own reconnection. */
+interface HostSnapshotPayload {
+  state: GameState;
+  activeSeatIndices: number[];
+}
+
+const toRoomMeta = (room: RoomSummary): HostRoomMeta => ({
+  connectedSeats: room.connectedSeats,
+  disconnectedSeats: room.disconnectedSeats,
+  expiresAt: room.expiresAt,
+  hostSeatIndex: room.hostSeatIndex,
+  lobbySeats: room.lobbySeats,
+  roomCode: room.roomCode,
+  seatCapacity: room.seatCapacity,
+  status: room.status,
+  version: room.version,
+});
+
 export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const [view, setView] = useState<ClientGameView | null>(null);
+  // Latest room/lobby summary. During WAITING there is no game view yet, so the
+  // lobby UI is driven from `presence` alone.
+  const [roomSummary, setRoomSummary] = useState<RoomSummary | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
   const [lastError, setLastError] = useState<string | null>(null);
   const [turnPresentationOverride, setTurnPresentationOverride] = useState<TurnPresentationOverride | null>(null);
@@ -65,15 +87,18 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const pingIntervalRef = useRef<number | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const turnPresentationTimeoutRef = useRef<number | null>(null);
+  // Host-authoritative state. Only populated when the local seat is the host.
+  const hostRef = useRef<SkipboHost | null>(null);
+  const activeSeatIndicesRef = useRef<number[]>([]);
+  const roomMetaRef = useRef<HostRoomMeta | null>(null);
+  const lastBroadcastTurnRef = useRef<number | null>(null);
   const { removeAnimation, startAnimation, waitForAnimations } = useCardAnimation();
+
+  const isHost = session != null && session.seatIndex === session.hostSeatIndex;
+
   const setInteractionLocked = useCallback((locked: boolean) => {
     interactionLockRef.current = locked;
   }, []);
-  // Animations are decoupled from the interaction lock: the user can keep
-  // selecting and playing cards while previous animations are still in flight.
-  // `interactionLockRef` is only held for the synchronous body of
-  // playCard/discardCard so two concurrent dispatches can't race on the same
-  // selectedCard.
   const isInteractionBlocked = useCallback(() => interactionLockRef.current, []);
   const commitView = useCallback((nextView: ClientGameView | null) => {
     viewRef.current = nextView;
@@ -84,6 +109,219 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     viewRef.current = nextView;
     setView(nextView);
   }, []);
+  const clearTurnPresentationTimeout = useCallback(() => {
+    if (turnPresentationTimeoutRef.current !== null) {
+      window.clearTimeout(turnPresentationTimeoutRef.current);
+      turnPresentationTimeoutRef.current = null;
+    }
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Wire helpers
+  // ---------------------------------------------------------------------------
+  const sendRaw = useCallback((message: unknown): void => {
+    if (!websocketRef.current || websocketRef.current.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    websocketRef.current.send(JSON.stringify(message));
+  }, []);
+
+  const sendRelay = useCallback(
+    (kind: 'move' | 'event' | 'view', payload: unknown, toSeats?: number[]): void => {
+      sendRaw({ type: 'relay', kind, payload, toSeats });
+    },
+    [sendRaw],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Rendering: ingest a redacted ClientGameView (host generates it; guests
+  // receive it). This is the single rendering path for both roles — opponent
+  // animation inference and optimistic reconciliation are unchanged.
+  // ---------------------------------------------------------------------------
+  const ingestView = useCallback(
+    (incomingView: ClientGameView): void => {
+      setInteractionLocked(false);
+      setConnectionStatus('connected');
+      setLastError(null);
+      authoritativeViewRef.current = incomingView;
+
+      if (incomingView.room.status === 'FINISHED' || incomingView.gameIsOver) {
+        clearOnlineSession();
+      }
+
+      const previousView = viewRef.current;
+      if (!previousView) {
+        commitView(incomingView);
+        return;
+      }
+
+      const previousState = cloneGameStateFromView(previousView);
+      const nextState = cloneGameStateFromView(incomingView);
+      const drawTransitions = collectDrawTransitions(previousState, nextState);
+      const opponentTransition = inferOpponentTransition(previousState, nextState);
+      if (
+        opponentTransition &&
+        previousState.selectedCard?.source === 'hand' &&
+        previousState.currentPlayerIndex !== 0
+      ) {
+        const opponentIndex = previousState.currentPlayerIndex;
+        const playedSlotIndex = previousState.selectedCard.index;
+        const refilledCard = nextState.players[opponentIndex].hand[playedSlotIndex];
+        const existing = drawTransitions.find((t) => t.playerIndex === opponentIndex);
+        if (refilledCard && (!existing || !existing.handIndices.includes(playedSlotIndex))) {
+          if (existing) {
+            const insertAt = existing.handIndices.findIndex((i) => i > playedSlotIndex);
+            const position = insertAt === -1 ? existing.handIndices.length : insertAt;
+            existing.cards.splice(position, 0, { ...refilledCard });
+            existing.handIndices.splice(position, 0, playedSlotIndex);
+          } else {
+            drawTransitions.push({
+              cards: [{ ...refilledCard }],
+              handIndices: [playedSlotIndex],
+              playerIndex: opponentIndex,
+            });
+          }
+        }
+      }
+      const turnChanged = previousView.currentPlayerIndex !== incomingView.currentPlayerIndex;
+      const holdPreviousTurnPresentation = () => {
+        if (!turnChanged) {
+          return;
+        }
+
+        clearTurnPresentationTimeout();
+        setTurnPresentationOverride({
+          currentPlayerIndex: previousView.currentPlayerIndex,
+          message: previousView.message,
+        });
+      };
+      const applyTurnPresentationDelay = (duration: number) => {
+        if (!turnChanged || duration <= 0) {
+          clearTurnPresentationTimeout();
+          setTurnPresentationOverride(null);
+          return;
+        }
+
+        clearTurnPresentationTimeout();
+        turnPresentationTimeoutRef.current = window.setTimeout(() => {
+          turnPresentationTimeoutRef.current = null;
+          setTurnPresentationOverride(null);
+        }, duration);
+      };
+
+      if (opponentTransition) {
+        holdPreviousTurnPresentation();
+        commitView(incomingView);
+        const opponentAnimationDuration = triggerAIAnimation(previousState, opponentTransition.action, {
+          cardOverride: opponentTransition.animationCard,
+          sourceRevealedOverride: opponentTransition.sourceRevealed,
+          targetSettledInStateOverride: true,
+          targetPileLengthOverride: opponentTransition.targetPileLength,
+          targetRevealedOverride: true,
+        });
+        if (opponentTransition.completedCards && opponentTransition.completedBuildPileIndex !== undefined) {
+          triggerCompletedBuildPileAnimation(
+            previousState,
+            opponentTransition.completedBuildPileIndex,
+            opponentTransition.completedCards,
+            previousState.completedBuildPiles.length,
+            100,
+            opponentAnimationDuration,
+          );
+        }
+
+        scheduleDrawAnimations(drawTransitions, opponentAnimationDuration);
+        applyTurnPresentationDelay(
+          Math.max(opponentAnimationDuration, getMaxDrawAnimationDuration(drawTransitions, opponentAnimationDuration)),
+        );
+      } else {
+        const drawAnimationDuration = getMaxDrawAnimationDuration(drawTransitions);
+        if (drawAnimationDuration > 0) {
+          holdPreviousTurnPresentation();
+        }
+        scheduleDrawAnimations(drawTransitions);
+        applyTurnPresentationDelay(drawAnimationDuration);
+        commitView(incomingView);
+      }
+    },
+    [clearTurnPresentationTimeout, commitView, setInteractionLocked],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Host authority: push each guest its redacted view, the abstract turn, the
+  // reconnection snapshot, and the game-over signal.
+  // ---------------------------------------------------------------------------
+  const pushAuthority = useCallback((): void => {
+    const host = hostRef.current;
+    const meta = roomMetaRef.current;
+    if (!host || !meta || !session) {
+      return;
+    }
+
+    // Advance the server's abstract turn BEFORE relaying the views. Otherwise a
+    // guest could receive a "your turn" view and fire a move that reaches the
+    // server before its currentSeatIndex is updated — a spurious rejection.
+    const currentTurn = host.gameIsOver ? null : host.currentSeatIndex();
+    if (currentTurn !== null && currentTurn !== lastBroadcastTurnRef.current) {
+      lastBroadcastTurnRef.current = currentTurn;
+      sendRaw({ type: 'setTurn', currentSeatIndex: currentTurn });
+    }
+
+    for (const seat of activeSeatIndicesRef.current) {
+      if (seat === session.seatIndex) {
+        continue;
+      }
+
+      sendRelay('view', host.viewForSeat(seat, meta), [seat]);
+    }
+
+    const snapshot: HostSnapshotPayload = {
+      state: host.serializeSnapshot(),
+      activeSeatIndices: activeSeatIndicesRef.current,
+    };
+    sendRaw({ type: 'snapshot', payload: snapshot });
+
+    if (host.gameIsOver) {
+      sendRaw({ type: 'endGame', winnerSeatIndex: host.winnerSeatIndex() });
+    }
+  }, [sendRaw, sendRelay, session]);
+
+  const applyHostAction = useCallback(
+    (action: GameAction): void => {
+      const host = hostRef.current;
+      const meta = roomMetaRef.current;
+      if (!host || !meta || !session) {
+        return;
+      }
+
+      const result = host.applyMove(session.seatIndex, action);
+      if (!result.ok) {
+        setLastError(result.error ?? null);
+        return;
+      }
+
+      ingestView(host.viewForSeat(session.seatIndex, meta));
+      pushAuthority();
+    },
+    [ingestView, pushAuthority, session],
+  );
+
+  const sendAction = useCallback(
+    (action: GameAction): void => {
+      if (isHost) {
+        applyHostAction(action);
+        return;
+      }
+
+      if (isDebugAction(action)) {
+        sendRelay('event', { move: action });
+      } else {
+        sendRelay('move', action);
+      }
+    },
+    [applyHostAction, isHost, sendRelay],
+  );
 
   useEffect(() => {
     setGlobalAnimationContext({ startAnimation, waitForAnimations });
@@ -105,12 +343,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         reconnectTimeoutRef.current = null;
       }
     };
-    const clearTurnPresentationTimeout = () => {
-      if (turnPresentationTimeoutRef.current !== null) {
-        window.clearTimeout(turnPresentationTimeoutRef.current);
-        turnPresentationTimeoutRef.current = null;
-      }
-    };
 
     if (!session) {
       setInteractionLocked(false);
@@ -121,12 +353,22 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       websocketRef.current = null;
       authoritativeViewRef.current = null;
       viewRef.current = null;
+      hostRef.current = null;
+      roomMetaRef.current = null;
+      activeSeatIndicesRef.current = [];
+      lastBroadcastTurnRef.current = null;
       return;
     }
 
+    const activeSession = session;
+    const localIsHost = activeSession.seatIndex === activeSession.hostSeatIndex;
     authoritativeViewRef.current = null;
     viewRef.current = null;
     intentionalLeaveRef.current = false;
+    hostRef.current = null;
+    roomMetaRef.current = null;
+    activeSeatIndicesRef.current = [];
+    lastBroadcastTurnRef.current = null;
 
     let socket: WebSocket | null = null;
     let isCancelled = false;
@@ -162,9 +404,12 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         return;
       }
 
-      const currentSocket = new WebSocket(session.wsUrl);
+      const currentSocket = new WebSocket(activeSession.wsUrl);
       socket = currentSocket;
       websocketRef.current = currentSocket;
+      // Guests request a fresh view from the host once per socket (covers
+      // reconnect mid-game; the host has no other way to know we came back).
+      let resyncRequested = false;
 
       currentSocket.addEventListener('open', () => {
         if (!isCurrentSocket(currentSocket)) {
@@ -176,9 +421,9 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
           JSON.stringify({
             type: 'auth',
             protocolVersion: PROTOCOL_VERSION,
-            roomCode: session.roomCode,
-            seatIndex: session.seatIndex,
-            seatToken: session.seatToken,
+            roomCode: activeSession.roomCode,
+            seatIndex: activeSession.seatIndex,
+            seatToken: activeSession.seatToken,
           }),
         );
         startPingLoop(currentSocket);
@@ -197,171 +442,128 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
           const message = JSON.parse(event.data) as ServerMessage;
 
           switch (message.type) {
-            case 'snapshot': {
+            case 'gameStarted': {
               setInteractionLocked(false);
               setConnectionStatus('connected');
               setLastError(null);
-              authoritativeViewRef.current = message.view;
+              activeSeatIndicesRef.current = message.activeSeatIndices;
+              lastBroadcastTurnRef.current = message.currentSeatIndex;
 
-              if (message.view.room.status === 'FINISHED' || message.view.gameIsOver) {
-                clearOnlineSession();
+              if (localIsHost) {
+                const meta = roomMetaRef.current;
+                const stockSize = (message.gameConfig as { stockSize?: number } | undefined)?.stockSize;
+                const playerNames = message.activeSeatIndices.map(
+                  (seat) => meta?.lobbySeats?.find((s) => s.seatIndex === seat)?.displayName ?? undefined,
+                );
+                const host = SkipboHost.create({
+                  activeSeatIndices: message.activeSeatIndices,
+                  allowDebug: import.meta.env.DEV,
+                  playerNames,
+                  stockSize,
+                });
+                hostRef.current = host;
+
+                if (meta) {
+                  ingestView(host.viewForSeat(activeSession.seatIndex, meta));
+                  for (const seat of message.activeSeatIndices) {
+                    if (seat !== activeSession.seatIndex) {
+                      sendRelay('view', host.viewForSeat(seat, meta), [seat]);
+                    }
+                  }
+                  const snapshot: HostSnapshotPayload = {
+                    state: host.serializeSnapshot(),
+                    activeSeatIndices: message.activeSeatIndices,
+                  };
+                  sendRaw({ type: 'snapshot', payload: snapshot });
+                }
               }
-
-              const previousView = viewRef.current;
-              if (previousView) {
-                const previousState = cloneGameStateFromView(previousView);
-                const nextState = cloneGameStateFromView(message.view);
-                const drawTransitions = collectDrawTransitions(previousState, nextState);
-                const opponentTransition = inferOpponentTransition(previousState, nextState);
-                // When an opponent plays the last card of their hand, the slot
-                // it left behind gets refilled in the next snapshot. Comparing
-                // hand[index] before/after only catches null→card transitions,
-                // so the just-played slot would otherwise pop in without
-                // animation while its 4 siblings fly from the deck.
-                if (
-                  opponentTransition &&
-                  previousState.selectedCard?.source === 'hand' &&
-                  previousState.currentPlayerIndex !== 0
-                ) {
-                  const opponentIndex = previousState.currentPlayerIndex;
-                  const playedSlotIndex = previousState.selectedCard.index;
-                  const refilledCard = nextState.players[opponentIndex].hand[playedSlotIndex];
-                  const existing = drawTransitions.find((t) => t.playerIndex === opponentIndex);
-                  if (refilledCard && (!existing || !existing.handIndices.includes(playedSlotIndex))) {
-                    if (existing) {
-                      const insertAt = existing.handIndices.findIndex((i) => i > playedSlotIndex);
-                      const position = insertAt === -1 ? existing.handIndices.length : insertAt;
-                      existing.cards.splice(position, 0, { ...refilledCard });
-                      existing.handIndices.splice(position, 0, playedSlotIndex);
-                    } else {
-                      drawTransitions.push({
-                        cards: [{ ...refilledCard }],
-                        handIndices: [playedSlotIndex],
-                        playerIndex: opponentIndex,
-                      });
+              break;
+            }
+            case 'snapshotRestore': {
+              if (localIsHost && message.payload) {
+                const payload = message.payload as HostSnapshotPayload;
+                activeSeatIndicesRef.current = payload.activeSeatIndices;
+                const host = SkipboHost.fromSnapshot(payload.state, payload.activeSeatIndices, import.meta.env.DEV);
+                hostRef.current = host;
+                lastBroadcastTurnRef.current = host.gameIsOver ? null : host.currentSeatIndex();
+                const meta = roomMetaRef.current;
+                if (meta) {
+                  ingestView(host.viewForSeat(activeSession.seatIndex, meta));
+                  for (const seat of payload.activeSeatIndices) {
+                    if (seat !== activeSession.seatIndex) {
+                      sendRelay('view', host.viewForSeat(seat, meta), [seat]);
                     }
                   }
                 }
-                const turnChanged = previousView.currentPlayerIndex !== message.view.currentPlayerIndex;
-                const holdPreviousTurnPresentation = () => {
-                  if (!turnChanged) {
-                    return;
-                  }
-
-                  clearTurnPresentationTimeout();
-                  setTurnPresentationOverride({
-                    currentPlayerIndex: previousView.currentPlayerIndex,
-                    message: previousView.message,
-                  });
-                };
-                const applyTurnPresentationDelay = (duration: number) => {
-                  if (!turnChanged || duration <= 0) {
-                    clearTurnPresentationTimeout();
-                    setTurnPresentationOverride(null);
-                    return;
-                  }
-
-                  clearTurnPresentationTimeout();
-                  turnPresentationTimeoutRef.current = window.setTimeout(() => {
-                    turnPresentationTimeoutRef.current = null;
-                    setTurnPresentationOverride(null);
-                  }, duration);
-                };
-
-                if (opponentTransition) {
-                  holdPreviousTurnPresentation();
-                  // Commit the new view *before* triggering the animation. The
-                  // DOM has not yet been updated (React only schedules the
-                  // re-render), so triggerAIAnimation can still read the
-                  // previous layout via document.querySelector. The flushSync
-                  // inside startAnimation then flushes both the new view and
-                  // the new animation in a single render — preventing a
-                  // one-frame intermediate render where the animation is
-                  // registered against the *old* state. That intermediate
-                  // render would mask the old stock top and fall back to the
-                  // second-from-top card, which on the opponent's stock is a
-                  // redacted HIDDEN_CARD and renders as a face-down back —
-                  // visible as a brief card-back flash before the new top
-                  // appears.
-                  commitView(message.view);
-                  // Register play, completion, draw refill, and the turn
-                  // presentation timer SYNCHRONOUSLY so they all batch into
-                  // the same React commit as the new view. A microtask gap
-                  // here (e.g. awaiting triggerAIAnimation) lets React paint
-                  // a frame where the play animation is registered but the
-                  // completion / draw animations are not — causing visible
-                  // glitches like the "12" backdrop appearing on the build
-                  // pile before the play card lands, or completed cards
-                  // leaking onto the retreat pile while the play is still
-                  // in flight.
-                  const opponentAnimationDuration = triggerAIAnimation(previousState, opponentTransition.action, {
-                    cardOverride: opponentTransition.animationCard,
-                    sourceRevealedOverride: opponentTransition.sourceRevealed,
-                    targetSettledInStateOverride: true,
-                    targetPileLengthOverride: opponentTransition.targetPileLength,
-                    targetRevealedOverride: true,
-                  });
-                  if (opponentTransition.completedCards && opponentTransition.completedBuildPileIndex !== undefined) {
-                    triggerCompletedBuildPileAnimation(
-                      previousState,
-                      opponentTransition.completedBuildPileIndex,
-                      opponentTransition.completedCards,
-                      previousState.completedBuildPiles.length,
-                      100,
-                      opponentAnimationDuration,
-                    );
-                  }
-
-                  scheduleDrawAnimations(drawTransitions, opponentAnimationDuration);
-                  applyTurnPresentationDelay(
-                    Math.max(
-                      opponentAnimationDuration,
-                      getMaxDrawAnimationDuration(drawTransitions, opponentAnimationDuration),
-                    ),
-                  );
-                } else {
-                  const drawAnimationDuration = getMaxDrawAnimationDuration(drawTransitions);
-                  if (drawAnimationDuration > 0) {
-                    holdPreviousTurnPresentation();
-                  }
-                  scheduleDrawAnimations(drawTransitions);
-                  applyTurnPresentationDelay(drawAnimationDuration);
-                  commitView(message.view);
-                }
-              } else {
-                commitView(message.view);
               }
-
               break;
             }
-            case 'presence':
+            case 'relayed': {
+              if (localIsHost) {
+                const host = hostRef.current;
+                const meta = roomMetaRef.current;
+                if (!host || !meta) {
+                  break;
+                }
+
+                if (message.kind === 'move') {
+                  const result = host.applyMove(message.fromSeat, message.payload as GameAction);
+                  if (result.ok) {
+                    ingestView(host.viewForSeat(activeSession.seatIndex, meta));
+                    pushAuthority();
+                  } else {
+                    // Correct the offending guest with its authoritative view.
+                    sendRelay('view', host.viewForSeat(message.fromSeat, meta), [message.fromSeat]);
+                  }
+                } else if (message.kind === 'event') {
+                  const payload = message.payload as { resync?: boolean; move?: GameAction } | null;
+                  if (payload?.resync) {
+                    sendRelay('view', host.viewForSeat(message.fromSeat, meta), [message.fromSeat]);
+                  } else if (payload?.move) {
+                    const result = host.applyMove(message.fromSeat, payload.move);
+                    if (result.ok) {
+                      ingestView(host.viewForSeat(activeSession.seatIndex, meta));
+                      pushAuthority();
+                    }
+                  }
+                }
+                // Host ignores relayed 'view'.
+              } else if (message.kind === 'view') {
+                ingestView(message.payload as ClientGameView);
+              }
+              break;
+            }
+            case 'turn':
+              // Views carry the current player; nothing extra to do.
+              break;
+            case 'presence': {
               setConnectionStatus('connected');
+              roomMetaRef.current = toRoomMeta(message.room);
+              setRoomSummary(message.room);
               if (message.room.status === 'FINISHED') {
                 clearOnlineSession();
               }
               authoritativeViewRef.current = authoritativeViewRef.current
-                ? {
-                    ...authoritativeViewRef.current,
-                    room: message.room,
-                  }
+                ? { ...authoritativeViewRef.current, room: message.room }
                 : authoritativeViewRef.current;
-              updateView((previousView) =>
-                previousView
-                  ? {
-                      ...previousView,
-                      room: message.room,
-                    }
-                  : previousView,
-              );
+              updateView((previousView) => (previousView ? { ...previousView, room: message.room } : previousView));
+
+              // Guest reconnecting into a running game: ask the host for our view.
+              if (!localIsHost && message.room.status === 'ACTIVE' && !resyncRequested) {
+                resyncRequested = true;
+                sendRelay('event', { resync: true });
+              }
               break;
-            case 'actionRejected':
+            }
+            case 'actionRejected': {
               setInteractionLocked(false);
-              if (authoritativeViewRef.current === null) {
+              const knownStatus = authoritativeViewRef.current?.room.status ?? roomMetaRef.current?.status ?? null;
+              if (knownStatus === null) {
                 intentionalLeaveRef.current = true;
                 clearOnlineSession();
                 setLastError(message.reason);
                 currentSocket.close();
-              } else if (authoritativeViewRef.current.room.status === 'WAITING') {
+              } else if (knownStatus === 'WAITING') {
                 intentionalLeaveRef.current = true;
                 currentSocket.close();
                 setLobbyRemovalReason('kicked');
@@ -370,30 +572,23 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
                 commitView(authoritativeViewRef.current ?? viewRef.current);
               }
               break;
+            }
             case 'roomClosed':
               setInteractionLocked(false);
               clearOnlineSession();
               if (message.status === 'WAITING' || authoritativeViewRef.current?.room.status === 'WAITING') {
                 setLobbyRemovalReason('host-left');
               }
+              setRoomSummary((previous) => (previous ? { ...previous, status: message.status } : previous));
               authoritativeViewRef.current = authoritativeViewRef.current
                 ? {
                     ...authoritativeViewRef.current,
-                    room: {
-                      ...authoritativeViewRef.current.room,
-                      status: message.status,
-                    },
+                    room: { ...authoritativeViewRef.current.room, status: message.status },
                   }
                 : authoritativeViewRef.current;
               updateView((previousView) =>
                 previousView
-                  ? {
-                      ...previousView,
-                      room: {
-                        ...previousView.room,
-                        status: message.status,
-                      },
-                    }
+                  ? { ...previousView, room: { ...previousView.room, status: message.status } }
                   : previousView,
               );
               break;
@@ -436,10 +631,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       window.clearTimeout(connectTimeoutId);
       clearReconnectTimeout();
       clearPingInterval();
-      if (turnPresentationTimeoutRef.current !== null) {
-        window.clearTimeout(turnPresentationTimeoutRef.current);
-        turnPresentationTimeoutRef.current = null;
-      }
+      clearTurnPresentationTimeout();
 
       if (websocketRef.current === socket) {
         websocketRef.current = null;
@@ -451,7 +643,17 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         socket.close();
       }
     };
-  }, [commitView, session, setInteractionLocked, updateView]);
+  }, [
+    clearTurnPresentationTimeout,
+    commitView,
+    ingestView,
+    pushAuthority,
+    sendRaw,
+    sendRelay,
+    session,
+    setInteractionLocked,
+    updateView,
+  ]);
 
   const gameState = useMemo(() => {
     const baseState = view
@@ -468,20 +670,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       message: turnPresentationOverride.message,
     };
   }, [session?.roomCode, session?.seatCapacity, turnPresentationOverride, view]);
-
-  const sendAction = useCallback((action: GameAction): void => {
-    if (!websocketRef.current || websocketRef.current.readyState !== WebSocket.OPEN) {
-      return;
-    }
-
-    websocketRef.current.send(
-      JSON.stringify({
-        type: 'action',
-        action,
-        clientVersion: viewRef.current?.room.version,
-      }),
-    );
-  }, []);
 
   const debugFillBuildPile = useCallback(
     (buildPile: number): void => {
@@ -507,17 +695,8 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   }, [sendAction]);
 
   const startGame = useCallback(() => {
-    if (!websocketRef.current || websocketRef.current.readyState !== WebSocket.OPEN) {
-      return;
-    }
-
-    websocketRef.current.send(
-      JSON.stringify({
-        type: 'startGame',
-        clientVersion: viewRef.current?.room.version,
-      }),
-    );
-  }, []);
+    sendRaw({ type: 'startGame', clientVersion: roomMetaRef.current?.version ?? viewRef.current?.room.version });
+  }, [sendRaw]);
 
   const selectCard = useCallback(
     (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => {
@@ -551,12 +730,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
           ? {
               ...previousView,
               message: 'Sélectionnez une destination',
-              selectedCard: {
-                card,
-                source,
-                index,
-                discardPileIndex,
-              },
+              selectedCard: { card, source, index, discardPileIndex },
             }
           : previousView,
       );
@@ -572,13 +746,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     }
 
     updateView((previousView) =>
-      previousView
-        ? {
-            ...previousView,
-            message: "C'est votre tour",
-            selectedCard: null,
-          }
-        : previousView,
+      previousView ? { ...previousView, message: "C'est votre tour", selectedCard: null } : previousView,
     );
 
     sendAction({ type: 'CLEAR_SELECTION' });
@@ -609,10 +777,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
 
       const willEmptyHand = willPlayCardEmptyHand(currentState);
 
-      // Trigger play animation. The completion animation is queued with a
-      // baseDelay so it lands once the play card has reached the build pile.
-      // The optimistic view is committed immediately afterwards so the user can
-      // continue selecting / playing while everything animates in parallel.
       let playAnimationDuration = 0;
       const dragOverride = consumeDragCommitOverride();
       try {
@@ -641,7 +805,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
             }
           }
 
-          // Drag-and-drop commit: start the play animation from the drop point.
           if (dragOverride?.startPosition) {
             startPosition = dragOverride.startPosition;
             startAngleDeg = undefined;
@@ -651,11 +814,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
 
           if (startPosition) {
             playAnimationDuration = calculateAnimationDuration(startPosition, endPosition) * 1.2;
-            // Mask the freshly-committed card at the build pile until the play
-            // animation has actually landed. Without targetSettledInState the
-            // optimistic view would render the new card immediately on top of
-            // the pile, making it appear teleported to its destination before
-            // flying there.
             const previousBuildPileLength = currentState.buildPiles[buildPile].length;
             startAnimation({
               card: currentState.selectedCard.card,
@@ -687,10 +845,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         console.warn('Play animation failed, continuing with online game logic:', error);
       }
 
-      // Register the build→retreat animation BEFORE committing the optimistic
-      // view. CenterArea relies on activeAnimations to mask completed cards at
-      // their destination; if we committed first, the cards would render on the
-      // retreat pile for one frame before the animation starts.
       if (completedBuildPileCards) {
         triggerCompletedBuildPileAnimation(
           currentState,
@@ -740,11 +894,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
 
         setInteractionLocked(true);
 
-        // Trigger discard animation, then commit the optimistic view and send the
-        // action immediately. The animation runs in parallel with the next user
-        // input — they can already select / play another card while this discard
-        // is still flying. The discard ends the human turn server-side, so any
-        // further play attempt is rejected (and the snapshot reconciles).
         const dragOverride = consumeDragCommitOverride();
 
         try {
@@ -759,10 +908,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
               if (discardContainer) {
                 const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
                 const animationDuration = calculateAnimationDuration(startPosition, endPosition);
-                // Mask the freshly-committed card on the discard pile until the
-                // animation lands — the optimistic view applies immediately, so
-                // without this the card would teleport to the pile and then
-                // re-animate.
                 const previousDiscardPileLength =
                   currentState.players[currentState.currentPlayerIndex].discardPiles[discardPile].length;
                 startAnimation({
@@ -810,56 +955,50 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     [commitView, isInteractionBlocked, sendAction, setInteractionLocked, startAnimation],
   );
 
-  const sendSetReady = useCallback((playerName?: string): void => {
-    if (!websocketRef.current || websocketRef.current.readyState !== WebSocket.OPEN) {
-      return;
-    }
-
-    websocketRef.current.send(JSON.stringify({ type: 'setReady', playerName }));
-  }, []);
+  const sendSetReady = useCallback(
+    (playerName?: string): void => {
+      sendRaw({ type: 'setReady', playerName });
+    },
+    [sendRaw],
+  );
 
   const sendSetUnready = useCallback((): void => {
-    if (!websocketRef.current || websocketRef.current.readyState !== WebSocket.OPEN) {
-      return;
-    }
+    sendRaw({ type: 'setUnready' });
+  }, [sendRaw]);
 
-    websocketRef.current.send(JSON.stringify({ type: 'setUnready' }));
-  }, []);
-
-  const kickSeat = useCallback((targetSeatIndex: number): void => {
-    if (!websocketRef.current || websocketRef.current.readyState !== WebSocket.OPEN) {
-      return;
-    }
-
-    websocketRef.current.send(JSON.stringify({ type: 'kickSeat', targetSeatIndex }));
-  }, []);
+  const kickSeat = useCallback(
+    (targetSeatIndex: number): void => {
+      sendRaw({ type: 'kickSeat', targetSeatIndex });
+    },
+    [sendRaw],
+  );
 
   const leaveLobby = useCallback((): void => {
     intentionalLeaveRef.current = true;
+    sendRaw({ type: 'leaveLobby' });
+  }, [sendRaw]);
 
-    if (websocketRef.current?.readyState === WebSocket.OPEN) {
-      websocketRef.current.send(JSON.stringify({ type: 'leaveLobby' }));
-    }
-  }, []);
-
+  // Ignore a summary left over from a previous room (session change before the
+  // first presence of the new room arrives).
+  const room = view?.room ?? (roomSummary && roomSummary.roomCode === session?.roomCode ? roomSummary : null);
   const playersBySeatIndex: Record<number, { displayName: string; seatIndex: number }> = {};
   view?.players.forEach((player) => {
     if (typeof player.seatIndex === 'number') {
       playersBySeatIndex[player.seatIndex] = { displayName: player.displayName, seatIndex: player.seatIndex };
     }
   });
-  view?.room.lobbySeats.forEach((seat) => {
+  room?.lobbySeats.forEach((seat) => {
     if (!playersBySeatIndex[seat.seatIndex] && seat.displayName) {
       playersBySeatIndex[seat.seatIndex] = { displayName: seat.displayName, seatIndex: seat.seatIndex };
     }
   });
 
-  const seatCapacity = view?.room.seatCapacity ?? session?.seatCapacity ?? 4;
-  const hostSeatIndex = view?.room.hostSeatIndex ?? session?.hostSeatIndex ?? 0;
-  const connectedSeats = view?.room.connectedSeats ?? [];
-  const disconnectedSeats: DisconnectedSeatInfo[] = view?.room.disconnectedSeats ?? [];
-  const lobbySeats: LobbySeatInfo[] = view?.room.lobbySeats ?? [];
-  const roomStatus = view?.room.status ?? 'WAITING';
+  const seatCapacity = room?.seatCapacity ?? session?.seatCapacity ?? 4;
+  const hostSeatIndex = room?.hostSeatIndex ?? session?.hostSeatIndex ?? 0;
+  const connectedSeats = room?.connectedSeats ?? [];
+  const disconnectedSeats: DisconnectedSeatInfo[] = room?.disconnectedSeats ?? [];
+  const lobbySeats: LobbySeatInfo[] = room?.lobbySeats ?? [];
+  const roomStatus = room?.status ?? 'WAITING';
   const isLocalHost = session?.seatIndex === hostSeatIndex;
   const myReadyState: LobbyReadyState =
     lobbySeats.find((s) => s.seatIndex === session?.seatIndex)?.readyState ?? 'never-ready';
@@ -891,7 +1030,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     myReadyState,
     playCard,
     playersBySeatIndex,
-    roomCode: view?.room.roomCode ?? session?.roomCode ?? '',
+    roomCode: room?.roomCode ?? session?.roomCode ?? '',
     roomStatus,
     seatCapacity,
     selectCard,

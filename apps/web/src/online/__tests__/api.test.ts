@@ -31,7 +31,7 @@ describe('online api configuration', () => {
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.example.com/rooms',
       expect.objectContaining({
-        body: JSON.stringify({ stockSize: 30 }),
+        body: JSON.stringify({ gameId: 'skipbo', gameConfig: { stockSize: 30 } }),
         method: 'POST',
       }),
     );
@@ -62,7 +62,7 @@ describe('online api configuration', () => {
       2,
       'https://runtime.example.com/rooms',
       expect.objectContaining({
-        body: JSON.stringify({ stockSize: 30 }),
+        body: JSON.stringify({ gameId: 'skipbo', gameConfig: { stockSize: 30 } }),
         method: 'POST',
       }),
     );
