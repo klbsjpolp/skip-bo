@@ -319,6 +319,46 @@ const mountOnlineDiscardAnimationDom = (): void => {
   document.body.append(firstPlayerArea, activePlayerArea, centerArea);
 };
 
+// Hand-area (selected card at index 0) plus an empty discard pile 0, so a local
+// discard produces a real, non-zero play animation duration.
+const mountOnlineHandDiscardDom = (): void => {
+  const firstPlayerArea = document.createElement('div');
+  firstPlayerArea.className = 'player-area';
+  firstPlayerArea.dataset.playerIndex = '1';
+
+  const activePlayerArea = document.createElement('div');
+  activePlayerArea.className = 'player-area';
+  activePlayerArea.dataset.playerIndex = '0';
+
+  const handArea = document.createElement('div');
+  handArea.className = 'hand-area';
+  setElementRect(handArea, createRect(120, 420, 360, 120));
+  handArea.style.setProperty('--card-width', '80px');
+  handArea.style.setProperty('--card-height', '120px');
+
+  const cardHolder = document.createElement('div');
+  cardHolder.setAttribute('data-card-index', '0');
+
+  const selectedCard = document.createElement('div');
+  selectedCard.className = 'card selected';
+  setElementRect(selectedCard, createRect(160, 412, 80, 120));
+
+  cardHolder.appendChild(selectedCard);
+  handArea.appendChild(cardHolder);
+  activePlayerArea.appendChild(handArea);
+
+  const discardPiles = document.createElement('div');
+  discardPiles.className = 'discard-piles';
+
+  const targetPile = document.createElement('div');
+  targetPile.setAttribute('data-pile-index', '0');
+  setElementRect(targetPile, createRect(600, 100, 80, 140));
+  discardPiles.appendChild(targetPile);
+  activePlayerArea.appendChild(discardPiles);
+
+  document.body.append(firstPlayerArea, activePlayerArea);
+};
+
 class MockWebSocket {
   static CONNECTING = 0;
   static OPEN = 1;
@@ -796,6 +836,75 @@ describe('useOnlineSkipBoGame', () => {
 
     expect(result.current.gameState.message).toBe(nextView.message);
     expect(result.current.gameState.currentPlayerIndex).toBe(nextView.currentPlayerIndex);
+  });
+
+  it('holds the next player draw until the local discard animation finishes online', async () => {
+    const session = createSession();
+
+    mountOnlineHandDiscardDom();
+
+    const initialState = initialGameState();
+    initialState.currentPlayerIndex = 0;
+    initialState.deck = [card(1), card(2), card(3), card(4)];
+    initialState.buildPiles = [[], [], [], []];
+    initialState.completedBuildPiles = [];
+    initialState.players[0].hand = [card(6), null, null, null, null];
+    initialState.players[1].isAI = false;
+    initialState.players[1].hand = [null, null, card(4), card(5), card(6)];
+    initialState.selectedCard = { card: card(6), source: 'hand', index: 0 };
+    initialState.message = 'Sélectionnez une destination';
+
+    // Authoritative result of the discard: the turn advances AND the next
+    // player draws to refill their hand, all in one view.
+    const nextState = gameReducer(gameReducer(initialState, { type: 'DISCARD_CARD', discardPile: 0 }), {
+      type: 'DRAW',
+    });
+
+    const initialView = createOnlineView(initialState, 1);
+    const nextView = createOnlineView(nextState, 2);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    expect(socket).toBeDefined();
+
+    await act(async () => {
+      socket.open();
+      socket.emitView(initialView);
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      const moveResult = await result.current.discardCard(0);
+      expect(moveResult).toEqual({ success: true, message: 'Carte défaussée' });
+      await Promise.resolve();
+    });
+
+    expect(startAnimation).toHaveBeenCalledTimes(1);
+    const discardDuration = startAnimation.mock.calls[0]?.[0].duration as number;
+    expect(discardDuration).toBeGreaterThan(0);
+
+    await act(async () => {
+      socket.emitView(nextView);
+      await Promise.resolve();
+    });
+
+    // The next player's draw is scheduled with a base delay equal to the local
+    // discard animation duration, instead of starting immediately (delay 0).
+    expect(triggerMultipleDrawAnimations).toHaveBeenCalled();
+    const drawCall = triggerMultipleDrawAnimations.mock.calls[0] as unknown as [
+      number,
+      Card[],
+      number[],
+      number,
+      number,
+    ];
+    expect(drawCall[0]).toBe(1); // next player (opponent) is players[1]
+    expect(drawCall[4]).toBe(discardDuration);
   });
 
   it('allows the host to start a waiting room as soon as all connected players are ready', async () => {
