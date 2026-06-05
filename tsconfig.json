@@ -4,6 +4,7 @@
     { "path": "./apps/web" },
     { "path": "./apps/realtime-api" },
     { "path": "./packages/game-core" },
-    { "path": "./packages/multiplayer-protocol" }
+    { "path": "./packages/multiplayer-protocol" },
+    { "path": "./packages/realtime-core" }
   ]
 }
