@@ -5,6 +5,7 @@
     { "path": "./apps/realtime-api" },
     { "path": "./packages/game-core" },
     { "path": "./packages/multiplayer-protocol" },
-    { "path": "./packages/realtime-core" }
+    { "path": "./packages/realtime-core" },
+    { "path": "./packages/skipbo-runtime" }
   ]
 }
