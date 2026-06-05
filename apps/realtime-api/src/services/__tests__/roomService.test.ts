@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { PROTOCOL_VERSION, ROOM_CODE_LENGTH, type ServerMessage } from '@skipbo/realtime-core';
 
@@ -582,5 +582,37 @@ describe('roomService', () => {
     dependencies.broadcaster.failureByConnectionId.set('c-1', new Error('transport offline'));
 
     await expect(rejectAction(dependencies, 'c-1', 'Invalid action')).rejects.toThrow('transport offline');
+  });
+
+  it('retries a host control message after a transient version conflict', async () => {
+    const dependencies = createDependencies();
+    const { created, idleSeat } = await startTwoPlayerGame(dependencies);
+    const repository = dependencies.roomRepository;
+    const original = repository.update.bind(repository);
+    let updateCalls = 0;
+    vi.spyOn(repository, 'update').mockImplementation(async (room, expectedVersion) => {
+      updateCalls += 1;
+      if (updateCalls === 1) {
+        throw new RoomVersionConflictError(room.roomCode);
+      }
+
+      return original(room, expectedVersion);
+    });
+
+    await handleSetTurn(dependencies, { connectionId: 'c-1', currentSeatIndex: idleSeat });
+
+    expect(updateCalls).toBeGreaterThanOrEqual(2);
+    const room = await repository.get(created.roomCode);
+    expect(room?.currentSeatIndex).toBe(idleSeat);
+  });
+
+  it('gives up after exhausting version-conflict retries', async () => {
+    const dependencies = createDependencies();
+    const { created, idleSeat } = await startTwoPlayerGame(dependencies);
+    vi.spyOn(dependencies.roomRepository, 'update').mockRejectedValue(new RoomVersionConflictError(created.roomCode));
+
+    await expect(
+      handleSetTurn(dependencies, { connectionId: 'c-1', currentSeatIndex: idleSeat }),
+    ).rejects.toBeInstanceOf(RoomVersionConflictError);
   });
 });
