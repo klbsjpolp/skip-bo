@@ -27,7 +27,8 @@ jobs:
               - 'infra/**'
               - 'apps/realtime-api/**'
               - 'packages/game-core/**'
-              - 'packages/multiplayer-protocol/**'
+              - 'packages/realtime-core/**'
+              - 'packages/skipbo-runtime/**'
 
   workspace:
     runs-on: ubuntu-latest
@@ -61,7 +62,8 @@ jobs:
           fail_ci_if_error: false
           files: |
             packages/game-core/coverage/lcov.info
-            packages/multiplayer-protocol/coverage/lcov.info
+            packages/realtime-core/coverage/lcov.info
+            packages/skipbo-runtime/coverage/lcov.info
             apps/realtime-api/coverage/lcov.info
             apps/web/coverage/lcov.info
 

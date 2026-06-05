@@ -386,9 +386,11 @@ describe('roomService', () => {
 
   it('ends the game on host endGame, clearing disconnects and closing the room', async () => {
     const dependencies = createDependencies();
-    const { created, idleSeat, seatToConnection } = await startTwoPlayerGame(dependencies);
+    const { created } = await startTwoPlayerGame(dependencies);
 
-    await handleDisconnect(dependencies, seatToConnection[idleSeat]);
+    // Disconnect the guest (c-2 / seat 1 is never the host) so the host (c-1)
+    // remains connected to send endGame.
+    await handleDisconnect(dependencies, 'c-2');
     await handleEndGame(dependencies, { connectionId: 'c-1', winnerSeatIndex: created.hostSeatIndex });
 
     const room = await dependencies.roomRepository.get(created.roomCode);

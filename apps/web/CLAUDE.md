@@ -20,14 +20,27 @@ Animation services live in `src/services/`.
 
 ## Local vs. Online Mode
 
-| Mode   | Hook                     | Authority                                                   |
-| ------ | ------------------------ | ----------------------------------------------------------- |
-| Local  | `useLocalSkipBoGame.ts`  | client drives full loop                                     |
-| Online | `useOnlineSkipBoGame.ts` | server snapshots are canonical; browser never mutates state |
+| Mode   | Hook                     | Authority                                                              |
+| ------ | ------------------------ | ---------------------------------------------------------------------- |
+| Local  | `useLocalSkipBoGame.ts`  | client drives full loop                                                |
+| Online | `useOnlineSkipBoGame.ts` | **host-authoritative**: the host seat runs the game; the server relays |
 
 `useLocalSkipBoGame` is a thin re-export of `useSkipBoGame`.
 
-`useOnlineSkipBoGame` applies **optimistic updates** for `PLAY_CARD` and `DISCARD_CARD` — the view is updated locally before the server confirms, then reconciled on the next snapshot.
+### Online (host-authoritative)
+
+The server (`apps/realtime-api`) is a **game-agnostic relay** — it never sees game
+state. The **host** seat (seat 0) runs `@skipbo/skipbo-runtime` (`SkipboHost`),
+applies every move (its own and relayed guest moves), and pushes a **redacted
+`ClientGameView` per seat** plus the abstract turn / a reconnection snapshot /
+the end-game signal. Guests send intents (`relay { kind: 'move' }`) and render
+the views the host relays.
+
+Both roles share **one** rendering path: `ingestView(view)` — the host generates
+the view locally, a guest receives it over the wire. `useOnlineSkipBoGame` still
+applies **optimistic updates** for `PLAY_CARD`/`DISCARD_CARD`, reconciled when the
+next authoritative view arrives. Lobby data comes from `presence` (there is no
+game view during `WAITING`).
 
 ## AI
 
