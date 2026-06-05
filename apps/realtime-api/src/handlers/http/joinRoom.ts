@@ -1,7 +1,7 @@
 import type { APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { ZodError } from 'zod';
 
-import { joinRoomRequestSchema } from '@skipbo/multiplayer-protocol';
+import { joinRoomRequestSchema } from '@skipbo/realtime-core';
 
 import { isClientError } from '../../errors/clientError.js';
 import { captureBackendException, withSentry } from '../../monitoring/sentry.js';

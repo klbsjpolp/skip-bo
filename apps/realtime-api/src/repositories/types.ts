@@ -1,5 +1,4 @@
-import type { GameState } from '@skipbo/game-core';
-import type { RoomStatus } from '@skipbo/multiplayer-protocol';
+import type { RoomStatus } from '@skipbo/realtime-core';
 
 export class RoomVersionConflictError extends Error {
   constructor(roomCode: string) {
@@ -10,7 +9,7 @@ export class RoomVersionConflictError extends Error {
 
 export interface RoomSummaryRecord {
   finishedAt: string;
-  winnerIndex: number | null;
+  winnerSeatIndex: number | null;
 }
 
 export interface LobbyPlayerRecord {
@@ -23,18 +22,30 @@ export interface DisconnectedSeatRecord {
   disconnectedAt: string;
 }
 
+/** Opaque full-state blob pushed by the host, replayed on host reconnection. */
+export interface HostSnapshotRecord {
+  payload: unknown;
+  version: number;
+}
+
 export interface RoomRecord {
   activeSeatIndices?: number[];
   authenticatedSeats?: number[];
   createdAt: string;
+  /** Whose turn it is, as an abstract seat index. `null` while WAITING/FINISHED. */
+  currentSeatIndex: number | null;
   disconnectedSeats?: Record<string, DisconnectedSeatRecord>;
   expiresAt: number;
+  /** Opaque per-game configuration; the server never interprets it. */
+  gameConfig?: unknown;
+  /** Which game this room hosts. Opaque routing key. */
+  gameId: string;
   hostSeatIndex: number;
+  hostSnapshot?: HostSnapshotRecord;
   lobbyPlayers?: LobbyPlayerRecord[];
   roomCode: string;
   seatCapacity: number;
   seatTokenHashes: Array<string | null>;
-  state: GameState;
   status: RoomStatus;
   summary: RoomSummaryRecord | null;
   updatedAt: string;

@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
 
-import type { ServerMessage } from '@skipbo/multiplayer-protocol';
+import type { ServerMessage } from '@skipbo/realtime-core';
 
 import type { RealtimeBroadcaster } from '../services/broadcaster.js';
 
