@@ -101,11 +101,12 @@ Frontend deploy also regenerates `apps/web/public/runtime-config.json` with the 
 
 ```text
 apps/
-├── realtime-api/         AWS Lambda handlers for HTTP and WebSocket APIs
+├── realtime-api/         Game-agnostic relay server (AWS Lambda HTTP + WebSocket)
 └── web/                  React/Vite app, AI, animations, fixtures, and browser tests
 packages/
 ├── game-core/            Shared reducer, validators, deck setup, and domain types
-└── multiplayer-protocol/ HTTP and WebSocket DTOs plus redacted client views
+├── realtime-core/        Generic relay protocol, room/lobby DTOs, room codes
+└── skipbo-runtime/       Host-authoritative Skip-Bo runtime + redacted client views
 infra/
 └── terraform/            OpenTofu configuration for the production backend
 docs/
