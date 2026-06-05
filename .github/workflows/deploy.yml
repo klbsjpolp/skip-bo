@@ -57,8 +57,7 @@ jobs:
           filters: |
             backend:
               - 'apps/realtime-api/**'
-              - 'packages/game-core/**'
-              - 'packages/multiplayer-protocol/**'
+              - 'packages/realtime-core/**'
               - 'infra/terraform/**'
             frontend:
               - 'apps/web/**'

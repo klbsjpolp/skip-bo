@@ -7,8 +7,10 @@ Guidance for Claude Code in this repository.
 Skip-Bo is a PNPM workspace monorepo. Three tiers:
 
 - **Frontend:** React/Vite PWA — [`apps/web`](apps/web/CLAUDE.md)
-- **Shared packages:** Game rules — [`packages/game-core`](packages/game-core/CLAUDE.md) · Multiplayer DTOs — [`packages/multiplayer-protocol`](packages/multiplayer-protocol/CLAUDE.md)
-- **Backend:** AWS Lambda + DynamoDB — [`apps/realtime-api`](apps/realtime-api/CLAUDE.md)
+- **Shared packages:** Skip-Bo rules — [`packages/game-core`](packages/game-core/CLAUDE.md) · Game-agnostic relay protocol/DTOs — [`packages/realtime-core`](packages/realtime-core/CLAUDE.md) · Host-authoritative Skip-Bo runtime — [`packages/skipbo-runtime`](packages/skipbo-runtime/CLAUDE.md)
+- **Backend:** AWS Lambda + DynamoDB **relay** server (no game logic) — [`apps/realtime-api`](apps/realtime-api/CLAUDE.md)
+
+Online play is **host-authoritative**: the server only relays opaque messages between seats and tracks an abstract turn; the host client (seat 0) runs the game and redacts hidden information. See [`docs/architecture/online-multiplayer.md`](docs/architecture/online-multiplayer.md).
 
 ## Commands
 
@@ -60,8 +62,9 @@ PWA_MINIMUM_SUPPORTED_VERSION  # Hard-update threshold for PWA clients
 | Scope             | Location                                   | Runner                        |
 | ----------------- | ------------------------------------------ | ----------------------------- |
 | Game-core unit    | `packages/game-core/tests/`                | Vitest                        |
-| Protocol unit     | `packages/multiplayer-protocol/tests/`     | Vitest                        |
-| API unit          | `apps/realtime-api/tests/`                 | Vitest                        |
+| Relay-core unit   | `packages/realtime-core/tests/`            | Vitest                        |
+| Skipbo-runtime    | `packages/skipbo-runtime/tests/`           | Vitest                        |
+| API unit          | `apps/realtime-api/src/**/__tests__/`      | Vitest                        |
 | Web unit          | `apps/web/src/**/__tests__/`               | Vitest (jsdom)                |
 | E2E               | `apps/web/tests/ui/*.spec.ts`              | Playwright                    |
 | Visual regression | `apps/web/tests/ui/theme-contract.spec.ts` | Playwright (chromium-desktop) |

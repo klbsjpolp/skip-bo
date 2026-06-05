@@ -4,8 +4,19 @@
 
 - Purpose: define the current HTTP and WebSocket contracts for online rooms.
 - Audience: contributors and agents changing online DTOs, room codes, or client/server message handling.
-- Source of truth: `packages/multiplayer-protocol/src/index.ts`, `packages/multiplayer-protocol/src/views/index.ts`, and backend enforcement in `apps/realtime-api/src/services/roomService.ts`.
+- Source of truth: `packages/realtime-core/src/index.ts` (generic relay protocol + DTOs),
+  `packages/skipbo-runtime/src/views.ts` (Skip-Bo redaction) + `actionSchema.ts` (move payloads),
+  and backend enforcement in `apps/realtime-api/src/services/roomService.ts`.
 - When to update: when any request shape, response shape, room-code rule, WebSocket message, or redaction rule changes.
+
+## Model: host-authoritative relay
+
+`PROTOCOL_VERSION = 2`. The server is a **game-agnostic relay**: it manages rooms,
+seats, the lobby, presence and an **abstract turn pointer** (`currentSeatIndex`),
+and forwards opaque messages between seats. It never inspects payloads. The
+**host** seat (seat 0) runs the game (`@skipbo/skipbo-runtime`), validates moves,
+and produces a **redacted `ClientGameView` per seat**. Guests send intents and
+render the views the host relays. v1 clients are rejected at `auth` with HTTP 426.
 
 ## Related Docs
 
@@ -17,184 +28,81 @@
 
 - Length: `3`
 - Alphabet: 23 uppercase letters (`A-Z` excluding the ambiguous `I`, `L`, `O`)
-- Canonical output: uppercase
-- Input parsing ignores case
+- Canonical output: uppercase; input parsing ignores case
 
 ## HTTP Endpoints
 
 ### `POST /rooms`
 
-Creates a private online room in `WAITING` state and seats the caller as host seat `0`.
-Rooms currently expose four joinable seats. The game does not auto-start.
+Creates a private room in `WAITING` and seats the caller as host seat `0` (4 joinable seats).
 
 Request:
 
 ```json
-{
-  "stockSize": 35,
-  "playerName": "Alice"
-}
+{ "gameId": "skipbo", "gameConfig": { "stockSize": 35 }, "playerName": "Alice" }
 ```
 
-Notes:
+- All fields optional. `gameId` defaults to `"skipbo"`. `gameConfig` is **opaque** to
+  the server (stored and echoed back in `gameStarted`); Skip-Bo reads `stockSize` from it.
+- `playerName` ≤ 10 chars after trimming; blank/omitted resolves to `Joueur #` (1-based seat).
 
-- `playerName` is optional.
-- Player names are limited to `10` characters after trimming.
-- If omitted or blank, the server resolves the seat name as `Joueur #`, where `#` is the 1-based seat index.
-
-Response:
-
-```json
-{
-  "hostSeatIndex": 0,
-  "roomCode": "KMP",
-  "seatCapacity": 4,
-  "seatIndex": 0,
-  "seatToken": "<opaque bearer token>",
-  "wsUrl": "wss://<api-id>.execute-api.ca-central-1.amazonaws.com/prod",
-  "expiresAt": "2026-04-04T12:00:00.000Z"
-}
-```
+Response (`RoomSession`): `{ hostSeatIndex, roomCode, seatCapacity, seatIndex, seatToken, wsUrl, expiresAt }`.
 
 ### `POST /rooms/join`
 
-Request:
+Request: `{ "roomCode": "kmp", "playerName": "Bob" }` (room code case-insensitive). Returns a
+`RoomSession` for the first open seat. Allowed only while the room is `WAITING`.
 
-```json
-{
-  "roomCode": "kmp",
-  "playerName": "Bob"
-}
-```
+## WebSocket
 
-Response matches the create payload, with `seatIndex` set to the first open seat.
-Join is allowed only while the room is still in `WAITING`.
+Open `wsUrl`, then send `auth`. All messages are JSON. Inbound is validated by
+`clientMessageSchema` (`packages/realtime-core/src/schemas/websocket.ts`); unknown
+shapes are dropped as `actionRejected`.
 
-## WebSocket Client Messages
+### Client → server
 
-### `auth`
+| Type                                                           | Shape                                                  | Notes                                                   |
+| -------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------- |
+| `auth`                                                         | `{ protocolVersion, roomCode, seatIndex, seatToken }`  | `protocolVersion` must be ≥ 2                           |
+| `relay`                                                        | `{ kind: 'move'\|'event'\|'view', payload, toSeats? }` | `payload` opaque; `toSeats` defaults to all other seats |
+| `setTurn`                                                      | `{ currentSeatIndex }`                                 | host only                                               |
+| `snapshot`                                                     | `{ payload }`                                          | host only; opaque full-state blob for host reconnection |
+| `endGame`                                                      | `{ winnerSeatIndex }`                                  | host only                                               |
+| `startGame`                                                    | `{ clientVersion? }`                                   | host only                                               |
+| `setReady` / `setUnready` / `kickSeat` / `leaveLobby` / `ping` | lobby/session                                          | unchanged                                               |
 
-Sent first after opening the socket.
+Gating: a `move` is accepted only from `room.currentSeatIndex`; `view` only from
+the host. Debug actions are sent as `relay { kind: 'event', payload: { move } }`
+to bypass the turn gate — the host applies them behind its own DEV flag.
 
-```json
-{
-  "type": "auth",
-  "roomCode": "KMP",
-  "seatIndex": 0,
-  "seatToken": "<opaque bearer token>"
-}
-```
+### Server → client
 
-### `startGame`
+| Type              | Shape                                                 | Notes                                                            |
+| ----------------- | ----------------------------------------------------- | ---------------------------------------------------------------- |
+| `presence`        | `{ room: RoomSummary }`                               | lobby/connectivity; `RoomSummary` carries `currentSeatIndex`     |
+| `relayed`         | `{ fromSeat, kind, payload }`                         | an opaque message forwarded from another seat                    |
+| `turn`            | `{ currentSeatIndex }`                                | abstract turn changed                                            |
+| `gameStarted`     | `{ activeSeatIndices, currentSeatIndex, gameConfig }` | seats shuffled; the host builds the game from this               |
+| `snapshotRestore` | `{ payload }`                                         | sent to the **host** on reconnect (its last snapshot, or `null`) |
+| `roomClosed`      | `{ roomCode, status }`                                | room ended/closed                                                |
+| `actionRejected`  | `{ code, reason }`                                    | validation / permission / turn rejection                         |
 
-Sent by the host after at least one other authenticated player is connected.
-When accepted, the server locks the active seats to the currently connected players and broadcasts fresh snapshots.
+Flow: host `startGame` → server shuffles seats, sets the first turn, broadcasts
+`gameStarted` → the host builds its `SkipboHost`, relays a `view` to each guest,
+and pushes a `snapshot`. Each subsequent move (guest `relay move` or the host's
+own move) is applied by the host, which then re-pushes views, `setTurn` (when the
+turn changes), a `snapshot`, and `endGame` on completion.
 
-```json
-{
-  "type": "startGame",
-  "clientVersion": 3
-}
-```
+## Redaction (Skip-Bo)
 
-### `action`
+Computed by the host via `serializeClientGameView` (`packages/skipbo-runtime/src/views.ts`).
+The server never redacts — opaque `view` payloads pass straight through.
 
-```json
-{
-  "type": "action",
-  "action": {
-    "type": "SELECT_CARD",
-    "source": "hand",
-    "index": 2
-  }
-}
-```
-
-### `ping`
-
-```json
-{
-  "type": "ping"
-}
-```
-
-## WebSocket Server Messages
-
-### `snapshot`
-
-Contains the authoritative redacted room view for the receiving seat.
-
-```json
-{
-  "type": "snapshot",
-  "view": {
-    "currentPlayerIndex": 0,
-    "players": [],
-    "room": {
-      "connectedSeats": [0, 1],
-      "expiresAt": "2026-04-04T12:00:00.000Z",
-      "hostSeatIndex": 0,
-      "roomCode": "KMP",
-      "seatCapacity": 4,
-      "status": "ACTIVE",
-      "version": 3
-    }
-  }
-}
-```
-
-Notes:
-
-- `view.players` is serialized in viewer-relative order, so the receiving player is always at index `0`.
-- `view.players[*].name` carries the resolved seat name, using the provided `playerName` when present and `Joueur #` otherwise.
-- While the room is `WAITING`, the local player can still receive their private hand, while public piles for waiting seats remain placeholders until the host starts the game.
-- Once the host starts the game, snapshots contain only the seats that were connected at start time.
-
-### `actionRejected`
-
-```json
-{
-  "type": "actionRejected",
-  "code": "invalid_action",
-  "reason": "Ce n’est pas votre tour."
-}
-```
-
-### `presence`
-
-Used for seat-connect and seat-disconnect updates.
-
-```json
-{
-  "type": "presence",
-  "room": {
-    "connectedSeats": [0, 1],
-    "expiresAt": "2026-04-04T12:00:00.000Z",
-    "hostSeatIndex": 0,
-    "roomCode": "KMP",
-    "seatCapacity": 4,
-    "status": "WAITING",
-    "version": 2
-  }
-}
-```
-
-### `roomClosed`
-
-```json
-{
-  "type": "roomClosed",
-  "roomCode": "KMP",
-  "status": "FINISHED"
-}
-```
-
-## Redaction Rules
-
-- The receiving player always sees their own hand and full stock pile.
-- Opponent hand cards are serialized as fixed-length hidden slots.
-- Opponent selection from hand exposes only the selected slot.
-- Opponent stock piles expose only the visible top card; deeper stock cards stay hidden.
-- Stock and discard selections can expose their visible source because those piles are public.
-- Room metadata carries `hostSeatIndex`, `seatCapacity`, `status`, and `connectedSeats`; clients should use that metadata rather than inferring room lifecycle from the board alone.
-- Clients should animate from semantic state changes between snapshots rather than trusting network timing.
+- The receiving player always sees their own hand and full stock pile (viewer is `players[0]`).
+- Opponent hand cards are fixed-length hidden slots (`HIDDEN_CARD`); an opponent hand
+  selection exposes only the selected slot.
+- Opponent stock piles expose only the visible top card; deeper cards stay hidden.
+- Stock and discard selections may expose their visible source (those piles are public).
+- `RoomSummary` carries `hostSeatIndex`, `seatCapacity`, `status`, `connectedSeats` and the
+  abstract `currentSeatIndex`; use that metadata rather than inferring lifecycle from the board.
+- Clients animate from semantic state changes between successive views, not network timing.

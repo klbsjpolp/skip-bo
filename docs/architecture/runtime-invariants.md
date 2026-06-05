@@ -17,8 +17,8 @@
 - `Skip-Bo` cards can be played as wildcards and may also be discarded to a discard pile (per official Skip-Bo rules).
 - Completed build piles move into `completedBuildPiles` and are reshuffled back into `deck` when more draw cards are needed.
 - Start-of-turn draws belong to the local state machine draw service. `END_TURN` only flips `currentPlayerIndex`.
-- Online rooms are server-authoritative. The browser treats incoming snapshots as canonical in online mode.
-- Online client views are viewer-relative. In online mode the receiving player is rendered at index `0` even though backend seat order is preserved separately.
+- Online rooms are host-authoritative. The server relays opaque messages and never sees game state; the host seat owns the game and redacts hidden information, relaying a `ClientGameView` per seat.
+- Online client views are viewer-relative. In online mode the receiving player is rendered at index `0` even though seat order is preserved separately.
 - Online active turn order is locked from the connected seats present when the host starts the room.
 
 ## Current Implementation Details
