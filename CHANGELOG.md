@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.43.7](https://github.com/klbsjpolp/skip-bo/compare/v1.43.6...v1.43.7) (2026-06-05)
+
+
+### Bug Fixes
+
+* **neon:** seamless background grid loop ([ce9d150](https://github.com/klbsjpolp/skip-bo/commit/ce9d150a06aadd88b0b940c2380bcd4361e199d8))
+
 ## [1.43.6](https://github.com/klbsjpolp/skip-bo/compare/v1.43.5...v1.43.6) (2026-05-31)
 
 ## [1.43.5](https://github.com/klbsjpolp/skip-bo/compare/v1.43.4...v1.43.5) (2026-05-31)
