@@ -92,6 +92,11 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const activeSeatIndicesRef = useRef<number[]>([]);
   const roomMetaRef = useRef<HostRoomMeta | null>(null);
   const lastBroadcastTurnRef = useRef<number | null>(null);
+  // Duration (ms) of the local play/discard animation that the user just
+  // started. When that action ends the turn, the next player's draw animation
+  // is held back by this much so the acting player sees the same sequence
+  // (own move first, then the next player drawing) that remote players see.
+  const pendingLocalActionAnimationRef = useRef(0);
   const { removeAnimation, startAnimation, waitForAnimations } = useCardAnimation();
 
   const isHost = session != null && session.seatIndex === session.hostSeatIndex;
@@ -145,6 +150,11 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       setConnectionStatus('connected');
       setLastError(null);
       authoritativeViewRef.current = incomingView;
+
+      // Consume the pending local-action duration: the next player's draw is
+      // delayed by it only when the local player's move ended the turn.
+      const localActionAnimationDuration = pendingLocalActionAnimationRef.current;
+      pendingLocalActionAnimationRef.current = 0;
 
       if (incomingView.room.status === 'FINISHED' || incomingView.gameIsOver) {
         clearOnlineSession();
@@ -236,11 +246,17 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
           Math.max(opponentAnimationDuration, getMaxDrawAnimationDuration(drawTransitions, opponentAnimationDuration)),
         );
       } else {
-        const drawAnimationDuration = getMaxDrawAnimationDuration(drawTransitions);
+        // After the local player's own turn-ending discard, the authoritative
+        // view advances the turn AND refills the next player's hand in one go.
+        // Hold that draw until the local discard animation has finished so the
+        // acting player sees the same sequence (own discard, then the next
+        // player drawing) that remote players see.
+        const drawBaseDelay = localActionAnimationDuration;
+        const drawAnimationDuration = getMaxDrawAnimationDuration(drawTransitions, drawBaseDelay);
         if (drawAnimationDuration > 0) {
           holdPreviousTurnPresentation();
         }
-        scheduleDrawAnimations(drawTransitions);
+        scheduleDrawAnimations(drawTransitions, drawBaseDelay);
         applyTurnPresentationDelay(drawAnimationDuration);
         commitView(incomingView);
       }
@@ -895,6 +911,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         setInteractionLocked(true);
 
         const dragOverride = consumeDragCommitOverride();
+        let discardAnimationDuration = 0;
 
         try {
           const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
@@ -908,6 +925,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
               if (discardContainer) {
                 const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
                 const animationDuration = calculateAnimationDuration(startPosition, endPosition);
+                discardAnimationDuration = animationDuration;
                 const previousDiscardPileLength =
                   currentState.players[currentState.currentPlayerIndex].discardPiles[discardPile].length;
                 startAnimation({
@@ -948,6 +966,9 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
           commitView(applyOptimisticDiscardView(viewRef.current, discardPile));
         }
 
+        // A discard ends the turn; hold the next player's draw until this
+        // discard animation finishes (consumed by the next ingestView).
+        pendingLocalActionAnimationRef.current = discardAnimationDuration;
         sendAction({ type: 'DISCARD_CARD', discardPile });
         setInteractionLocked(false);
         resolve({ success: true, message: 'Carte défaussée' });
