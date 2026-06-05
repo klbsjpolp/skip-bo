@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { SkipboHost } from '../src/hostRuntime.js';
-import { skipboActionSchema } from '../src/actionSchema.js';
+import { skipboActionSchema, skipboGameConfigSchema } from '../src/actionSchema.js';
 
 const ROOM = {
   connectedSeats: [2, 3],
@@ -69,6 +69,23 @@ describe('SkipboHost', () => {
     expect(view.room.currentSeatIndex).toBe(2);
   });
 
+  it('reports no winner and a null turn while the game is ongoing', () => {
+    const host = SkipboHost.create({ activeSeatIndices: [2, 3] });
+
+    expect(host.winnerSeatIndex()).toBeNull();
+    expect(host.viewForSeat(2, ROOM).room.currentSeatIndex).toBe(2);
+  });
+
+  it('nulls the abstract turn in the view once the game is over', () => {
+    const host = SkipboHost.create({ activeSeatIndices: [2, 3], allowDebug: true });
+    host.applyMove(2, { type: 'DEBUG_WIN' });
+
+    const view = host.viewForSeat(2, ROOM);
+    expect(host.gameIsOver).toBe(true);
+    expect(view.gameIsOver).toBe(true);
+    expect(view.room.currentSeatIndex).toBeNull();
+  });
+
   it('round-trips through a snapshot', () => {
     const host = SkipboHost.create({ activeSeatIndices: [2, 3] });
     host.applyMove(2, { type: 'SELECT_CARD', source: 'hand', index: 0 });
@@ -88,5 +105,19 @@ describe('skipboActionSchema', () => {
 
   it('rejects an unknown action', () => {
     expect(() => skipboActionSchema.parse({ type: 'NONSENSE' })).toThrow();
+  });
+});
+
+describe('skipboGameConfigSchema', () => {
+  it('accepts a stock size that is a multiple of five', () => {
+    expect(skipboGameConfigSchema.parse({ stockSize: 30 })).toEqual({ stockSize: 30 });
+  });
+
+  it('accepts an omitted stock size', () => {
+    expect(skipboGameConfigSchema.parse({})).toEqual({});
+  });
+
+  it('rejects a stock size that is not a multiple of five', () => {
+    expect(() => skipboGameConfigSchema.parse({ stockSize: 31 })).toThrow();
   });
 });
