@@ -1,7 +1,7 @@
 import { Check, CircleCheck, Copy, Flag, LoaderCircle, WifiOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-import type { DisconnectedSeatInfo } from '@skipbo/realtime-core';
+import type { DisconnectedSeatInfo } from '@klbsjpolp/realtime-core';
 
 import { DISCONNECT_GRACE_MS } from '@/config/timing';
 import { Button } from '@/components/ui/button';

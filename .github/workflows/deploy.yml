@@ -7,14 +7,6 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
-      force_backend:
-        description: 'Force backend deployment'
-        type: boolean
-        default: false
-      force_frontend:
-        description: 'Force frontend deployment'
-        type: boolean
-        default: false
       minimum_supported_version:
         description: 'Optional minimum supported web version for installed PWAs'
         type: string
@@ -33,6 +25,11 @@ permissions:
   pages: write
   id-token: write
 
+# The backend relay server is deployed separately from the realtime-infra repo
+# (https://github.com/klbsjpolp/realtime-infra). This workflow only builds and
+# deploys the web frontend, which connects to the shared server via the
+# VITE_SKIPBO_API_URL secret.
+
 jobs:
   gate:
     runs-on: ubuntu-latest
@@ -42,29 +39,8 @@ jobs:
     steps:
       - run: echo "Gate passed"
 
-  detect-changes:
-    needs: gate
-    runs-on: ubuntu-latest
-    outputs:
-      backend: ${{ steps.filter.outputs.backend }}
-      frontend: ${{ steps.filter.outputs.frontend }}
-    steps:
-      - uses: actions/checkout@v6
-      - uses: dorny/paths-filter@v4
-        id: filter
-        with:
-          base: ${{ github.event.workflow_run.head_branch || github.ref }}
-          filters: |
-            backend:
-              - 'apps/realtime-api/**'
-              - 'packages/realtime-core/**'
-              - 'infra/terraform/**'
-            frontend:
-              - 'apps/web/**'
-              - 'packages/**'
-
   release:
-    needs: [gate, detect-changes]
+    needs: gate
     if: github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     outputs:
@@ -101,116 +77,9 @@ jobs:
           echo "release_tag=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
           echo "release_version=$(node -p 'require(\"./package.json\").version')" >> "$GITHUB_OUTPUT"
 
-  deploy-backend:
-    needs: [gate, detect-changes, release]
-    if: >
-      needs.detect-changes.outputs.backend == 'true' ||
-      (github.event_name == 'workflow_dispatch' && inputs.force_backend)
-    runs-on: ubuntu-latest
-    environment: aws-prod
-    permissions:
-      id-token: write
-      contents: read
-    outputs:
-      api_url: ${{ steps.get_url.outputs.value }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.release.outputs.release_sha }}
-      - uses: ./.github/actions/setup-node
-
-      - uses: opentofu/setup-opentofu@v2
-        with:
-          tofu_wrapper: false
-
-      - uses: aws-actions/configure-aws-credentials@v6
-        with:
-          aws-region: ca-central-1
-          role-to-assume: ${{ secrets.AWS_OPENTOFU_ROLE_ARN || secrets.AWS_DEPLOY_ROLE_ARN }}
-          role-session-name: deploy-backend-${{ github.run_id }}
-
-      - name: Build realtime API bundle
-        run: pnpm --filter @skipbo/realtime-api build
-
-      - name: Write backend config
-        shell: bash
-        env:
-          TOFU_CONFIG: ${{ secrets.TOFU_BACKEND_CONFIG_HCL }}
-        run: printf '%s\n' "$TOFU_CONFIG" > infra/terraform/envs/prod/backend.hcl
-
-      - name: Initialize OpenTofu with remote state
-        run: tofu -chdir=infra/terraform/envs/prod init -backend-config=backend.hcl
-
-      - name: Create production plan
-        run: tofu -chdir=infra/terraform/envs/prod plan -input=false -out=tfplan
-        env:
-          TF_VAR_sentry_dsn: ${{ secrets.BACKEND_SENTRY_DSN || secrets.SENTRY_DSN || secrets.VITE_SENTRY_DSN }}
-          TF_VAR_sentry_release: ${{ needs.release.outputs.release_tag }}
-
-      - name: Apply production plan
-        run: tofu -chdir=infra/terraform/envs/prod apply -input=false tfplan
-        env:
-          TF_VAR_sentry_dsn: ${{ secrets.BACKEND_SENTRY_DSN || secrets.SENTRY_DSN || secrets.VITE_SENTRY_DSN }}
-          TF_VAR_sentry_release: ${{ needs.release.outputs.release_tag }}
-
-      - name: Get API URL from OpenTofu output
-        id: get_url
-        run: |
-          URL=$(tofu -chdir=infra/terraform/envs/prod output -raw http_api_url)
-          echo "value=$URL" >> "$GITHUB_OUTPUT"
-
-  get-api-url:
-    needs: [gate, detect-changes, deploy-backend]
-    if: always() && needs.gate.result == 'success'
-    runs-on: ubuntu-latest
-    environment: aws-prod
-    permissions:
-      id-token: write
-      contents: read
-    outputs:
-      api_url: ${{ steps.resolve.outputs.value }}
-    steps:
-      - uses: actions/checkout@v6
-      - uses: ./.github/actions/setup-node
-
-      - uses: opentofu/setup-opentofu@v2
-        with:
-          tofu_wrapper: false
-
-      - uses: aws-actions/configure-aws-credentials@v6
-        with:
-          aws-region: ca-central-1
-          role-to-assume: ${{ secrets.AWS_OPENTOFU_ROLE_ARN || secrets.AWS_DEPLOY_ROLE_ARN }}
-          role-session-name: get-api-url-${{ github.run_id }}
-
-      - name: Resolve API URL
-        id: resolve
-        shell: bash
-        env:
-          TOFU_CONFIG: ${{ secrets.TOFU_BACKEND_CONFIG_HCL }}
-        run: |
-          URL="${{ needs.deploy-backend.outputs.api_url }}"
-          if [ -z "$URL" ]; then
-            printf '%s\n' "$TOFU_CONFIG" > infra/terraform/envs/prod/backend.hcl
-            tofu -chdir=infra/terraform/envs/prod init -backend-config=backend.hcl
-            URL=$(tofu -chdir=infra/terraform/envs/prod output -raw http_api_url)
-          fi
-          if [ -z "$URL" ]; then
-            URL="${{ secrets.VITE_SKIPBO_API_URL }}"
-          fi
-          echo "value=$URL" >> "$GITHUB_OUTPUT"
-
   build-frontend:
-    needs: [gate, detect-changes, release, get-api-url]
-    if: >
-      always() &&
-      needs.gate.result == 'success' &&
-      needs.release.result == 'success' &&
-      needs.get-api-url.result == 'success' &&
-      (
-        needs.detect-changes.outputs.frontend == 'true' ||
-        (github.event_name == 'workflow_dispatch' && inputs.force_frontend)
-      )
+    needs: [gate, release]
+    if: needs.release.result == 'success'
     runs-on: ubuntu-latest
     environment: aws-prod
     steps:
@@ -224,7 +93,7 @@ jobs:
       - name: Generate runtime config
         shell: bash
         env:
-          API_BASE_URL: ${{ needs.get-api-url.outputs.api_url }}
+          API_BASE_URL: ${{ secrets.VITE_SKIPBO_API_URL }}
           APP_VERSION: ${{ needs.release.outputs.release_tag }}
           MINIMUM_SUPPORTED_VERSION: ${{ inputs.minimum_supported_version || vars.PWA_MINIMUM_SUPPORTED_VERSION }}
         run: |

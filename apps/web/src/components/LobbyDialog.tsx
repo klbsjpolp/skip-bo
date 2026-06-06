@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { MAX_PLAYER_NAME_LENGTH } from '@skipbo/realtime-core';
-import type { LobbySeatInfo, LobbyReadyState } from '@skipbo/realtime-core';
+import { MAX_PLAYER_NAME_LENGTH } from '@klbsjpolp/realtime-core';
+import type { LobbySeatInfo, LobbyReadyState } from '@klbsjpolp/realtime-core';
 import { getStoredPlayerName, storePlayerName } from '@/state/lobbyPreferences';
 import { cn } from '@/lib/utils.ts';
 

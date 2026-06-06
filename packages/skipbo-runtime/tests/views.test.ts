@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { initialGameState } from '@skipbo/game-core';
-import { resolvePlayerName } from '@skipbo/realtime-core';
+import { resolvePlayerName } from '@klbsjpolp/realtime-core';
 
 import { HIDDEN_CARD, serializeClientGameView } from '../src/views.js';
 

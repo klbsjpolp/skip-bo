@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { gameReducer, initialGameState, type Card, type GameState } from '@skipbo/game-core';
-import type { CreateRoomResponse, LobbySeatInfo, RoomSummary, ServerMessage } from '@skipbo/realtime-core';
+import type { CreateRoomResponse, LobbySeatInfo, RoomSummary, ServerMessage } from '@klbsjpolp/realtime-core';
 import { serializeClientGameView, type ClientGameView } from '@skipbo/skipbo-runtime';
 
 import { inferOpponentTransition, useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';

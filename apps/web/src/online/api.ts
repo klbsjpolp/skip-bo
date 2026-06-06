@@ -1,4 +1,4 @@
-import { type CreateRoomRequest, type CreateRoomResponse, type JoinRoomResponse } from '@skipbo/realtime-core';
+import { type CreateRoomRequest, type CreateRoomResponse, type JoinRoomResponse } from '@klbsjpolp/realtime-core';
 import { clearRuntimeConfigCache, fetchRuntimeConfig } from '@/lib/runtimeConfig';
 
 const ONLINE_CONFIGURATION_ERROR = 'Le jeu en ligne n’est pas configuré pour cette installation.';
