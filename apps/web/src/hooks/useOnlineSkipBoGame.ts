@@ -11,7 +11,7 @@ import {
   type LobbySeatInfo,
   type RoomSummary,
   type ServerMessage,
-} from '@skipbo/realtime-core';
+} from '@klbsjpolp/realtime-core';
 import { isDebugAction, SkipboHost, type ClientGameView, type HostRoomMeta } from '@skipbo/skipbo-runtime';
 
 import { useCardAnimation } from '@/contexts/useCardAnimation';

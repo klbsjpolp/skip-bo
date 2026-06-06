@@ -6,7 +6,7 @@ import {
   type LobbySeatInfo,
   type RoomStatus,
   type RoomSummary,
-} from '@skipbo/realtime-core';
+} from '@klbsjpolp/realtime-core';
 
 export interface PlayerView extends Player {
   displayName: string;

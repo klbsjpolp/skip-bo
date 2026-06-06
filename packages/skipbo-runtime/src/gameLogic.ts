@@ -8,7 +8,7 @@ import {
   type Player,
   type SelectedCard,
 } from '@skipbo/game-core';
-import { resolvePlayerName } from '@skipbo/realtime-core';
+import { resolvePlayerName } from '@klbsjpolp/realtime-core';
 
 const cardsMatch = (candidate: Card | null | undefined, selectedCard: Card): boolean =>
   !!candidate && candidate.value === selectedCard.value && candidate.isSkipBo === selectedCard.isSkipBo;
