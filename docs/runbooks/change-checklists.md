@@ -15,8 +15,8 @@
 - If the change touches rendered gameplay behavior, run `pnpm test:e2e`.
 - If the change affects shared board layout, fixture-visible UI, `.player-area`, `.center-area`, or the `ready-human` fixture, run `pnpm --filter @skipbo/web exec playwright test tests/ui/theme-contract.spec.ts --project=chromium-desktop`.
 - If the UI change is intentional and screenshot diffs are expected, run `pnpm test:visual:update` and keep the snapshot updates in the same change.
-- If the change touches the relay protocol, room codes, or room lifecycle, update `packages/realtime-core/tests` and `apps/realtime-api/src/**/__tests__`. If it touches Skip-Bo redaction or move rules, update `packages/skipbo-runtime/tests`.
-- If the change touches infra or deployment workflows, run `pnpm tofu:fmt` and `pnpm --dir infra/terraform validate:offline:prod`.
+- The relay protocol, room codes, and room lifecycle live in [realtime-infra](https://github.com/klbsjpolp/realtime-infra) — change them there. If a change touches Skip-Bo redaction or move rules, update `packages/skipbo-runtime/tests`.
+- If the change touches the frontend deploy workflow, verify `.github/workflows/deploy.yml` and the web build.
 
 ## Gameplay Checklist
 
@@ -45,22 +45,19 @@
 
 ## Realtime Protocol Checklist
 
-- Inspect `apps/realtime-api/src/services/roomService.ts` (relay), `packages/realtime-core/src/index.ts` (protocol/DTOs), and `packages/skipbo-runtime/src/{hostRuntime,views}.ts` (host runtime + redaction).
-- Update `apps/realtime-api/src/**/__tests__`.
-- Update `packages/realtime-core/tests` (protocol) and/or `packages/skipbo-runtime/tests` (rules/redaction).
-- Update [../protocols/realtime-events.md](../protocols/realtime-events.md).
+The generic relay protocol and server live in [realtime-infra](https://github.com/klbsjpolp/realtime-infra) — change them there. In this repo:
+
+- Inspect `packages/skipbo-runtime/src/{hostRuntime,views,actionSchema}.ts` (host runtime, redaction, and the Skip-Bo move payload).
+- Update `packages/skipbo-runtime/tests`.
+- Bump the `@klbsjpolp/realtime-core` dependency if the protocol changed upstream.
 - Update [../architecture/online-multiplayer.md](../architecture/online-multiplayer.md) if authority boundaries, relay flow, or redaction responsibilities changed.
-- Update [../architecture/decision-log.md](../architecture/decision-log.md) if the decision itself changed.
 - Smoke-test with two browser sessions when end-to-end online behavior changed.
 
-## Infra And Deploy Checklist
+## Frontend Deploy Checklist
 
-- Inspect `infra/terraform/**`, `.github/workflows/ci.yml`, `.github/workflows/deploy.yml`, and any touched package scripts.
-- Run `pnpm tofu:fmt`.
-- Run `pnpm --dir infra/terraform validate:offline:prod`.
-- Rebuild `@skipbo/realtime-api` if Lambda packaging inputs changed.
-- Update [opentofu-aws-realtime.md](opentofu-aws-realtime.md) and [../../infra/terraform/README.md](../../infra/terraform/README.md).
-- Update [../monitoring/SENTRY_AWS_INTEGRATION.md](../monitoring/SENTRY_AWS_INTEGRATION.md) if alarms, Sentry wiring, or monitoring ownership changed.
+- Inspect `.github/workflows/ci.yml`, `.github/workflows/deploy.yml`, and any touched package scripts.
+- The deploy workflow ships the web app to GitHub Pages only; the backend deploys from realtime-infra.
+- Update [../monitoring/SENTRY_AWS_INTEGRATION.md](../monitoring/SENTRY_AWS_INTEGRATION.md) if web Sentry wiring changed.
 - Update the decision log if the deployment topology or operating model changed.
 
 ## Release Notes Trigger

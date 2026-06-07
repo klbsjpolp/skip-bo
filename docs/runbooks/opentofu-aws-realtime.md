@@ -1,113 +1,17 @@
 # OpenTofu AWS Realtime Runbook
 
-## Document Contract
+> **Moved.** The realtime backend (the WebSocket relay server and its AWS/OpenTofu
+> deployment) was extracted to the shared
+> [realtime-infra](https://github.com/klbsjpolp/realtime-infra) repo, which deploys one
+> server shared by every game. This runbook no longer applies to skip-bo.
 
-- Purpose: describe how to bootstrap, validate, and deploy the AWS realtime backend with OpenTofu.
-- Audience: contributors and agents operating the Skip-Bo realtime backend.
-- Source of truth: `infra/terraform/**`, `.github/workflows/ci.yml`, and `.github/workflows/deploy.yml`.
-- When to update: when backend infrastructure, deployment workflows, secrets, or validation steps change.
+## Where things live now
 
-## Related Docs
+- **Server + Terraform + deploy:** `realtime-infra` (`apps/realtime-api`, `infra/terraform`,
+  `.github/workflows/deploy-backend.yml`). The backend deploy runbook lives there.
+- **This repo (skip-bo):** deploys the **web frontend only** to GitHub Pages via
+  `.github/workflows/deploy.yml`. It connects to the shared server through the
+  `VITE_SKIPBO_API_URL` secret — no backend infrastructure is managed here.
 
-- [../architecture/online-multiplayer.md](../architecture/online-multiplayer.md)
-- [../protocols/realtime-events.md](../protocols/realtime-events.md)
-- [../../infra/terraform/README.md](../../infra/terraform/README.md)
-- [../monitoring/SENTRY_AWS_INTEGRATION.md](../monitoring/SENTRY_AWS_INTEGRATION.md)
-
-## Preconditions
-
-- `pnpm install` has been run at the repo root.
-- OpenTofu is installed locally if you are planning or applying from your machine.
-- AWS credentials or an assumable role are available for the target account.
-- The realtime API bundle can be built locally.
-
-## Inputs
-
-- remote-state backend settings for `infra/terraform/envs/prod/backend.hcl`
-- `AWS_OPENTOFU_ROLE_ARN` or `AWS_DEPLOY_ROLE_ARN` for GitHub Actions
-- `VITE_SKIPBO_API_URL` for frontend deployment after backend rollout
-- optional `PWA_MINIMUM_SUPPORTED_VERSION` GitHub repository variable, or the manual deploy input of the same meaning, when installed PWAs must be forced off an older build
-- optional `VITE_SENTRY_DSN`
-- optional `BACKEND_SENTRY_DSN` or `SENTRY_DSN` GitHub secret if the backend should report to a different Sentry project than the browser
-- optional `TF_VAR_sentry_dsn`, `TF_VAR_sentry_release`, and `TF_VAR_sentry_traces_sample_rate` for local plan or apply
-
-## Steps
-
-### One-Time Bootstrap
-
-Create the remote-state infrastructure outside this stack:
-
-- S3 bucket for OpenTofu state
-- DynamoDB table for state locking
-- an IAM role that GitHub Actions can assume for OpenTofu operations
-
-Store the backend configuration as the GitHub secret `TOFU_BACKEND_CONFIG_HCL`. Example payload:
-
-```hcl
-bucket         = "skipbo-opentofu-state"
-key            = "prod/opentofu.tfstate"
-region         = "ca-central-1"
-dynamodb_table = "skipbo-opentofu-locks"
-encrypt        = true
-```
-
-Store the deployment role ARN as `AWS_OPENTOFU_ROLE_ARN`.
-
-### Local Plan
-
-```bash
-pnpm install
-pnpm --filter @skipbo/realtime-api build
-tofu -chdir=infra/terraform/envs/prod init \
-  -backend-config="bucket=skipbo-opentofu-state" \
-  -backend-config="key=prod/opentofu.tfstate" \
-  -backend-config="region=ca-central-1" \
-  -backend-config="dynamodb_table=skipbo-opentofu-locks"
-TF_VAR_sentry_dsn=your_backend_dsn \
-TF_VAR_sentry_release=v$(node -p 'require("./package.json").version') \
-pnpm tofu:plan
-```
-
-### Local Apply
-
-```bash
-pnpm --filter @skipbo/realtime-api build
-TF_VAR_sentry_dsn=your_backend_dsn \
-TF_VAR_sentry_release=v$(node -p 'require("./package.json").version') \
-pnpm tofu:apply
-```
-
-### GitHub Actions Deploy
-
-- `ci.yml` runs workspace checks and offline OpenTofu validation.
-- `deploy.yml` creates the release commit and tag, deploys the backend when needed, rebuilds the frontend with runtime config, deploys GitHub Pages, and publishes the GitHub release.
-- The release job checks out `main` with full git history so `commit-and-tag-version` can inspect commits since the previous tag and produce the correct SemVer bump.
-- Backend deploy uses `TOFU_BACKEND_CONFIG_HCL` plus `AWS_OPENTOFU_ROLE_ARN` or `AWS_DEPLOY_ROLE_ARN`.
-- Backend deploy resolves the Sentry DSN from `BACKEND_SENTRY_DSN`, then `SENTRY_DSN`, then `VITE_SENTRY_DSN`.
-- Frontend deploy writes `apps/web/public/runtime-config.json` with `apiBaseUrl`, the current release tag as `appVersion`, and an optional `minimumSupportedVersion` sourced from the workflow-dispatch input or the `PWA_MINIMUM_SUPPORTED_VERSION` repository variable.
-- Leave `PWA_MINIMUM_SUPPORTED_VERSION` empty for normal soft-update behavior. Set it to a release tag such as `v1.4.0` only when older installed PWAs must block and reload before continuing.
-
-## Validation
-
-1. Read the OpenTofu outputs and capture `http_api_url`.
-2. Ensure the repository secret `VITE_SKIPBO_API_URL` points at that URL before rebuilding or redeploying the frontend.
-3. Open two browser sessions.
-4. Create a room in one browser and join it from the other.
-5. Confirm room-code display, live selection sync, hidden opponent hand, and replay creating a fresh online room.
-
-## Rollback
-
-- If a bad infra change has not been applied yet, stop at plan review and fix the configuration.
-- If a bad apply has already happened, revert the infra change in git, rebuild the realtime API if packaging inputs changed, and run a fresh plan and apply.
-- If the backend URL changed unexpectedly, update `VITE_SKIPBO_API_URL` and redeploy the frontend so `apps/web/public/runtime-config.json` is regenerated from the current value.
-- If installed clients are being forced to reload unexpectedly, clear or lower `PWA_MINIMUM_SUPPORTED_VERSION` and redeploy the frontend so the runtime config stops hard-blocking older builds.
-
-## Failure Modes
-
-- Missing or incorrect `backend.hcl` settings prevent OpenTofu from initializing remote state.
-- Skipping the realtime API build can package stale Lambda artifacts.
-- Missing AWS role secrets break GitHub Actions deployment.
-- Forgetting to refresh `VITE_SKIPBO_API_URL` leaves the frontend pointed at the wrong backend.
-- Setting `PWA_MINIMUM_SUPPORTED_VERSION` too high can block otherwise healthy installed PWAs until they reload onto a newer release.
-- Missing Sentry variables disables backend release tagging and monitoring integration.
-- When `TF_VAR_sentry_dsn` is set, backend tracing defaults to a `1.0` sample rate unless `TF_VAR_sentry_traces_sample_rate` overrides it.
+To point the web app at a backend, set `VITE_SKIPBO_API_URL` to the relay server's HTTP
+API base URL (or `http://127.0.0.1:8787` when running `pnpm dev:api` from realtime-infra).

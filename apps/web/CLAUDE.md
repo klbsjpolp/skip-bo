@@ -29,7 +29,8 @@ Animation services live in `src/services/`.
 
 ### Online (host-authoritative)
 
-The server (`apps/realtime-api`) is a **game-agnostic relay** — it never sees game
+The server (the shared relay in [realtime-infra](https://github.com/klbsjpolp/realtime-infra))
+is a **game-agnostic relay** — it never sees game
 state. The **host** seat (seat 0) runs `@skipbo/skipbo-runtime` (`SkipboHost`),
 applies every move (its own and relayed guest moves), and pushes a **redacted
 `ClientGameView` per seat** plus the abstract turn / a reconnection snapshot /

@@ -4,7 +4,7 @@
 
 - Purpose: describe how the online multiplayer system is partitioned and why the current architecture works the way it does.
 - Audience: contributors and agents changing realtime room lifecycle, view serialization, or the online client flow.
-- Source of truth: `apps/realtime-api/src/services/roomService.ts`, `packages/realtime-core/src/index.ts`, and `packages/skipbo-runtime/src/{hostRuntime,views}.ts`.
+- Source of truth: `packages/skipbo-runtime/src/{hostRuntime,views}.ts` (this repo). The game-agnostic relay server and protocol live in [realtime-infra](https://github.com/klbsjpolp/realtime-infra) (`@klbsjpolp/realtime-core` + `apps/realtime-api`).
 - When to update: when authority boundaries, transport model, room flow, or major runtime components change.
 
 ## Related Docs
@@ -18,11 +18,10 @@
 ## Boundaries
 
 - `apps/web` owns the online client runtime, room create/join flows, the **host runtime** when the local seat is host, and client-side animation inferred from views.
-- `apps/realtime-api` is a **game-agnostic relay**: room lifecycle, seat presence, an abstract turn pointer, and opaque message forwarding. No game logic.
+- The **game-agnostic relay server** (room lifecycle, seat presence, abstract turn pointer, opaque message forwarding — no game logic) lives in the shared [realtime-infra](https://github.com/klbsjpolp/realtime-infra) repo (`apps/realtime-api`), deployed once and shared by every game.
+- `@klbsjpolp/realtime-core` (consumed from npm) owns the generic relay protocol, room/lobby/presence DTOs, and room-code helpers. **No dependency on game-core.**
 - `packages/game-core` owns the pure Skip-Bo rules.
-- `packages/realtime-core` owns the generic relay protocol, room/lobby/presence DTOs, and room-code helpers. **No dependency on game-core.**
 - `packages/skipbo-runtime` owns the host-authoritative Skip-Bo runtime: rules application, hidden-information redaction, and per-seat `ClientGameView`. Consumed only by `apps/web`.
-- `infra/terraform` owns the AWS infrastructure that hosts the realtime API.
 
 ## Authority Model
 
