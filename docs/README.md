@@ -28,11 +28,11 @@
 
 ### Protocols
 
-- [protocols/realtime-events.md](protocols/realtime-events.md): HTTP and WebSocket contracts for online rooms.
+- [protocols/realtime-events.md](protocols/realtime-events.md): pointer to the realtime relay contract (now maintained in realtime-infra).
 
 ### Runbooks
 
-- [runbooks/opentofu-aws-realtime.md](runbooks/opentofu-aws-realtime.md): bootstrap, plan, apply, and smoke-test flow for the AWS backend.
+- [runbooks/opentofu-aws-realtime.md](runbooks/opentofu-aws-realtime.md): pointer — the AWS backend deploy now lives in realtime-infra.
 - [runbooks/change-checklists.md](runbooks/change-checklists.md): procedural checklists and validation rules by change zone.
 
 ### Monitoring
@@ -50,7 +50,6 @@
 ### Code-Adjacent Module Docs
 
 - [../apps/web/src/ai/README.md](../apps/web/src/ai/README.md): stable AI module orientation near the code.
-- [../infra/terraform/README.md](../infra/terraform/README.md): OpenTofu directory guide.
 
 ### Backlog And Design Notes
 

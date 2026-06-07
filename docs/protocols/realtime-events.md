@@ -1,12 +1,18 @@
 # Realtime Event Protocol
 
+> **Moved:** the generic relay protocol and its server enforcement now live in the shared
+> [realtime-infra](https://github.com/klbsjpolp/realtime-infra) repo — the published
+> `@klbsjpolp/realtime-core` package plus the relay server — consumed here from npm. This page
+> is kept as an orientation reference; the canonical source is realtime-infra. Only the
+> **Skip-Bo-specific** payloads (`packages/skipbo-runtime/src/actionSchema.ts`) and redaction
+> (`views.ts`) are owned in this repo.
+
 ## Document Contract
 
 - Purpose: define the current HTTP and WebSocket contracts for online rooms.
 - Audience: contributors and agents changing online DTOs, room codes, or client/server message handling.
-- Source of truth: `packages/realtime-core/src/index.ts` (generic relay protocol + DTOs),
-  `packages/skipbo-runtime/src/views.ts` (Skip-Bo redaction) + `actionSchema.ts` (move payloads),
-  and backend enforcement in `apps/realtime-api/src/services/roomService.ts`.
+- Source of truth: `@klbsjpolp/realtime-core` (generic relay protocol + DTOs, in realtime-infra),
+  `packages/skipbo-runtime/src/views.ts` (Skip-Bo redaction) + `actionSchema.ts` (move payloads).
 - When to update: when any request shape, response shape, room-code rule, WebSocket message, or redaction rule changes.
 
 ## Model: host-authoritative relay

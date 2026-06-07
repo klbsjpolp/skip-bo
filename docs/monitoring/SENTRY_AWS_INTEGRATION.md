@@ -1,5 +1,10 @@
 # Sentry AWS Integration
 
+> **Note:** the **backend** Sentry wiring (Lambda monitoring, OpenTofu monitoring modules)
+> moved to the shared [realtime-infra](https://github.com/klbsjpolp/realtime-infra) repo
+> along with the relay server. In this repo only the **web app** Sentry integration is owned;
+> the backend sections below are kept for reference but are maintained in realtime-infra.
+
 ## Document Contract
 
 - Purpose: explain how Sentry connects to the Skip-Bo AWS resources and application runtimes.

@@ -48,14 +48,9 @@ This starts the frontend only.
 
 ### Run the realtime API locally
 
-```bash
-pnpm dev:api
-```
-
-The local API listens on `http://127.0.0.1:8787` by default and exposes WebSocket upgrades on `/ws`.
-Use `SKIPBO_LOCAL_API_HOST`, `SKIPBO_LOCAL_API_PORT`, and `SKIPBO_LOCAL_API_PUBLIC_HOST` to override the bind or advertised address.
-
-To exercise online play against the local backend, run the web app in a second terminal with:
+The game-agnostic relay server lives in the shared
+[realtime-infra](https://github.com/klbsjpolp/realtime-infra) repo. Run it from there
+(`pnpm dev:api`, listens on `http://127.0.0.1:8787`), then point the web app at it:
 
 ```bash
 VITE_SKIPBO_API_URL=http://127.0.0.1:8787 pnpm dev
@@ -69,9 +64,6 @@ VITE_SKIPBO_API_URL=http://127.0.0.1:8787 pnpm dev
 - `pnpm test:e2e`
 - `pnpm test:visual`
 - `pnpm typecheck`
-- `pnpm tofu:init`
-- `pnpm tofu:plan`
-- `pnpm tofu:apply`
 
 ## Environment Notes
 
@@ -93,22 +85,20 @@ Browser Sentry is optional:
 VITE_SENTRY_DSN=your_browser_dsn
 ```
 
-Backend deployment uses `TF_VAR_sentry_dsn` and `TF_VAR_sentry_release` when Sentry is enabled. GitHub Actions prefers `BACKEND_SENTRY_DSN`, then `SENTRY_DSN`, then falls back to `VITE_SENTRY_DSN`. The exact deploy flow lives in [docs/runbooks/opentofu-aws-realtime.md](docs/runbooks/opentofu-aws-realtime.md).
-Backend tracing defaults to `1.0` when `TF_VAR_sentry_dsn` is set; override it with `TF_VAR_sentry_traces_sample_rate` if you want a lower sample rate.
+For a deployed backend, point `VITE_SKIPBO_API_URL` at the shared relay server's HTTP API
+base URL. The server and its deployment now live in
+[realtime-infra](https://github.com/klbsjpolp/realtime-infra); this repo only builds and
+deploys the web frontend.
 Frontend deploy also regenerates `apps/web/public/runtime-config.json` with the current app version. Leave `PWA_MINIMUM_SUPPORTED_VERSION` empty for soft update prompts, or set it to a release tag like `v1.4.0` before redeploying when installed PWAs must hard-reload onto a newer build.
 
 ## Workspace Layout
 
 ```text
 apps/
-├── realtime-api/         Game-agnostic relay server (AWS Lambda HTTP + WebSocket)
 └── web/                  React/Vite app, AI, animations, fixtures, and browser tests
 packages/
 ├── game-core/            Shared reducer, validators, deck setup, and domain types
-├── realtime-core/        Generic relay protocol, room/lobby DTOs, room codes
 └── skipbo-runtime/       Host-authoritative Skip-Bo runtime + redacted client views
-infra/
-└── terraform/            OpenTofu configuration for the production backend
 docs/
 ├── architecture/         Structural decisions and source-of-truth maps
 ├── backlog/              Non-normative design notes and proposals
@@ -124,8 +114,7 @@ docs/
 - [docs/architecture/source-of-truth.md](docs/architecture/source-of-truth.md): code ownership by domain
 - [docs/architecture/runtime-invariants.md](docs/architecture/runtime-invariants.md): invariants that changes must preserve
 - [docs/architecture/online-multiplayer.md](docs/architecture/online-multiplayer.md): how the online stack fits together
-- [docs/protocols/realtime-events.md](docs/protocols/realtime-events.md): room API and WebSocket contracts
-- [docs/runbooks/opentofu-aws-realtime.md](docs/runbooks/opentofu-aws-realtime.md): AWS/OpenTofu bootstrap and deploy flow
+- The relay protocol (`@klbsjpolp/realtime-core`), the WebSocket server, and its AWS/OpenTofu deployment live in [realtime-infra](https://github.com/klbsjpolp/realtime-infra)
 
 ## Contributing Notes
 
