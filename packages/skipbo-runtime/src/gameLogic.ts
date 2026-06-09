@@ -1,44 +1,13 @@
 import {
   canPlayCard,
   gameReducer,
+  hasValidDiscardPileIndex,
+  hasValidSelectedSource,
   initialGameState,
-  type Card,
   type GameAction,
   type GameState,
-  type Player,
-  type SelectedCard,
 } from '@skipbo/game-core';
 import { resolvePlayerName } from '@klbsjpolp/realtime-core';
-
-const cardsMatch = (candidate: Card | null | undefined, selectedCard: Card): boolean =>
-  !!candidate && candidate.value === selectedCard.value && candidate.isSkipBo === selectedCard.isSkipBo;
-
-const hasValidDiscardPileIndex = (player: Player, discardPileIndex: number): boolean =>
-  discardPileIndex >= 0 && discardPileIndex < player.discardPiles.length;
-
-const hasValidSelectedSource = (player: Player, selectedCard: SelectedCard): boolean => {
-  switch (selectedCard.source) {
-    case 'hand':
-      return (
-        selectedCard.index >= 0 &&
-        selectedCard.index < player.hand.length &&
-        cardsMatch(player.hand[selectedCard.index], selectedCard.card)
-      );
-    case 'stock':
-      return cardsMatch(player.stockPile[player.stockPile.length - 1], selectedCard.card);
-    case 'discard':
-      return (
-        selectedCard.discardPileIndex !== undefined &&
-        hasValidDiscardPileIndex(player, selectedCard.discardPileIndex) &&
-        cardsMatch(
-          player.discardPiles[selectedCard.discardPileIndex][
-            player.discardPiles[selectedCard.discardPileIndex].length - 1
-          ],
-          selectedCard.card,
-        )
-      );
-  }
-};
 
 const isCardSelectable = (gameState: GameState, action: Extract<GameAction, { type: 'SELECT_CARD' }>): boolean => {
   const player = gameState.players[gameState.currentPlayerIndex];
