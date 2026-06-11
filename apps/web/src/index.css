@@ -30,6 +30,7 @@
 
 /* Themes (alphabetical) */
 @import './themes/candy.css';
+@import './themes/cinema.css';
 @import './themes/glass.css';
 @import './themes/metro.css';
 @import './themes/midnight.css';
