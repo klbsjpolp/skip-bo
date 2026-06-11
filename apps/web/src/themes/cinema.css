@@ -1,0 +1,269 @@
+/* Cinéma muet — 1920s silent-film table: a darkened picture house, a projector
+   beam, film grain and scratches, silver-nitrate card faces, film-strip card
+   backs, and a Skip-Bo card styled as an intertitle title card. Strictly
+   monochrome: the three number ranges are ink black / dark gray / mid gray. */
+
+.theme-cinema {
+  /* === Core color scheme === */
+  --background: #121212;
+  --foreground: #e9e5da;
+  --primary: #e3dfd2;
+  --primary-foreground: #161616;
+  --input: #e3dfd2;
+  --input-foreground: #161616;
+  --secondary: #1d1d1d;
+  --secondary-foreground: #e9e5da;
+  --success: #cfccc0;
+  --success-foreground: #161616;
+  --muted: #262626;
+  --muted-foreground: hsl(0 0% 72%);
+  --accent: #2b2b2b;
+  --accent-foreground: #ece8dd;
+  --popover: #181818;
+  --popover-foreground: #ece8dd;
+  --border: hsl(0 0% 42%);
+  --ring: #e9e5da;
+  --text-color: #ddd8cc;
+  --title-color: #f2eee3;
+
+  /* === Card surface === */
+  --card-front-color: #e9e4d6;
+  --card-back-color: #101010;
+  --card-border-color: #1f1f1f;
+  --card-color: #1a1a1a;
+  --card-radius: 8px;
+  --card-shadow: 0 10px 22px rgb(0 0 0 / 0.6), 0 1px 0 rgb(255 255 255 / 0.05);
+  /* Film strip: sprocket holes, double frame, art-deco rising sun. */
+  --card-back-bg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 120'><rect width='80' height='120' fill='%23101010'/><g fill='%23e9e5da' opacity='0.88'><rect x='4.5' y='7' width='7' height='5' rx='1.5'/><rect x='4.5' y='21' width='7' height='5' rx='1.5'/><rect x='4.5' y='35' width='7' height='5' rx='1.5'/><rect x='4.5' y='49' width='7' height='5' rx='1.5'/><rect x='4.5' y='63' width='7' height='5' rx='1.5'/><rect x='4.5' y='77' width='7' height='5' rx='1.5'/><rect x='4.5' y='91' width='7' height='5' rx='1.5'/><rect x='4.5' y='105' width='7' height='5' rx='1.5'/><rect x='68.5' y='7' width='7' height='5' rx='1.5'/><rect x='68.5' y='21' width='7' height='5' rx='1.5'/><rect x='68.5' y='35' width='7' height='5' rx='1.5'/><rect x='68.5' y='49' width='7' height='5' rx='1.5'/><rect x='68.5' y='63' width='7' height='5' rx='1.5'/><rect x='68.5' y='77' width='7' height='5' rx='1.5'/><rect x='68.5' y='91' width='7' height='5' rx='1.5'/><rect x='68.5' y='105' width='7' height='5' rx='1.5'/></g><rect x='16' y='7' width='48' height='106' fill='none' stroke='%23e9e5da' stroke-width='1.6' opacity='0.92'/><rect x='19.5' y='10.5' width='41' height='99' fill='none' stroke='%23e9e5da' stroke-width='0.8' opacity='0.65'/><g stroke='%23e9e5da' stroke-width='1.3' opacity='0.85'><path d='M40 68 L40 26'/><path d='M40 68 L29 30'/><path d='M40 68 L51 30'/><path d='M40 68 L22 38'/><path d='M40 68 L58 38'/><path d='M40 68 L19 50'/><path d='M40 68 L61 50'/></g><circle cx='40' cy='72' r='9' fill='%23e9e5da'/><g stroke='%23e9e5da' opacity='0.8'><path d='M27 87 H53' stroke-width='1.4'/><path d='M30 92 H50' stroke-width='1.1'/><path d='M33 97 H47' stroke-width='0.8'/><path d='M36 102 H44' stroke-width='0.6'/></g></svg>");
+
+  /* === Card number colors (1–4, 5–8, 9–12) — three shades of ink === */
+  --card-g1: #141414;
+  --card-g2: #444444;
+  --card-g3: #757575;
+
+  /* === Skip-Bo special card === */
+  --skipbo-text: #f3efe3;
+  --skipbo-bg: #101010;
+
+  /* === Selection & drag === */
+  --selected-border-color: #ffffff;
+  --selected-shadow: 0 0 0 2px rgb(255 255 255 / 0.9), 0 0 22px rgb(255 255 255 / 0.45);
+  --drop-indicator-color: #f2eee3;
+  --can-drop-shadow: 0 0 18px rgb(255 255 255 / 0.35);
+  --active-turn-color: rgb(242 238 227 / 0.75);
+
+  /* === Victory layer === */
+  --victory-border: #f2eee3;
+  --victory-accent: #ffffff;
+  --victory-accent-soft: color-mix(in srgb, var(--victory-accent) 22%, transparent);
+  --victory-accent-opacity: 0.3;
+  --victory-piece-1: #ffffff;
+  --victory-piece-2: #d9d4c7;
+  --victory-piece-3: #a3a3a3;
+  --victory-piece-4: #6e6e6e;
+  --victory-pattern-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'><g fill='%23ffffff' opacity='0.8'><path d='M14 8 l1.6 4.4 4.4 1.6 -4.4 1.6 -1.6 4.4 -1.6 -4.4 -4.4 -1.6 4.4 -1.6 z'/></g><g fill='%23e9e5da' opacity='0.7'><path d='M42 38 l1.3 3.6 3.6 1.3 -3.6 1.3 -1.3 3.6 -1.3 -3.6 -3.6 -1.3 3.6 -1.3 z'/></g><circle cx='44' cy='12' r='1.3' fill='%23ffffff' opacity='0.6'/><circle cx='12' cy='44' r='1.1' fill='%23e9e5da' opacity='0.6'/></svg>");
+  --victory-pattern-opacity: 0.18;
+  --victory-pattern-size: 56px 56px;
+  --victory-pattern-drift-to: 56px 56px;
+  --victory-shine-opacity: 0.4;
+  --victory-shine-duration: 3.8s;
+  --victory-emblem-opacity: 0.7;
+  /* Film reel emblem for the winner area. */
+  --victory-emblem-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><circle cx='100' cy='100' r='80' fill='none' stroke='%23e9e5da' stroke-width='7'/><circle cx='100' cy='100' r='66' fill='none' stroke='%23e9e5da' stroke-width='2' opacity='0.6'/><circle cx='100' cy='100' r='13' fill='%23e9e5da'/><g fill='none' stroke='%23e9e5da' stroke-width='5'><circle cx='100' cy='56' r='20'/><circle cx='142' cy='86' r='20'/><circle cx='126' cy='136' r='20'/><circle cx='74' cy='136' r='20'/><circle cx='58' cy='86' r='20'/></g></svg>");
+
+  /* === Body / page chrome: darkened theater, projector beam, grain === */
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background-image:
+      /* projector beam from above the screen */
+      radial-gradient(
+        ellipse 60% 50% at 50% -12%,
+        rgb(244 240 228 / 0.14) 0%,
+        rgb(244 240 228 / 0.05) 45%,
+        transparent 70%
+      ),
+      /* vignette */ radial-gradient(ellipse 100% 85% at 50% 50%, transparent 52%, rgb(0 0 0 / 0.55) 100%),
+      /* film grain */
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"),
+      linear-gradient(180deg, #181818 0%, #0c0c0c 100%);
+    background-size:
+      auto,
+      auto,
+      220px 220px,
+      auto;
+    background-repeat: no-repeat, no-repeat, repeat, no-repeat;
+    background-attachment: fixed;
+  }
+
+  /* Projection scratches — faint vertical lines that flicker like worn film. */
+  body::before {
+    @apply content-[''] fixed inset-0 pointer-events-none z-0 opacity-65;
+    background-image: linear-gradient(
+      90deg,
+      transparent 0 12%,
+      rgb(255 255 255 / 0.035) 12% calc(12% + 1px),
+      transparent calc(12% + 1px) 37%,
+      rgb(255 255 255 / 0.05) 37% calc(37% + 1px),
+      transparent calc(37% + 1px) 71%,
+      rgb(255 255 255 / 0.04) 71% calc(71% + 1px),
+      transparent calc(71% + 1px) 100%
+    );
+    animation: cinemaFlicker 2.8s linear infinite;
+    @variant motion-reduce {
+      animation: none;
+    }
+  }
+
+  #main {
+    @apply relative z-2;
+  }
+
+  .title,
+  h1,
+  h2 {
+    font-family: 'Cinzel', Georgia, 'Times New Roman', serif;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--title-color);
+    text-shadow: 0 0 14px rgb(255 255 255 / 0.18);
+  }
+
+  /* === Card customizations === */
+  .card {
+    /* Numbered cards: silver-nitrate print with a photographic vignette. */
+    &.normal-card {
+      @apply shadow-card bg-card-front;
+      background-image:
+        radial-gradient(ellipse 120% 100% at 50% 40%, transparent 55%, rgb(16 16 16 / 0.18) 100%),
+        linear-gradient(180deg, #f0ecdf 0%, #e2ddcd 100%);
+
+      .card-number,
+      .card-corner-number {
+        font-family: 'Cinzel', Georgia, 'Times New Roman', serif;
+        font-weight: 700;
+      }
+    }
+
+    /* Empty piles recede into the dark of the theater. */
+    &.empty-card {
+      background-color: transparent;
+      background-image: none;
+      border: 2px dashed rgb(233 229 218 / 0.3);
+      color: rgb(233 229 218 / 0.5);
+      box-shadow: none;
+    }
+
+    /* Skip-Bo: an intertitle title card — black, double frame, italic serif. */
+    &.skipbo-text {
+      @apply shadow-card;
+      border-color: rgb(233 229 218 / 0.6);
+
+      .card-inner::before {
+        @apply content-[''] absolute pointer-events-none rounded-xs;
+        inset: 6%;
+        border: 1px solid rgb(243 239 227 / 0.85);
+        outline: 1px solid rgb(243 239 227 / 0.4);
+        outline-offset: 2px;
+      }
+
+      .card-number {
+        font-family: 'Cinzel', Georgia, 'Times New Roman', serif;
+        font-style: italic;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-shadow: 0 0 10px rgb(255 255 255 / 0.25);
+      }
+    }
+
+    /* Film-strip back, stretched edge to edge so sprockets hug the borders. */
+    .back {
+      background-image: var(--card-back-bg);
+      background-color: var(--card-back-color);
+      background-position: center;
+      background-size: 100% 100%;
+      border-color: rgb(233 229 218 / 0.5);
+    }
+  }
+
+  /* === Player / center area overrides: framed like an intertitle === */
+  .player-area,
+  .center-area {
+    background:
+      radial-gradient(ellipse 120% 90% at 50% 0%, rgb(244 240 228 / 0.05) 0%, transparent 55%),
+      linear-gradient(180deg, rgb(26 26 26 / 0.96), rgb(14 14 14 / 0.94));
+    border-color: rgb(233 229 218 / 0.4);
+  }
+
+  .player-area::before,
+  .center-area::before {
+    @apply content-[''] absolute pointer-events-none z-1;
+    inset: 7px;
+    border: 1px solid rgb(233 229 218 / 0.28);
+    border-radius: calc(0.5rem - 2px);
+  }
+
+  .player-area .bg-layer,
+  .center-area .bg-layer {
+    @apply opacity-50;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 220px 220px;
+  }
+
+  /* === Winner: caught in the projector's spotlight === */
+  .player-area.winner {
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.7),
+      0 0 36px rgb(255 255 255 / 0.25),
+      0 0 80px rgb(244 240 228 / 0.15);
+    animation: cinemaSpotlight 3.2s ease-in-out infinite;
+    @variant motion-reduce {
+      animation: none;
+    }
+  }
+}
+
+/* === Theme-local keyframes (top-level by CSS spec) === */
+@keyframes cinemaFlicker {
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+  12% {
+    opacity: 0.5;
+  }
+  19% {
+    opacity: 0.75;
+  }
+  34% {
+    opacity: 0.55;
+  }
+  41% {
+    opacity: 0.7;
+  }
+  58% {
+    opacity: 0.5;
+  }
+  66% {
+    opacity: 0.78;
+  }
+  84% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes cinemaSpotlight {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.7),
+      0 0 36px rgb(255 255 255 / 0.25),
+      0 0 80px rgb(244 240 228 / 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.9),
+      0 0 48px rgb(255 255 255 / 0.38),
+      0 0 100px rgb(244 240 228 / 0.24);
+  }
+}
