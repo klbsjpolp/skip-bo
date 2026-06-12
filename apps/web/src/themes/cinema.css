@@ -285,10 +285,39 @@
       box-shadow: none;
     }
 
-    /* Skip-Bo: an intertitle title card — black, double frame, italic serif. */
+    /* Skip-Bo: the leader frame before the picture starts — the same Academy
+       countdown as the numbered cards but in negative (silver on intertitle
+       black) and with no wipe: the count hasn't begun. Playing it on a build
+       pile morphs it into the value's wipe. The double intertitle frame stays. */
     &.skipbo-text {
       @apply shadow-card;
       border-color: rgb(233 229 218 / 0.6);
+
+      .card-inner {
+        background-image:
+          /* concentric leader circles, inverted */
+          url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill='none' stroke='%23e9e5da'><circle cx='50' cy='50' r='42' stroke-width='2' opacity='0.3'/><circle cx='50' cy='50' r='32' stroke-width='1.2' opacity='0.25'/></g></svg>"),
+          /* vertical crosshair */
+          linear-gradient(
+              90deg,
+              transparent calc(50% - 0.5px),
+              rgb(233 229 218 / 0.22) calc(50% - 0.5px) calc(50% + 0.5px),
+              transparent calc(50% + 0.5px)
+            ),
+          /* horizontal crosshair */
+          linear-gradient(
+              180deg,
+              transparent calc(50% - 0.5px),
+              rgb(233 229 218 / 0.22) calc(50% - 0.5px) calc(50% + 0.5px),
+              transparent calc(50% + 0.5px)
+            );
+        background-size:
+          contain,
+          100% 100%,
+          100% 100%;
+        background-repeat: no-repeat, no-repeat, no-repeat;
+        background-position: center;
+      }
 
       .card-inner::before {
         @apply content-[''] absolute pointer-events-none rounded-xs;
