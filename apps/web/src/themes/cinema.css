@@ -38,8 +38,8 @@
 
   /* === Card number colors (1–4, 5–8, 9–12) — three shades of ink === */
   --card-g1: #141414;
-  --card-g2: #444444;
-  --card-g3: #757575;
+  --card-g2: var(--card-g1);
+  --card-g3: var(--card-g1);
 
   /* === Skip-Bo special card === */
   --skipbo-text: #f3efe3;
@@ -176,14 +176,98 @@
     text-shadow: 0 0 14px rgb(255 255 255 / 0.18);
   }
 
+  h1 {
+    @apply text-base lg:text-base;
+  }
+
+  h2 {
+    @apply text-2xs lg:text-xs;
+  }
+
   /* === Card customizations === */
   .card {
-    /* Numbered cards: silver-nitrate print with a photographic vignette. */
+    /* Numbered cards: silver-nitrate print with a photographic vignette,
+       framed as an Academy-leader countdown — crosshair, two concentric
+       circles, and a clock-wipe wedge whose sweep encodes the value
+       (value / 12 of a full turn), with a darker line at its leading edge. */
     &.normal-card {
       @apply shadow-card bg-card-front;
       background-image:
         radial-gradient(ellipse 120% 100% at 50% 40%, transparent 55%, rgb(16 16 16 / 0.18) 100%),
         linear-gradient(180deg, #f0ecdf 0%, #e2ddcd 100%);
+
+      --cinema-sweep: 0deg;
+      &[data-value='1'] {
+        --cinema-sweep: 30deg;
+      }
+      &[data-value='2'] {
+        --cinema-sweep: 60deg;
+      }
+      &[data-value='3'] {
+        --cinema-sweep: 90deg;
+      }
+      &[data-value='4'] {
+        --cinema-sweep: 120deg;
+      }
+      &[data-value='5'] {
+        --cinema-sweep: 150deg;
+      }
+      &[data-value='6'] {
+        --cinema-sweep: 180deg;
+      }
+      &[data-value='7'] {
+        --cinema-sweep: 210deg;
+      }
+      &[data-value='8'] {
+        --cinema-sweep: 240deg;
+      }
+      &[data-value='9'] {
+        --cinema-sweep: 270deg;
+      }
+      &[data-value='10'] {
+        --cinema-sweep: 300deg;
+      }
+      &[data-value='11'] {
+        --cinema-sweep: 330deg;
+      }
+      &[data-value='12'] {
+        --cinema-sweep: 360deg;
+      }
+
+      .card-inner::before {
+        @apply content-[''] absolute inset-0 pointer-events-none;
+        background-image:
+          /* concentric leader circles */
+          url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill='none' stroke='%23141414'><circle cx='50' cy='50' r='42' stroke-width='2' opacity='0.3'/><circle cx='50' cy='50' r='32' stroke-width='1.2' opacity='0.25'/></g></svg>"),
+          /* vertical crosshair */
+          linear-gradient(
+              90deg,
+              transparent calc(50% - 0.5px),
+              rgb(20 20 20 / 0.22) calc(50% - 0.5px) calc(50% + 0.5px),
+              transparent calc(50% + 0.5px)
+            ),
+          /* horizontal crosshair */
+          linear-gradient(
+              180deg,
+              transparent calc(50% - 0.5px),
+              rgb(20 20 20 / 0.22) calc(50% - 0.5px) calc(50% + 0.5px),
+              transparent calc(50% + 0.5px)
+            ),
+          /* clock-wipe wedge */
+          conic-gradient(
+              from 0deg at 50% 50%,
+              rgb(16 16 16 / 0.1) 0deg calc(var(--cinema-sweep) - 3deg),
+              rgb(16 16 16 / 0.3) calc(var(--cinema-sweep) - 3deg) var(--cinema-sweep),
+              transparent var(--cinema-sweep) 360deg
+            );
+        background-size:
+          contain,
+          100% 100%,
+          100% 100%,
+          100% 100%;
+        background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+        background-position: center;
+      }
 
       .card-number,
       .card-corner-number {
