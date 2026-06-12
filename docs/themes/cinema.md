@@ -23,6 +23,7 @@
 ## Current Features
 
 - Body layers a projector beam (top radial), a vignette, an SVG `feTurbulence` film-grain tile, and a near-black base; a fixed `body::before` adds faint vertical scratch lines with a flicker animation (disabled under `prefers-reduced-motion`).
+- Two Hollywood-premiere searchlights (html `::after` + `body::after`) rise from the bottom edge as conic-gradient light cones with a lamp glow at the base; they hold their angle and sweep to a new one once in a while (`cinemaSearchlightLeft`/`Right`, desynchronized 27s/34s cycles, disabled under `prefers-reduced-motion`).
 - Card backs are a film-strip SVG: sprocket holes down both edges, a double frame, and an art-deco rising sun.
 - The Skip-Bo card is an intertitle title card — black face, double silver frame (`border` + offset `outline` on `.card-inner::before`), italic serif wordmark.
 - Numbered card faces carry a subtle photographic vignette over a silver gradient.

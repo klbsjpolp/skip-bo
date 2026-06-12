@@ -22,3 +22,7 @@
 .env.*.local
 docs/runbooks/TOFU_BACKEND_CONFIG_HCL.hcl
 .claude/worktrees
+
+# Visual baselines generated on non-macOS machines (committed baselines are -darwin; CI runs macOS)
+apps/web/tests/ui/**/*-linux.png
+apps/web/tests/ui/**/*-win32.png
