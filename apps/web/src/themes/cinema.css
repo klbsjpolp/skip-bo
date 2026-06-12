@@ -42,8 +42,8 @@
   --card-g3: var(--card-g1);
 
   /* === Skip-Bo special card === */
-  --skipbo-text: #f3efe3;
-  --skipbo-bg: #101010;
+  --skipbo-text: #141414;
+  --skipbo-bg: #e9e4d6;
 
   /* === Selection & drag === */
   --selected-border-color: #ffffff;
@@ -286,29 +286,31 @@
     }
 
     /* Skip-Bo: the leader frame before the picture starts — the same Academy
-       countdown as the numbered cards but in negative (silver on intertitle
-       black) and with no wipe: the count hasn't begun. Playing it on a build
-       pile morphs it into the value's wipe. The double intertitle frame stays. */
+       countdown as the numbered cards, same silver-nitrate print, but with no
+       wipe: the count hasn't begun. Playing it on a build pile morphs it into
+       the value's wipe. */
     &.skipbo-text {
       @apply shadow-card;
-      border-color: rgb(233 229 218 / 0.6);
+      background-image:
+        radial-gradient(ellipse 120% 100% at 50% 40%, transparent 55%, rgb(16 16 16 / 0.18) 100%),
+        linear-gradient(180deg, #f0ecdf 0%, #e2ddcd 100%);
 
       .card-inner {
         background-image:
-          /* concentric leader circles, inverted */
-          url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill='none' stroke='%23e9e5da'><circle cx='50' cy='50' r='42' stroke-width='2' opacity='0.3'/><circle cx='50' cy='50' r='32' stroke-width='1.2' opacity='0.25'/></g></svg>"),
+          /* concentric leader circles */
+          url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill='none' stroke='%23141414'><circle cx='50' cy='50' r='42' stroke-width='2' opacity='0.3'/><circle cx='50' cy='50' r='32' stroke-width='1.2' opacity='0.25'/></g></svg>"),
           /* vertical crosshair */
           linear-gradient(
               90deg,
               transparent calc(50% - 0.5px),
-              rgb(233 229 218 / 0.22) calc(50% - 0.5px) calc(50% + 0.5px),
+              rgb(20 20 20 / 0.22) calc(50% - 0.5px) calc(50% + 0.5px),
               transparent calc(50% + 0.5px)
             ),
           /* horizontal crosshair */
           linear-gradient(
               180deg,
               transparent calc(50% - 0.5px),
-              rgb(233 229 218 / 0.22) calc(50% - 0.5px) calc(50% + 0.5px),
+              rgb(20 20 20 / 0.22) calc(50% - 0.5px) calc(50% + 0.5px),
               transparent calc(50% + 0.5px)
             );
         background-size:
@@ -319,20 +321,11 @@
         background-position: center;
       }
 
-      .card-inner::before {
-        @apply content-[''] absolute pointer-events-none rounded-xs;
-        inset: 6%;
-        border: 1px solid rgb(243 239 227 / 0.85);
-        outline: 1px solid rgb(243 239 227 / 0.4);
-        outline-offset: 2px;
-      }
-
       .card-number {
         font-family: 'Cinzel', Georgia, 'Times New Roman', serif;
         font-style: italic;
         font-weight: 700;
         letter-spacing: 0.03em;
-        text-shadow: 0 0 10px rgb(255 255 255 / 0.25);
       }
     }
 
