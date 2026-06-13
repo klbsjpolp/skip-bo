@@ -9,7 +9,11 @@ import {
 } from '@/lib/pwaUpdates';
 import { fetchRuntimeConfig } from '@/lib/runtimeConfig';
 import { compareAppVersions, normalizeVersionTag } from '@/lib/versionUtils';
-import { PWA_UPDATE_CHECK_INTERVAL_MS, PWA_UPDATE_RECHECK_MIN_INTERVAL_MS } from '@/config/timing';
+import {
+  PWA_LAUNCH_AUTO_UPDATE_WINDOW_MS,
+  PWA_UPDATE_CHECK_INTERVAL_MS,
+  PWA_UPDATE_RECHECK_MIN_INTERVAL_MS,
+} from '@/config/timing';
 export const AUTO_RELOAD_SESSION_STORAGE_KEY = 'skipbo:pwa-auto-reload-version';
 export const SOFT_AUTO_RELOAD_SESSION_STORAGE_KEY = 'skipbo:pwa-soft-auto-reload-key';
 export const LAST_SEEN_VERSION_STORAGE_KEY = 'skipbo:last-seen-version';
@@ -92,9 +96,21 @@ export interface UsePwaVersionGateOptions {
   // for multiplayer, so the caller defers the hard update until a lossless moment
   // (new game / replay / going online) and applies it imperatively there.
   deferHardUpdate?: boolean;
+  // While true, a pending soft update is applied automatically if it becomes
+  // available within PWA_LAUNCH_AUTO_UPDATE_WINDOW_MS of mount. Players usually
+  // open the app and start playing before the new service worker finishes
+  // downloading, so the deferred "apply on New Game" path never fires for them.
+  // The local game is freshly dealt on launch, so reloading within the window
+  // loses nothing; once it elapses we fall back to deferring so an in-progress
+  // game is never reloaded away by a background update.
+  autoApplyPendingOnLaunch?: boolean;
 }
 
-export const usePwaVersionGate = ({ deferHardUpdate = false }: UsePwaVersionGateOptions = {}): PwaVersionGateState => {
+export const usePwaVersionGate = ({
+  deferHardUpdate = false,
+  autoApplyPendingOnLaunch = false,
+}: UsePwaVersionGateOptions = {}): PwaVersionGateState => {
+  const mountedAtRef = useRef(0);
   const [dismissedUpdateKey, setDismissedUpdateKey] = useState<string | null>(null);
   const [isApplyingUpdate, setIsApplyingUpdate] = useState(false);
   const [justUpdatedFromVersion, setJustUpdatedFromVersion] = useState<string | null>(() => {
@@ -152,6 +168,7 @@ export const usePwaVersionGate = ({ deferHardUpdate = false }: UsePwaVersionGate
   });
 
   useEffect(() => {
+    mountedAtRef.current = Date.now();
     void checkForUpdates();
 
     const intervalId = globalThis.setInterval(() => {
@@ -234,6 +251,22 @@ export const usePwaVersionGate = ({ deferHardUpdate = false }: UsePwaVersionGate
     writeSoftAutoReloadKey(updateKey);
     void runReloadToUpdate();
   }, [isUpdatePending, updateKey, runReloadToUpdate]);
+
+  // Apply a pending soft update automatically when it lands within the launch
+  // window. This re-runs when `isUpdatePending` flips true (the service worker
+  // typically reaches `waiting` a few seconds after mount), so a slow download
+  // is still caught as long as it finishes inside the window.
+  useEffect(() => {
+    if (!autoApplyPendingOnLaunch || !isUpdatePending) {
+      return;
+    }
+
+    if (Date.now() - mountedAtRef.current >= PWA_LAUNCH_AUTO_UPDATE_WINDOW_MS) {
+      return;
+    }
+
+    applyUpdateOnceForCurrentTarget();
+  }, [autoApplyPendingOnLaunch, isUpdatePending, applyUpdateOnceForCurrentTarget]);
 
   const dismissJustUpdated = useCallback(() => {
     setJustUpdatedFromVersion(null);
