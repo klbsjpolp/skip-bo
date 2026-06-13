@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.1.1](https://github.com/klbsjpolp/skip-bo/compare/v2.1.0...v2.1.1) (2026-06-13)
+
+
+### Bug Fixes
+
+* **game-core:** consolidate refill/validation logic, fix README drift ([27ea5ad](https://github.com/klbsjpolp/skip-bo/commit/27ea5ad51e85beed105eb4c3cee4452d8a3f9ffa))
+
 ## [2.1.0](https://github.com/klbsjpolp/skip-bo/compare/v2.0.2...v2.1.0) (2026-06-13)
 
 
