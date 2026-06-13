@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.2.0](https://github.com/klbsjpolp/skip-bo/compare/v2.1.1...v2.2.0) (2026-06-13)
+
+
+### Features
+
+* **web:** add Nouveau badge for cinema theme in switcher ([d63915d](https://github.com/klbsjpolp/skip-bo/commit/d63915d7d7c7334a9b071fe0f13bab47d531c326))
+
+
+### Bug Fixes
+
+* **deps:** bump tmp override to >=0.2.6 (CVE-2026-44705) ([d2f2cf7](https://github.com/klbsjpolp/skip-bo/commit/d2f2cf75ddec05b75c08f2bd25edae44119a5b2c))
+
 ## [2.1.1](https://github.com/klbsjpolp/skip-bo/compare/v2.1.0...v2.1.1) (2026-06-13)
 
 
