@@ -62,7 +62,6 @@
           radial-gradient(ellipse 2% 80% at 20.83% 50%, #00ff88 0% 30%, transparent 80%),
           radial-gradient(ellipse 2% 80% at 12.5% 50%, #0066ff 0% 30%, transparent 80%),
           radial-gradient(ellipse 2% 80% at 4.17% 50%, #ff0099 0% 30%, transparent 80%);
-        -webkit-mask: linear-gradient(to right, transparent var(--reveal), black var(--reveal));
         mask: linear-gradient(to right, transparent var(--reveal), black var(--reveal));
         animation: neonTubePulse 2.4s ease-in-out infinite;
       }
@@ -212,7 +211,7 @@
 
   /* Fade the grid into the background at the very bottom of the viewport */
   body::after {
-    @apply content-[''] fixed bottom-[-2px] left-0 right-0 h-20 pointer-events-none z-1;
+    @apply content-[''] fixed -bottom-0.5 left-0 right-0 h-20 pointer-events-none z-1;
     background-image: linear-gradient(to top, #0a0a0a 60%, transparent 100%);
   }
 

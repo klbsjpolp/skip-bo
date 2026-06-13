@@ -276,13 +276,23 @@
       }
     }
 
-    /* Empty piles recede into the dark of the theater. */
+    /* Empty piles recede into the dark of the theater — a hand-crank movie
+       camera (body, flared lens, twin film reels on top), drawn as an outline
+       icon. It's a mask tinted with currentColor so it stays strictly
+       monochrome (an emoji glyph would render in full color on most
+       platforms). The padded 102×96 viewBox keeps the 5px stroke clear of
+       every edge, and the two reels sit tangent (centre distance ≈ r1+r2) so
+       they touch like the reference rather than crossing through each other. */
     &.empty-card {
-      background-color: transparent;
-      background-image: none;
-      border: 2px dashed rgb(233 229 218 / 0.3);
+      @apply text-[0em] bg-transparent bg-none shadow-none border-2 border-dashed;
+      border-color: rgb(233 229 218 / 0.3);
       color: rgb(233 229 218 / 0.5);
-      box-shadow: none;
+
+      &::after {
+        @apply content-[''] absolute inset-0 m-auto aspect-102/96 w-[calc(var(--card-width)*0.72)] bg-current;
+        mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 102 96'><g fill='none' stroke='white' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'><circle cx='23' cy='32' r='12'/><circle cx='52' cy='24' r='18'/><rect x='6' y='45' width='62' height='41' rx='7'/><path d='M68 55 L96 45 L96 86 L68 76 Z'/></g></svg>")
+          center / contain no-repeat;
+      }
     }
 
     /* Skip-Bo: the leader frame before the picture starts — the same Academy
@@ -361,6 +371,29 @@
     @apply opacity-50;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
     background-size: 220px 220px;
+  }
+
+  /* === Changeover cue ("cigarette burn") ===
+     When a turn begins, this player's reel starts rolling — so a soft circular
+     burn flashes twice in the top-right corner, exactly the projectionist's
+     signal that the reel is changing. It's a one-shot animation that replays
+     every time `.active-turn` lands on this area, i.e. on each turn change.
+     Sits above the cards (z-20) like a real burn over the picture, but stays
+     pointer-events-none so it never blocks play. */
+  .player-area.active-turn::after {
+    @apply content-[''] absolute top-3 right-3.5 size-[18px] rounded-full pointer-events-none z-20 opacity-0;
+    /* A real projection cue-mark: a thin, light ring around a dark filled
+       centre — a circle burned through the frame. Discreet; strictly
+       monochrome (cream ring, near-black centre) per the theme contract. */
+    background-image:
+      /* thin light ring */
+      radial-gradient(circle at 50% 50%, transparent 57%, rgb(246 242 232 / 0.78) 61% 67%, transparent 72%),
+      /* dark filled centre — reads over both the black table and a bright card */
+      radial-gradient(circle at 50% 50%, rgb(8 8 8 / 0.82) 0% 60%, rgb(8 8 8 / 0) 69%);
+    animation: cinemaCueMark 1.3s ease-in-out;
+    @variant motion-reduce {
+      animation: none;
+    }
   }
 
   /* === Winner: caught in the projector's spotlight === */
@@ -455,5 +488,30 @@
       0 0 0 1px rgb(255 255 255 / 0.9),
       0 0 48px rgb(255 255 255 / 0.38),
       0 0 100px rgb(244 240 228 / 0.24);
+  }
+}
+
+/* Two crisp blinks with a clear gap between them — the projectionist's
+   double cue (motor cue, then changeover cue), compressed to ~1.3s. */
+@keyframes cinemaCueMark {
+  0%,
+  6% {
+    opacity: 0;
+  }
+  8%,
+  22% {
+    opacity: 0.95;
+  }
+  26%,
+  62% {
+    opacity: 0;
+  }
+  64%,
+  80% {
+    opacity: 0.95;
+  }
+  84%,
+  100% {
+    opacity: 0;
   }
 }
