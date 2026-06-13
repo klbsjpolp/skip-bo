@@ -366,7 +366,7 @@ function LiveApp() {
     latestAppVersion,
     minimumSupportedVersion,
     reloadToUpdate,
-  } = usePwaVersionGate({ deferHardUpdate: isLocalMode });
+  } = usePwaVersionGate({ deferHardUpdate: isLocalMode, autoApplyPendingOnLaunch: isLocalMode });
 
   useEffect(() => {
     animationServiceBridge.waitForAnimations = waitForAnimations;
