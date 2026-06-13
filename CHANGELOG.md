@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.1.0](https://github.com/klbsjpolp/skip-bo/compare/v2.0.2...v2.1.0) (2026-06-13)
+
+
+### Features
+
+* **web:** academy-leader countdown faces for cinema cards ([5aea84f](https://github.com/klbsjpolp/skip-bo/commit/5aea84fe07d323933d1c949b89efb4aef6795fcc))
+* **web:** add Cinéma muet silent-film monochrome theme ([ce2eae5](https://github.com/klbsjpolp/skip-bo/commit/ce2eae57e32d4b0141d63399fbe5c64d445008b2))
+* **web:** add swaying searchlights to the cinema theme ([faca7dc](https://github.com/klbsjpolp/skip-bo/commit/faca7dcdf45c8664adf96600eca06f246f54e7fc))
+* **web:** skip-bo as a countdown-at-zero card in cinema theme ([5d6ed9e](https://github.com/klbsjpolp/skip-bo/commit/5d6ed9e1d397db44886e727011b3908c49e9f76c))
+* **web:** skip-bo printed in nitrate like the numbered cards ([c4c8033](https://github.com/klbsjpolp/skip-bo/commit/c4c803320bd9d7e34ea641982dccb6cbe07da80a))
+
 ## [2.0.2](https://github.com/klbsjpolp/skip-bo/compare/v2.0.1...v2.0.2) (2026-06-07)
 
 ## [2.0.1](https://github.com/klbsjpolp/skip-bo/compare/v2.0.0...v2.0.1) (2026-06-07)

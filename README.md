@@ -15,11 +15,10 @@
 - Source of truth: package scripts, workspace package manifests, and the docs linked from this file.
 - When to update: when setup steps, top-level workflows, or contributor-facing entrypoints change.
 
-Skip-Bo is a `pnpm` monorepo with three main concerns:
+Skip-Bo is a `pnpm` monorepo with two main concerns:
 
 - a React web app for local play and online play
 - shared gameplay and multiplayer packages
-- an AWS/OpenTofu stack for the realtime backend
 
 The default experience is local play against the built-in AI. The same web app can also create or join private online rooms for two to four human players, backed by the realtime API.
 
@@ -29,7 +28,6 @@ The default experience is local play against the built-in AI. The same web app c
 
 - Node.js `>=22.12.0`
 - `pnpm`
-- OpenTofu if you need to work on the AWS stack
 
 ### Install
 

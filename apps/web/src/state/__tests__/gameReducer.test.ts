@@ -563,6 +563,48 @@ describe('gameReducer', () => {
         // Deck should have remaining cards after reshuffle (1 card left)
         expect(result.deck.length).toBeGreaterThan(0);
       });
+
+      it('should refill from a build pile completed by the same play', () => {
+        // 11 cards already on the build pile; the played card is the 12th and
+        // also empties the hand. The deck and completedBuildPiles both start
+        // empty, so the only cards available to refill the hand are the 12
+        // that this play just completed.
+        const buildPileWith11Cards = Array.from({ length: 11 }, (_, i) => ({
+          value: i + 1,
+          isSkipBo: false,
+        }));
+
+        const stateWithEmptyDeck = {
+          ...initialState,
+          deck: [],
+          completedBuildPiles: [],
+          buildPiles: [buildPileWith11Cards, [], [], []],
+          players: [
+            {
+              ...initialState.players[0],
+              hand: [{ value: 12, isSkipBo: false }, null, null, null, null], // Only 1 card in hand
+            },
+            initialState.players[1],
+          ],
+        };
+
+        const stateWithSelection = gameReducer(stateWithEmptyDeck, {
+          type: 'SELECT_CARD',
+          source: 'hand',
+          index: 0,
+        });
+
+        const result = gameReducer(stateWithSelection, {
+          type: 'PLAY_CARD',
+          buildPile: 0,
+        });
+
+        // The completed pile's 12 cards should have been reshuffled into the
+        // deck and used to refill the hand.
+        expect(result.players[0].hand.filter((c) => !!c)).toHaveLength(5);
+        expect(result.completedBuildPiles).toHaveLength(0);
+        expect(result.deck.length).toBe(7);
+      });
     });
 
     describe('END_TURN with deck exhaustion', () => {

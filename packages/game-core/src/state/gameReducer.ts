@@ -1,13 +1,10 @@
 import { produce } from 'immer';
-import type { Card, GameState, Player, SelectedCard } from '../types/index.js';
+import type { Card, GameState } from '../types/index.js';
 import type { GameAction } from './gameActions.js';
 import { initialGameState } from './initialGameState.js';
 import { MESSAGES } from '../lib/config.js';
-import { shuffleInPlace } from '../lib/shuffle.js';
-import { canPlayCard } from '../lib/validators.js';
-
-const cardsMatch = (candidate: Card | null | undefined, selectedCard: Card): boolean =>
-  !!candidate && candidate.value === selectedCard.value && candidate.isSkipBo === selectedCard.isSkipBo;
+import { refillHand } from '../lib/handRefill.js';
+import { canPlayCard, hasValidDiscardPileIndex, hasValidSelectedSource } from '../lib/validators.js';
 
 const getNextPlayerIndex = (currentPlayerIndex: number, playerCount: number): number => {
   if (playerCount <= 0) {
@@ -15,33 +12,6 @@ const getNextPlayerIndex = (currentPlayerIndex: number, playerCount: number): nu
   }
 
   return (currentPlayerIndex + 1) % playerCount;
-};
-
-const hasValidDiscardPileIndex = (player: Player, discardPileIndex: number): boolean =>
-  discardPileIndex >= 0 && discardPileIndex < player.discardPiles.length;
-
-const hasValidSelectedSource = (player: Player, selectedCard: SelectedCard): boolean => {
-  switch (selectedCard.source) {
-    case 'hand':
-      return (
-        selectedCard.index >= 0 &&
-        selectedCard.index < player.hand.length &&
-        cardsMatch(player.hand[selectedCard.index], selectedCard.card)
-      );
-    case 'stock':
-      return cardsMatch(player.stockPile[player.stockPile.length - 1], selectedCard.card);
-    case 'discard':
-      return (
-        selectedCard.discardPileIndex !== undefined &&
-        hasValidDiscardPileIndex(player, selectedCard.discardPileIndex) &&
-        cardsMatch(
-          player.discardPiles[selectedCard.discardPileIndex][
-            player.discardPiles[selectedCard.discardPileIndex].length - 1
-          ],
-          selectedCard.card,
-        )
-      );
-  }
 };
 
 export const gameReducer = produce((draft: GameState, action: GameAction) => {
@@ -52,51 +22,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
 
     case 'DRAW': {
       const player = draft.players[draft.currentPlayerIndex];
-
-      // Count empty slots in hand (null values)
-      const emptySlots = player.hand.filter((card) => card === null).length;
-
-      let remainingToDraw = action.count ?? Math.min(emptySlots, draft.deck.length + draft.completedBuildPiles.length);
-
-      // If no empty slots and no count specified, return early
-      if (remainingToDraw === 0) {
-        return;
-      }
-
-      // First, draw from existing deck
-      const fromDeck = Math.min(remainingToDraw, draft.deck.length);
-      if (fromDeck > 0) {
-        // Fill empty slots first
-        for (let i = 0; i < player.hand.length && remainingToDraw > 0; i++) {
-          if (player.hand[i] === null && draft.deck.length > 0) {
-            player.hand[i] = draft.deck.shift()!;
-            remainingToDraw--;
-          }
-        }
-      } else {
-        // Variable-length system: add cards to end
-        while (remainingToDraw > 0 && draft.deck.length > 0) {
-          player.hand.push(draft.deck.shift()!);
-          remainingToDraw--;
-        }
-      }
-
-      // If we still need more cards and have completed build piles, reshuffle and continue
-      if (remainingToDraw > 0 && draft.completedBuildPiles.length > 0) {
-        // Move completed build piles to deck and shuffle
-        draft.deck.push(...draft.completedBuildPiles);
-        draft.completedBuildPiles = [];
-
-        shuffleInPlace(draft.deck);
-
-        // Draw remaining cards to fill empty slots
-        for (let i = 0; i < player.hand.length && remainingToDraw > 0 && draft.deck.length > 0; i++) {
-          if (player.hand[i] === null) {
-            player.hand[i] = draft.deck.shift()!;
-            remainingToDraw--;
-          }
-        }
-      }
+      refillHand(draft, player, action.count);
       break;
     }
 
@@ -114,9 +40,8 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
     case 'DEBUG_SET_AI_HAND': {
       const player = draft.players[draft.currentPlayerIndex];
       const targetSize = draft.config.HAND_SIZE;
-      const newHand = action.hand.slice(0, targetSize);
+      const newHand: (Card | null)[] = action.hand.slice(0, targetSize);
       while (newHand.length < targetSize) {
-        // @ts-expect-error will never happen
         newHand.push(null);
       }
       player.hand = newHand;
@@ -267,49 +192,18 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
         player.discardPiles[selectedCard.discardPileIndex].pop();
       }
 
-      // Draw cards only if the player's hand is empty (all slots are null)
-      const allSlotsEmpty = player.hand.every((card) => card === null);
-      if (allSlotsEmpty) {
-        // Count empty slots in hand (null values)
-        const emptySlots = player.hand.filter((card) => card === null).length;
-
-        let remainingToDraw = Math.min(emptySlots, draft.deck.length + draft.completedBuildPiles.length);
-
-        // First, draw from existing deck
-        const fromDeck = Math.min(remainingToDraw, draft.deck.length);
-        if (fromDeck > 0) {
-          // Fill empty slots first
-          for (let i = 0; i < player.hand.length && remainingToDraw > 0; i++) {
-            if (player.hand[i] === null && draft.deck.length > 0) {
-              player.hand[i] = draft.deck.shift()!;
-              remainingToDraw--;
-            }
-          }
-        }
-
-        // If we still need more cards and have completed build piles, reshuffle and continue
-        if (remainingToDraw > 0 && draft.completedBuildPiles.length > 0) {
-          // Move completed build piles to deck and shuffle
-          draft.deck.push(...draft.completedBuildPiles);
-          draft.completedBuildPiles = [];
-
-          shuffleInPlace(draft.deck);
-
-          // Draw remaining cards to fill empty slots
-          for (let i = 0; i < player.hand.length && remainingToDraw > 0 && draft.deck.length > 0; i++) {
-            if (player.hand[i] === null) {
-              player.hand[i] = draft.deck.shift()!;
-              remainingToDraw--;
-            }
-          }
-        }
-      }
-
-      // Check if build pile is complete (12 cards)
-      if (draft.buildPiles[buildPileIndex].length === 12) {
+      // Check if build pile is complete, before refilling the hand so a
+      // pile completed by this very play is available to reshuffle from.
+      if (draft.buildPiles[buildPileIndex].length === draft.config.CARD_VALUES_MAX) {
         // Completed build pile: move cards to completed pile storage
         draft.completedBuildPiles.push(...draft.buildPiles[buildPileIndex]);
         draft.buildPiles[buildPileIndex] = [];
+      }
+
+      // Draw cards only if the player's hand is empty (all slots are null)
+      const allSlotsEmpty = player.hand.every((card) => card === null);
+      if (allSlotsEmpty) {
+        refillHand(draft, player);
       }
 
       // Check win condition
