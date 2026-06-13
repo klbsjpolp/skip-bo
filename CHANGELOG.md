@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.3.0](https://github.com/klbsjpolp/skip-bo/compare/v2.2.0...v2.3.0) (2026-06-13)
+
+
+### Features
+
+* **theme-cinema:** camera empty-card icon and turn cue mark ([eb38f20](https://github.com/klbsjpolp/skip-bo/commit/eb38f201864e95916b8abe8f2ea6fc908d851ab9))
+
 ## [2.2.0](https://github.com/klbsjpolp/skip-bo/compare/v2.1.1...v2.2.0) (2026-06-13)
 
 
