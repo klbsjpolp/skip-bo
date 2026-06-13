@@ -72,3 +72,46 @@ const install = (key: 'localStorage' | 'sessionStorage') => {
 
 install('localStorage');
 install('sessionStorage');
+
+/**
+ * jsdom doesn't implement the Pointer Events / ResizeObserver APIs that
+ * Radix UI primitives (Select, Dialog, Popper, ...) call when opening or
+ * positioning. Without these, opening a Radix Select in jsdom throws
+ * "... is not a function".
+ */
+if (!Element.prototype.hasPointerCapture) {
+  Element.prototype.hasPointerCapture = () => false;
+}
+if (!Element.prototype.setPointerCapture) {
+  Element.prototype.setPointerCapture = () => undefined;
+}
+if (!Element.prototype.releasePointerCapture) {
+  Element.prototype.releasePointerCapture = () => undefined;
+}
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => undefined;
+}
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  globalThis.ResizeObserver = class ResizeObserver {
+    observe(): void {}
+    unobserve(): void {}
+    disconnect(): void {}
+  };
+}
+
+/**
+ * jsdom doesn't implement `matchMedia`, which `next-themes` calls to detect
+ * the OS color-scheme preference.
+ */
+if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {
+  window.matchMedia = (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => undefined,
+    removeListener: () => undefined,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+    dispatchEvent: () => false,
+  });
+}
