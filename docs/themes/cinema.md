@@ -1,4 +1,4 @@
-# Cinéma muet
+# Cinéma
 
 ## Document Contract
 
@@ -10,7 +10,7 @@
 ## Identity
 
 - **Category:** Retro & Vintage
-- **Label / icon:** "Cinéma muet" / `Film`
+- **Label / icon:** "Cinéma" / `Film`
 - **Role:** Strictly monochrome 1920s picture-house nostalgia — a darkened theater, a projector beam, film grain, and silver-nitrate cards. Reads as a silent-movie still.
 
 ## Palette & Typography
