@@ -26,6 +26,7 @@ import { getRequestedUiFixtureName, getUiFixture, type UiFixtureName } from '@/t
 import { DebugStrip } from '@/components/DebugStrip';
 import { usePwaVersionGate } from '@/hooks/usePwaVersionGate';
 import { useThemeColorMeta } from '@/hooks/useThemeColorMeta';
+import { useThemeUsageGameGate, useThemeUsageReporter } from '@/hooks/useThemeUsageReporter';
 
 const fixtureActionResult = Promise.resolve({ success: true, message: 'Fixture mode' });
 
@@ -56,6 +57,8 @@ function AppShell({
   statusStrip,
   updateNotice,
 }: AppShellProps) {
+  useThemeUsageGameGate(isGameOver);
+
   return (
     <main
       id="main"
@@ -511,6 +514,7 @@ function LiveApp() {
 
 function App() {
   useThemeColorMeta();
+  useThemeUsageReporter();
   const fixtureName = getRequestedUiFixtureName();
 
   if (fixtureName) {

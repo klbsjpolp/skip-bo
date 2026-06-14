@@ -5,6 +5,16 @@ import { themes } from '@/types';
 import { Button } from '@/components/ui/button';
 import * as Lucide from 'lucide-react';
 import type { ComponentType, SVGProps } from 'react';
+import { trackThemeSelection } from '@/monitoring/themeAnalytics';
+
+/** Picks a theme other than `current`, or `null` when none is available. */
+function pickRandomTheme(current: ThemeDetail['value']): ThemeDetail['value'] | null {
+  const available = themes.map(({ value }) => value).filter((value) => value !== current);
+  if (available.length === 0) {
+    return null;
+  }
+  return available[Math.floor(Math.random() * available.length)];
+}
 
 export function ThemeSwitcher() {
   const { setTheme, theme } = useTheme();
@@ -16,19 +26,27 @@ export function ThemeSwitcher() {
   };
 
   const setRandomTheme = () => {
-    const availableThemes = themes.map(({ value }) => value).filter((value) => value !== activeTheme.value);
-
-    if (availableThemes.length === 0) {
+    const randomTheme = pickRandomTheme(activeTheme.value);
+    if (!randomTheme) {
       return;
     }
-
-    const randomTheme = availableThemes[Math.floor(Math.random() * availableThemes.length)];
+    trackThemeSelection({ theme: randomTheme, previousTheme: activeTheme.value, source: 'random' });
     setTheme(randomTheme);
   };
 
   return (
     <div className="relative flex items-center gap-0.5" data-testid="theme-switcher">
-      <Select value={activeTheme.value} onValueChange={setTheme}>
+      <Select
+        value={activeTheme.value}
+        onValueChange={(value) => {
+          trackThemeSelection({
+            theme: value as ThemeDetail['value'],
+            previousTheme: activeTheme.value,
+            source: 'manual',
+          });
+          setTheme(value);
+        }}
+      >
         <SelectTrigger className="w-36" data-testid="theme-switcher-trigger" aria-label="Thème">
           <div className="flex items-center">
             {getIcon(activeTheme.icon)}
