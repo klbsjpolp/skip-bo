@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.5.0](https://github.com/klbsjpolp/skip-bo/compare/v2.4.0...v2.5.0) (2026-06-14)
+
+
+### Features
+
+* **web:** track per-theme usage time via Sentry spans ([734494a](https://github.com/klbsjpolp/skip-bo/commit/734494ad50c53d1637982c10f19f5133d0fa1f7b))
+
 ## [2.4.0](https://github.com/klbsjpolp/skip-bo/compare/v2.3.0...v2.4.0) (2026-06-13)
 
 
