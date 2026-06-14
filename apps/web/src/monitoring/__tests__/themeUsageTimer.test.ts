@@ -79,6 +79,14 @@ describe('themeUsageTimer', () => {
     expect(startInactiveSpan()).not.toHaveBeenCalled();
   });
 
+  test('does not emit a span for a segment that ends on the same tick it started', () => {
+    timer.recordActiveTheme('theme-paper');
+    // Suspend with no time elapsed: the segment has zero duration.
+    timer.suspendThemeTimer('hidden');
+
+    expect(startInactiveSpan()).not.toHaveBeenCalled();
+  });
+
   test('stays suspended until every reason is cleared', () => {
     timer.recordActiveTheme('theme-wool');
     vi.advanceTimersByTime(1_000);
