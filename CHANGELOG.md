@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.5.1](https://github.com/klbsjpolp/skip-bo/compare/v2.5.0...v2.5.1) (2026-06-14)
+
+
+### Bug Fixes
+
+* **web:** record theme usage as standalone spans with real duration ([e057892](https://github.com/klbsjpolp/skip-bo/commit/e057892ce80f8f28e60e9356fca048eb62e086a3))
+
 ## [2.5.0](https://github.com/klbsjpolp/skip-bo/compare/v2.4.0...v2.5.0) (2026-06-14)
 
 
