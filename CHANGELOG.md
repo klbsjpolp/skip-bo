@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.6.0](https://github.com/klbsjpolp/skip-bo/compare/v2.5.1...v2.6.0) (2026-06-15)
+
+
+### Features
+
+* **web:** add Formule 1 theme ([710af7b](https://github.com/klbsjpolp/skip-bo/commit/710af7bbdc5d154e4f374953398f3cc5dff87deb))
+
+
+### Bug Fixes
+
+* **web:** keep pre-completion backdrop until completing play lands ([ebc3cbd](https://github.com/klbsjpolp/skip-bo/commit/ebc3cbde17440cd9b02d8d93ab6794e59e30367f))
+
 ## [2.5.1](https://github.com/klbsjpolp/skip-bo/compare/v2.5.0...v2.5.1) (2026-06-14)
 
 
