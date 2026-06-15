@@ -113,6 +113,27 @@ const createSelectedLastCardState = (): GameState => {
   return state;
 };
 
+const createSelectedCompletingHandState = (): GameState => {
+  const state = initialGameState();
+  const max = state.config.CARD_VALUES_MAX;
+
+  state.currentPlayerIndex = 0;
+  // Build pile 0 holds 1..(max-1); playing the max card completes it.
+  state.buildPiles = [Array.from({ length: max - 1 }, (_, i) => card(i + 1)), [], [], []];
+  state.completedBuildPiles = [];
+  state.deck = [card(8), card(9), card(10), card(11), card(12)];
+  state.players[0].hand = [card(max), null, null, null, null];
+  state.players[1].isAI = false;
+  state.selectedCard = {
+    card: card(max),
+    source: 'hand',
+    index: 0,
+  };
+  state.message = 'Sélectionnez une destination';
+
+  return state;
+};
+
 const createSelectedStockCardState = (): GameState => {
   const state = initialGameState();
 
@@ -731,6 +752,46 @@ describe('useOnlineSkipBoGame', () => {
     expect(animation.endPosition).toEqual({
       x: 460,
       y: 180,
+    });
+  });
+
+  it('reports the cleared pile length (0) for a local play that completes a build pile online', async () => {
+    const session = createSession();
+
+    mountOnlineHandAnimationDom();
+
+    const initialState = createSelectedCompletingHandState();
+    const initialView = createOnlineView(initialState, 1);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    expect(socket).toBeDefined();
+
+    await act(async () => {
+      socket.open();
+      socket.emitView(initialView);
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      const moveResult = await result.current.playCard(0);
+      expect(moveResult).toEqual({ success: true, message: 'Carte jouée' });
+      await Promise.resolve();
+    });
+
+    // The committed view clears the build pile, so the in-flight play card must
+    // advertise targetPileLength 0 — keeping CenterArea's pre-completion
+    // backdrop until the play animation lands.
+    expect(startAnimation).toHaveBeenCalledTimes(1);
+    expect(startAnimation.mock.calls[0]?.[0]).toMatchObject({
+      animationType: 'play',
+      targetSettledInState: true,
+      targetPileLength: 0,
     });
   });
 
