@@ -203,7 +203,13 @@ export function useSkipBoGame() {
             // top of the pile would render the new card immediately (because we
             // dispatched PLAY_CARD before the animation), making the card appear
             // teleported to its destination before flying there.
+            //
+            // When this play completes the pile, the committed state clears the
+            // build pile (length 0). targetPileLength must reflect that committed
+            // length so CenterArea masks the in-flight card with the pre-completion
+            // backdrop instead of painting the final card on the pile early.
             const previousBuildPileLength = currentState.buildPiles[buildPile].length;
+            const settledBuildPileLength = completedBuildPileCards ? 0 : previousBuildPileLength + 1;
             startAnimation({
               card: currentState.selectedCard.card,
               startPosition,
@@ -215,7 +221,7 @@ export function useSkipBoGame() {
               initialDelay: 0,
               duration: playAnimationDuration,
               targetSettledInState: true,
-              targetPileLength: previousBuildPileLength + 1,
+              targetPileLength: settledBuildPileLength,
               sourceInfo: {
                 playerIndex: currentState.currentPlayerIndex,
                 source: currentState.selectedCard.source,

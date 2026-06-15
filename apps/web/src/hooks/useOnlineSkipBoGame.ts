@@ -830,7 +830,12 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
 
           if (startPosition) {
             playAnimationDuration = calculateAnimationDuration(startPosition, endPosition) * 1.2;
+            // When this play completes the pile, the committed state clears the
+            // build pile (length 0). targetPileLength must reflect that committed
+            // length so CenterArea masks the in-flight card with the pre-completion
+            // backdrop instead of painting the final card on the pile early.
             const previousBuildPileLength = currentState.buildPiles[buildPile].length;
+            const settledBuildPileLength = completedBuildPileCards ? 0 : previousBuildPileLength + 1;
             startAnimation({
               card: currentState.selectedCard.card,
               startPosition,
@@ -842,7 +847,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
               initialDelay: 0,
               duration: playAnimationDuration,
               targetSettledInState: true,
-              targetPileLength: previousBuildPileLength + 1,
+              targetPileLength: settledBuildPileLength,
               sourceInfo: {
                 playerIndex: currentState.currentPlayerIndex,
                 source: currentState.selectedCard.source,
