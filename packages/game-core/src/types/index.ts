@@ -57,6 +57,7 @@ export const themes = [
   { value: 'theme-wool' as const, label: 'Laine', icon: 'Spool' },
   { value: 'theme-minecraft' as const, label: 'Minecraft', icon: 'Blocks' },
   { value: 'theme-steampunk' as const, label: 'Steampunk', icon: 'Cog' },
+  { value: 'theme-f1' as const, label: 'Formule 1', icon: 'Flag' },
 ] as const;
 
 export type ThemeDetail = (typeof themes)[number];
