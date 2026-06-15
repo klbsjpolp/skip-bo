@@ -95,6 +95,27 @@ const createSelectedHandCardState = (): GameState => {
   return state;
 };
 
+const createCompletingHandCardState = (): GameState => {
+  const state = initialGameState();
+  const max = state.config.CARD_VALUES_MAX;
+
+  state.currentPlayerIndex = 0;
+  // Build pile 0 holds 1..(max-1); playing the max card completes it.
+  state.buildPiles = [Array.from({ length: max - 1 }, (_, i) => card(i + 1)), [], [], []];
+  state.completedBuildPiles = [];
+  state.deck = [card(8), card(9), card(10), card(11), card(12)];
+  state.players[0].hand = [card(max), null, null, null, null];
+  state.players[1].isAI = false;
+  state.selectedCard = {
+    card: card(max),
+    source: 'hand',
+    index: 0,
+  };
+  state.message = 'Sélectionnez une destination';
+
+  return state;
+};
+
 const createSelectedStockCardState = (): GameState => {
   const state = initialGameState();
 
@@ -350,6 +371,29 @@ describe('useSkipBoGame', () => {
       ]);
     },
   );
+
+  it('reports the cleared pile length (0) for a play that completes a build pile', async () => {
+    workingState.current = createCompletingHandCardState();
+    appendHandArea();
+
+    const { result } = renderHook(() => useSkipBoGame());
+
+    await act(async () => {
+      const moveResult = await result.current.playCard(0);
+      expect(moveResult).toEqual({ success: true, message: 'Carte jouée' });
+    });
+
+    // The committed state clears the build pile, so the in-flight play card must
+    // advertise targetPileLength 0. This lets CenterArea keep the pre-completion
+    // backdrop until the play animation lands, instead of painting the final
+    // card on the pile before it has visually arrived.
+    expect(startAnimation).toHaveBeenCalledTimes(1);
+    expect(startAnimation.mock.calls[0][0]).toMatchObject({
+      animationType: 'play',
+      targetSettledInState: true,
+      targetPileLength: 0,
+    });
+  });
 
   it('accepts new selections while a discard is still animating locally', async () => {
     workingState.current = createSelectedHandCardState();

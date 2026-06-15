@@ -169,6 +169,22 @@ describe('CenterArea', () => {
     expect(buildPile?.querySelector('.empty-card')).toBeNull();
   });
 
+  test('shows the pre-completion "11" backdrop while a completing play card is still in flight', () => {
+    // Build pile 0 is already cleared in committed state by the completion, and
+    // a settled play animation (targetPileLength 0) is carrying the final "12"
+    // toward it alongside the completion animations. The pile must keep showing
+    // the pre-completion "11" backdrop so the final card does not appear before
+    // the play animation visually delivers it.
+    const gameState = createGameState([]);
+    const animations = [createSettledIncomingBuildAnimation(0, 0), ...createCompletionAnimations(3)];
+
+    const { container } = renderCenterArea(gameState, animations);
+    const buildPile = container.querySelector<HTMLElement>('[data-build-pile="0"]');
+
+    expect(buildPile?.querySelector('.card[data-value="11"]')).not.toBeNull();
+    expect(buildPile?.querySelector('.card[data-value="12"]')).toBeNull();
+  });
+
   test('hides "12" backdrop once all completion animations have started', () => {
     const gameState = createGameState([]);
     const animations = createCompletionAnimations(3).map((a) => ({ ...a, hasStarted: true }));
