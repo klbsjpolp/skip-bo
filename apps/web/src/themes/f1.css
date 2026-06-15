@@ -1,0 +1,334 @@
+/* Formule 1 — a 2026 race weekend: dark asphalt paddock, carbon-fibre card
+   backs, and the twelve numbered cards painted as abstract team liveries
+   ordered by the current constructors' standings (2 = last, 12 = leader).
+   Card 1 is the starting grid; the Skip-Bo wildcard is the chequered finish
+   line. The active player's band is flagged with a kerb stripe. */
+
+.theme-f1 {
+  /* === Core color scheme === */
+  --background: #16191d;
+  --foreground: #eceef0;
+  --primary: #c8102e; /* deepened F1 red so white labels reach ≥4.5:1 */
+  --primary-foreground: #ffffff;
+  --secondary: #23272d;
+  --secondary-foreground: #eceef0;
+  --success: #1f9d4d;
+  --success-foreground: #ffffff;
+  --destructive: #e2231a;
+  --destructive-foreground: #ffffff;
+  --muted: hsl(0 0% 100% / 0.07);
+  --muted-foreground: hsl(0 0% 72%);
+  --accent: #2c3138;
+  --accent-foreground: #eceef0;
+  --popover: #1b1f24;
+  --popover-foreground: #eceef0;
+  --input: #2a2f36;
+  --input-foreground: #eceef0;
+  --border: hsl(0 0% 100% / 0.14);
+  --ring: #c8102e;
+  --text-color: #e6e8ea;
+  --title-color: #ffffff;
+
+  /* === Card surface === */
+  --card-front-color: #23272d;
+  --card-back-color: #16161a;
+  --card-border-color: #0d0e11;
+  --card-color: #ffffff;
+  --card-radius: 2px;
+  --card-shadow: 0 8px 18px rgb(0 0 0 / 0.45);
+  /* Carbon-fibre weave, tiled small on the card backs. */
+  --card-back-bg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><rect width='8' height='8' fill='%231a1a1d'/><rect width='4' height='4' fill='%2325252a'/><rect x='4' y='4' width='4' height='4' fill='%2325252a'/><rect x='0' y='0' width='4' height='1' fill='%23323239'/><rect x='4' y='4' width='4' height='1' fill='%23323239'/></svg>");
+
+  /* === Card number colors (1–4, 5–8, 9–12) — white over dark liveries === */
+  --card-g1: #ffffff;
+  --card-g2: #ffffff;
+  --card-g3: #ffffff;
+
+  /* === Skip-Bo special card === */
+  --skipbo-text: #141414;
+  --skipbo-bg: #ffffff;
+
+  /* === Selection & drag === */
+  --selected-border-color: #ffe100; /* yellow flag */
+  --selected-shadow: 0 0 0 2px #ffe100, 0 0 20px rgb(255 225 0 / 0.5);
+  --drop-indicator-color: #ffe100;
+  --can-drop-shadow: 0 0 16px rgb(255 225 0 / 0.45);
+  --active-turn-color: #22c55e; /* lights out, green flag */
+
+  /* === Victory layer — podium gold + chequered drift === */
+  --victory-border: #e8b53a;
+  --victory-accent: #ffd45e;
+  --victory-accent-soft: color-mix(in srgb, var(--victory-accent) 22%, transparent);
+  --victory-accent-opacity: 0.28;
+  --victory-piece-1: #e8b53a;
+  --victory-piece-2: #d7d7dc;
+  --victory-piece-3: #c8102e;
+  --victory-piece-4: #1f9d4d;
+  --victory-pattern-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'><g fill='%23ffffff' opacity='0.6'><rect x='0' y='0' width='12' height='12'/><rect x='24' y='0' width='12' height='12'/><rect x='12' y='12' width='12' height='12'/><rect x='36' y='12' width='12' height='12'/><rect x='0' y='24' width='12' height='12'/><rect x='24' y='24' width='12' height='12'/><rect x='12' y='36' width='12' height='12'/><rect x='36' y='36' width='12' height='12'/></g></svg>");
+  --victory-pattern-opacity: 0.16;
+  --victory-pattern-size: 48px 48px;
+  --victory-pattern-drift-to: 48px 48px;
+  /* Podium trophy with a "1" engraved on the cup. */
+  --victory-emblem-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><g fill='none' stroke='%23e8b53a' stroke-width='9' stroke-linecap='round'><path d='M58 54 C34 54 32 90 64 96'/><path d='M142 54 C166 54 168 90 136 96'/></g><path d='M56 42 H144 C144 84 124 114 100 114 C76 114 56 84 56 42 Z' fill='%23e8b53a'/><path d='M66 48 C66 80 78 102 92 110' stroke='%23ffd45e' stroke-width='6' fill='none' opacity='0.75' stroke-linecap='round'/><rect x='94' y='112' width='12' height='22' fill='%23d79a22'/><path d='M76 134 H124 L130 156 H70 Z' fill='%23e8b53a'/><rect x='62' y='156' width='76' height='13' rx='3' fill='%23c98f1e'/><text x='100' y='100' font-family='Arial, Helvetica, sans-serif' font-size='62' font-weight='700' fill='%235e4708' text-anchor='middle'>1</text></svg>");
+  --victory-emblem-opacity: 0.95;
+
+  /* === Theme-internal tokens === */
+  --f1-kerb: repeating-linear-gradient(90deg, #cc1417 0 10px, #fafafa 10px 20px);
+  /* Open-wheel car silhouette (nose up) used to mask the victory burst pieces. */
+  --f1-car: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 44'><g fill='%23000'><rect x='4' y='3' width='16' height='3' rx='1'/><rect x='1.5' y='8' width='4' height='7' rx='1'/><rect x='18.5' y='8' width='4' height='7' rx='1'/><rect x='0.5' y='29' width='5' height='9' rx='1'/><rect x='18.5' y='29' width='5' height='9' rx='1'/><rect x='5' y='34' width='14' height='3.5' rx='1'/><path d='M12 4 L9 11 L8.5 32 L15.5 32 L15 11 Z'/><circle cx='12' cy='22' r='3.2'/></g></svg>");
+
+  font-family: 'Titillium Web', 'Inter', system-ui, sans-serif;
+
+  /* === Body / page chrome: dark asphalt with a faint speed-line wash === */
+  & body {
+    font-family: 'Titillium Web', 'Inter', system-ui, sans-serif;
+    background-image:
+      radial-gradient(ellipse 110% 70% at 50% -8%, rgb(255 255 255 / 0.05) 0%, transparent 60%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.035 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"),
+      linear-gradient(180deg, #1f242a 0%, #131619 100%);
+    background-size:
+      auto,
+      200px 200px,
+      auto;
+    background-repeat: no-repeat, repeat, no-repeat;
+    background-attachment: fixed;
+  }
+
+  & h1,
+  & h2,
+  & .title {
+    font-family: 'Titillium Web', 'Inter', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  /* === Card customizations === */
+  & .card {
+    font-family: 'Titillium Web', 'Inter', system-ui, sans-serif;
+
+    .card-number {
+      @apply font-bold;
+      letter-spacing: 0.01em;
+      text-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
+    }
+
+    /* Corner number (visible when discard cards stack) reads on any livery. */
+    .card-corner-number {
+      @apply flex items-center justify-center font-bold text-2xs rounded-sm px-1;
+      background: rgb(0 0 0 / 0.62);
+      color: #ffffff;
+      text-shadow: none;
+    }
+
+    /* --- Numbered liveries (background-image art over a solid base the
+       readability spec can measure) --- */
+    &.normal-card {
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+
+      /* 1 — starting grid: asphalt, green verges, red/white kerbs, and the
+         two front corners of each staggered grid box. */
+      &[data-value='1'] {
+        background-color: #3c3f42;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 100' preserveAspectRatio='none'><rect width='70' height='100' fill='%233C3F42'/><rect x='0' width='3' height='100' fill='%232F7D33'/><rect x='67' width='3' height='100' fill='%232F7D33'/><rect x='3' width='5' height='100' fill='%23fafafa'/><rect x='62' width='5' height='100' fill='%23fafafa'/><g fill='%23cc1417'><rect x='3' y='0' width='5' height='8'/><rect x='3' y='16' width='5' height='8'/><rect x='3' y='32' width='5' height='8'/><rect x='3' y='48' width='5' height='8'/><rect x='3' y='64' width='5' height='8'/><rect x='3' y='80' width='5' height='8'/><rect x='3' y='96' width='5' height='4'/><rect x='62' y='0' width='5' height='8'/><rect x='62' y='16' width='5' height='8'/><rect x='62' y='32' width='5' height='8'/><rect x='62' y='48' width='5' height='8'/><rect x='62' y='64' width='5' height='8'/><rect x='62' y='80' width='5' height='8'/><rect x='62' y='96' width='5' height='4'/></g><g fill='none' stroke='%23E6E6E6' stroke-width='2' stroke-linecap='square'><path d='M22,14 H16 V26'/><path d='M28,14 H34 V26'/><path d='M42,40 H36 V52'/><path d='M48,40 H54 V52'/><path d='M22,66 H16 V78'/><path d='M28,66 H34 V78'/></g></svg>");
+      }
+
+      /* 2 — Cadillac: black with a grey centre stripe. */
+      &[data-value='2'] {
+        background-color: #141416;
+        background-image: linear-gradient(90deg, transparent 43%, #7e8388 43%, #7e8388 57%, transparent 57%);
+      }
+
+      /* 3 — Aston Martin: dark green / black with a light-green divider. */
+      &[data-value='3'] {
+        background-color: #15171a;
+        background-image:
+          linear-gradient(90deg, transparent 58%, #b6e000 58%, #b6e000 60%, transparent 60%),
+          linear-gradient(90deg, #0b3d2e 0%, #0b3d2e 58%, transparent 58%);
+      }
+
+      /* 4 — Audi: titanium silver nose, an angled red wedge clipping the
+         silver, and a black body — like the 2026 livery. */
+      &[data-value='4'] {
+        background-color: #1a1a1c;
+        background-image:
+          linear-gradient(180deg, #c4c9cc 0%, #c4c9cc 32%, transparent 32%),
+          linear-gradient(210deg, #c8102e 0%, #c8102e 42%, transparent 42%);
+      }
+
+      /* 5 — Williams: navy with a cyan swoosh. */
+      &[data-value='5'] {
+        background-color: #0a1a3f;
+        background-image: linear-gradient(120deg, transparent 52%, #2fd3ff 52%, #2fd3ff 68%, transparent 68%);
+      }
+
+      /* 6 — Haas: white / black with a red slash (dark number). */
+      &[data-value='6'] {
+        background-color: #ededed;
+        background-image:
+          linear-gradient(120deg, transparent 44%, #e6002b 44%, #e6002b 52%, transparent 52%),
+          linear-gradient(180deg, transparent 60%, #18181a 60%, #18181a 100%);
+      }
+      &[data-value='6'] .card-number,
+      &[data-value='6'] .card-corner-inset {
+        color: #141414;
+        text-shadow: 0 1px 2px rgb(255 255 255 / 0.5);
+      }
+
+      /* 7 — Racing Bulls: white / navy diagonal with a red line (dark number). */
+      &[data-value='7'] {
+        background-color: #ecedee;
+        background-image:
+          linear-gradient(160deg, transparent 53%, #e2231a 53%, #e2231a 55%, transparent 55%),
+          linear-gradient(160deg, transparent 55%, #142a6b 55%, #142a6b 100%);
+      }
+      &[data-value='7'] .card-number {
+        color: #141414;
+        text-shadow: 0 1px 2px rgb(255 255 255 / 0.5);
+      }
+
+      /* 8 — Alpine: blue with a prominent BWT-pink band and a black accent. */
+      &[data-value='8'] {
+        background-color: #0050c8;
+        background-image:
+          linear-gradient(160deg, transparent 34%, #ff2d8e 34%, #ff2d8e 60%, transparent 60%),
+          linear-gradient(160deg, transparent 60%, #111418 60%, #111418 66%, transparent 66%);
+      }
+
+      /* 9 — Red Bull: navy with a yellow/red slash. */
+      &[data-value='9'] {
+        background-color: #0a1a52;
+        background-image: linear-gradient(
+          125deg,
+          transparent 48%,
+          #ffd200 48%,
+          #ffd200 54%,
+          #d81e2c 54%,
+          #d81e2c 72%,
+          transparent 72%
+        );
+      }
+
+      /* 10 — McLaren: papaya over black (dark number). */
+      &[data-value='10'] {
+        background-color: #ff8000;
+        background-image: linear-gradient(160deg, transparent 60%, #161616 60%, #161616 100%);
+      }
+      &[data-value='10'] .card-number {
+        color: #141414;
+        text-shadow: 0 1px 2px rgb(255 255 255 / 0.45);
+      }
+
+      /* 11 — Ferrari: rosso with a black base and a white corner. */
+      &[data-value='11'] {
+        background-color: #e20025;
+        background-image:
+          linear-gradient(315deg, #ffffff 0%, #ffffff 9%, transparent 9%),
+          linear-gradient(180deg, transparent 72%, #141414 72%, #141414 100%);
+      }
+
+      /* 12 — Mercedes: black body with a petronas-teal swoosh and a gunmetal
+         floor — black-dominant like the 2026 car. */
+      &[data-value='12'] {
+        background-color: #101418;
+        background-image:
+          linear-gradient(125deg, transparent 40%, #00b3a4 40%, #00b3a4 52%, transparent 52%),
+          linear-gradient(180deg, transparent 72%, #8a9296 72%, #8a9296 100%);
+      }
+    }
+
+    /* Skip-Bo: the chequered finish line. The wordmark sits in a dark band so
+       it stays legible over the flag. */
+    &.skipbo-text {
+      background-color: #ffffff;
+      background-image:
+        linear-gradient(45deg, #111 25%, transparent 25%), linear-gradient(-45deg, #111 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #111 75%), linear-gradient(-45deg, transparent 75%, #111 75%);
+      background-size: 14px 14px;
+      background-position:
+        0 0,
+        0 7px,
+        7px -7px,
+        -7px 0;
+
+      .card-number {
+        @apply rounded-sm px-1 py-0.5;
+        background: rgb(17 17 17 / 0.82);
+        color: #ffffff;
+        text-shadow: none;
+      }
+    }
+
+    /* Carbon-fibre weave on the card backs. */
+    .back {
+      background-image: var(--card-back-bg);
+      background-color: var(--card-back-color);
+      background-size: 9px 9px;
+      background-repeat: repeat;
+      border-color: rgb(255 255 255 / 0.12);
+    }
+
+    /* Empty slots read as an open grid box, not a card. */
+    &.empty-card {
+      background-color: rgb(255 255 255 / 0.04);
+      background-image: none;
+      border: 2px dashed rgb(255 255 255 / 0.28);
+      color: rgb(255 255 255 / 0.42);
+      box-shadow: none;
+    }
+  }
+
+  & .placeholder {
+    border-color: rgb(255 255 255 / 0.3);
+    color: rgb(255 255 255 / 0.3);
+  }
+
+  /* === Player / center area: pit-lane panels === */
+  & .player-area,
+  & .center-area {
+    background-image: linear-gradient(180deg, rgb(38 43 49 / 0.96), rgb(24 28 32 / 0.96));
+    border-color: rgb(255 255 255 / 0.1);
+  }
+
+  /* Active turn: lights-out green ring + a kerb stripe along the top edge. */
+  & .player-area.active-turn,
+  & .center-area.active-turn {
+    border-color: var(--active-turn-color);
+    box-shadow:
+      0 0 0 1px var(--active-turn-color),
+      0 0 18px rgb(34 197 94 / 0.25);
+
+    &::after {
+      @apply content-[''] absolute left-0 right-0 top-0 h-1 pointer-events-none z-1;
+      background-image: var(--f1-kerb);
+      border-top-left-radius: inherit;
+      border-top-right-radius: inherit;
+    }
+  }
+
+  /* === Winner: caught under the podium lights === */
+  & .player-area.winner {
+    box-shadow:
+      0 0 0 2px var(--victory-border),
+      0 0 34px rgb(232 181 58 / 0.3);
+  }
+
+  /* Burst pieces are little open-wheel cars driving out from the podium —
+     tinted by the four victory colours and pointed along their flight path. */
+  & .victory-burst-piece {
+    width: 15px;
+    height: 26px;
+    border-radius: 0;
+    background: var(--piece-color);
+    -webkit-mask-image: var(--f1-car);
+    mask-image: var(--f1-car);
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    --piece-start-rotation: var(--piece-flight-rotation);
+    --piece-end-rotation: var(--piece-flight-rotation);
+  }
+}

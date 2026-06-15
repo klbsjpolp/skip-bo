@@ -59,7 +59,7 @@ export function ThemeSwitcher() {
               <div className="flex items-center">
                 {getIcon(icon)}
                 {label}
-                {value === 'theme-cinema' && (
+                {(value === 'theme-cinema' || value === 'theme-f1') && (
                   <span className="ml-2 rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none text-primary-foreground">
                     Nouveau
                   </span>
