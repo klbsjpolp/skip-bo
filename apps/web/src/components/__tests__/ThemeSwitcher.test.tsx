@@ -41,6 +41,16 @@ describe('ThemeSwitcher', () => {
     expect(within(paperOption).queryByText('Nouveau')).toBeNull();
   });
 
+  test('flags the cinema theme as improved in the dropdown', () => {
+    renderSwitcher();
+
+    fireEvent.click(screen.getByTestId('theme-switcher-trigger'));
+
+    const cinemaOption = screen.getByTestId('theme-option-theme-cinema');
+    expect(within(cinemaOption).getByText('Amélioré')).toBeTruthy();
+    expect(within(cinemaOption).queryByText('Nouveau')).toBeNull();
+  });
+
   test('reports a manual selection from the dropdown', () => {
     renderSwitcher();
 

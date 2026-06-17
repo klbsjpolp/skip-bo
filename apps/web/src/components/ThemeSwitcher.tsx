@@ -54,13 +54,18 @@ export function ThemeSwitcher() {
           </div>
         </SelectTrigger>
         <SelectContent data-testid="theme-switcher-content" className="popper">
-          {themes.map(({ value, label, icon }) => (
+          {themes.map(({ value, label, icon, status }) => (
             <SelectItem key={value} value={value} data-testid={`theme-option-${value}`}>
               <div className="flex items-center">
                 {getIcon(icon)}
                 {label}
-                {(value === 'theme-cinema' || value === 'theme-f1') && (
-                  <span className="ml-2 rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none text-primary-foreground">
+                {status === 'UPDATED' && (
+                  <span className="ml-2 rounded-full bg-secondary px-1.5 py-0.5 text-2xs font-bold uppercase leading-none text-secondary-foreground">
+                    Amélioré
+                  </span>
+                )}
+                {status === 'NEW' && (
+                  <span className="ml-2 rounded-full bg-primary px-1.5 py-0.5 text-2xs font-bold uppercase leading-none text-primary-foreground">
                     Nouveau
                   </span>
                 )}

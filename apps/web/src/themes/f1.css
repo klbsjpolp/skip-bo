@@ -6,7 +6,9 @@
 
 .theme-f1 {
   /* === Core color scheme === */
-  --background: #16191d;
+  /* Matches the body gradient's top stop so the iOS status-bar tint blends
+     with the page top instead of reading as a darker grey band. */
+  --background: #20252b;
   --foreground: #eceef0;
   --primary: #c8102e; /* deepened F1 red so white labels reach ≥4.5:1 */
   --primary-foreground: #ffffff;
@@ -32,10 +34,15 @@
   /* === Card surface === */
   --card-front-color: #23272d;
   --card-back-color: #16161a;
-  --card-border-color: #0d0e11;
+  /* Light hairline so dark liveries (Cadillac, Mercedes, the black lower
+     halves of Haas/Ferrari/etc.) keep a visible edge against the panel —
+     a near-black border vanished into the background. */
+  --card-border-color: var(--card-back-color);
   --card-color: #ffffff;
   --card-radius: 2px;
-  --card-shadow: 0 8px 18px rgb(0 0 0 / 0.45);
+  /* Drop shadow plus a faint outer light ring; the ring is what actually
+     separates a dark card from the dark panel (a dark shadow can't). */
+  --card-shadow: 0 6px 16px rgb(0 0 0 / 0.5), 0 0 0 1px rgb(255 255 255 / 0.08);
   /* Carbon-fibre weave, tiled small on the card backs. */
   --card-back-bg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><rect width='8' height='8' fill='%231a1a1d'/><rect width='4' height='4' fill='%2325252a'/><rect x='4' y='4' width='4' height='4' fill='%2325252a'/><rect x='0' y='0' width='4' height='1' fill='%23323239'/><rect x='4' y='4' width='4' height='1' fill='%23323239'/></svg>");
 
@@ -125,46 +132,54 @@
     &.normal-card {
       background-repeat: no-repeat;
       background-size: 100% 100%;
+      --bg: var(--card-back-bg);
+      --border: var(--bg);
+      background-color: var(--bg);
+      border-color: var(--border);
 
       /* 1 — starting grid: asphalt, green verges, red/white kerbs, and the
          two front corners of each staggered grid box. */
       &[data-value='1'] {
-        background-color: #3c3f42;
+        --bg: #3c3f42;
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 100' preserveAspectRatio='none'><rect width='70' height='100' fill='%233C3F42'/><rect x='0' width='3' height='100' fill='%232F7D33'/><rect x='67' width='3' height='100' fill='%232F7D33'/><rect x='3' width='5' height='100' fill='%23fafafa'/><rect x='62' width='5' height='100' fill='%23fafafa'/><g fill='%23cc1417'><rect x='3' y='0' width='5' height='8'/><rect x='3' y='16' width='5' height='8'/><rect x='3' y='32' width='5' height='8'/><rect x='3' y='48' width='5' height='8'/><rect x='3' y='64' width='5' height='8'/><rect x='3' y='80' width='5' height='8'/><rect x='3' y='96' width='5' height='4'/><rect x='62' y='0' width='5' height='8'/><rect x='62' y='16' width='5' height='8'/><rect x='62' y='32' width='5' height='8'/><rect x='62' y='48' width='5' height='8'/><rect x='62' y='64' width='5' height='8'/><rect x='62' y='80' width='5' height='8'/><rect x='62' y='96' width='5' height='4'/></g><g fill='none' stroke='%23E6E6E6' stroke-width='2' stroke-linecap='square'><path d='M22,14 H16 V26'/><path d='M28,14 H34 V26'/><path d='M42,40 H36 V52'/><path d='M48,40 H54 V52'/><path d='M22,66 H16 V78'/><path d='M28,66 H34 V78'/></g></svg>");
+        --border: #2F7D33;
       }
 
       /* 2 — Cadillac: black with a grey centre stripe. */
       &[data-value='2'] {
-        background-color: #141416;
+        --bg: #141416;
         background-image: linear-gradient(90deg, transparent 43%, #7e8388 43%, #7e8388 57%, transparent 57%);
+        --border: #7e8388;
       }
 
       /* 3 — Aston Martin: dark green / black with a light-green divider. */
       &[data-value='3'] {
-        background-color: #15171a;
+        --bg: #15171a;
         background-image:
           linear-gradient(90deg, transparent 58%, #b6e000 58%, #b6e000 60%, transparent 60%),
           linear-gradient(90deg, #0b3d2e 0%, #0b3d2e 58%, transparent 58%);
+        --border: #0b3d2e;
       }
 
       /* 4 — Audi: titanium silver nose, an angled red wedge clipping the
          silver, and a black body — like the 2026 livery. */
       &[data-value='4'] {
-        background-color: #1a1a1c;
+        --bg: #1a1a1c;
         background-image:
           linear-gradient(180deg, #c4c9cc 0%, #c4c9cc 32%, transparent 32%),
           linear-gradient(210deg, #c8102e 0%, #c8102e 42%, transparent 42%);
+        --border: #c4c9cc;
       }
 
       /* 5 — Williams: navy with a cyan swoosh. */
       &[data-value='5'] {
-        background-color: #0a1a3f;
+        --bg: #0a1a3f;
         background-image: linear-gradient(120deg, transparent 52%, #2fd3ff 52%, #2fd3ff 68%, transparent 68%);
       }
 
       /* 6 — Haas: white / black with a red slash (dark number). */
       &[data-value='6'] {
-        background-color: #ededed;
+        --bg: #ededed;
         background-image:
           linear-gradient(120deg, transparent 44%, #e6002b 44%, #e6002b 52%, transparent 52%),
           linear-gradient(180deg, transparent 60%, #18181a 60%, #18181a 100%);
@@ -177,10 +192,11 @@
 
       /* 7 — Racing Bulls: white / navy diagonal with a red line (dark number). */
       &[data-value='7'] {
-        background-color: #ecedee;
+        --bg: #ecedee;
         background-image:
           linear-gradient(160deg, transparent 53%, #e2231a 53%, #e2231a 55%, transparent 55%),
           linear-gradient(160deg, transparent 55%, #142a6b 55%, #142a6b 100%);
+        --border: #142a6b;
       }
       &[data-value='7'] .card-number {
         color: #141414;
@@ -189,7 +205,7 @@
 
       /* 8 — Alpine: blue with a prominent BWT-pink band and a black accent. */
       &[data-value='8'] {
-        background-color: #0050c8;
+        --bg: #0050c8;
         background-image:
           linear-gradient(160deg, transparent 34%, #ff2d8e 34%, #ff2d8e 60%, transparent 60%),
           linear-gradient(160deg, transparent 60%, #111418 60%, #111418 66%, transparent 66%);
@@ -197,7 +213,7 @@
 
       /* 9 — Red Bull: navy with a yellow/red slash. */
       &[data-value='9'] {
-        background-color: #0a1a52;
+        --bg: #0a1a52;
         background-image: linear-gradient(
           125deg,
           transparent 48%,
@@ -211,7 +227,7 @@
 
       /* 10 — McLaren: papaya over black (dark number). */
       &[data-value='10'] {
-        background-color: #ff8000;
+        --bg: #ff8000;
         background-image: linear-gradient(160deg, transparent 60%, #161616 60%, #161616 100%);
       }
       &[data-value='10'] .card-number {
@@ -221,7 +237,7 @@
 
       /* 11 — Ferrari: rosso with a black base and a white corner. */
       &[data-value='11'] {
-        background-color: #e20025;
+        --bg: #e20025;
         background-image:
           linear-gradient(315deg, #ffffff 0%, #ffffff 9%, transparent 9%),
           linear-gradient(180deg, transparent 72%, #141414 72%, #141414 100%);
@@ -230,10 +246,11 @@
       /* 12 — Mercedes: black body with a petronas-teal swoosh and a gunmetal
          floor — black-dominant like the 2026 car. */
       &[data-value='12'] {
-        background-color: #101418;
+        --bg: #101418;
         background-image:
           linear-gradient(125deg, transparent 40%, #00b3a4 40%, #00b3a4 52%, transparent 52%),
           linear-gradient(180deg, transparent 72%, #8a9296 72%, #8a9296 100%);
+        --border: #8a9296;
       }
     }
 
@@ -265,7 +282,6 @@
       background-color: var(--card-back-color);
       background-size: 9px 9px;
       background-repeat: repeat;
-      border-color: rgb(255 255 255 / 0.12);
     }
 
     /* Empty slots read as an open grid box, not a card. */
@@ -283,11 +299,13 @@
     color: rgb(255 255 255 / 0.3);
   }
 
-  /* === Player / center area: pit-lane panels === */
+  /* === Player / center area: pit-lane panels — lifted well above the asphalt
+     background so the panels read as distinct and near-black liveries
+     (Cadillac, Mercedes) stand out against them === */
   & .player-area,
   & .center-area {
-    background-image: linear-gradient(180deg, rgb(38 43 49 / 0.96), rgb(24 28 32 / 0.96));
-    border-color: rgb(255 255 255 / 0.1);
+    background-image: linear-gradient(180deg, rgb(60 67 76 / 0.97), rgb(44 50 58 / 0.97));
+    border-color: rgb(255 255 255 / 0.16);
   }
 
   /* Active turn: lights-out green ring + a kerb stripe along the top edge. */
