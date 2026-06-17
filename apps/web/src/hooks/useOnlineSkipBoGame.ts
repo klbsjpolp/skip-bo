@@ -1,18 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { canPlayCard, type Card, getCompletedBuildPileCards, type GameState, type MoveResult } from '@skipbo/game-core';
+import { canPlayCard, type Card, getCompletedBuildPileCards, type MoveResult } from '@skipbo/game-core';
 
 import type { GameAction } from '@/state/gameActions';
 import {
-  PROTOCOL_VERSION,
   type CreateRoomResponse,
   type DisconnectedSeatInfo,
   type LobbyReadyState,
   type LobbySeatInfo,
   type RoomSummary,
-  type ServerMessage,
 } from '@klbsjpolp/realtime-core';
-import { isDebugAction, SkipboHost, type ClientGameView, type HostRoomMeta } from '@skipbo/skipbo-runtime';
+import { isDebugAction, type ClientGameView, type HostRoomMeta, type SkipboHost } from '@skipbo/skipbo-runtime';
 
 import { useCardAnimation } from '@/contexts/useCardAnimation';
 import {
@@ -21,19 +19,8 @@ import {
 } from '@/services/completedBuildPileAnimationService';
 import { setGlobalDrawAnimationContext } from '@/services/drawAnimationService';
 import { setGlobalAnimationContext, triggerAIAnimation } from '@/services/aiAnimationService';
-import { consumeDragCommitOverride } from '@/services/dragCommitOverride';
-import {
-  calculateAnimationDuration,
-  getBuildPilePosition,
-  getDiscardTopCardPosition,
-  getHandCardAngle,
-  getHandCardPosition,
-  getNextDiscardCardPosition,
-  getStockCardPosition,
-} from '@/utils/cardPositions';
 import { clearOnlineSession } from '@/state/sessionPersistence';
 
-import { RECONNECT_DELAYS_MS, WEBSOCKET_PING_INTERVAL_MS } from '@/config/timing';
 import {
   applyOptimisticDiscardView,
   applyOptimisticPlayView,
@@ -47,28 +34,11 @@ import {
   type OpponentTransition,
   type TurnPresentationOverride,
 } from '@/hooks/useOnlineSkipBoGame/helpers';
+import { startDiscardCardAnimation, startPlayCardAnimation } from '@/hooks/useOnlineSkipBoGame/localActionAnimations';
+import { type ConnectionStatus, type HostSnapshotPayload } from '@/hooks/useOnlineSkipBoGame/types';
+import { useOnlineConnection } from '@/hooks/useOnlineSkipBoGame/useOnlineConnection';
 
 export { inferOpponentTransition, type OpponentTransition };
-
-type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
-
-/** Opaque blob the host stores on the server for its own reconnection. */
-interface HostSnapshotPayload {
-  state: GameState;
-  activeSeatIndices: number[];
-}
-
-const toRoomMeta = (room: RoomSummary): HostRoomMeta => ({
-  connectedSeats: room.connectedSeats,
-  disconnectedSeats: room.disconnectedSeats,
-  expiresAt: room.expiresAt,
-  hostSeatIndex: room.hostSeatIndex,
-  lobbySeats: room.lobbySeats,
-  roomCode: room.roomCode,
-  seatCapacity: room.seatCapacity,
-  status: room.status,
-  version: room.version,
-});
 
 export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const [view, setView] = useState<ClientGameView | null>(null);
@@ -84,8 +54,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const intentionalLeaveRef = useRef(false);
   const viewRef = useRef<ClientGameView | null>(null);
   const websocketRef = useRef<WebSocket | null>(null);
-  const pingIntervalRef = useRef<number | null>(null);
-  const reconnectTimeoutRef = useRef<number | null>(null);
   const turnPresentationTimeoutRef = useRef<number | null>(null);
   // Host-authoritative state. Only populated when the local seat is the host.
   const hostRef = useRef<SkipboHost | null>(null);
@@ -345,331 +313,32 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     setGlobalCompletedPileAnimationContext({ startAnimation });
   }, [removeAnimation, startAnimation, waitForAnimations]);
 
-  useEffect(() => {
-    const clearPingInterval = () => {
-      if (pingIntervalRef.current !== null) {
-        window.clearInterval(pingIntervalRef.current);
-        pingIntervalRef.current = null;
-      }
-    };
-
-    const clearReconnectTimeout = () => {
-      if (reconnectTimeoutRef.current !== null) {
-        window.clearTimeout(reconnectTimeoutRef.current);
-        reconnectTimeoutRef.current = null;
-      }
-    };
-
-    if (!session) {
-      setInteractionLocked(false);
-      clearReconnectTimeout();
-      clearPingInterval();
-      clearTurnPresentationTimeout();
-      websocketRef.current?.close();
-      websocketRef.current = null;
-      authoritativeViewRef.current = null;
-      viewRef.current = null;
-      hostRef.current = null;
-      roomMetaRef.current = null;
-      activeSeatIndicesRef.current = [];
-      lastBroadcastTurnRef.current = null;
-      return;
-    }
-
-    const activeSession = session;
-    const localIsHost = activeSession.seatIndex === activeSession.hostSeatIndex;
-    authoritativeViewRef.current = null;
-    viewRef.current = null;
-    intentionalLeaveRef.current = false;
-    hostRef.current = null;
-    roomMetaRef.current = null;
-    activeSeatIndicesRef.current = [];
-    lastBroadcastTurnRef.current = null;
-
-    let socket: WebSocket | null = null;
-    let isCancelled = false;
-    let reconnectAttempt = 0;
-    const isCurrentSocket = (candidate: WebSocket): boolean => websocketRef.current === candidate;
-    const startPingLoop = (currentSocket: WebSocket) => {
-      clearPingInterval();
-      pingIntervalRef.current = window.setInterval(() => {
-        if (!isCurrentSocket(currentSocket) || currentSocket.readyState !== WebSocket.OPEN) {
-          return;
-        }
-
-        currentSocket.send(JSON.stringify({ type: 'ping' }));
-      }, WEBSOCKET_PING_INTERVAL_MS);
-    };
-    const scheduleReconnect = () => {
-      if (isCancelled || reconnectTimeoutRef.current !== null) {
-        return;
-      }
-
-      const delay = RECONNECT_DELAYS_MS[Math.min(reconnectAttempt, RECONNECT_DELAYS_MS.length - 1)];
-      reconnectAttempt += 1;
-      setConnectionStatus('connecting');
-      clearPingInterval();
-      reconnectTimeoutRef.current = window.setTimeout(() => {
-        reconnectTimeoutRef.current = null;
-        connect();
-      }, delay);
-    };
-
-    const connect = () => {
-      if (isCancelled) {
-        return;
-      }
-
-      const currentSocket = new WebSocket(activeSession.wsUrl);
-      socket = currentSocket;
-      websocketRef.current = currentSocket;
-      // Guests request a fresh view from the host once per socket (covers
-      // reconnect mid-game; the host has no other way to know we came back).
-      let resyncRequested = false;
-
-      currentSocket.addEventListener('open', () => {
-        if (!isCurrentSocket(currentSocket)) {
-          return;
-        }
-
-        reconnectAttempt = 0;
-        currentSocket.send(
-          JSON.stringify({
-            type: 'auth',
-            protocolVersion: PROTOCOL_VERSION,
-            roomCode: activeSession.roomCode,
-            seatIndex: activeSession.seatIndex,
-            seatToken: activeSession.seatToken,
-          }),
-        );
-        startPingLoop(currentSocket);
-      });
-
-      currentSocket.addEventListener('message', (event) => {
-        if (!isCurrentSocket(currentSocket)) {
-          return;
-        }
-
-        try {
-          if (typeof event.data !== 'string') {
-            return;
-          }
-
-          const message = JSON.parse(event.data) as ServerMessage;
-
-          switch (message.type) {
-            case 'gameStarted': {
-              setInteractionLocked(false);
-              setConnectionStatus('connected');
-              setLastError(null);
-              activeSeatIndicesRef.current = message.activeSeatIndices;
-              lastBroadcastTurnRef.current = message.currentSeatIndex;
-
-              if (localIsHost) {
-                const meta = roomMetaRef.current;
-                const stockSize = (message.gameConfig as { stockSize?: number } | undefined)?.stockSize;
-                const playerNames = message.activeSeatIndices.map(
-                  (seat) => meta?.lobbySeats?.find((s) => s.seatIndex === seat)?.displayName ?? undefined,
-                );
-                const host = SkipboHost.create({
-                  activeSeatIndices: message.activeSeatIndices,
-                  allowDebug: import.meta.env.DEV,
-                  playerNames,
-                  stockSize,
-                });
-                hostRef.current = host;
-
-                if (meta) {
-                  ingestView(host.viewForSeat(activeSession.seatIndex, meta));
-                  for (const seat of message.activeSeatIndices) {
-                    if (seat !== activeSession.seatIndex) {
-                      sendRelay('view', host.viewForSeat(seat, meta), [seat]);
-                    }
-                  }
-                  const snapshot: HostSnapshotPayload = {
-                    state: host.serializeSnapshot(),
-                    activeSeatIndices: message.activeSeatIndices,
-                  };
-                  sendRaw({ type: 'snapshot', payload: snapshot });
-                }
-              }
-              break;
-            }
-            case 'snapshotRestore': {
-              if (localIsHost && message.payload) {
-                const payload = message.payload as HostSnapshotPayload;
-                activeSeatIndicesRef.current = payload.activeSeatIndices;
-                const host = SkipboHost.fromSnapshot(payload.state, payload.activeSeatIndices, import.meta.env.DEV);
-                hostRef.current = host;
-                lastBroadcastTurnRef.current = host.gameIsOver ? null : host.currentSeatIndex();
-                const meta = roomMetaRef.current;
-                if (meta) {
-                  ingestView(host.viewForSeat(activeSession.seatIndex, meta));
-                  for (const seat of payload.activeSeatIndices) {
-                    if (seat !== activeSession.seatIndex) {
-                      sendRelay('view', host.viewForSeat(seat, meta), [seat]);
-                    }
-                  }
-                }
-              }
-              break;
-            }
-            case 'relayed': {
-              if (localIsHost) {
-                const host = hostRef.current;
-                const meta = roomMetaRef.current;
-                if (!host || !meta) {
-                  break;
-                }
-
-                if (message.kind === 'move') {
-                  const result = host.applyMove(message.fromSeat, message.payload as GameAction);
-                  if (result.ok) {
-                    ingestView(host.viewForSeat(activeSession.seatIndex, meta));
-                    pushAuthority();
-                  } else {
-                    // Correct the offending guest with its authoritative view.
-                    sendRelay('view', host.viewForSeat(message.fromSeat, meta), [message.fromSeat]);
-                  }
-                } else if (message.kind === 'event') {
-                  const payload = message.payload as { resync?: boolean; move?: GameAction } | null;
-                  if (payload?.resync) {
-                    sendRelay('view', host.viewForSeat(message.fromSeat, meta), [message.fromSeat]);
-                  } else if (payload?.move) {
-                    const result = host.applyMove(message.fromSeat, payload.move);
-                    if (result.ok) {
-                      ingestView(host.viewForSeat(activeSession.seatIndex, meta));
-                      pushAuthority();
-                    }
-                  }
-                }
-                // Host ignores relayed 'view'.
-              } else if (message.kind === 'view') {
-                ingestView(message.payload as ClientGameView);
-              }
-              break;
-            }
-            case 'turn':
-              // Views carry the current player; nothing extra to do.
-              break;
-            case 'presence': {
-              setConnectionStatus('connected');
-              roomMetaRef.current = toRoomMeta(message.room);
-              setRoomSummary(message.room);
-              if (message.room.status === 'FINISHED') {
-                clearOnlineSession();
-              }
-              authoritativeViewRef.current = authoritativeViewRef.current
-                ? { ...authoritativeViewRef.current, room: message.room }
-                : authoritativeViewRef.current;
-              updateView((previousView) => (previousView ? { ...previousView, room: message.room } : previousView));
-
-              // Guest reconnecting into a running game: ask the host for our view.
-              if (!localIsHost && message.room.status === 'ACTIVE' && !resyncRequested) {
-                resyncRequested = true;
-                sendRelay('event', { resync: true });
-              }
-              break;
-            }
-            case 'actionRejected': {
-              setInteractionLocked(false);
-              const knownStatus = authoritativeViewRef.current?.room.status ?? roomMetaRef.current?.status ?? null;
-              if (knownStatus === null) {
-                intentionalLeaveRef.current = true;
-                clearOnlineSession();
-                setLastError(message.reason);
-                currentSocket.close();
-              } else if (knownStatus === 'WAITING') {
-                intentionalLeaveRef.current = true;
-                currentSocket.close();
-                setLobbyRemovalReason('kicked');
-              } else {
-                setLastError(message.reason);
-                commitView(authoritativeViewRef.current ?? viewRef.current);
-              }
-              break;
-            }
-            case 'roomClosed':
-              setInteractionLocked(false);
-              clearOnlineSession();
-              if (message.status === 'WAITING' || authoritativeViewRef.current?.room.status === 'WAITING') {
-                setLobbyRemovalReason('host-left');
-              }
-              setRoomSummary((previous) => (previous ? { ...previous, status: message.status } : previous));
-              authoritativeViewRef.current = authoritativeViewRef.current
-                ? {
-                    ...authoritativeViewRef.current,
-                    room: { ...authoritativeViewRef.current.room, status: message.status },
-                  }
-                : authoritativeViewRef.current;
-              updateView((previousView) =>
-                previousView
-                  ? { ...previousView, room: { ...previousView.room, status: message.status } }
-                  : previousView,
-              );
-              break;
-          }
-        } catch (error) {
-          console.warn('Failed to parse websocket message:', error);
-        }
-      });
-
-      currentSocket.addEventListener('close', () => {
-        if (!isCurrentSocket(currentSocket)) {
-          return;
-        }
-
-        websocketRef.current = null;
-        setInteractionLocked(false);
-        clearPingInterval();
-
-        if (isCancelled || intentionalLeaveRef.current) {
-          setConnectionStatus('disconnected');
-          return;
-        }
-
-        scheduleReconnect();
-      });
-
-      currentSocket.addEventListener('error', () => {
-        if (!isCurrentSocket(currentSocket)) {
-          return;
-        }
-
-        setConnectionStatus('connecting');
-      });
-    };
-
-    const connectTimeoutId = window.setTimeout(connect, 0);
-
-    return () => {
-      isCancelled = true;
-      window.clearTimeout(connectTimeoutId);
-      clearReconnectTimeout();
-      clearPingInterval();
-      clearTurnPresentationTimeout();
-
-      if (websocketRef.current === socket) {
-        websocketRef.current = null;
-      }
-
-      setInteractionLocked(false);
-
-      if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
-        socket.close();
-      }
-    };
-  }, [
+  // Owns the WebSocket lifecycle (connect / ping / reconnect) and routes server
+  // messages back through the collaborators below. All shared state and host
+  // orchestration stay here; only the socket plumbing lives in the connection hook.
+  useOnlineConnection({
+    session,
+    websocketRef,
+    authoritativeViewRef,
+    viewRef,
+    hostRef,
+    roomMetaRef,
+    activeSeatIndicesRef,
+    lastBroadcastTurnRef,
+    intentionalLeaveRef,
+    setInteractionLocked,
     clearTurnPresentationTimeout,
-    commitView,
     ingestView,
     pushAuthority,
     sendRaw,
     sendRelay,
-    session,
-    setInteractionLocked,
+    commitView,
     updateView,
-  ]);
+    setConnectionStatus,
+    setLastError,
+    setRoomSummary,
+    setLobbyRemovalReason,
+  });
 
   const gameState = useMemo(() => {
     const baseState = view
@@ -793,89 +462,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
 
       const willEmptyHand = willPlayCardEmptyHand(currentState);
 
-      let playAnimationDuration = 0;
-      const dragOverride = consumeDragCommitOverride();
-      try {
-        const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
-        const centerAreaElement = document.querySelector('.center-area') as HTMLElement;
-        let startAngleDeg: number | undefined;
-
-        if (playerAreaElement && centerAreaElement) {
-          let startPosition;
-
-          if (currentState.selectedCard.source === 'hand') {
-            const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
-            if (handContainer) {
-              startPosition = getHandCardPosition(handContainer, currentState.selectedCard.index);
-              startAngleDeg = getHandCardAngle(handContainer, currentState.selectedCard.index);
-            }
-          } else if (currentState.selectedCard.source === 'stock') {
-            const stockContainer = playerAreaElement.querySelector('.stock-pile') as HTMLElement;
-            if (stockContainer) {
-              startPosition = getStockCardPosition(stockContainer);
-            }
-          } else if (currentState.selectedCard.source === 'discard') {
-            const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
-            if (discardContainer && currentState.selectedCard.discardPileIndex !== undefined) {
-              startPosition = getDiscardTopCardPosition(discardContainer, currentState.selectedCard.discardPileIndex);
-            }
-          }
-
-          if (dragOverride?.startPosition) {
-            startPosition = dragOverride.startPosition;
-            startAngleDeg = undefined;
-          }
-
-          const endPosition = getBuildPilePosition(centerAreaElement, buildPile);
-
-          if (startPosition) {
-            playAnimationDuration = calculateAnimationDuration(startPosition, endPosition) * 1.2;
-            // When this play completes the pile, the committed state clears the
-            // build pile (length 0). targetPileLength must reflect that committed
-            // length so CenterArea masks the in-flight card with the pre-completion
-            // backdrop instead of painting the final card on the pile early.
-            const previousBuildPileLength = currentState.buildPiles[buildPile].length;
-            const settledBuildPileLength = completedBuildPileCards ? 0 : previousBuildPileLength + 1;
-            startAnimation({
-              card: currentState.selectedCard.card,
-              startPosition,
-              endPosition,
-              startAngleDeg,
-              animationType: 'play',
-              sourceRevealed: true,
-              targetRevealed: true,
-              initialDelay: 0,
-              duration: playAnimationDuration,
-              targetSettledInState: true,
-              targetPileLength: settledBuildPileLength,
-              sourceInfo: {
-                playerIndex: currentState.currentPlayerIndex,
-                source: currentState.selectedCard.source,
-                index: currentState.selectedCard.index,
-                discardPileIndex: currentState.selectedCard.discardPileIndex,
-              },
-              targetInfo: {
-                playerIndex: currentState.currentPlayerIndex,
-                source: 'build',
-                index: buildPile,
-              },
-            });
-          }
-        }
-      } catch (error) {
-        console.warn('Play animation failed, continuing with online game logic:', error);
-      }
-
-      if (completedBuildPileCards) {
-        triggerCompletedBuildPileAnimation(
-          currentState,
-          buildPile,
-          completedBuildPileCards,
-          currentState.completedBuildPiles.length,
-          100,
-          playAnimationDuration,
-        );
-      }
+      startPlayCardAnimation(currentState, buildPile, completedBuildPileCards, startAnimation);
 
       if (viewRef.current) {
         commitView(applyOptimisticPlayView(viewRef.current, buildPile, willEmptyHand));
@@ -915,57 +502,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
 
         setInteractionLocked(true);
 
-        const dragOverride = consumeDragCommitOverride();
-        let discardAnimationDuration = 0;
-
-        try {
-          const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
-
-          if (playerAreaElement) {
-            const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
-            if (handContainer) {
-              const startPosition =
-                dragOverride?.startPosition ?? getHandCardPosition(handContainer, currentState.selectedCard.index);
-              const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
-              if (discardContainer) {
-                const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
-                const animationDuration = calculateAnimationDuration(startPosition, endPosition);
-                discardAnimationDuration = animationDuration;
-                const previousDiscardPileLength =
-                  currentState.players[currentState.currentPlayerIndex].discardPiles[discardPile].length;
-                startAnimation({
-                  card: currentState.selectedCard.card,
-                  startPosition,
-                  endPosition,
-                  animationType: 'discard',
-                  sourceRevealed: true,
-                  targetRevealed: true,
-                  initialDelay: 0,
-                  duration: animationDuration,
-                  startAngleDeg: dragOverride?.startPosition
-                    ? undefined
-                    : getHandCardAngle(handContainer, currentState.selectedCard.index),
-                  targetSettledInState: true,
-                  targetPileLength: previousDiscardPileLength + 1,
-                  sourceInfo: {
-                    playerIndex: currentState.currentPlayerIndex,
-                    source: currentState.selectedCard.source,
-                    index: currentState.selectedCard.index,
-                    discardPileIndex: currentState.selectedCard.discardPileIndex,
-                  },
-                  targetInfo: {
-                    playerIndex: currentState.currentPlayerIndex,
-                    source: 'discard',
-                    index: discardPile,
-                    discardPileIndex: discardPile,
-                  },
-                });
-              }
-            }
-          }
-        } catch (error) {
-          console.warn('Discard animation failed, continuing with online game logic:', error);
-        }
+        const discardAnimationDuration = startDiscardCardAnimation(currentState, discardPile, startAnimation);
 
         if (viewRef.current) {
           commitView(applyOptimisticDiscardView(viewRef.current, discardPile));
