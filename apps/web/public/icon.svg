@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Deep slate background, matches app theme_color #0f172a -->
+    <radialGradient id="bg" cx="50%" cy="38%" r="75%">
+      <stop offset="0%" stop-color="#243149"/>
+      <stop offset="55%" stop-color="#14213b"/>
+      <stop offset="100%" stop-color="#0b1326"/>
+    </radialGradient>
+
+    <!-- White card face with a hint of cool light -->
+    <linearGradient id="face" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e8edf6"/>
+    </linearGradient>
+
+    <!-- Hero Skip-Bo wildcard: brand amber → orange -->
+    <linearGradient id="hero" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="#fcd34d"/>
+      <stop offset="48%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+
+    <radialGradient id="heroGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#fbbf24" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000000" flood-opacity="0.34"/>
+    </filter>
+
+    <!-- Reusable card body, centered on x=256 -->
+    <rect id="card" x="188" y="158" width="136" height="194" rx="17" fill="url(#face)" stroke="#cbd5e1" stroke-width="2"/>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- Mild center scale keeps card tips inside the maskable safe zone -->
+  <g transform="translate(256 256) scale(0.95) translate(-256 -256)">
+  <g transform="translate(0 -6)">
+    <!-- Back row: far-left, far-right. Numbers sit in each card's visible OUTER sliver. -->
+    <g transform="rotate(-34 256 446)" filter="url(#cardShadow)">
+      <use href="#card"/>
+      <text x="214" y="212" text-anchor="middle" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="50" font-weight="800" fill="#2563eb">1</text>
+    </g>
+    <g transform="rotate(34 256 446)" filter="url(#cardShadow)">
+      <use href="#card"/>
+      <text x="298" y="212" text-anchor="middle" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="44" font-weight="800" fill="#e11d48">12</text>
+    </g>
+
+    <!-- Mid row: near-left, near-right (numbers pushed toward outer edge so the hero doesn't cover them) -->
+    <g transform="rotate(-17 256 446)" filter="url(#cardShadow)">
+      <use href="#card"/>
+      <text x="220" y="204" text-anchor="middle" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="50" font-weight="800" fill="#16a34a">4</text>
+    </g>
+    <g transform="rotate(17 256 446)" filter="url(#cardShadow)">
+      <use href="#card"/>
+      <text x="292" y="204" text-anchor="middle" font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="50" font-weight="800" fill="#7c3aed">9</text>
+    </g>
+
+    <!-- Hero glow -->
+    <ellipse cx="256" cy="252" rx="150" ry="168" fill="url(#heroGlow)"/>
+
+    <!-- Hero Skip-Bo card -->
+    <g transform="translate(0 -8)" filter="url(#cardShadow)">
+      <rect x="186" y="150" width="140" height="200" rx="17" fill="url(#hero)" stroke="#fde9b8" stroke-width="2"/>
+      <text x="204" y="184" text-anchor="middle" font-family="'Inter',Arial,sans-serif" font-size="22" font-weight="800" fill="#ffffff" opacity="0.92">SB</text>
+      <text x="308" y="324" text-anchor="middle" font-family="'Inter',Arial,sans-serif" font-size="22" font-weight="800" fill="#ffffff" opacity="0.92" transform="rotate(180 308 316)">SB</text>
+      <text x="256" y="252" text-anchor="middle" dominant-baseline="central"
+            font-family="'Inter','Helvetica Neue',Arial,sans-serif" font-size="68" font-weight="800"
+            fill="#ffffff" letter-spacing="-2">SB</text>
+    </g>
+  </g>
+  </g>
+</svg>
