@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.7.0](https://github.com/klbsjpolp/skip-bo/compare/v2.6.1...v2.7.0) (2026-06-17)
+
+
+### Features
+
+* **web:** warm ivory cinema theme and clearer F1 card edges ([8545b46](https://github.com/klbsjpolp/skip-bo/commit/8545b46e058e9baa9ce1895e07142164af06c6cd))
+
+
+### Bug Fixes
+
+* **web:** adjust dialog close button size for consistency and alignment ([331049f](https://github.com/klbsjpolp/skip-bo/commit/331049f2010b8f6ce8e3191862d0c5edc643e629))
+* **web:** align dialog close button size and update theme-specific styles ([c948a48](https://github.com/klbsjpolp/skip-bo/commit/c948a4865de92cc1301b2b526d4b8351b5afe23d))
+* **web:** format f1.css and refresh F1 + switcher visual baselines ([914af18](https://github.com/klbsjpolp/skip-bo/commit/914af188366bf0ef8f46ebc6f48fb47233f8a216))
+
 ## [2.6.1](https://github.com/klbsjpolp/skip-bo/compare/v2.6.0...v2.6.1) (2026-06-15)
 
 ## [2.6.0](https://github.com/klbsjpolp/skip-bo/compare/v2.5.1...v2.6.0) (2026-06-15)
