@@ -410,6 +410,10 @@
       animation: none;
     }
   }
+
+  .dialog-close {
+    @apply size-6;
+  }
 }
 
 /* === Theme-local keyframes (top-level by CSS spec) === */

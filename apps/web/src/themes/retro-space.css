@@ -578,6 +578,10 @@
       --retro-space-corner-font-size: 9px;
     }
   }
+
+  .dialog-close {
+    @apply size-6;
+  }
 }
 
 @keyframes retroSpaceVictoryFlyby {
