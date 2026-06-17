@@ -6,6 +6,7 @@ import type { CreateRoomResponse, LobbySeatInfo, RoomSummary, ServerMessage } fr
 import { serializeClientGameView, type ClientGameView } from '@skipbo/skipbo-runtime';
 
 import { inferOpponentTransition, useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
+import { WEBSOCKET_PING_INTERVAL_MS } from '@/config/timing';
 
 const {
   activeAnimationsState,
@@ -1078,6 +1079,146 @@ describe('useOnlineSkipBoGame', () => {
     });
 
     expect(MockWebSocket.instances.length).toBe(1);
+  });
+
+  // --- Connection lifecycle (host runtime, reconnect, ping, teardown) ---------
+
+  const parseSent = (socket: MockWebSocket): Array<Record<string, unknown>> =>
+    socket.sent.map((message) => JSON.parse(message) as Record<string, unknown>);
+
+  it('builds the host runtime and relays views + a snapshot on gameStarted', async () => {
+    const session = createHostSession();
+    renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      socket.emitMessage({ type: 'presence', room: waitingRoomSummary([0, 1], 1) });
+      socket.emitMessage({
+        type: 'gameStarted',
+        activeSeatIndices: [0, 1],
+        currentSeatIndex: 0,
+        gameConfig: { stockSize: 10 },
+      });
+      await Promise.resolve();
+    });
+
+    const sent = parseSent(socket);
+    expect(sent.some((m) => m.type === 'relay' && m.kind === 'view' && (m.toSeats as number[])?.includes(1))).toBe(
+      true,
+    );
+    expect(sent.some((m) => m.type === 'snapshot')).toBe(true);
+  });
+
+  it('restores the host runtime from a snapshot and re-relays views', async () => {
+    const session = createHostSession();
+    renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      socket.emitMessage({ type: 'presence', room: waitingRoomSummary([0, 1], 1) });
+      socket.emitMessage({
+        type: 'gameStarted',
+        activeSeatIndices: [0, 1],
+        currentSeatIndex: 0,
+        gameConfig: { stockSize: 10 },
+      });
+      await Promise.resolve();
+    });
+
+    const snapshot = parseSent(socket).find((m) => m.type === 'snapshot');
+    expect(snapshot).toBeDefined();
+    const before = socket.sent.length;
+
+    await act(async () => {
+      socket.emitMessage({ type: 'snapshotRestore', payload: snapshot!.payload });
+      await Promise.resolve();
+    });
+
+    const after = parseSent(socket).slice(before);
+    expect(after.some((m) => m.type === 'relay' && m.kind === 'view' && (m.toSeats as number[])?.includes(1))).toBe(
+      true,
+    );
+  });
+
+  it('sends periodic pings while connected', async () => {
+    const session = createSession();
+    renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(WEBSOCKET_PING_INTERVAL_MS + 50);
+    });
+
+    expect(parseSent(socket).some((m) => m.type === 'ping')).toBe(true);
+  });
+
+  it('schedules a reconnect after an unexpected close', async () => {
+    const session = createSession();
+    renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      await Promise.resolve();
+    });
+
+    // An unexpected close (not via leaveLobby) should back off and reconnect.
+    await act(async () => {
+      socket.close();
+      await Promise.resolve();
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(10_000);
+    });
+
+    expect(MockWebSocket.instances.length).toBeGreaterThan(1);
+  });
+
+  it('tears down the live socket when the session becomes null', async () => {
+    const { rerender } = renderHook((s: CreateRoomResponse | null) => useOnlineSkipBoGame(s), {
+      initialProps: createSession() as CreateRoomResponse | null,
+    });
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      await Promise.resolve();
+    });
+    expect(socket.readyState).toBe(MockWebSocket.OPEN);
+
+    await act(async () => {
+      rerender(null);
+      await Promise.resolve();
+    });
+
+    expect(socket.readyState).toBe(MockWebSocket.CLOSED);
   });
 
   it('exposes lobbySeats and myReadyState from a waiting presence', async () => {
