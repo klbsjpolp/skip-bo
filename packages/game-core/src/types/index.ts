@@ -43,21 +43,21 @@ export interface MoveResult {
 }
 
 export const themes = [
-  { value: 'theme-paper' as const, label: 'Papier', icon: 'NotebookPen' },
-  { value: 'theme-midnight' as const, label: 'Minuit', icon: 'Moon' },
-  { value: 'theme-origami' as const, label: 'Origami', icon: 'Bird' },
-  { value: 'theme-candy' as const, label: 'Bonbon', icon: 'Candy' },
-  { value: 'theme-rainbow' as const, label: 'Arc-en-ciel', icon: 'Rainbow' },
-  { value: 'theme-metro' as const, label: 'Metro', icon: 'Building2' },
-  { value: 'theme-neon' as const, label: 'Néon', icon: 'Zap' },
-  { value: 'theme-retro' as const, label: 'Rétro', icon: 'Radio' },
-  { value: 'theme-retro-space' as const, label: 'Espace', icon: 'Rocket' },
-  { value: 'theme-cinema' as const, label: 'Cinéma', icon: 'Film' },
-  { value: 'theme-glass' as const, label: 'Verre', icon: 'Squircle' },
-  { value: 'theme-wool' as const, label: 'Laine', icon: 'Spool' },
-  { value: 'theme-minecraft' as const, label: 'Minecraft', icon: 'Blocks' },
-  { value: 'theme-steampunk' as const, label: 'Steampunk', icon: 'Cog' },
-  { value: 'theme-f1' as const, label: 'Formule 1', icon: 'Flag' },
+  { value: 'theme-paper' as const, label: 'Papier', icon: 'NotebookPen', status: null },
+  { value: 'theme-midnight' as const, label: 'Minuit', icon: 'Moon', status: null },
+  { value: 'theme-origami' as const, label: 'Origami', icon: 'Bird', status: null },
+  { value: 'theme-candy' as const, label: 'Bonbon', icon: 'Candy', status: null },
+  { value: 'theme-rainbow' as const, label: 'Arc-en-ciel', icon: 'Rainbow', status: null },
+  { value: 'theme-metro' as const, label: 'Metro', icon: 'Building2', status: null },
+  { value: 'theme-neon' as const, label: 'Néon', icon: 'Zap', status: null },
+  { value: 'theme-retro' as const, label: 'Rétro', icon: 'Radio', status: null },
+  { value: 'theme-retro-space' as const, label: 'Espace', icon: 'Rocket', status: null },
+  { value: 'theme-cinema' as const, label: 'Cinéma', icon: 'Film', status: 'UPDATED' },
+  { value: 'theme-glass' as const, label: 'Verre', icon: 'Squircle', status: null },
+  { value: 'theme-wool' as const, label: 'Laine', icon: 'Spool', status: null },
+  { value: 'theme-minecraft' as const, label: 'Minecraft', icon: 'Blocks', status: null },
+  { value: 'theme-steampunk' as const, label: 'Steampunk', icon: 'Cog', status: null },
+  { value: 'theme-f1' as const, label: 'Formule 1', icon: 'Flag', status: 'NEW' },
 ] as const;
 
 export type ThemeDetail = (typeof themes)[number];

@@ -4,37 +4,40 @@
    monochrome: the three number ranges are ink black / dark gray / mid gray. */
 
 .theme-cinema {
-  /* === Core color scheme === */
-  --background: #121212;
-  --foreground: #e9e5da;
-  --primary: #e3dfd2;
+  /* === Core color scheme — warm, aged-film ivory rather than bright white,
+     for an old-print look that's easier on the eyes === */
+  /* Matches the body gradient's top stop so the iOS status-bar tint blends
+     with the page top instead of reading as a darker grey band. */
+  --background: #181818;
+  --foreground: #e6d6ac;
+  --primary: #dfcf9c;
   --primary-foreground: #161616;
-  --input: #e3dfd2;
+  --input: #dfcf9c;
   --input-foreground: #161616;
   --secondary: #1d1d1d;
-  --secondary-foreground: #e9e5da;
-  --success: #cfccc0;
+  --secondary-foreground: #e6d6ac;
+  --success: #cdbf8c;
   --success-foreground: #161616;
   --muted: #262626;
-  --muted-foreground: hsl(0 0% 72%);
+  --muted-foreground: hsl(45 22% 70%);
   --accent: #2b2b2b;
-  --accent-foreground: #ece8dd;
+  --accent-foreground: #e9dab0;
   --popover: #181818;
-  --popover-foreground: #ece8dd;
-  --border: hsl(0 0% 42%);
-  --ring: #e9e5da;
-  --text-color: #ddd8cc;
-  --title-color: #f2eee3;
+  --popover-foreground: #e9dab0;
+  --border: hsl(45 28% 54%);
+  --ring: #e6d6ac;
+  --text-color: #dacd9e;
+  --title-color: #ece0b2;
 
   /* === Card surface === */
-  --card-front-color: #e9e4d6;
-  --card-back-color: #101010;
+  --card-front-color: #e8d8a8;
+  --card-back-color: #191205;
   --card-border-color: #1f1f1f;
   --card-color: #1a1a1a;
   --card-radius: 8px;
   --card-shadow: 0 10px 22px rgb(0 0 0 / 0.6), 0 1px 0 rgb(255 255 255 / 0.05);
   /* Film strip: sprocket holes, double frame, art-deco rising sun. */
-  --card-back-bg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 120'><rect width='80' height='120' fill='%23101010'/><g fill='%23e9e5da' opacity='0.88'><rect x='4.5' y='7' width='7' height='5' rx='1.5'/><rect x='4.5' y='21' width='7' height='5' rx='1.5'/><rect x='4.5' y='35' width='7' height='5' rx='1.5'/><rect x='4.5' y='49' width='7' height='5' rx='1.5'/><rect x='4.5' y='63' width='7' height='5' rx='1.5'/><rect x='4.5' y='77' width='7' height='5' rx='1.5'/><rect x='4.5' y='91' width='7' height='5' rx='1.5'/><rect x='4.5' y='105' width='7' height='5' rx='1.5'/><rect x='68.5' y='7' width='7' height='5' rx='1.5'/><rect x='68.5' y='21' width='7' height='5' rx='1.5'/><rect x='68.5' y='35' width='7' height='5' rx='1.5'/><rect x='68.5' y='49' width='7' height='5' rx='1.5'/><rect x='68.5' y='63' width='7' height='5' rx='1.5'/><rect x='68.5' y='77' width='7' height='5' rx='1.5'/><rect x='68.5' y='91' width='7' height='5' rx='1.5'/><rect x='68.5' y='105' width='7' height='5' rx='1.5'/></g><rect x='16' y='7' width='48' height='106' fill='none' stroke='%23e9e5da' stroke-width='1.6' opacity='0.92'/><rect x='19.5' y='10.5' width='41' height='99' fill='none' stroke='%23e9e5da' stroke-width='0.8' opacity='0.65'/><g stroke='%23e9e5da' stroke-width='1.3' opacity='0.85'><path d='M40 68 L40 26'/><path d='M40 68 L29 30'/><path d='M40 68 L51 30'/><path d='M40 68 L22 38'/><path d='M40 68 L58 38'/><path d='M40 68 L19 50'/><path d='M40 68 L61 50'/></g><circle cx='40' cy='72' r='9' fill='%23e9e5da'/><g stroke='%23e9e5da' opacity='0.8'><path d='M27 87 H53' stroke-width='1.4'/><path d='M30 92 H50' stroke-width='1.1'/><path d='M33 97 H47' stroke-width='0.8'/><path d='M36 102 H44' stroke-width='0.6'/></g></svg>");
+  --card-back-bg: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 120'><rect width='80' height='120' fill='%23191205'/><g fill='%23e8d8a8' opacity='0.9'><rect x='4.5' y='7' width='7' height='5' rx='1.5'/><rect x='4.5' y='21' width='7' height='5' rx='1.5'/><rect x='4.5' y='35' width='7' height='5' rx='1.5'/><rect x='4.5' y='49' width='7' height='5' rx='1.5'/><rect x='4.5' y='63' width='7' height='5' rx='1.5'/><rect x='4.5' y='77' width='7' height='5' rx='1.5'/><rect x='4.5' y='91' width='7' height='5' rx='1.5'/><rect x='4.5' y='105' width='7' height='5' rx='1.5'/><rect x='68.5' y='7' width='7' height='5' rx='1.5'/><rect x='68.5' y='21' width='7' height='5' rx='1.5'/><rect x='68.5' y='35' width='7' height='5' rx='1.5'/><rect x='68.5' y='49' width='7' height='5' rx='1.5'/><rect x='68.5' y='63' width='7' height='5' rx='1.5'/><rect x='68.5' y='77' width='7' height='5' rx='1.5'/><rect x='68.5' y='91' width='7' height='5' rx='1.5'/><rect x='68.5' y='105' width='7' height='5' rx='1.5'/></g><rect x='16' y='7' width='48' height='106' fill='none' stroke='%23e8d8a8' stroke-width='1.6' opacity='0.94'/><rect x='19.5' y='10.5' width='41' height='99' fill='none' stroke='%23e8d8a8' stroke-width='0.8' opacity='0.7'/><g stroke='%23e8d8a8' stroke-width='1.3' opacity='0.88'><path d='M40 68 L40 26'/><path d='M40 68 L29 30'/><path d='M40 68 L51 30'/><path d='M40 68 L22 38'/><path d='M40 68 L58 38'/><path d='M40 68 L19 50'/><path d='M40 68 L61 50'/></g><circle cx='40' cy='72' r='9' fill='%23e8d8a8'/><g stroke='%23e8d8a8' opacity='0.82'><path d='M27 87 H53' stroke-width='1.4'/><path d='M30 92 H50' stroke-width='1.1'/><path d='M33 97 H47' stroke-width='0.8'/><path d='M36 102 H44' stroke-width='0.6'/></g></svg>");
 
   /* === Card number colors (1–4, 5–8, 9–12) — three shades of ink === */
   --card-g1: #141414;
@@ -43,14 +46,14 @@
 
   /* === Skip-Bo special card === */
   --skipbo-text: #141414;
-  --skipbo-bg: #e9e4d6;
+  --skipbo-bg: #e8d8a8;
 
-  /* === Selection & drag === */
-  --selected-border-color: #ffffff;
-  --selected-shadow: 0 0 0 2px rgb(255 255 255 / 0.9), 0 0 22px rgb(255 255 255 / 0.45);
-  --drop-indicator-color: #f2eee3;
-  --can-drop-shadow: 0 0 18px rgb(255 255 255 / 0.35);
-  --active-turn-color: rgb(242 238 227 / 0.75);
+  /* === Selection & drag — ivory to match the card faces, not stark white === */
+  --selected-border-color: #e8d8a8;
+  --selected-shadow: 0 0 0 2px rgb(232 216 168 / 0.95), 0 0 22px rgb(232 216 168 / 0.5);
+  --drop-indicator-color: #e8d8a8;
+  --can-drop-shadow: 0 0 18px rgb(232 216 168 / 0.4);
+  --active-turn-color: rgb(232 216 168 / 0.8);
 
   /* === Victory layer === */
   --victory-border: #f2eee3;
@@ -128,15 +131,15 @@
     height: 96vh;
     transform-origin: 50% 100%;
     background-image:
-      /* lamp glow at the base */
-      radial-gradient(circle at 50% 100%, rgb(255 252 240 / 0.55) 0, rgb(255 252 240 / 0.14) 2.5%, transparent 6%),
-      /* light cone */
+      /* ivory lamp glow at the base — same tone as the card faces */
+      radial-gradient(circle at 50% 100%, rgb(232 216 168 / 0.6) 0, rgb(232 216 168 / 0.16) 2.5%, transparent 6%),
+      /* ivory light cone */
       conic-gradient(
           from -11deg at 50% 100%,
           transparent 0deg,
-          rgb(244 240 228 / 0.05) 4deg,
-          rgb(244 240 228 / 0.14) 11deg,
-          rgb(244 240 228 / 0.05) 18deg,
+          rgb(232 216 168 / 0.06) 4deg,
+          rgb(232 216 168 / 0.17) 11deg,
+          rgb(232 216 168 / 0.06) 18deg,
           transparent 22deg
         );
     mask-image: linear-gradient(to top, rgb(0 0 0 / 0.95) 0%, rgb(0 0 0 / 0.6) 55%, transparent 96%);
@@ -194,7 +197,7 @@
       @apply shadow-card bg-card-front;
       background-image:
         radial-gradient(ellipse 120% 100% at 50% 40%, transparent 55%, rgb(16 16 16 / 0.18) 100%),
-        linear-gradient(180deg, #f0ecdf 0%, #e2ddcd 100%);
+        linear-gradient(180deg, #eee0b0 0%, #ddca8e 100%);
 
       --cinema-sweep: 0deg;
       &[data-value='1'] {
@@ -285,8 +288,8 @@
        they touch like the reference rather than crossing through each other. */
     &.empty-card {
       @apply text-[0em] bg-transparent bg-none shadow-none border-2 border-dashed;
-      border-color: rgb(233 229 218 / 0.3);
-      color: rgb(233 229 218 / 0.5);
+      border-color: rgb(232 216 168 / 0.3);
+      color: rgb(232 216 168 / 0.5);
 
       &::after {
         @apply content-[''] absolute inset-0 m-auto aspect-102/96 w-[calc(var(--card-width)*0.72)] bg-current;
@@ -303,7 +306,7 @@
       @apply shadow-card;
       background-image:
         radial-gradient(ellipse 120% 100% at 50% 40%, transparent 55%, rgb(16 16 16 / 0.18) 100%),
-        linear-gradient(180deg, #f0ecdf 0%, #e2ddcd 100%);
+        linear-gradient(180deg, #eee0b0 0%, #ddca8e 100%);
 
       .card-inner {
         background-image:
@@ -345,7 +348,7 @@
       background-color: var(--card-back-color);
       background-position: center;
       background-size: 100% 100%;
-      border-color: rgb(233 229 218 / 0.5);
+      border-color: rgb(232 216 168 / 0.5);
     }
   }
 
@@ -355,14 +358,14 @@
     background:
       radial-gradient(ellipse 120% 90% at 50% 0%, rgb(244 240 228 / 0.05) 0%, transparent 55%),
       linear-gradient(180deg, rgb(26 26 26 / 0.96), rgb(14 14 14 / 0.94));
-    border-color: rgb(233 229 218 / 0.4);
+    border-color: rgb(232 216 168 / 0.4);
   }
 
   .player-area::before,
   .center-area::before {
     @apply content-[''] absolute pointer-events-none z-1;
     inset: 7px;
-    border: 1px solid rgb(233 229 218 / 0.28);
+    border: 1px solid rgb(232 216 168 / 0.28);
     border-radius: calc(0.5rem - 2px);
   }
 
