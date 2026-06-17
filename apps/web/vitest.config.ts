@@ -24,6 +24,15 @@ export default defineConfig({
       reporter: ['text-summary', 'text'],
       include: ['src/**/*.{ts,tsx}'],
       exclude: ['src/**/__tests__/**', 'src/**/*.test.{ts,tsx}', 'src/testing/**', 'src/**/*.d.ts'],
+      // Regression floors set a few points below current coverage. They ratchet
+      // against silent erosion (deleted tests / untested new code) without
+      // breaking CI on normal fluctuation. Raise them as coverage improves.
+      thresholds: {
+        statements: 63,
+        branches: 53,
+        functions: 63,
+        lines: 63,
+      },
     },
   },
 });

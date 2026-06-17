@@ -34,19 +34,35 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
   // Tracks the second-half flip animation so the cleanup can cancel it
   const secondHalfRef = useRef<Animation | undefined>(undefined);
 
-  // Effect 1: wait out the initial delay before showing the card
+  // Effect 1: wait out the initial delay before showing the card.
+  // `animation.initialDelay` is fixed for this card's lifetime (the parent mounts
+  // a fresh AnimatedCard per animation.id), so this runs exactly once on mount.
   useEffect(() => {
     if (animation.initialDelay === 0) return;
     const timeout = setTimeout(() => setIsVisible(true), animation.initialDelay);
     return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [animation.id]);
+  }, [animation.initialDelay]);
+
+  // Effect 2 must run exactly once — when the card becomes visible — and must not
+  // restart mid-flight. But `markAnimationStarted` swaps in a new `animation`
+  // object (hasStarted: true) while the card is animating, so depending on
+  // `animation` directly would re-run the effect and restart WAAPI. Read the
+  // latest inputs through a ref instead, keeping `isVisible` as the only trigger.
+  const effectInputsRef = useRef({ animation, needsFlip, portalTarget, markAnimationStarted, removeAnimation });
+  // Sync in a layout effect rather than during render (react-hooks/refs). It is
+  // declared before the WAAPI effect below, so on any commit it runs first and
+  // that effect always sees fresh inputs.
+  useLayoutEffect(() => {
+    effectInputsRef.current = { animation, needsFlip, portalTarget, markAnimationStarted, removeAnimation };
+  });
 
   // Effect 2: start WAAPI once the card element is actually in the DOM.
   // useLayoutEffect fires synchronously after React commits the render, so
   // rootRef.current is guaranteed to be set here — even for delayed cards.
   useLayoutEffect(() => {
     if (!isVisible) return;
+
+    const { animation, needsFlip, portalTarget, markAnimationStarted, removeAnimation } = effectInputsRef.current;
 
     markAnimationStarted(animation.id);
 
@@ -137,9 +153,6 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
       firstHalfAnim?.cancel();
       secondHalfRef.current?.cancel();
     };
-    // animation and its derivatives are stable for the lifetime of this component:
-    // the parent always mounts a new AnimatedCard per animation.id.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisible]);
 
   if (!isVisible) {
