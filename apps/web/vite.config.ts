@@ -27,7 +27,27 @@ export default defineConfig(({ mode }) => {
   return {
     base,
     envDir: path.resolve(__dirname, '../..'),
-    build: { sourcemap: 'hidden' },
+    build: {
+      sourcemap: 'hidden',
+      // The vendor chunk below is intentionally large but changes rarely, so it
+      // stays cached (and SW-precached) across app deploys. Raise the warning
+      // limit so it doesn't flag on every build.
+      chunkSizeWarningLimit: 900,
+      rollupOptions: {
+        output: {
+          // Separate third-party code from app code so a routine app deploy only
+          // busts the small entry chunk, leaving the big dependency chunks cached
+          // (and SW-precached). React and Sentry are split out further: they
+          // change on their own cadence and download in parallel.
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return undefined;
+            if (id.includes('@sentry')) return 'sentry';
+            if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) return 'react';
+            return 'vendor';
+          },
+        },
+      },
+    },
     plugins: [
       ...plugins,
       VitePWA({

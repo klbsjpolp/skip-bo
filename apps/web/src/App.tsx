@@ -1,23 +1,16 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 
 import type { CreateRoomResponse } from '@klbsjpolp/realtime-core';
 
 import { useLocalSkipBoGame } from '@/hooks/useLocalSkipBoGame';
-import { useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
 import type { GameType } from '@/app/types';
+import { AppShell, type SessionScreenProps } from '@/components/AppShell';
 import { AppUpdatedBanner } from '@/components/AppUpdatedBanner';
 import { ForcedUpdateOverlay } from '@/components/ForcedUpdateOverlay';
-import { LobbyDialog, LobbyRemovedDialog } from '@/components/LobbyDialog';
-import { OnlineStatusStrip } from '@/components/OnlineStatusStrip';
 import { ResumeGameBanner } from '@/components/ResumeGameBanner';
-import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { LocalGameBoard } from '@/components/LocalGameBoard';
-import { OnlineGameBoard } from '@/components/OnlineGameBoard';
-import { Button } from '@/components/ui/button';
-import NewGame from '@/components/NewGame';
 import { useCardAnimation } from '@/contexts/useCardAnimation';
 import { animationServiceBridge } from '@/lib/animationServiceBridge';
-import { APP_VERSION } from '@/lib/appVersion';
 import { canPlayCard } from '@/lib/validators';
 import { createOnlineRoom, joinOnlineRoom } from '@/online/api';
 import { getStoredStockSize } from '@/state/initialGameState';
@@ -26,92 +19,14 @@ import { getRequestedUiFixtureName, getUiFixture, type UiFixtureName } from '@/t
 import { DebugStrip } from '@/components/DebugStrip';
 import { usePwaVersionGate } from '@/hooks/usePwaVersionGate';
 import { useThemeColorMeta } from '@/hooks/useThemeColorMeta';
-import { useThemeUsageGameGate, useThemeUsageReporter } from '@/hooks/useThemeUsageReporter';
+import { useThemeUsageReporter } from '@/hooks/useThemeUsageReporter';
+
+// Code-split: the online stack (host runtime, online hook, online board, lobby
+// dialogs) is fetched only when a player actually starts or joins an online
+// game, keeping it out of the initial load for the common local-AI path.
+const OnlineGameScreen = lazy(() => import('@/components/OnlineGameScreen'));
 
 const fixtureActionResult = Promise.resolve({ success: true, message: 'Fixture mode' });
-
-interface AppShellProps {
-  debugStrip?: ReactNode;
-  fixtureName?: UiFixtureName;
-  gameBoard: ReactNode;
-  isGameOver: boolean;
-  isUpdatePending?: boolean;
-  onJoinOnlineGame: (roomCode: string) => Promise<void>;
-  onReplay: () => Promise<void> | void;
-  onStartLocalGame: () => void;
-  onStartOnlineGame: (stockSize?: number) => Promise<void>;
-  statusStrip?: ReactNode;
-  updateNotice?: ReactNode;
-}
-
-function AppShell({
-  debugStrip,
-  fixtureName,
-  gameBoard,
-  isGameOver,
-  isUpdatePending = false,
-  onJoinOnlineGame,
-  onReplay,
-  onStartLocalGame,
-  onStartOnlineGame,
-  statusStrip,
-  updateNotice,
-}: AppShellProps) {
-  useThemeUsageGameGate(isGameOver);
-
-  return (
-    <main
-      id="main"
-      className="min-h-screen px-4 pb-4 pt-1 lg:px-10 lg:pb-10 lg:pt-2"
-      data-testid="app-main"
-      data-ui-fixture={fixtureName}
-    >
-      <div className="mx-auto max-w-7xl">
-        <div
-          className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
-          data-testid="app-toolbar"
-        >
-          <div className="flex flex-row gap-2 items-center" data-testid="app-toolbar-left">
-            <NewGame
-              onJoinOnlineGame={onJoinOnlineGame}
-              onStartLocalGame={onStartLocalGame}
-              onStartOnlineGame={onStartOnlineGame}
-            />
-            {statusStrip}
-          </div>
-          <ThemeSwitcher />
-        </div>
-        {updateNotice ? <div className="mb-3">{updateNotice}</div> : null}
-        {gameBoard}
-        {isGameOver && (
-          <div className="mt-5 text-center">
-            <Button onClick={() => void onReplay()} size="lg" data-testid="replay-button">
-              Rejouer
-            </Button>
-          </div>
-        )}
-        <div className="mt-4 flex items-center gap-3 justify-between">
-          {debugStrip}
-          <div className="grow"></div>
-          <p
-            className="app-version-badge flex items-center gap-1.5 text-xs text-muted-foreground/80 tabular-nums"
-            data-testid="app-version"
-          >
-            {isUpdatePending ? (
-              <span
-                aria-label="Mise à jour prête, elle sera appliquée à la prochaine partie"
-                className="inline-block size-2 shrink-0 rounded-full bg-primary"
-                data-testid="app-version-update-dot"
-                title="Mise à jour prête, elle sera appliquée à la prochaine partie"
-              />
-            ) : null}
-            Version {APP_VERSION}
-          </p>
-        </div>
-      </div>
-    </main>
-  );
-}
 
 function FixtureApp({ fixtureName }: { fixtureName: UiFixtureName }) {
   const gameState = getUiFixture(fixtureName);
@@ -137,15 +52,6 @@ function FixtureApp({ fixtureName }: { fixtureName: UiFixtureName }) {
       onStartOnlineGame={() => Promise.resolve()}
     />
   );
-}
-
-interface SessionScreenProps {
-  isUpdatePending?: boolean;
-  onJoinOnlineGame: (roomCode: string) => Promise<void>;
-  onReplay: () => Promise<void>;
-  onStartLocalGame: () => void;
-  onStartOnlineGame: (stockSize?: number) => Promise<void>;
-  updateNotice?: ReactNode;
 }
 
 function LocalGameScreen({
@@ -199,150 +105,6 @@ function LocalGameScreen({
       onStartOnlineGame={onStartOnlineGame}
       updateNotice={updateNotice}
     />
-  );
-}
-
-interface OnlineGameScreenProps extends SessionScreenProps {
-  applyUpdateWhenSafe: () => void;
-  onLeaveSession: () => void;
-  session: CreateRoomResponse;
-}
-
-function OnlineGameScreen({
-  applyUpdateWhenSafe,
-  isUpdatePending,
-  onJoinOnlineGame,
-  onLeaveSession,
-  onReplay,
-  onStartLocalGame,
-  onStartOnlineGame,
-  session,
-  updateNotice,
-}: OnlineGameScreenProps) {
-  const {
-    canStartGame,
-    clearSelection,
-    connectedSeats,
-    connectionStatus,
-    debugFillBuildPile,
-    debugFillHandSkipBo,
-    debugClearStockPile,
-    debugClearAiStockPile,
-    debugWin,
-    discardCard,
-    disconnectedSeats,
-    gameState,
-    isLocalHost,
-    kickSeat,
-    leaveLobby,
-    lobbySeats,
-    myReadyState,
-    playCard,
-    playersBySeatIndex,
-    roomCode,
-    roomStatus,
-    seatCapacity,
-    selectCard,
-    sendSetReady,
-    sendSetUnready,
-    startGame,
-    lobbyRemovalReason,
-  } = useOnlineSkipBoGame(session);
-  const { gameState: localGameState } = useLocalSkipBoGame();
-
-  // Online state is rebuilt from the server snapshot after a reload, so applying
-  // a pending update is lossless. Only do it at a "safe" moment — never while it
-  // is the local player's active turn (index 0 in the recentred view), to avoid
-  // cutting off an in-progress action, and never on a finished game so the
-  // victory/defeat screen is preserved. The update then lands during an
-  // opponent's turn, in the next lobby, or on the user's next deliberate action.
-  const isSafeToApplyUpdate = !gameState.gameIsOver && (roomStatus === 'WAITING' || gameState.currentPlayerIndex !== 0);
-
-  useEffect(() => {
-    if (isUpdatePending && isSafeToApplyUpdate) {
-      applyUpdateWhenSafe();
-    }
-  }, [isUpdatePending, isSafeToApplyUpdate, applyUpdateWhenSafe]);
-
-  const handleLeave = () => {
-    leaveLobby();
-    onLeaveSession();
-  };
-
-  const gameBoard =
-    roomStatus === 'WAITING' ? (
-      <LocalGameBoard
-        gameState={localGameState}
-        selectCard={() => undefined}
-        playCard={() => Promise.resolve({ success: true, message: '' })}
-        discardCard={() => Promise.resolve({ success: true, message: '' })}
-        clearSelection={() => undefined}
-        canPlayCard={canPlayCard}
-      />
-    ) : (
-      <OnlineGameBoard
-        gameState={gameState}
-        selectCard={selectCard}
-        playCard={playCard}
-        discardCard={discardCard}
-        clearSelection={clearSelection}
-        canPlayCard={canPlayCard}
-      />
-    );
-
-  return (
-    <>
-      <LobbyRemovedDialog reason={lobbyRemovalReason} onDismiss={onLeaveSession} />
-      <LobbyDialog
-        canStartGame={canStartGame}
-        connectedSeats={connectedSeats}
-        isHost={isLocalHost}
-        kickSeat={kickSeat}
-        lobbySeats={lobbySeats}
-        mySeatIndex={session.seatIndex}
-        myReadyState={myReadyState}
-        onLeave={handleLeave}
-        onReady={sendSetReady}
-        onStartGame={startGame}
-        onUnready={sendSetUnready}
-        open={roomStatus === 'WAITING' && lobbyRemovalReason === null}
-        roomCode={roomCode}
-        seatCapacity={seatCapacity}
-      />
-      <AppShell
-        debugStrip={
-          <DebugStrip
-            debugFillBuildPile={() => debugFillBuildPile(0)}
-            debugFillHandSkipBo={debugFillHandSkipBo}
-            debugClearStockPile={debugClearStockPile}
-            debugClearAiStockPile={debugClearAiStockPile}
-            debugWin={debugWin}
-          />
-        }
-        gameBoard={gameBoard}
-        isGameOver={gameState.gameIsOver}
-        isUpdatePending={isUpdatePending}
-        onJoinOnlineGame={onJoinOnlineGame}
-        onReplay={onReplay}
-        onStartLocalGame={onStartLocalGame}
-        onStartOnlineGame={onStartOnlineGame}
-        statusStrip={
-          <OnlineStatusStrip
-            canStartGame={canStartGame}
-            connectedSeats={connectedSeats}
-            connectionStatus={connectionStatus}
-            disconnectedSeats={disconnectedSeats}
-            isHost={isLocalHost}
-            onStartGame={startGame}
-            playersBySeatIndex={playersBySeatIndex}
-            roomCode={roomCode}
-            roomStatus={roomStatus}
-            seatCapacity={seatCapacity}
-          />
-        }
-        updateNotice={updateNotice}
-      />
-    </>
   );
 }
 
@@ -472,18 +234,20 @@ function LiveApp() {
 
   const screen =
     currentGameType === 'online-human' && onlineSession ? (
-      <OnlineGameScreen
-        key={`${onlineSession.roomCode}-${onlineSession.seatToken}`}
-        applyUpdateWhenSafe={applyUpdateOnceForCurrentTarget}
-        isUpdatePending={isUpdatePending}
-        onJoinOnlineGame={joinGame}
-        onLeaveSession={leaveOnlineSession}
-        onReplay={replayCurrentGame}
-        onStartLocalGame={startLocalGame}
-        onStartOnlineGame={startOnlineGame}
-        session={onlineSession}
-        updateNotice={hasUpdateNotice ? updateNotice : undefined}
-      />
+      <Suspense fallback={null}>
+        <OnlineGameScreen
+          key={`${onlineSession.roomCode}-${onlineSession.seatToken}`}
+          applyUpdateWhenSafe={applyUpdateOnceForCurrentTarget}
+          isUpdatePending={isUpdatePending}
+          onJoinOnlineGame={joinGame}
+          onLeaveSession={leaveOnlineSession}
+          onReplay={replayCurrentGame}
+          onStartLocalGame={startLocalGame}
+          onStartOnlineGame={startOnlineGame}
+          session={onlineSession}
+          updateNotice={hasUpdateNotice ? updateNotice : undefined}
+        />
+      </Suspense>
     ) : (
       <LocalGameScreen
         key={`local-${localSessionVersion}`}
