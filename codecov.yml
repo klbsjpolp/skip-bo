@@ -1,0 +1,17 @@
+# Codecov configuration.
+#
+# Only unit-test coverage (Vitest lcov) is uploaded. Presentational React
+# components — game screens and layout shells such as App.tsx, AppShell.tsx and
+# OnlineGameScreen.tsx — are exercised by the Playwright e2e suite, whose coverage
+# is not uploaded. That split is why project coverage sits around 66%.
+#
+# Without this file Codecov applies a strict default `auto` patch target, which
+# fails any change that adds or moves such UI code (or relocates already-covered
+# logic into new files). Give patch coverage some slack below the project target
+# so it still flags real regressions without blocking refactors and UI work.
+coverage:
+  status:
+    patch:
+      default:
+        target: auto
+        threshold: 12%
