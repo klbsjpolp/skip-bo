@@ -142,7 +142,7 @@
       &[data-value='1'] {
         --bg: #3c3f42;
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 100' preserveAspectRatio='none'><rect width='70' height='100' fill='%233C3F42'/><rect x='0' width='3' height='100' fill='%232F7D33'/><rect x='67' width='3' height='100' fill='%232F7D33'/><rect x='3' width='5' height='100' fill='%23fafafa'/><rect x='62' width='5' height='100' fill='%23fafafa'/><g fill='%23cc1417'><rect x='3' y='0' width='5' height='8'/><rect x='3' y='16' width='5' height='8'/><rect x='3' y='32' width='5' height='8'/><rect x='3' y='48' width='5' height='8'/><rect x='3' y='64' width='5' height='8'/><rect x='3' y='80' width='5' height='8'/><rect x='3' y='96' width='5' height='4'/><rect x='62' y='0' width='5' height='8'/><rect x='62' y='16' width='5' height='8'/><rect x='62' y='32' width='5' height='8'/><rect x='62' y='48' width='5' height='8'/><rect x='62' y='64' width='5' height='8'/><rect x='62' y='80' width='5' height='8'/><rect x='62' y='96' width='5' height='4'/></g><g fill='none' stroke='%23E6E6E6' stroke-width='2' stroke-linecap='square'><path d='M22,14 H16 V26'/><path d='M28,14 H34 V26'/><path d='M42,40 H36 V52'/><path d='M48,40 H54 V52'/><path d='M22,66 H16 V78'/><path d='M28,66 H34 V78'/></g></svg>");
-        --border: #2F7D33;
+        --border: #2f7d33;
       }
 
       /* 2 — Cadillac: black with a grey centre stripe. */
