@@ -252,6 +252,72 @@
           linear-gradient(180deg, transparent 72%, #8a9296 72%, #8a9296 100%);
         --border: #8a9296;
       }
+
+      /* === Constructor brand marks ===
+         The official 2026 constructor logos (from formula1.com) sit directly in
+         the top-right corner of each livery — no badge — so they read like the
+         logo painted on the car. Each card uses whichever logo colour contrasts
+         the corner it sits over: the *black* logo on the light liveries (Audi's
+         silver nose, the white tops of Haas and Racing Bulls, McLaren papaya)
+         and the *white* logo on the dark ones. A soft shadow keeps the white
+         marks from dissolving into a dark livery. Card 1 (the starting grid) is
+         not a team, so it gets no mark. Logos in ./logos/f1/. */
+      &:not([data-value='1'])::after {
+        content: '';
+        position: absolute;
+        /* Sit high and stay short enough to fit inside the exposed strip of a
+           stacked card (--stack-diff: 16px mobile / 20px desktop) so the bottom
+           of the logo is never clipped by the card stacked on top. */
+        top: 1.5px;
+        right: 2px;
+        width: clamp(12px, 23%, 16px);
+        height: clamp(12px, 23%, 16px);
+        z-index: 4;
+        background-image: var(--brand, none);
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+        filter: drop-shadow(0 1px 1.5px rgb(0 0 0 / 0.45));
+        pointer-events: none;
+      }
+
+      &[data-value='2'] {
+        --brand: url('./logos/f1/cadillac.webp');
+      }
+      &[data-value='3'] {
+        --brand: url('./logos/f1/astonmartin.webp');
+      }
+      &[data-value='4'] {
+        /* silver nose at the top — black logo */
+        --brand: url('./logos/f1/audi-black.webp');
+      }
+      &[data-value='5'] {
+        --brand: url('./logos/f1/williams.webp');
+      }
+      &[data-value='6'] {
+        /* white upper half — black logo */
+        --brand: url('./logos/f1/haas-black.webp');
+      }
+      &[data-value='7'] {
+        /* white upper half — black logo */
+        --brand: url('./logos/f1/racingbulls-black.webp');
+      }
+      &[data-value='8'] {
+        --brand: url('./logos/f1/alpine.webp');
+      }
+      &[data-value='9'] {
+        --brand: url('./logos/f1/redbull.webp');
+      }
+      &[data-value='10'] {
+        /* papaya — black logo */
+        --brand: url('./logos/f1/mclaren-black.webp');
+      }
+      &[data-value='11'] {
+        --brand: url('./logos/f1/ferrari.webp');
+      }
+      &[data-value='12'] {
+        --brand: url('./logos/f1/mercedes.webp');
+      }
     }
 
     /* Skip-Bo: the chequered finish line. The wordmark sits in a dark band so
