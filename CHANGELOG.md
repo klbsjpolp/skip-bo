@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.8.0](https://github.com/klbsjpolp/skip-bo/compare/v2.7.1...v2.8.0) (2026-06-18)
+
+
+### Features
+
+* **web:** add F1 team logos to card corners ([7198361](https://github.com/klbsjpolp/skip-bo/commit/71983612daff8b1f443f3893cff232cf1319fde0))
+
 ## [2.7.1](https://github.com/klbsjpolp/skip-bo/compare/v2.7.0...v2.7.1) (2026-06-17)
 
 ## [2.7.0](https://github.com/klbsjpolp/skip-bo/compare/v2.6.1...v2.7.0) (2026-06-17)
