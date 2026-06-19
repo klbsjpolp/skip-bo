@@ -19,13 +19,3 @@ export const PWA_UPDATE_CHECK_INTERVAL_MS = 10 * 60 * 1000;
 // `registration.update()` + runtime-config fetches. The periodic poll above is
 // unaffected.
 export const PWA_UPDATE_RECHECK_MIN_INTERVAL_MS = 30 * 1000;
-
-// Window after launch during which a pending soft update is applied
-// automatically (local mode only). Players typically open the app and start
-// playing before the new service worker finishes downloading, so the
-// "apply on New Game" path never fires for them. The local game is always
-// freshly dealt on launch, so reloading within this window loses nothing; the
-// margin is generous enough to outlast a slow bundle download. After it
-// elapses we revert to the deferred behavior so an in-progress game is never
-// reloaded out from under the player by a background update.
-export const PWA_LAUNCH_AUTO_UPDATE_WINDOW_MS = 60 * 1000;

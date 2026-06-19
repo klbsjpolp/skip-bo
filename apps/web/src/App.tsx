@@ -54,14 +54,19 @@ function FixtureApp({ fixtureName }: { fixtureName: UiFixtureName }) {
   );
 }
 
+interface LocalGameScreenProps extends SessionScreenProps {
+  applyUpdateWhenSafe: () => void;
+}
+
 function LocalGameScreen({
+  applyUpdateWhenSafe,
   isUpdatePending,
   onJoinOnlineGame,
   onReplay,
   onStartLocalGame,
   onStartOnlineGame,
   updateNotice,
-}: SessionScreenProps) {
+}: LocalGameScreenProps) {
   const {
     clearSelection,
     debugFillBuildPile,
@@ -74,6 +79,27 @@ function LocalGameScreen({
     playCard,
     selectCard,
   } = useLocalSkipBoGame();
+
+  // A local reload always re-deals a fresh game (it isn't persisted), so the
+  // only lossless moment to apply a pending update is before the player has
+  // touched the freshly dealt game. "Untouched" = nothing has been played to a
+  // build pile and nobody has discarded yet; a start-of-turn draw doesn't count.
+  // Unlike the old launch timer this has no deadline, so a service worker that
+  // finishes downloading minutes after open is still caught on the next idle
+  // render — while an in-progress game is never reloaded out from under the
+  // player. Online's equivalent safe-moment gate lives in OnlineGameScreen.
+  const isLocalGameUntouched =
+    gameState.buildPiles.every((pile) => pile.length === 0) &&
+    gameState.completedBuildPiles.length === 0 &&
+    gameState.players.every((player) => player.discardPiles.every((pile) => pile.length === 0));
+  const isSafeToApplyUpdate = !gameState.gameIsOver && isLocalGameUntouched;
+
+  useEffect(() => {
+    if (isUpdatePending && isSafeToApplyUpdate) {
+      applyUpdateWhenSafe();
+    }
+  }, [isUpdatePending, isSafeToApplyUpdate, applyUpdateWhenSafe]);
+
   const gameBoard = (
     <LocalGameBoard
       gameState={gameState}
@@ -131,7 +157,7 @@ function LiveApp() {
     latestAppVersion,
     minimumSupportedVersion,
     reloadToUpdate,
-  } = usePwaVersionGate({ deferHardUpdate: isLocalMode, autoApplyPendingOnLaunch: isLocalMode });
+  } = usePwaVersionGate({ deferHardUpdate: isLocalMode });
 
   useEffect(() => {
     animationServiceBridge.waitForAnimations = waitForAnimations;
@@ -251,6 +277,7 @@ function LiveApp() {
     ) : (
       <LocalGameScreen
         key={`local-${localSessionVersion}`}
+        applyUpdateWhenSafe={applyUpdateOnceForCurrentTarget}
         isUpdatePending={isUpdatePending}
         onJoinOnlineGame={joinGame}
         onReplay={replayCurrentGame}
