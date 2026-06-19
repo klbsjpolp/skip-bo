@@ -43,7 +43,7 @@ vi.mock('@/lib/pwaUpdates', () => ({
   },
 }));
 
-import { PWA_LAUNCH_AUTO_UPDATE_WINDOW_MS, PWA_UPDATE_RECHECK_MIN_INTERVAL_MS } from '@/config/timing';
+import { PWA_UPDATE_RECHECK_MIN_INTERVAL_MS } from '@/config/timing';
 
 import { AUTO_RELOAD_SESSION_STORAGE_KEY, usePwaVersionGate } from '../usePwaVersionGate';
 
@@ -173,29 +173,7 @@ describe('usePwaVersionGate', () => {
     expect(applyServiceWorkerUpdateMock).toHaveBeenCalledTimes(1);
   });
 
-  it('auto-applies a pending soft update that lands within the launch window', async () => {
-    applyServiceWorkerUpdateMock.mockResolvedValue(true);
-
-    const { result } = renderHook(() => usePwaVersionGate({ autoApplyPendingOnLaunch: true }));
-
-    await waitFor(() => {
-      expect(fetchRuntimeConfigMock).toHaveBeenCalledTimes(1);
-    });
-
-    // The service worker reaches `waiting` a few seconds after mount, still
-    // inside the launch window.
-    currentTime += 5_000;
-    act(() => {
-      emitPwaSnapshot({ needRefresh: true });
-    });
-
-    await waitFor(() => {
-      expect(applyServiceWorkerUpdateMock).toHaveBeenCalledTimes(1);
-    });
-    expect(result.current.isUpdatePending).toBe(true);
-  });
-
-  it('does not auto-apply on launch when the option is off (the default)', async () => {
+  it('never auto-applies a pending soft update on its own (callers drive it at a safe moment)', async () => {
     applyServiceWorkerUpdateMock.mockResolvedValue(true);
 
     const { result } = renderHook(() => usePwaVersionGate());
@@ -213,28 +191,8 @@ describe('usePwaVersionGate', () => {
     });
     await Promise.resolve();
 
-    expect(applyServiceWorkerUpdateMock).not.toHaveBeenCalled();
-  });
-
-  it('does not auto-apply a soft update that lands after the launch window elapses', async () => {
-    applyServiceWorkerUpdateMock.mockResolvedValue(true);
-
-    const { result } = renderHook(() => usePwaVersionGate({ autoApplyPendingOnLaunch: true }));
-
-    await waitFor(() => {
-      expect(fetchRuntimeConfigMock).toHaveBeenCalledTimes(1);
-    });
-
-    currentTime += PWA_LAUNCH_AUTO_UPDATE_WINDOW_MS;
-    act(() => {
-      emitPwaSnapshot({ needRefresh: true });
-    });
-
-    await waitFor(() => {
-      expect(result.current.isUpdatePending).toBe(true);
-    });
-    await Promise.resolve();
-
+    // The hook surfaces the pending update but leaves the reload to the caller's
+    // safe-moment gate (a fresh local game / a safe point online).
     expect(applyServiceWorkerUpdateMock).not.toHaveBeenCalled();
   });
 
