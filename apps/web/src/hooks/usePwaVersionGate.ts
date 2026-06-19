@@ -128,7 +128,7 @@ export const usePwaVersionGate = ({ deferHardUpdate = false }: UsePwaVersionGate
     });
   });
 
-  const runReloadToUpdate = useCallback(async () => {
+  const runReloadToUpdate = useCallback(async (onReloadCommitted?: () => void) => {
     if (isApplyingUpdateRef.current) {
       return;
     }
@@ -140,7 +140,7 @@ export const usePwaVersionGate = ({ deferHardUpdate = false }: UsePwaVersionGate
       // No `location.reload()` fallback: reloading without a freshly installed
       // worker re-serves the same precached bundle, which on iOS standalone
       // PWAs loops splash → blank → reload whenever a hard update is required.
-      await applyServiceWorkerUpdate().catch(() => false);
+      await applyServiceWorkerUpdate(onReloadCommitted).catch(() => false);
     } finally {
       isApplyingUpdateRef.current = false;
       setIsApplyingUpdate(false);
@@ -222,9 +222,15 @@ export const usePwaVersionGate = ({ deferHardUpdate = false }: UsePwaVersionGate
   // Apply a pending soft update at most once per target version. Callers invoke
   // this at a lossless moment (a fresh/untouched local game, or a safe point in
   // an online game) so a background update lands without a wall-clock deadline —
-  // a slow service-worker download is still caught whenever it finishes. The
-  // sessionStorage guard survives `location.reload()`, so a deploy that
-  // advertises a version it isn't actually serving yet can't reload-loop.
+  // a slow service-worker download is still caught whenever it finishes.
+  //
+  // The per-version guard is written from `onReloadCommitted`, i.e. only once a
+  // reload is actually firing. A no-op apply — the `runtime:` channel advertising
+  // a version the service worker hasn't staged yet, so there's no waiting worker
+  // — leaves the guard unset, so a later safe render retries instead of burning
+  // this version's single attempt. The write still lands before navigation, so
+  // the sessionStorage guard survives `location.reload()` and a deploy that
+  // reloads without advancing the version can't reload-loop.
   const applyUpdateOnceForCurrentTarget = useCallback(() => {
     if (!isUpdatePending || !updateKey) {
       return;
@@ -234,8 +240,7 @@ export const usePwaVersionGate = ({ deferHardUpdate = false }: UsePwaVersionGate
       return;
     }
 
-    writeSoftAutoReloadKey(updateKey);
-    void runReloadToUpdate();
+    void runReloadToUpdate(() => writeSoftAutoReloadKey(updateKey));
   }, [isUpdatePending, updateKey, runReloadToUpdate]);
 
   const dismissJustUpdated = useCallback(() => {

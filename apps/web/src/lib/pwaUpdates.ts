@@ -109,7 +109,12 @@ const waitForInstallingWorker = (worker: ServiceWorker, timeoutMs: number): Prom
     worker.addEventListener('statechange', handleStateChange);
   });
 
-export const applyServiceWorkerUpdate = async (): Promise<boolean> => {
+// `onReloadCommitted` runs at the single instant the update is about to be
+// applied — after a waiting worker is confirmed, just before the activate +
+// reload. Callers use it to record a per-version guard that must survive the
+// reload yet must not be written on the no-op path (no waiting worker), so a
+// transient miss doesn't burn that version's one attempt.
+export const applyServiceWorkerUpdate = async (onReloadCommitted?: () => void): Promise<boolean> => {
   const registration = snapshot.registration;
   if (!registration || !updateServiceWorker) {
     return false;
@@ -132,6 +137,7 @@ export const applyServiceWorkerUpdate = async (): Promise<boolean> => {
   }
 
   if (snapshot.needRefresh || registration.waiting) {
+    onReloadCommitted?.();
     await updateServiceWorker(true);
     return true;
   }
