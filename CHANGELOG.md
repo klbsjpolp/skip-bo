@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.8.1](https://github.com/klbsjpolp/skip-bo/compare/v2.8.0...v2.8.1) (2026-06-19)
+
+
+### Bug Fixes
+
+* **web:** apply pending update at safe game state, not on a timer ([516ca8d](https://github.com/klbsjpolp/skip-bo/commit/516ca8d8244180fcf1ec931791cdfb58a2730384))
+* **web:** write soft-update guard only when the reload actually fires ([c06dd87](https://github.com/klbsjpolp/skip-bo/commit/c06dd87f663217154a42fc0119ff9f7a3f489c3c))
+
 ## [2.8.0](https://github.com/klbsjpolp/skip-bo/compare/v2.7.1...v2.8.0) (2026-06-18)
 
 
