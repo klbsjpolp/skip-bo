@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.9.0](https://github.com/klbsjpolp/skip-bo/compare/v2.8.1...v2.9.0) (2026-06-19)
+
+
+### Features
+
+* **web:** redesign app icon as a 5-card Skip-Bo fan ([b723b1d](https://github.com/klbsjpolp/skip-bo/commit/b723b1d5637ec29d2b38bf2c935b0ad1186c84e1))
+
 ## [2.8.1](https://github.com/klbsjpolp/skip-bo/compare/v2.8.0...v2.8.1) (2026-06-19)
 
 
