@@ -48,7 +48,7 @@ jobs:
       release_tag: ${{ steps.release_meta.outputs.release_tag }}
       release_version: ${{ steps.release_meta.outputs.release_version }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: main # Garantir qu'on est sur main pour la release
           fetch-depth: 0 # Full history is required for conventional-commit version calculation
@@ -83,7 +83,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: aws-prod
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ needs.release.outputs.release_sha }}
       - uses: ./.github/actions/setup-node
