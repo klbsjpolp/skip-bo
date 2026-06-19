@@ -11,6 +11,7 @@ import { ResumeGameBanner } from '@/components/ResumeGameBanner';
 import { LocalGameBoard } from '@/components/LocalGameBoard';
 import { useCardAnimation } from '@/contexts/useCardAnimation';
 import { animationServiceBridge } from '@/lib/animationServiceBridge';
+import { isSafeToApplyLocalUpdate } from '@/lib/localUpdateGate';
 import { canPlayCard } from '@/lib/validators';
 import { createOnlineRoom, joinOnlineRoom } from '@/online/api';
 import { getStoredStockSize } from '@/state/initialGameState';
@@ -80,19 +81,11 @@ function LocalGameScreen({
     selectCard,
   } = useLocalSkipBoGame();
 
-  // A local reload always re-deals a fresh game (it isn't persisted), so the
-  // only lossless moment to apply a pending update is before the player has
-  // touched the freshly dealt game. "Untouched" = nothing has been played to a
-  // build pile and nobody has discarded yet; a start-of-turn draw doesn't count.
-  // Unlike the old launch timer this has no deadline, so a service worker that
+  // Apply a pending update without a wall-clock deadline: a service worker that
   // finishes downloading minutes after open is still caught on the next idle
-  // render — while an in-progress game is never reloaded out from under the
-  // player. Online's equivalent safe-moment gate lives in OnlineGameScreen.
-  const isLocalGameUntouched =
-    gameState.buildPiles.every((pile) => pile.length === 0) &&
-    gameState.completedBuildPiles.length === 0 &&
-    gameState.players.every((player) => player.discardPiles.every((pile) => pile.length === 0));
-  const isSafeToApplyUpdate = !gameState.gameIsOver && isLocalGameUntouched;
+  // render, while an in-progress game is never reloaded out from under the
+  // player. See isSafeToApplyLocalUpdate for what counts as a lossless moment.
+  const isSafeToApplyUpdate = isSafeToApplyLocalUpdate(gameState);
 
   useEffect(() => {
     if (isUpdatePending && isSafeToApplyUpdate) {
