@@ -148,7 +148,12 @@ describe('usePwaVersionGate', () => {
   });
 
   it('applies a pending soft update at most once per target version', async () => {
-    applyServiceWorkerUpdateMock.mockResolvedValue(true);
+    // A real apply fires the reload, so it records the per-version guard via the
+    // onReloadCommitted callback the hook passes in.
+    applyServiceWorkerUpdateMock.mockImplementation(async (onReloadCommitted?: () => void) => {
+      onReloadCommitted?.();
+      return true;
+    });
 
     const { result } = renderHook(() => usePwaVersionGate());
 
@@ -166,11 +171,60 @@ describe('usePwaVersionGate', () => {
 
     await act(async () => {
       result.current.applyUpdateOnceForCurrentTarget();
+      await Promise.resolve();
+    });
+
+    expect(applyServiceWorkerUpdateMock).toHaveBeenCalledTimes(1);
+
+    // The version's single attempt is now recorded, so a later call is a no-op.
+    await act(async () => {
       result.current.applyUpdateOnceForCurrentTarget();
       await Promise.resolve();
     });
 
     expect(applyServiceWorkerUpdateMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not burn the version attempt when the apply is a no-op (retries later)', async () => {
+    // First apply finds no waiting worker (runtime config raced ahead of the
+    // service worker): no reload fires, onReloadCommitted is never called, so the
+    // guard stays unset.
+    applyServiceWorkerUpdateMock.mockResolvedValueOnce(false);
+
+    const { result } = renderHook(() => usePwaVersionGate());
+
+    await waitFor(() => {
+      expect(fetchRuntimeConfigMock).toHaveBeenCalledTimes(1);
+    });
+
+    act(() => {
+      emitPwaSnapshot({ needRefresh: true });
+    });
+
+    await waitFor(() => {
+      expect(result.current.isUpdatePending).toBe(true);
+    });
+
+    await act(async () => {
+      result.current.applyUpdateOnceForCurrentTarget();
+      await Promise.resolve();
+    });
+
+    expect(applyServiceWorkerUpdateMock).toHaveBeenCalledTimes(1);
+
+    // The worker has now caught up; the next attempt for the same version retries
+    // instead of being blocked by a burned guard.
+    applyServiceWorkerUpdateMock.mockImplementation(async (onReloadCommitted?: () => void) => {
+      onReloadCommitted?.();
+      return true;
+    });
+
+    await act(async () => {
+      result.current.applyUpdateOnceForCurrentTarget();
+      await Promise.resolve();
+    });
+
+    expect(applyServiceWorkerUpdateMock).toHaveBeenCalledTimes(2);
   });
 
   it('never auto-applies a pending soft update on its own (callers drive it at a safe moment)', async () => {

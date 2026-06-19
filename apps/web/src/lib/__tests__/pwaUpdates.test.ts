@@ -168,6 +168,30 @@ describe('pwaUpdates', () => {
     expect(applied).toBe(true);
   });
 
+  it('invokes onReloadCommitted only when a reload actually fires', async () => {
+    const { initializePwaUpdates, applyServiceWorkerUpdate } = await loadPwaUpdates();
+    initializePwaUpdates();
+
+    const onReloadCommitted = vi.fn();
+
+    // No waiting worker → no reload → callback must not fire (so the caller's
+    // per-version guard isn't burned on a no-op apply).
+    const noWorker = buildFakeRegistration();
+    registerOptions.onRegisteredSW?.('/sw.js', noWorker as unknown as ServiceWorkerRegistration);
+    expect(await applyServiceWorkerUpdate(onReloadCommitted)).toBe(false);
+    expect(onReloadCommitted).not.toHaveBeenCalled();
+
+    // Waiting worker present → reload fires → callback runs once, before the
+    // activate + reload.
+    const withWorker = buildFakeRegistration();
+    withWorker.waiting = new FakeServiceWorker();
+    withWorker.waiting.state = 'installed';
+    registerOptions.onRegisteredSW?.('/sw.js', withWorker as unknown as ServiceWorkerRegistration);
+    expect(await applyServiceWorkerUpdate(onReloadCommitted)).toBe(true);
+    expect(onReloadCommitted).toHaveBeenCalledTimes(1);
+    expect(updateServiceWorkerMock).toHaveBeenCalledWith(true);
+  });
+
   it('times out the install wait so the promise never hangs forever', async () => {
     vi.useFakeTimers();
 
