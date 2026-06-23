@@ -74,6 +74,8 @@ Two rules that get violated most often — keep them in your head:
 
 Themes also have a **readability contract** — filled card values and the turn-state prompt must meet ≥ 3:1 contrast, the selected card must visibly differ from unselected ones, and the Skip-Bo wildcard must keep its accessible name. Enforced by [`tests/ui/readability.spec.ts`](tests/ui/readability.spec.ts); see [`src/themes/README.md`](src/themes/README.md#11-readability-contract) §11 for the full rules. `.card.empty-card` (the `Vide` placeholder) is intentionally exempt — it should recede.
 
+Theme registry (order, label, `NEW`/`UPDATED` badge) is the `themes` array in [`packages/game-core/src/types/index.ts`](../../packages/game-core/src/types/index.ts); the default theme is `defaultTheme` in [`src/Root.tsx`](src/Root.tsx). Keep the `ThemeStatus` type on the array — removing the last `UPDATED`/`NEW` use narrows the inferred union and breaks `ThemeSwitcher`'s `=== 'UPDATED'` comparison (TS2367).
+
 ## Debug Buttons
 
 `DebugStrip` renders in `DEV` mode only, in both local and online game screens:
@@ -103,6 +105,9 @@ pnpm --filter @skipbo/web test:visual
 # bare flag to "missing" and silently skips existing baselines).
 pnpm test:visual:update
 ```
+
+- CI runs the `ui` job on **macOS**; baselines are committed as `*-darwin.png`, so regenerate snapshots locally on macOS to match.
+- Editing the `themes` array (order / label / `NEW`/`UPDATED` badge) or the default theme also changes `layout-and-accessibility.spec.ts`'s `theme-switcher-open` snapshot — regenerate it too, not just `theme-contract`/`readability`.
 
 Unit tests: `src/**/__tests__/`  
 E2E + visual: `tests/ui/`
