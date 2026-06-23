@@ -1,44 +1,44 @@
 .theme-rummy {
   /* === Core color scheme === */
-  --background: #eef1f4;
-  --foreground: #1f2933;
-  --primary: #1f6fd6;
+  --background: #14181d;
+  --foreground: #eef1f4;
+  --primary: #1d4ed8; /* deepened so white button labels reach ≥4.5:1 */
   --primary-foreground: #ffffff;
-  --secondary: #ffffff;
-  --secondary-foreground: #1f2933;
-  --success: #2e7d32;
+  --secondary: #1f2933;
+  --secondary-foreground: #eef1f4;
+  --success: #4caf50;
   --success-foreground: #ffffff;
-  --destructive: #d32f2f;
+  --destructive: #f44336;
   --destructive-foreground: #ffffff;
-  --muted: #e6eaee;
-  --muted-foreground: #56606b;
+  --muted: #1f2933;
+  --muted-foreground: #94a3b8;
   --accent: #f4c20d;
-  --accent-foreground: #1f2933;
-  --popover: #ffffff;
-  --popover-foreground: #1f2933;
-  --border: #d6dbe0;
-  --ring: #1f6fd6;
-  --input: #ffffff;
-  --input-foreground: #1f2933;
-  --text-color: #1f2933;
-  --title-color: #15539e;
+  --accent-foreground: #14181d;
+  --popover: #1f2933;
+  --popover-foreground: #eef1f4;
+  --border: #334155;
+  --ring: #3b82f6;
+  --input: #1f2933;
+  --input-foreground: #eef1f4;
+  --text-color: #eef1f4;
+  --title-color: #60a5fa;
 
   /* === Card surface === */
   --card-front-color: #ffffff;
-  --card-back-color: #14181d;
-  --card-border-color: #cdd3da;
-  --card-color: #1f2933;
+  --card-back-color: #0f172a;
+  --card-border-color: #ffffff;
+  --card-color: #eef1f4;
   --card-radius: 10px;
-  --card-shadow: 0 2px 4px rgba(20, 24, 29, 0.18), 0 4px 10px rgba(20, 24, 29, 0.1);
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
 
   /* === Card number colors (1–4, 5–8, 9–12) === */
-  --card-g1: #e23b35;
-  --card-g2: #1f6fd6;
-  --card-g3: #2e9e3f;
+  --card-g1: #ef4444;
+  --card-g2: #3b82f6;
+  --card-g3: #059669; /* emerald-600: emerald-500 fails ≥3:1 on the white card */
 
   /* === Skip-Bo special card === */
   --skipbo-text: #ffffff;
-  --skipbo-bg: #14181d;
+  --skipbo-bg: #0f172a;
 
   /* === Selection & drag === */
   --selected-border-color: #f4c20d;
@@ -151,7 +151,7 @@
       &::after,
       .card-corner-inset::before {
         @apply invisible lg:visible absolute z-4 text-xs font-black leading-none;
-        color: #ffffff;
+        color: var(--card-front-color);
       }
       &::before,
       &::after {
@@ -251,6 +251,20 @@
       .card-number {
         @apply sr-only;
       }
+
+      /* Small white star top-left, an inverted one bottom-right. */
+      &::before,
+      &::after {
+        @apply content-[''] absolute z-4 h-3 w-3 bg-contain bg-center bg-no-repeat pointer-events-none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' fill='%23ffffff'/></svg>");
+      }
+      &::before {
+        @apply top-1 left-1;
+      }
+      &::after {
+        @apply bottom-1 right-1;
+        transform: rotate(180deg);
+      }
     }
   }
 
@@ -258,8 +272,10 @@
   /* A yellow firework of stars bursts outward from behind the card when it is
      selected — the motion cue, on top of the persistent lift + glow. The stars
      sit in a ring beyond the card edges, so they radiate around it, not over
-     the value. */
-  & .card.selected .card-corner-inset::after {
+     the value. `.card-corner-inset` exists on face-up cards; `.back` covers
+     face-down cards (e.g. an opponent selecting from their hidden hand). */
+  & .card.selected .card-corner-inset::after,
+  & .card.selected .back::after {
     @apply content-[''] absolute z-1 pointer-events-none bg-no-repeat bg-center bg-contain;
     top: 50%;
     left: 50%;
@@ -289,8 +305,11 @@
       color-mix(in srgb, #f4c20d 7%, transparent) 100%
     );
 
+    /* z-1 (below the content-layer at z-2) so dealt cards portaled into the
+       hand-area pass over the ribbon instead of sliding under it. The top strip
+       sits in the panel padding, above no card, so the ribbon stays visible. */
     &::before {
-      @apply content-[''] absolute top-0 left-0 right-0 h-1.5 z-3 rounded-t-lg pointer-events-none opacity-0;
+      @apply content-[''] absolute top-0 left-0 right-0 h-1.5 z-1 rounded-t-lg pointer-events-none opacity-0;
       background-image: linear-gradient(90deg, #e23b35 0 25%, #1f6fd6 25% 50%, #2e9e3f 50% 75%, #f4c20d 75% 100%);
       transition: opacity 0.6s;
     }
@@ -302,11 +321,12 @@
   /* Empty slots: keep them receding (per the readability contract) but give
      the outline the angular cut and a faint star watermark. */
   & .card.empty-card {
+    background-color: #0f1419;
     border-style: dashed;
     border-color: color-mix(in srgb, #1f6fd6 28%, var(--card-border-color));
     color: var(--muted-foreground);
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' fill='none' stroke='%23aeb6c0' stroke-width='3' stroke-linejoin='round'/></svg>");
-    @apply bg-no-repeat bg-center bg-size-[46%];
+    @apply text-[0em] bg-no-repeat bg-center bg-size-[70%];
   }
 
   /* === Victory === */
