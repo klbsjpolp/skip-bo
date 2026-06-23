@@ -21,7 +21,7 @@ function Root() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider
           attribute="class"
-          defaultTheme={'theme-paper' satisfies Theme}
+          defaultTheme={'theme-rummy' satisfies Theme}
           themes={themes.map((t) => t.value)}
         >
           <CardAnimationProvider>

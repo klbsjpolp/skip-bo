@@ -42,7 +42,12 @@ export interface MoveResult {
   winnerIndex?: number;
 }
 
+export type ThemeStatus = 'NEW' | 'UPDATED' | null;
+
 export const themes = [
+  // `status` is widened to ThemeStatus here so the 'UPDATED' badge stays a
+  // valid capability even while no theme currently uses it.
+  { value: 'theme-rummy' as const, label: 'Rummy', icon: 'Star', status: 'NEW' as ThemeStatus },
   { value: 'theme-paper' as const, label: 'Papier', icon: 'NotebookPen', status: null },
   { value: 'theme-midnight' as const, label: 'Minuit', icon: 'Moon', status: null },
   { value: 'theme-origami' as const, label: 'Origami', icon: 'Bird', status: null },
@@ -52,12 +57,12 @@ export const themes = [
   { value: 'theme-neon' as const, label: 'Néon', icon: 'Zap', status: null },
   { value: 'theme-retro' as const, label: 'Rétro', icon: 'Radio', status: null },
   { value: 'theme-retro-space' as const, label: 'Espace', icon: 'Rocket', status: null },
-  { value: 'theme-cinema' as const, label: 'Cinéma', icon: 'Film', status: 'UPDATED' },
+  { value: 'theme-cinema' as const, label: 'Cinéma', icon: 'Film', status: null },
   { value: 'theme-glass' as const, label: 'Verre', icon: 'Squircle', status: null },
   { value: 'theme-wool' as const, label: 'Laine', icon: 'Spool', status: null },
   { value: 'theme-minecraft' as const, label: 'Minecraft', icon: 'Blocks', status: null },
   { value: 'theme-steampunk' as const, label: 'Steampunk', icon: 'Cog', status: null },
-  { value: 'theme-f1' as const, label: 'Formule 1', icon: 'Flag', status: 'NEW' },
+  { value: 'theme-f1' as const, label: 'Formule 1', icon: 'Flag', status: null },
 ] as const;
 
 export type ThemeDetail = (typeof themes)[number];
