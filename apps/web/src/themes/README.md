@@ -305,6 +305,15 @@ These come from incidents that shipped to production. Don't relax them without u
 
 **Sections appear in this order.** Empty sections are removed (don't keep empty headers).
 
+### 5.1 Card-decoration mechanisms
+
+The card DOM ([`Card.tsx`](../components/Card.tsx)) gives a few hooks worth knowing when driving per-card art:
+
+- **`currentColor` inside a `.card.normal-card` = the value-group colour.** The `card-range-*` utility sets `color: var(--card-g{1,2,3})` on `.card`, so children/pseudos inherit it — e.g. `.card-inner { background-color: currentColor }` paints a band in the group colour without per-value rules.
+- **`content: attr(data-value)` only works on `.card`'s own `::before`/`::after`** (`data-value` lives on `.card`). Pseudos of descendants (`.card-corner-inset`, `.card-number`) can't read it — fall back to per-value `&[data-value='N'] … { content: 'N' }` for extra corners.
+- **One-shot burst on `.selected`/state classes:** use `animation: … forwards` **and** set the resting state (`opacity: 0`, the centring `transform`) in the base rule. Without `forwards` the element snaps back to the un-animated base after the keyframes (visible + off-centre).
+- **Transition a state indicator instead of popping it:** render the pseudo always (e.g. `opacity: 0`) and only flip opacity on the state class, so it eases with `.player-area`'s existing `0.6s` turn transition.
+
 ## 6. Token catalog
 
 Tokens read by global code in `styles/*.css` are **universal**. Themes override them but don't invent new names for the same concept. Theme-only tokens get a prefix (`--lg-*`, `--retro-space-*`, etc.).
@@ -378,11 +387,14 @@ Each theme can declare additional tokens that are only read inside its own block
    - `--foreground`
    - `--selected-border-color`
    - `--card-g1` (and conventionally `--card-g2`, `--card-g3` too)
-3. Add the theme to [`packages/game-core/src/types/index.ts`](../../../../packages/game-core/src/types/index.ts) `themes` array: `{ value: 'theme-<name>' as const, label: '<Display Name>', icon: '<LucideIconName>' }`.
+3. Add the theme to [`packages/game-core/src/types/index.ts`](../../../../packages/game-core/src/types/index.ts) `themes` array: `{ value: 'theme-<name>' as const, label: '<Display Name>', icon: '<LucideIconName>', status: null }`. The array also controls **dropdown order** and the `NEW`/`UPDATED` badge (`status`); keep its `ThemeStatus` type (removing the last `UPDATED`/`NEW` use narrows the union and breaks `ThemeSwitcher`'s `=== 'UPDATED'` comparison). The default theme is `defaultTheme` in [`Root.tsx`](../Root.tsx).
 4. Add an `@import './themes/<name>.css';` line to [`index.css`](../index.css), alphabetical.
 5. Run `pnpm --filter @skipbo/web exec playwright test tests/ui/theme-contract.spec.ts --project=chromium-desktop`. The first run generates the baseline PNG snapshot — commit it.
 6. If the theme is one of the [`representativeThemes`](../../tests/ui/helpers.ts) used by `layout-and-accessibility.spec.ts`, also commit those snapshots.
-7. Run `pnpm --filter @skipbo/web exec playwright test tests/ui/readability.spec.ts --project=chromium-desktop` to confirm the new theme meets the [readability contract](#11-readability-contract).
+7. **Adding/reordering/re-badging a theme changes the `theme-switcher-open` snapshot** in `layout-and-accessibility.spec.ts` (it lists every theme) — regenerate it too, not just the theme-contract baselines.
+8. Run `pnpm --filter @skipbo/web exec playwright test tests/ui/readability.spec.ts --project=chromium-desktop` to confirm the new theme meets the [readability contract](#11-readability-contract).
+
+> Baselines are committed per-OS as `*-darwin.png` and CI runs the `ui` job on macOS — regenerate on macOS to match.
 
 ## 8. Visual regression workflow
 
