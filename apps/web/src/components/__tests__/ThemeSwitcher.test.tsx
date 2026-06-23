@@ -29,25 +29,28 @@ afterEach(() => {
 });
 
 describe('ThemeSwitcher', () => {
-  test('flags the F1 theme as new in the dropdown', () => {
+  test('flags the rummy theme as new in the dropdown', () => {
     renderSwitcher();
 
     fireEvent.click(screen.getByTestId('theme-switcher-trigger'));
 
-    const f1Option = screen.getByTestId('theme-option-theme-f1');
-    expect(within(f1Option).getByText('Nouveau')).toBeTruthy();
+    const rummyOption = screen.getByTestId('theme-option-theme-rummy');
+    expect(within(rummyOption).getByText('Nouveau')).toBeTruthy();
 
     const paperOption = screen.getByTestId('theme-option-theme-paper');
     expect(within(paperOption).queryByText('Nouveau')).toBeNull();
   });
 
-  test('flags the cinema theme as improved in the dropdown', () => {
+  test('no longer flags the f1 or cinema themes', () => {
     renderSwitcher();
 
     fireEvent.click(screen.getByTestId('theme-switcher-trigger'));
 
+    const f1Option = screen.getByTestId('theme-option-theme-f1');
+    expect(within(f1Option).queryByText('Nouveau')).toBeNull();
+
     const cinemaOption = screen.getByTestId('theme-option-theme-cinema');
-    expect(within(cinemaOption).getByText('Amélioré')).toBeTruthy();
+    expect(within(cinemaOption).queryByText('Amélioré')).toBeNull();
     expect(within(cinemaOption).queryByText('Nouveau')).toBeNull();
   });
 

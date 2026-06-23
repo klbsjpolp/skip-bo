@@ -1,0 +1,354 @@
+.theme-rummy {
+  /* === Core color scheme === */
+  --background: #eef1f4;
+  --foreground: #1f2933;
+  --primary: #1f6fd6;
+  --primary-foreground: #ffffff;
+  --secondary: #ffffff;
+  --secondary-foreground: #1f2933;
+  --success: #2e7d32;
+  --success-foreground: #ffffff;
+  --destructive: #d32f2f;
+  --destructive-foreground: #ffffff;
+  --muted: #e6eaee;
+  --muted-foreground: #56606b;
+  --accent: #f4c20d;
+  --accent-foreground: #1f2933;
+  --popover: #ffffff;
+  --popover-foreground: #1f2933;
+  --border: #d6dbe0;
+  --ring: #1f6fd6;
+  --input: #ffffff;
+  --input-foreground: #1f2933;
+  --text-color: #1f2933;
+  --title-color: #15539e;
+
+  /* === Card surface === */
+  --card-front-color: #ffffff;
+  --card-back-color: #14181d;
+  --card-border-color: #cdd3da;
+  --card-color: #1f2933;
+  --card-radius: 10px;
+  --card-shadow: 0 2px 4px rgba(20, 24, 29, 0.18), 0 4px 10px rgba(20, 24, 29, 0.1);
+
+  /* === Card number colors (1–4, 5–8, 9–12) === */
+  --card-g1: #e23b35;
+  --card-g2: #1f6fd6;
+  --card-g3: #2e9e3f;
+
+  /* === Skip-Bo special card === */
+  --skipbo-text: #ffffff;
+  --skipbo-bg: #14181d;
+
+  /* === Selection & drag === */
+  --selected-border-color: #f4c20d;
+
+  /* === Victory layer: a gold hero star ringed by the four colours, a drifting
+     star field, and star-shaped confetti in the four colours === */
+  --victory-border: #f4c20d;
+  --victory-accent: #f4c20d;
+  --victory-accent-soft: color-mix(in srgb, #f4c20d 32%, transparent);
+  --victory-accent-opacity: 0.5;
+  --victory-emblem-opacity: 0.92;
+  --victory-emblem-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(100 100) scale(1.25) translate(-50 -50)' fill='%23f4c20d' stroke='%23ffffff' stroke-width='2.5' stroke-linejoin='round'/><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(100 24) scale(0.34) translate(-50 -50)' fill='%23e23b35'/><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(176 100) scale(0.34) translate(-50 -50)' fill='%231f6fd6'/><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(100 176) scale(0.34) translate(-50 -50)' fill='%232e9e3f'/><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(24 100) scale(0.34) translate(-50 -50)' fill='%23ffffff'/></svg>");
+  --victory-pattern-opacity: 0.16;
+  --victory-pattern-size: 84px 84px;
+  --victory-pattern-drift-to: 84px 84px;
+  --victory-pattern-image: var(--rummy-star-field);
+  --victory-piece-1: #e23b35;
+  --victory-piece-2: #1f6fd6;
+  --victory-piece-3: #2e9e3f;
+  --victory-piece-4: #f4c20d;
+
+  /* === Theme-internal: scattered four-colour star field (body + victory) === */
+  --rummy-star-field: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(35 40) scale(0.2) translate(-50 -50)' fill='%23e23b35'/><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(112 28) scale(0.16) translate(-50 -50)' fill='%231f6fd6'/><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(45 118) scale(0.17) translate(-50 -50)' fill='%232e9e3f'/><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(122 108) scale(0.19) translate(-50 -50)' fill='%23f4c20d'/></svg>");
+
+  /* === Theme-internal: yellow star burst behind a selected card === */
+  --rummy-select-burst: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><g><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(178 100) scale(0.3) translate(-50 -50)' fill='%23f4c20d'/><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(155.2 44.8) scale(0.24) translate(-50 -50)' fill='%23ffd24a'/><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(100 22) scale(0.3) translate(-50 -50)' fill='%23f4c20d'/><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(44.8 44.8) scale(0.24) translate(-50 -50)' fill='%23ffd24a'/><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(22 100) scale(0.3) translate(-50 -50)' fill='%23f4c20d'/><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(44.8 155.2) scale(0.24) translate(-50 -50)' fill='%23ffd24a'/><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(100 178) scale(0.3) translate(-50 -50)' fill='%23f4c20d'/><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' transform='translate(155.2 155.2) scale(0.24) translate(-50 -50)' fill='%23ffd24a'/></g></svg>");
+
+  /* === Card-back art: dark field, rainbow band, outlined star === */
+  --card-back-bg:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linejoin='round'/></svg>")
+      center / 62% no-repeat,
+    linear-gradient(
+      to bottom,
+      transparent 0 40%,
+      #e23b35 40% 45%,
+      #1f6fd6 45% 50%,
+      #2e9e3f 50% 55%,
+      #f4c20d 55% 60%,
+      transparent 60% 100%
+    ),
+    #14181d;
+
+  /* === Body / page chrome === */
+  & body {
+    font-family:
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      Roboto,
+      Arial,
+      sans-serif;
+    color: var(--text-color);
+    @apply bg-background;
+  }
+
+  /* Game-table feel: a faint four-colour star confetti tiled behind the play
+     mats (fixed so it doesn't scroll with the board). */
+  & body::before {
+    @apply content-[''] fixed inset-0 pointer-events-none z-0;
+    background-image: var(--rummy-star-field);
+    background-repeat: repeat;
+    background-size: 132px 132px;
+    opacity: 0.14;
+  }
+
+  & #main {
+    @apply relative z-2;
+  }
+
+  & h1,
+  & h2,
+  & h3,
+  & .title {
+    color: var(--title-color);
+    font-family: 'Baloo 2', system-ui, Arial, sans-serif;
+    @apply font-bold;
+  }
+
+  /* === Card customizations === */
+  & .card {
+    /* Chunky rounded display face — the "family game night" identity. */
+    font-family: 'Baloo 2', 'Arial Black', system-ui, Arial, sans-serif;
+
+    /* Full-size decoration hook used by the corner numbers (normal cards) and
+       the selected-card star badge (any card). */
+    .card-corner-inset {
+      @apply inset-0 pointer-events-none;
+    }
+
+    /* Bold flat number cards: a shallow coloured angled band top and bottom in
+       the value-group colour (currentColor) with the value on a white middle. */
+    &.normal-card:not(.empty-card) {
+      .card-inner {
+        background-color: currentColor;
+        clip-path: polygon(0 0, 100% 0, 100% 17%, 0 27%);
+      }
+      .card-inner-2 {
+        background-color: currentColor;
+        clip-path: polygon(0 83%, 100% 73%, 100% 100%, 0 100%);
+      }
+
+      /* The value reads in all four corners (Phase-10 style): the bottom pair
+         is rotated 180°. Only top-left is a real element (.card-corner-number,
+         kept for discard-stack slivers); the other three are generated — the
+         right pair from attr(data-value), bottom-left per value via the
+         .card-corner-inset hook. All reversed out in white on the band, and
+         hidden on small cards exactly like the base corner number. */
+      .card-corner-number,
+      &::before,
+      &::after,
+      .card-corner-inset::before {
+        @apply invisible lg:visible absolute z-4 text-xs font-black leading-none;
+        color: #ffffff;
+      }
+      &::before,
+      &::after {
+        content: attr(data-value);
+      }
+      &::before {
+        @apply top-0.5 lg:top-1 right-1 lg:right-1.5;
+      }
+      &::after {
+        @apply bottom-0.5 lg:bottom-1 right-1 lg:right-1.5;
+        transform: rotate(180deg);
+      }
+      .card-corner-inset::before {
+        @apply bottom-0.5 lg:bottom-1 left-1 lg:left-1.5;
+        transform: rotate(180deg);
+      }
+      &[data-value='1'] .card-corner-inset::before {
+        content: '1';
+      }
+      &[data-value='2'] .card-corner-inset::before {
+        content: '2';
+      }
+      &[data-value='3'] .card-corner-inset::before {
+        content: '3';
+      }
+      &[data-value='4'] .card-corner-inset::before {
+        content: '4';
+      }
+      &[data-value='5'] .card-corner-inset::before {
+        content: '5';
+      }
+      &[data-value='6'] .card-corner-inset::before {
+        content: '6';
+      }
+      &[data-value='7'] .card-corner-inset::before {
+        content: '7';
+      }
+      &[data-value='8'] .card-corner-inset::before {
+        content: '8';
+      }
+      &[data-value='9'] .card-corner-inset::before {
+        content: '9';
+      }
+      &[data-value='10'] .card-corner-inset::before {
+        content: '10';
+      }
+      &[data-value='11'] .card-corner-inset::before {
+        content: '11';
+      }
+      &[data-value='12'] .card-corner-inset::before {
+        content: '12';
+      }
+
+      .card-number {
+        @apply font-black;
+        letter-spacing: -0.02em;
+      }
+
+      /* Underline 6 and 9 so a rotated digit can't be misread. */
+      &[data-value='6'] .card-number,
+      &[data-value='9'] .card-number {
+        text-decoration: underline;
+        text-decoration-thickness: 0.08em;
+        text-underline-offset: 0.14em;
+      }
+    }
+
+    /* Skip-Bo wild card: black field, angled four-colour stripe band, and an
+       outlined star. The wordmark stays in the DOM for assistive tech (per the
+       readability contract) but is visually hidden — only the star shows. */
+    &.skipbo-text {
+      color: var(--skipbo-text);
+      background-color: var(--skipbo-bg);
+
+      .card-corner-number {
+        @apply hidden;
+      }
+
+      .card-inner {
+        background-image: linear-gradient(
+          158deg,
+          transparent 0 27%,
+          #e23b35 27% 39%,
+          #1f6fd6 39% 51%,
+          #2e9e3f 51% 63%,
+          #f4c20d 63% 75%,
+          transparent 75% 100%
+        );
+      }
+
+      .card-inner-2 {
+        @apply bg-no-repeat bg-center;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' fill='%2314181d' stroke='%23ffffff' stroke-width='4' stroke-linejoin='round'/></svg>");
+        background-size: 82%;
+      }
+
+      .card-number {
+        @apply sr-only;
+      }
+    }
+  }
+
+  /* === Selection === */
+  /* A yellow firework of stars bursts outward from behind the card when it is
+     selected — the motion cue, on top of the persistent lift + glow. The stars
+     sit in a ring beyond the card edges, so they radiate around it, not over
+     the value. */
+  & .card.selected .card-corner-inset::after {
+    @apply content-[''] absolute z-1 pointer-events-none bg-no-repeat bg-center bg-contain;
+    top: 50%;
+    left: 50%;
+    width: 235%;
+    height: 235%;
+    /* Base state is centred + hidden; the burst plays once and `forwards`
+       holds the final (opacity 0) frame so the stars don't linger off-centre. */
+    opacity: 0;
+    transform: translate(-50%, -50%);
+    background-image: var(--rummy-select-burst);
+    animation: rummySelectBurst 560ms ease-out forwards;
+  }
+
+  /* === Player / center area overrides === */
+  /* Sections carry a very pale four-colour wash (the white card-front stays
+     opaque on top). The active player is marked by the multi-colour ribbon
+     below; the ribbon is always present but faded out, so it eases in/out with
+     the player-area's own 0.6s turn transition instead of popping. */
+  & .player-area,
+  & .center-area {
+    --active-turn-color: transparent;
+    background-image: linear-gradient(
+      100deg,
+      color-mix(in srgb, #e23b35 7%, transparent) 0%,
+      color-mix(in srgb, #1f6fd6 7%, transparent) 34%,
+      color-mix(in srgb, #2e9e3f 7%, transparent) 67%,
+      color-mix(in srgb, #f4c20d 7%, transparent) 100%
+    );
+
+    &::before {
+      @apply content-[''] absolute top-0 left-0 right-0 h-1.5 z-3 rounded-t-lg pointer-events-none opacity-0;
+      background-image: linear-gradient(90deg, #e23b35 0 25%, #1f6fd6 25% 50%, #2e9e3f 50% 75%, #f4c20d 75% 100%);
+      transition: opacity 0.6s;
+    }
+    &.active-turn::before {
+      @apply opacity-100;
+    }
+  }
+
+  /* Empty slots: keep them receding (per the readability contract) but give
+     the outline the angular cut and a faint star watermark. */
+  & .card.empty-card {
+    border-style: dashed;
+    border-color: color-mix(in srgb, #1f6fd6 28%, var(--card-border-color));
+    color: var(--muted-foreground);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' fill='none' stroke='%23aeb6c0' stroke-width='3' stroke-linejoin='round'/></svg>");
+    @apply bg-no-repeat bg-center bg-size-[46%];
+  }
+
+  /* === Victory === */
+  /* Star-shaped confetti in the four card colours. */
+  & .victory-burst-piece {
+    @apply rounded-none;
+    height: var(--victory-burst-size);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+
+  /* === Chrome cohesion: carry the motif into the UI shell === */
+  /* Stock-pile depletion gauge in the four colours instead of a flat primary. */
+  & .stock-pile-progress {
+    background-image: linear-gradient(to top, #e23b35 0%, #f4c20d 38%, #2e9e3f 68%, #1f6fd6 100%);
+  }
+
+  /* Primary CTAs get a gold "dog-ear" — the angular-cut motif, applied to a
+     pseudo so the button's focus ring is never clipped. */
+  & [data-testid='new-game-trigger'],
+  & [data-testid='replay-button'] {
+    @apply relative overflow-hidden;
+    &::after {
+      @apply content-[''] absolute top-0 right-0 w-3 h-3 pointer-events-none;
+      background: #f4c20d;
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
+    }
+  }
+}
+
+@keyframes rummySelectBurst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3) rotate(-12deg);
+  }
+  20% {
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.35) rotate(10deg);
+  }
+}
