@@ -268,6 +268,19 @@
     }
   }
 
+  /* The colour bands (`.card-inner`/`-2`) are `absolute; inset:0`, so they size
+     against the card's nearest positioned ancestor. The hand and player-area
+     piles already render their cards `position: relative`, but the build piles
+     and the retrait pile (both in the center area) leave them `static`, so the
+     bands resolved against the pile slot and painted over the card's 1px white
+     border. Anchor those cards so the border frames the colour. Scope to
+     .center-area only: the victory hand fan is `static` and its fan offsets
+     would spring open (overflowing on mobile) if it became positioned. */
+  & .center-area .card.normal-card:not(.empty-card),
+  & .center-area .card.skipbo-text {
+    @apply relative;
+  }
+
   /* === Selection === */
   /* A yellow firework of stars bursts outward from behind the card when it is
      selected — the motion cue, on top of the persistent lift + glow. The stars
