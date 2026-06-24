@@ -321,6 +321,16 @@
     animation: rummySelectBurst 560ms ease-out forwards;
   }
 
+  /* Starting a drag both selects the source card and hides it (the card
+     follows the pointer as a ghost). Keep the star-burst firing in the
+     now-empty slot — the burst pseudo would otherwise inherit the card's
+     visibility:hidden. Only the burst is re-shown; the card body and corner
+     numbers stay hidden. */
+  .card.selected.is-drag-source .card-corner-inset::after,
+  .card.selected.is-drag-source .back::after {
+    visibility: visible;
+  }
+
   /* === Player / center area overrides === */
   /* Sections carry a very pale four-colour wash (the white card-front stays
      opaque on top). The active player is marked by the multi-colour ribbon
