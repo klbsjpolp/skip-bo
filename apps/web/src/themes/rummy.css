@@ -168,6 +168,19 @@
         @apply bottom-0.5 lg:bottom-1 left-1 lg:left-1.5;
         transform: rotate(180deg);
       }
+
+      /* While this card is the drag source its body is hidden with
+         visibility:hidden, but the three generated corner numbers carry their
+         own `visibility: visible` (lg:visible) so they escape the inherited
+         hidden and float in the empty slot. Re-hide them with the card. (The
+         real top-left number is already hidden by drag.css's `.is-drag-source
+         *`.) */
+      &.is-drag-source::before,
+      &.is-drag-source::after,
+      &.is-drag-source .card-corner-inset::before {
+        @apply invisible;
+      }
+
       &[data-value='1'] .card-corner-inset::before {
         content: '1';
       }
