@@ -275,9 +275,15 @@
      bands resolved against the pile slot and painted over the card's 1px white
      border. Anchor those cards so the border frames the colour. Scope to
      .center-area only: the victory hand fan is `static` and its fan offsets
-     would spring open (overflowing on mobile) if it became positioned. */
-  .center-area .card.normal-card:not(.empty-card),
-  .center-area .card.skipbo-text {
+     would spring open (overflowing on mobile) if it became positioned.
+
+     Exclude `.card-morph-layer`: when a Skip-Bo is played onto a build pile it
+     renders as two `position: absolute` layers stacked inside a wrapper and
+     cross-faded. Forcing them `relative` makes the layers flow in document
+     order, dropping the numeric layer a full card-height below the pile. The
+     absolute layer already establishes the containing block its bands need. */
+  .center-area .card.normal-card:not(.empty-card):not(.card-morph-layer),
+  .center-area .card.skipbo-text:not(.card-morph-layer) {
     @apply relative;
   }
 
