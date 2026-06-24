@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.10.0](https://github.com/klbsjpolp/skip-bo/compare/v2.9.0...v2.10.0) (2026-06-24)
+
+
+### Features
+
+* **web:** add Rummy theme as new default ([a28d0c3](https://github.com/klbsjpolp/skip-bo/commit/a28d0c3980b303bb70e4d185b3e744c90a5c1d30))
+* **web:** make Rummy a dark theme with corner stars ([8c29b58](https://github.com/klbsjpolp/skip-bo/commit/8c29b5893b72317d0d65d88d1c743ec97736ba03))
+* **web:** make Rummy drag star-burst follow the ghost card ([588b557](https://github.com/klbsjpolp/skip-bo/commit/588b557219de44d2d38e3d37b98524b6d7633095))
+* **web:** play Rummy select star-burst when a drag begins ([cbe5d55](https://github.com/klbsjpolp/skip-bo/commit/cbe5d554c31ce3eecdcd7cd808f4079204b3bbbb))
+
+
+### Bug Fixes
+
+* **web:** hide Rummy corner numbers on the drag-source card ([66852d7](https://github.com/klbsjpolp/skip-bo/commit/66852d70ecb3ae7ae4159b0327d5cab699e42dd8))
+* **web:** keep Rummy Skip-Bo morph layers absolute on build piles ([ecc53a6](https://github.com/klbsjpolp/skip-bo/commit/ecc53a699e4813f95970b8993ed3515c13c5dd57))
+* **web:** light Rummy build-pile star on drag start, not just hover ([0eb8296](https://github.com/klbsjpolp/skip-bo/commit/0eb8296dc23f6ffa9f8eb34f5fb020fba2bb3d74))
+* **web:** light up Rummy empty-pile star outline when aimed at ([8778250](https://github.com/klbsjpolp/skip-bo/commit/8778250fd378aa97408807f3af7d6fcb41dc072a))
+* **web:** show white card border on Rummy build/retrait piles ([131c073](https://github.com/klbsjpolp/skip-bo/commit/131c073c505c1126fc536a8a5c2901e12c2552a1))
+
 ## [2.9.0](https://github.com/klbsjpolp/skip-bo/compare/v2.8.1...v2.9.0) (2026-06-19)
 
 
