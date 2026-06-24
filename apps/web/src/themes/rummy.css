@@ -305,9 +305,17 @@
      selected — the motion cue, on top of the persistent lift + glow. The stars
      sit in a ring beyond the card edges, so they radiate around it, not over
      the value. `.card-corner-inset` exists on face-up cards; `.back` covers
-     face-down cards (e.g. an opponent selecting from their hidden hand). */
+     face-down cards (e.g. an opponent selecting from their hidden hand).
+
+     The drag ghost (`.card-drag-ghost`, portaled to <body> and following the
+     pointer) fires the same burst so the stars travel with the card from the
+     moment the drag begins, instead of staying behind in the empty slot. The
+     source card is `.selected` too, but it's hidden during the drag so its own
+     burst never shows. */
   .card.selected .card-corner-inset::after,
-  .card.selected .back::after {
+  .card.selected .back::after,
+  .card-drag-ghost .card-corner-inset::after,
+  .card-drag-ghost .back::after {
     @apply content-[''] absolute z-1 pointer-events-none bg-no-repeat bg-center bg-contain;
     top: 50%;
     left: 50%;
@@ -319,16 +327,6 @@
     transform: translate(-50%, -50%);
     background-image: var(--rummy-select-burst);
     animation: rummySelectBurst 560ms ease-out forwards;
-  }
-
-  /* Starting a drag both selects the source card and hides it (the card
-     follows the pointer as a ghost). Keep the star-burst firing in the
-     now-empty slot — the burst pseudo would otherwise inherit the card's
-     visibility:hidden. Only the burst is re-shown; the card body and corner
-     numbers stay hidden. */
-  .card.selected.is-drag-source .card-corner-inset::after,
-  .card.selected.is-drag-source .back::after {
-    visibility: visible;
   }
 
   /* === Player / center area overrides === */
