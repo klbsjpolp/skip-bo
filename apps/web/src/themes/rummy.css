@@ -347,13 +347,18 @@
 
   /* Aiming a card at a valid EMPTY pile lights its star yellow. Covers both
      shapes the empty slot takes: nested inside a highlighted drop-indicator
-     wrapper (build piles), or being the drop-indicator itself. Matches the
-     hover (selection) and is-drag-over (drag) aim states. */
+     wrapper (e.g. the deck/discard slots), or being the drop-indicator itself
+     (build piles: EmptyCard renders `.card.empty-card` and `.drop-indicator
+     can-drop` on the same div, so the self-case selectors are required, not
+     just the descendant ones). Matches hover (selection), is-drag-over
+     (drag-over a specific pile), and drag-active-but-not-yet-hovered (every
+     valid target lights up as soon as a drag starts). */
   .drop-indicator.can-drop:hover .card.empty-card,
   .drop-indicator.is-drag-over .card.empty-card,
   .card.empty-card.can-drop:hover,
   .card.empty-card.is-drag-over,
-  body[data-drag-active='true'] .drop-indicator.can-drop .card.empty-card {
+  body[data-drag-active='true'] .drop-indicator.can-drop .card.empty-card,
+  body[data-drag-active='true'] .card.empty-card.can-drop {
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 10 L59.4 37.1 L88.04 37.64 L65.22 54.94 L73.5 82.36 L50 66 L26.5 82.36 L34.78 54.94 L11.96 37.64 L40.6 37.1 Z' fill='none' stroke='%23f4c20d' stroke-width='3' stroke-linejoin='round'/></svg>");
   }
 
