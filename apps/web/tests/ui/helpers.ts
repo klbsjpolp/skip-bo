@@ -35,7 +35,12 @@ export const gotoApp = async (page: Page, { theme = 'theme-paper', runtimeConfig
   await expect(page.getByTestId('app-main')).toBeVisible();
 };
 
-export const gotoFixture = async (page: Page, fixture: UiFixtureName, theme: Theme) => {
+export const gotoFixture = async (
+  page: Page,
+  fixture: UiFixtureName,
+  theme: Theme,
+  extraQuery: Record<string, string> = {},
+) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addInitScript(
     ({ activeTheme, stockSize }) => {
@@ -50,7 +55,8 @@ export const gotoFixture = async (page: Page, fixture: UiFixtureName, theme: The
     { activeTheme: theme, stockSize: 30 },
   );
 
-  await page.goto(`/?fixture=${fixture}`);
+  const params = new URLSearchParams({ fixture, ...extraQuery });
+  await page.goto(`/?${params.toString()}`);
   await page.addStyleTag({ content: stableScreenshotCss });
   await waitForStableUi(page, fixture);
 };
