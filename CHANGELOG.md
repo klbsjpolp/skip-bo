@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.10.6](https://github.com/klbsjpolp/skip-bo/compare/v2.10.5...v2.10.6) (2026-06-25)
+
+
+### Bug Fixes
+
+* **web:** recover from stale code-split chunk load failures ([cb70fdd](https://github.com/klbsjpolp/skip-bo/commit/cb70fdd0638e572b1e45bf47dc0df7b6dfdbc853))
+
 ## [2.10.5](https://github.com/klbsjpolp/skip-bo/compare/v2.10.4...v2.10.5) (2026-06-25)
 
 ## [2.10.4](https://github.com/klbsjpolp/skip-bo/compare/v2.10.3...v2.10.4) (2026-06-25)
