@@ -16,7 +16,12 @@ import { canPlayCard } from '@/lib/validators';
 import { createOnlineRoom, joinOnlineRoom } from '@/online/api';
 import { getStoredStockSize } from '@/state/initialGameState';
 import { clearOnlineSession, loadOnlineSession, saveOnlineSession } from '@/state/sessionPersistence';
-import { getRequestedUiFixtureName, getUiFixture, type UiFixtureName } from '@/testing/uiFixtures';
+import {
+  getRequestedUiFixtureName,
+  getStatsDialogFixtureRecord,
+  getUiFixture,
+  type UiFixtureName,
+} from '@/testing/uiFixtures';
 import { DebugStrip } from '@/components/DebugStrip';
 import { usePwaVersionGate } from '@/hooks/usePwaVersionGate';
 import { useThemeColorMeta } from '@/hooks/useThemeColorMeta';
@@ -52,6 +57,7 @@ function FixtureApp({ fixtureName }: { fixtureName: UiFixtureName }) {
       onReplay={() => undefined}
       onStartLocalGame={() => undefined}
       onStartOnlineGame={() => Promise.resolve()}
+      statsRecord={getStatsDialogFixtureRecord()}
     />
   );
 }
