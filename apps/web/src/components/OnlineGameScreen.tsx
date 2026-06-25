@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import type { CreateRoomResponse } from '@klbsjpolp/realtime-core';
 
@@ -10,6 +10,7 @@ import { OnlineGameBoard } from '@/components/OnlineGameBoard';
 import { OnlineStatusStrip } from '@/components/OnlineStatusStrip';
 import { useLocalSkipBoGame } from '@/hooks/useLocalSkipBoGame';
 import { useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
+import { buildGameStatsSnapshot, useGameStatsRecorder } from '@/hooks/useGameStatsRecorder';
 import { canPlayCard } from '@/lib/validators';
 
 export interface OnlineGameScreenProps extends SessionScreenProps {
@@ -67,6 +68,19 @@ function OnlineGameScreen({
     lobbyRemovalReason,
   } = useOnlineSkipBoGame(session);
   const { gameState: localGameState } = useLocalSkipBoGame();
+
+  // Record stats only once the game is actually being played (not during the
+  // lobby). Every seat keeps its own local history; only the host emits the
+  // centralized report so a finished game is counted once globally.
+  const isLiveGame = roomStatus === 'ACTIVE' || roomStatus === 'FINISHED';
+  const statsSnapshot = useMemo(
+    () => (isLiveGame ? buildGameStatsSnapshot(gameState, 'online') : null),
+    [isLiveGame, gameState],
+  );
+  const { lastRecord: statsRecord } = useGameStatsRecorder(statsSnapshot, {
+    mode: 'online',
+    isCentralReporter: isLocalHost,
+  });
 
   // Online state is rebuilt from the server snapshot after a reload, so applying
   // a pending update is lossless. Only do it at a "safe" moment — never while it
@@ -146,6 +160,7 @@ function OnlineGameScreen({
         onStartLocalGame={onStartLocalGame}
         onStartOnlineGame={onStartOnlineGame}
         onUpdateNow={onUpdateNow}
+        statsRecord={statsRecord}
         statusStrip={
           <OnlineStatusStrip
             canStartGame={canStartGame}
