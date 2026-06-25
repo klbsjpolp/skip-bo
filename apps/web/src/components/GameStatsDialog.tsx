@@ -18,10 +18,10 @@ const formatClock = (ms: number): string => {
   return minutes > 0 ? `${minutes} min ${seconds.toString().padStart(2, '0')} s` : `${seconds} s`;
 };
 
-const formatDateTime = (iso: string): string => {
+const formatTime = (iso: string): string => {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' });
+  return date.toLocaleTimeString('fr-FR', { timeStyle: 'short' });
 };
 
 const formatMode = (mode: GameStatsMode): string => (mode === 'online' ? 'En ligne' : 'Local');
@@ -61,16 +61,15 @@ export function GameStatsDialog({ record }: GameStatsDialogProps) {
         <DialogHeader>
           <DialogTitle>Statistiques de la partie</DialogTitle>
           <DialogDescription>
-            {formatMode(record.mode)} · {record.playerCount} joueurs · version {record.appVersion}
+            {formatMode(record.mode)}
+            {record.mode === 'online' ? ` · ${record.playerCount} joueurs · version ${record.appVersion}` : null}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          <SummaryItem label="Début" value={formatDateTime(record.startedAt)} />
+          <SummaryItem label="Début" value={formatTime(record.startedAt)} />
           <SummaryItem label="Durée" value={formatClock(record.durationMs)} />
-          <SummaryItem label="Tours" value={String(record.totalTurns)} />
           <SummaryItem label="Cartes au départ" value={String(record.stockSize)} />
-          <SummaryItem label="Vainqueur" value={record.winnerName ?? 'Aucun'} />
         </div>
 
         <div className="overflow-x-auto">
@@ -80,7 +79,6 @@ export function GameStatsDialog({ record }: GameStatsDialogProps) {
                 <th className="py-1 pr-3 font-medium">Joueur</th>
                 <th className="py-1 px-2 text-right font-medium">Tours</th>
                 <th className="py-1 px-2 text-right font-medium">Temps</th>
-                <th className="py-1 px-2 text-right font-medium">Jouées</th>
                 <th className="py-1 pl-2 text-right font-medium">Restantes</th>
               </tr>
             </thead>
@@ -95,7 +93,6 @@ export function GameStatsDialog({ record }: GameStatsDialogProps) {
                   </td>
                   <td className="py-1.5 px-2 text-right tabular-nums">{player.turns}</td>
                   <td className="py-1.5 px-2 text-right tabular-nums">{formatClock(player.playTimeMs)}</td>
-                  <td className="py-1.5 px-2 text-right tabular-nums">{player.cardsCleared}</td>
                   <td className="py-1.5 pl-2 text-right tabular-nums">{player.leftoverStock}</td>
                 </tr>
               ))}
