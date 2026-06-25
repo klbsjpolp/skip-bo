@@ -2,9 +2,11 @@ import { type ReactNode } from 'react';
 
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { Button } from '@/components/ui/button';
+import { GameStatsDialog } from '@/components/GameStatsDialog';
 import NewGame from '@/components/NewGame';
 import { APP_VERSION } from '@/lib/appVersion';
 import { useThemeUsageGameGate } from '@/hooks/useThemeUsageReporter';
+import type { GameStatsRecord } from '@/monitoring/gameStats';
 import type { UiFixtureName } from '@/testing/uiFixtures';
 
 export interface AppShellProps {
@@ -19,6 +21,8 @@ export interface AppShellProps {
   onStartLocalGame: () => void;
   onStartOnlineGame: (stockSize?: number) => Promise<void>;
   onUpdateNow?: () => void;
+  /** Stats for the just-finished game; surfaces a button on the victory screen. */
+  statsRecord?: GameStatsRecord | null;
   statusStrip?: ReactNode;
   updateNotice?: ReactNode;
 }
@@ -40,6 +44,7 @@ export function AppShell({
   onStartLocalGame,
   onStartOnlineGame,
   onUpdateNow,
+  statsRecord,
   statusStrip,
   updateNotice,
 }: AppShellProps) {
@@ -70,10 +75,11 @@ export function AppShell({
         {updateNotice ? <div className="mb-3">{updateNotice}</div> : null}
         {gameBoard}
         {isGameOver && (
-          <div className="mt-5 text-center">
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <Button onClick={() => void onReplay()} size="lg" data-testid="replay-button">
               Rejouer
             </Button>
+            {statsRecord ? <GameStatsDialog record={statsRecord} /> : null}
           </div>
         )}
         <div className="mt-4 flex items-center gap-3 justify-between">

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 
 import type { CreateRoomResponse } from '@klbsjpolp/realtime-core';
 
@@ -21,6 +21,7 @@ import { DebugStrip } from '@/components/DebugStrip';
 import { usePwaVersionGate } from '@/hooks/usePwaVersionGate';
 import { useThemeColorMeta } from '@/hooks/useThemeColorMeta';
 import { useThemeUsageReporter } from '@/hooks/useThemeUsageReporter';
+import { buildGameStatsSnapshot, useGameStatsRecorder } from '@/hooks/useGameStatsRecorder';
 
 // Code-split: the online stack (host runtime, online hook, online board, lobby
 // dialogs) is fetched only when a player actually starts or joins an online
@@ -83,6 +84,12 @@ function LocalGameScreen({
     selectCard,
   } = useLocalSkipBoGame();
 
+  const statsSnapshot = useMemo(() => buildGameStatsSnapshot(gameState, 'local'), [gameState]);
+  const { lastRecord: statsRecord } = useGameStatsRecorder(statsSnapshot, {
+    mode: 'local',
+    isCentralReporter: true,
+  });
+
   // Apply a pending update without a wall-clock deadline: a service worker that
   // finishes downloading minutes after open is still caught on the next idle
   // render, while an in-progress game is never reloaded out from under the
@@ -126,6 +133,7 @@ function LocalGameScreen({
       onStartLocalGame={onStartLocalGame}
       onStartOnlineGame={onStartOnlineGame}
       onUpdateNow={onUpdateNow}
+      statsRecord={statsRecord}
       updateNotice={updateNotice}
     />
   );
