@@ -1,5 +1,5 @@
 import type { Card, GameConfig, GameState, Player, SelectedCard } from '@/types';
-import type { GameStatsRecord } from '@/monitoring/gameStats';
+import type { GameStatsMode, GameStatsRecord } from '@/monitoring/gameStats';
 import { MESSAGES } from '@/lib/config';
 
 export const uiFixtureNames = [
@@ -158,45 +158,59 @@ export const getUiFixture = (fixtureName: UiFixtureName): GameState => fixtureFa
 
 // Deterministic finished-game record for the stats-dialog visual baseline.
 // Fixed timestamps/durations keep the screenshot stable; the start time is also
-// timezone-pinned by the spec since it is rendered with the local locale.
+// timezone-pinned by the spec since it is rendered with the local locale. The
+// header differs by mode (online shows the player count + version), so the mode
+// is parameterized to cover both variants. Online play is human-vs-human, so the
+// opponent is a named human rather than the AI used locally.
 const STATS_DIALOG_FIXTURE_START = '2026-06-25T14:03:00.000Z';
 
-export const getStatsDialogFixtureRecord = (): GameStatsRecord => ({
-  id: 'fixture-game',
-  schemaVersion: 1,
-  appVersion: 'v1.0.0',
-  mode: 'local',
-  startedAt: STATS_DIALOG_FIXTURE_START,
-  endedAt: new Date(Date.parse(STATS_DIALOG_FIXTURE_START) + 510_000).toISOString(),
-  durationMs: 510_000,
-  totalTurns: 24,
-  playerCount: 2,
-  stockSize: 30,
-  winnerIndex: 0,
-  winnerName: 'Joueur',
-  winnerIsAI: false,
-  players: [
-    {
-      index: 0,
-      name: 'Joueur',
-      isAI: false,
-      startStock: 30,
-      leftoverStock: 0,
-      cardsCleared: 30,
-      turns: 12,
-      playTimeMs: 270_000,
-      isWinner: true,
-    },
-    {
-      index: 1,
-      name: 'IA',
-      isAI: true,
-      startStock: 30,
-      leftoverStock: 7,
-      cardsCleared: 23,
-      turns: 12,
-      playTimeMs: 240_000,
-      isWinner: false,
-    },
-  ],
-});
+export const getStatsDialogFixtureRecord = (mode: GameStatsMode = 'local'): GameStatsRecord => {
+  const isOnline = mode === 'online';
+  return {
+    id: 'fixture-game',
+    schemaVersion: 1,
+    appVersion: 'v1.0.0',
+    mode,
+    startedAt: STATS_DIALOG_FIXTURE_START,
+    endedAt: new Date(Date.parse(STATS_DIALOG_FIXTURE_START) + 510_000).toISOString(),
+    durationMs: 510_000,
+    totalTurns: 24,
+    playerCount: 2,
+    stockSize: 30,
+    winnerIndex: 0,
+    winnerName: isOnline ? 'Alice' : 'Joueur',
+    winnerIsAI: false,
+    players: [
+      {
+        index: 0,
+        name: isOnline ? 'Alice' : 'Joueur',
+        isAI: false,
+        startStock: 30,
+        leftoverStock: 0,
+        cardsCleared: 30,
+        turns: 12,
+        playTimeMs: 270_000,
+        isWinner: true,
+      },
+      {
+        index: 1,
+        name: isOnline ? 'Bob' : 'IA',
+        isAI: !isOnline,
+        startStock: 30,
+        leftoverStock: 7,
+        cardsCleared: 23,
+        turns: 12,
+        playTimeMs: 240_000,
+        isWinner: false,
+      },
+    ],
+  };
+};
+
+/** Reads the stats-dialog fixture mode from the URL (`?statsMode=online`). */
+export const getRequestedStatsDialogMode = (): GameStatsMode => {
+  if (typeof window === 'undefined') {
+    return 'local';
+  }
+  return new URLSearchParams(window.location.search).get('statsMode') === 'online' ? 'online' : 'local';
+};

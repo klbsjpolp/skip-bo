@@ -17,6 +17,7 @@ import { createOnlineRoom, joinOnlineRoom } from '@/online/api';
 import { getStoredStockSize } from '@/state/initialGameState';
 import { clearOnlineSession, loadOnlineSession, saveOnlineSession } from '@/state/sessionPersistence';
 import {
+  getRequestedStatsDialogMode,
   getRequestedUiFixtureName,
   getStatsDialogFixtureRecord,
   getUiFixture,
@@ -57,7 +58,7 @@ function FixtureApp({ fixtureName }: { fixtureName: UiFixtureName }) {
       onReplay={() => undefined}
       onStartLocalGame={() => undefined}
       onStartOnlineGame={() => Promise.resolve()}
-      statsRecord={getStatsDialogFixtureRecord()}
+      statsRecord={getStatsDialogFixtureRecord(getRequestedStatsDialogMode())}
     />
   );
 }
