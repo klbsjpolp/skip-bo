@@ -81,6 +81,21 @@ describe('chunkLoadRecovery', () => {
     expect(reloadMock).toHaveBeenCalledTimes(1);
   });
 
+  it('still reloads when sessionStorage is unavailable (private mode)', async () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('storage disabled');
+    });
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('storage disabled');
+    });
+
+    const { handleChunkLoadFailure } = await loadModule();
+    handleChunkLoadFailure(new Error('Importing a module script failed.'));
+
+    expect(reloadMock).toHaveBeenCalledTimes(1);
+    expect(sentryCaptureException).not.toHaveBeenCalled();
+  });
+
   it('registers the window listener only once', async () => {
     const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
     const { installChunkLoadRecovery } = await loadModule();
