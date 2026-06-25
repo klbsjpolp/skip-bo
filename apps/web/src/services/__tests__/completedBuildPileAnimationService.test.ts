@@ -60,6 +60,7 @@ const createGameState = (): GameState => ({
     DISCARD_PILES_COUNT: 4,
     HAND_SIZE: 5,
     SKIP_BO_CARDS: 18,
+    CARD_COPIES_PER_RANK: 12,
     STOCK_SIZE: 30,
   },
 });

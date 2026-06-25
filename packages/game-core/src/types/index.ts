@@ -71,6 +71,7 @@ export type Theme = ThemeDetail['value'];
 export interface GameConfig {
   DECK_SIZE: number;
   SKIP_BO_CARDS: number;
+  CARD_COPIES_PER_RANK: number;
   HAND_SIZE: number;
   STOCK_SIZE: number;
   BUILD_PILES_COUNT: number;

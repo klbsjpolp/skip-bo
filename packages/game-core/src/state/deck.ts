@@ -12,9 +12,9 @@ export const createDeck = (config: GameConfig): Card[] => {
   // Skip-Bo
   for (let i = 0; i < config.SKIP_BO_CARDS; i++) deck.push(createCard(config.CARD_VALUES_SKIP_BO, true));
 
-  // 12 × (1-12)
+  // CARD_COPIES_PER_RANK × (CARD_VALUES_MIN-CARD_VALUES_MAX)
   for (let v = config.CARD_VALUES_MIN; v <= config.CARD_VALUES_MAX; v++)
-    for (let i = 0; i < 12; i++) deck.push(createCard(v, false));
+    for (let i = 0; i < config.CARD_COPIES_PER_RANK; i++) deck.push(createCard(v, false));
 
   return shuffle(deck);
 };

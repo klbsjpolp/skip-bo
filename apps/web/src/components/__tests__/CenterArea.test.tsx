@@ -8,6 +8,7 @@ import type { Card, GameConfig, GameState, Player } from '@/types';
 const FIXTURE_CONFIG: GameConfig = {
   DECK_SIZE: 162,
   SKIP_BO_CARDS: 18,
+  CARD_COPIES_PER_RANK: 12,
   HAND_SIZE: 5,
   STOCK_SIZE: 30,
   BUILD_PILES_COUNT: 4,

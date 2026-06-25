@@ -65,16 +65,46 @@ export function getStoredStockSize(): number {
   return DEFAULT_STOCK_SIZE;
 }
 
+// Standard Skip-Bo deck: 12 copies each of ranks 1-12 (144 cards) + 18 Skip-Bo cards (162 total).
+const BASE_CARD_COPIES_PER_RANK = 12;
+const BASE_SKIP_BO_CARDS = 18;
+
+// When dealing leaves fewer than this many cards in the draw pile, grow the deck by adding
+// extra "decks worth" of cards (2 copies of each rank + 3 Skip-Bo cards = 27 cards per step)
+// until the remaining draw pile is large enough again.
+const MIN_REMAINING_DECK_CARDS = 60;
+const CARD_COPIES_PER_RANK_STEP = 2;
+const SKIP_BO_CARDS_STEP = 3;
+
 function getGameConfig(options: InitialGameStateOptions = {}): GameConfig {
+  const stockSize = parseStockSize(options.stockSize) ?? getStoredStockSize();
+  const playerCount = parsePlayerCount(options.playerCount) ?? 2;
+  const handSize = 5;
+  const cardValuesMin = 1;
+  const cardValuesMax = 12;
+  const rankCount = cardValuesMax - cardValuesMin + 1;
+  const dealtCards = playerCount * (stockSize + handSize);
+
+  let cardCopiesPerRank = BASE_CARD_COPIES_PER_RANK;
+  let skipBoCards = BASE_SKIP_BO_CARDS;
+  let deckSize = cardCopiesPerRank * rankCount + skipBoCards;
+
+  while (deckSize - dealtCards < MIN_REMAINING_DECK_CARDS) {
+    cardCopiesPerRank += CARD_COPIES_PER_RANK_STEP;
+    skipBoCards += SKIP_BO_CARDS_STEP;
+    deckSize = cardCopiesPerRank * rankCount + skipBoCards;
+  }
+
   return {
-    DECK_SIZE: 162,
-    SKIP_BO_CARDS: 18,
-    HAND_SIZE: 5,
-    STOCK_SIZE: parseStockSize(options.stockSize) ?? getStoredStockSize(),
+    DECK_SIZE: deckSize,
+    SKIP_BO_CARDS: skipBoCards,
+    CARD_COPIES_PER_RANK: cardCopiesPerRank,
+    HAND_SIZE: handSize,
+    STOCK_SIZE: stockSize,
     BUILD_PILES_COUNT: 4,
     DISCARD_PILES_COUNT: 4,
-    CARD_VALUES_MIN: 1,
-    CARD_VALUES_MAX: 12,
+    CARD_VALUES_MIN: cardValuesMin,
+    CARD_VALUES_MAX: cardValuesMax,
     CARD_VALUES_SKIP_BO: 0,
   };
 }
