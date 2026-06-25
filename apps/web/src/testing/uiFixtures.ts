@@ -1,4 +1,5 @@
 import type { Card, GameConfig, GameState, Player, SelectedCard } from '@/types';
+import type { GameStatsRecord } from '@/monitoring/gameStats';
 import { MESSAGES } from '@/lib/config';
 
 export const uiFixtureNames = [
@@ -154,3 +155,48 @@ export const getRequestedUiFixtureName = (): UiFixtureName | null => {
 };
 
 export const getUiFixture = (fixtureName: UiFixtureName): GameState => fixtureFactories[fixtureName]();
+
+// Deterministic finished-game record for the stats-dialog visual baseline.
+// Fixed timestamps/durations keep the screenshot stable; the start time is also
+// timezone-pinned by the spec since it is rendered with the local locale.
+const STATS_DIALOG_FIXTURE_START = '2026-06-25T14:03:00.000Z';
+
+export const getStatsDialogFixtureRecord = (): GameStatsRecord => ({
+  id: 'fixture-game',
+  schemaVersion: 1,
+  appVersion: 'v1.0.0',
+  mode: 'local',
+  startedAt: STATS_DIALOG_FIXTURE_START,
+  endedAt: new Date(Date.parse(STATS_DIALOG_FIXTURE_START) + 510_000).toISOString(),
+  durationMs: 510_000,
+  totalTurns: 24,
+  playerCount: 2,
+  stockSize: 30,
+  winnerIndex: 0,
+  winnerName: 'Joueur',
+  winnerIsAI: false,
+  players: [
+    {
+      index: 0,
+      name: 'Joueur',
+      isAI: false,
+      startStock: 30,
+      leftoverStock: 0,
+      cardsCleared: 30,
+      turns: 12,
+      playTimeMs: 270_000,
+      isWinner: true,
+    },
+    {
+      index: 1,
+      name: 'IA',
+      isAI: true,
+      startStock: 30,
+      leftoverStock: 7,
+      cardsCleared: 23,
+      turns: 12,
+      playTimeMs: 240_000,
+      isWinner: false,
+    },
+  ],
+});
