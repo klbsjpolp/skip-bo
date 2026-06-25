@@ -27,6 +27,13 @@ export default defineConfig(({ mode }) => {
   return {
     base,
     envDir: path.resolve(__dirname, '../..'),
+    server: {
+      // Honor a PORT assigned by the environment (e.g. the preview harness),
+      // binding it strictly so the proxy mapping stays correct. Without PORT,
+      // fall back to 5173 and let Vite auto-increment if it's busy.
+      port: process.env.PORT ? Number(process.env.PORT) : 5173,
+      strictPort: Boolean(process.env.PORT),
+    },
     build: {
       sourcemap: 'hidden',
       // The vendor chunk below is intentionally large but changes rarely, so it
