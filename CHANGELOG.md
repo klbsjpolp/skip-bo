@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.10.2](https://github.com/klbsjpolp/skip-bo/compare/v2.10.1...v2.10.2) (2026-06-25)
+
+
+### Bug Fixes
+
+* **game-core:** scale deck size to avoid early draw-pile depletion ([dde0bc5](https://github.com/klbsjpolp/skip-bo/commit/dde0bc5dbf0a35ee5bba7c743dd1fd553f3e95da))
+
 ## [2.10.1](https://github.com/klbsjpolp/skip-bo/compare/v2.10.0...v2.10.1) (2026-06-24)
 
 ## [2.10.0](https://github.com/klbsjpolp/skip-bo/compare/v2.9.0...v2.10.0) (2026-06-24)
