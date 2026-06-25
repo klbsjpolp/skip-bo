@@ -4,7 +4,9 @@ import './index.css';
 import Root from '@/Root.tsx';
 import { reactErrorHandler } from '@sentry/react';
 import { initializePwaUpdates } from '@/lib/pwaUpdates';
+import { installChunkLoadRecovery } from '@/lib/chunkLoadRecovery';
 
+installChunkLoadRecovery();
 initializePwaUpdates();
 
 ReactDOM.createRoot(document.getElementById('root')!, {
