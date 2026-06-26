@@ -209,4 +209,126 @@ describe('createGameStatsTracker', () => {
     expect(record.winnerIsAI).toBeNull();
     expect(record.players.every((player) => !player.isWinner)).toBe(true);
   });
+
+  it('generates an id when no generator is provided', () => {
+    const onComplete = vi.fn();
+    const tracker = createGameStatsTracker({ appVersion: 'v1', mode: 'local', onComplete });
+
+    tracker.observe(
+      snap(false, 0, null, [
+        ['Alice', false, 10],
+        ['Bot', true, 10],
+      ]),
+      0,
+    );
+    tracker.observe(
+      snap(true, 0, 0, [
+        ['Alice', false, 0],
+        ['Bot', true, 4],
+      ]),
+      1000,
+    );
+
+    const record = onComplete.mock.calls[0][0] as GameStatsRecord;
+    expect(typeof record.id).toBe('string');
+    expect(record.id.length).toBeGreaterThan(0);
+  });
+
+  it('ignores a redundant visibility change', () => {
+    const onComplete = vi.fn();
+    const tracker = makeTracker(onComplete);
+
+    tracker.observe(
+      snap(false, 0, null, [
+        ['Alice', false, 10],
+        ['Bot', true, 10],
+      ]),
+      0,
+    );
+    tracker.setHidden(false, 500); // already visible — no-op, the segment keeps running
+    tracker.observe(
+      snap(true, 0, 0, [
+        ['Alice', false, 0],
+        ['Bot', true, 6],
+      ]),
+      2000,
+    );
+
+    const record = onComplete.mock.calls[0][0] as GameStatsRecord;
+    expect(record.players[0].playTimeMs).toBe(2000);
+  });
+
+  it('does not count time across a turn change that happens while hidden', () => {
+    const onComplete = vi.fn();
+    const tracker = makeTracker(onComplete);
+
+    tracker.observe(
+      snap(false, 0, null, [
+        ['Alice', false, 10],
+        ['Bot', true, 10],
+      ]),
+      0,
+    );
+    tracker.setHidden(true, 1000); // P0 has played 1000ms
+    tracker.observe(
+      snap(false, 1, null, [
+        ['Alice', false, 10],
+        ['Bot', true, 9],
+      ]),
+      5000,
+    ); // turn passes to P1 while hidden
+    tracker.setHidden(false, 6000); // resume on P1's turn
+    tracker.observe(
+      snap(true, 1, 1, [
+        ['Alice', false, 8],
+        ['Bot', true, 0],
+      ]),
+      7000,
+    );
+
+    const record = onComplete.mock.calls[0][0] as GameStatsRecord;
+    expect(record.totalTurns).toBe(2);
+    expect(record.players[0].playTimeMs).toBe(1000); // only the pre-hide time
+    expect(record.players[1].playTimeMs).toBe(1000); // only the post-resume time
+  });
+
+  it('does not open a recording for an empty-player snapshot', () => {
+    const onComplete = vi.fn();
+    const tracker = makeTracker(onComplete);
+
+    tracker.observe(snap(false, 0, null, []), 0);
+
+    expect(tracker.isRecording()).toBe(false);
+    expect(onComplete).not.toHaveBeenCalled();
+  });
+
+  it('clamps a missing or negative leftover stock to zero', () => {
+    const onComplete = vi.fn();
+    const tracker = makeTracker(onComplete);
+
+    tracker.observe(
+      snap(false, 0, null, [
+        ['Alice', false, 10],
+        ['Bot', true, 10],
+      ]),
+      0,
+    );
+    // Final snapshot drops the second player and reports a negative count.
+    tracker.observe(
+      {
+        gameIsOver: true,
+        currentPlayerIndex: 0,
+        winnerIndex: 0,
+        stockSize: 10,
+        players: [{ name: 'Alice', isAI: false, leftoverStock: -3 }],
+      },
+      1000,
+    );
+
+    const record = onComplete.mock.calls[0][0] as GameStatsRecord;
+    expect(record.players[0].leftoverStock).toBe(0);
+    expect(record.players[0].cardsCleared).toBe(10);
+    expect(record.players[1].leftoverStock).toBe(0); // missing in final snapshot → 0
+    expect(record.players[1].cardsCleared).toBe(10);
+  });
 });
