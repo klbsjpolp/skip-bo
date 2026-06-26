@@ -110,4 +110,11 @@ describe('reportGameCompleted', () => {
       expect.objectContaining({ tags: expect.objectContaining({ 'game.winner_kind': 'none' }) }),
     );
   });
+
+  it('skips the span when the timestamps are unparseable', () => {
+    reportGameCompleted(baseRecord({ startedAt: 'not-a-date', endedAt: 'not-a-date' }));
+
+    expect(captureMessage).toHaveBeenCalledTimes(1);
+    expect(startInactiveSpan).not.toHaveBeenCalled();
+  });
 });
