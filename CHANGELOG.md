@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.11.0](https://github.com/klbsjpolp/skip-bo/compare/v2.10.6...v2.11.0) (2026-06-27)
+
+
+### Features
+
+* **web:** replace update dot with "Mettre à jour" button ([215068f](https://github.com/klbsjpolp/skip-bo/commit/215068f9dde5a0557edab6061cf70b070716426b))
+
 ## [2.10.6](https://github.com/klbsjpolp/skip-bo/compare/v2.10.5...v2.10.6) (2026-06-25)
 
 
