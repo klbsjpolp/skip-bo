@@ -11,12 +11,14 @@ export interface AppShellProps {
   debugStrip?: ReactNode;
   fixtureName?: UiFixtureName;
   gameBoard: ReactNode;
+  isApplyingUpdate?: boolean;
   isGameOver: boolean;
   isUpdatePending?: boolean;
   onJoinOnlineGame: (roomCode: string) => Promise<void>;
   onReplay: () => Promise<void> | void;
   onStartLocalGame: () => void;
   onStartOnlineGame: (stockSize?: number) => Promise<void>;
+  onUpdateNow?: () => void;
   statusStrip?: ReactNode;
   updateNotice?: ReactNode;
 }
@@ -30,12 +32,14 @@ export function AppShell({
   debugStrip,
   fixtureName,
   gameBoard,
+  isApplyingUpdate = false,
   isGameOver,
   isUpdatePending = false,
   onJoinOnlineGame,
   onReplay,
   onStartLocalGame,
   onStartOnlineGame,
+  onUpdateNow,
   statusStrip,
   updateNotice,
 }: AppShellProps) {
@@ -75,18 +79,15 @@ export function AppShell({
         <div className="mt-4 flex items-center gap-3 justify-between">
           {debugStrip}
           <div className="grow"></div>
+          {isUpdatePending && onUpdateNow ? (
+            <Button size="xs" onClick={onUpdateNow} disabled={isApplyingUpdate} data-testid="app-version-update-button">
+              {isApplyingUpdate ? 'Mise à jour…' : 'Mettre à jour'}
+            </Button>
+          ) : null}
           <p
             className="app-version-badge flex items-center gap-1.5 text-xs text-muted-foreground/80 tabular-nums"
             data-testid="app-version"
           >
-            {isUpdatePending ? (
-              <span
-                aria-label="Mise à jour prête, elle sera appliquée à la prochaine partie"
-                className="inline-block size-2 shrink-0 rounded-full bg-primary"
-                data-testid="app-version-update-dot"
-                title="Mise à jour prête, elle sera appliquée à la prochaine partie"
-              />
-            ) : null}
             Version {APP_VERSION}
           </p>
         </div>
@@ -96,10 +97,12 @@ export function AppShell({
 }
 
 export interface SessionScreenProps {
+  isApplyingUpdate?: boolean;
   isUpdatePending?: boolean;
   onJoinOnlineGame: (roomCode: string) => Promise<void>;
   onReplay: () => Promise<void>;
   onStartLocalGame: () => void;
   onStartOnlineGame: (stockSize?: number) => Promise<void>;
+  onUpdateNow?: () => void;
   updateNotice?: ReactNode;
 }

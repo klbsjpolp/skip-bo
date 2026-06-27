@@ -61,11 +61,13 @@ interface LocalGameScreenProps extends SessionScreenProps {
 
 function LocalGameScreen({
   applyUpdateWhenSafe,
+  isApplyingUpdate,
   isUpdatePending,
   onJoinOnlineGame,
   onReplay,
   onStartLocalGame,
   onStartOnlineGame,
+  onUpdateNow,
   updateNotice,
 }: LocalGameScreenProps) {
   const {
@@ -116,12 +118,14 @@ function LocalGameScreen({
         />
       }
       gameBoard={gameBoard}
+      isApplyingUpdate={isApplyingUpdate}
       isGameOver={gameState.gameIsOver}
       isUpdatePending={isUpdatePending}
       onJoinOnlineGame={onJoinOnlineGame}
       onReplay={onReplay}
       onStartLocalGame={onStartLocalGame}
       onStartOnlineGame={onStartOnlineGame}
+      onUpdateNow={onUpdateNow}
       updateNotice={updateNotice}
     />
   );
@@ -257,12 +261,14 @@ function LiveApp() {
         <OnlineGameScreen
           key={`${onlineSession.roomCode}-${onlineSession.seatToken}`}
           applyUpdateWhenSafe={applyUpdateOnceForCurrentTarget}
+          isApplyingUpdate={isApplyingUpdate}
           isUpdatePending={isUpdatePending}
           onJoinOnlineGame={joinGame}
           onLeaveSession={leaveOnlineSession}
           onReplay={replayCurrentGame}
           onStartLocalGame={startLocalGame}
           onStartOnlineGame={startOnlineGame}
+          onUpdateNow={reloadToUpdate}
           session={onlineSession}
           updateNotice={hasUpdateNotice ? updateNotice : undefined}
         />
@@ -271,11 +277,13 @@ function LiveApp() {
       <LocalGameScreen
         key={`local-${localSessionVersion}`}
         applyUpdateWhenSafe={applyUpdateOnceForCurrentTarget}
+        isApplyingUpdate={isApplyingUpdate}
         isUpdatePending={isUpdatePending}
         onJoinOnlineGame={joinGame}
         onReplay={replayCurrentGame}
         onStartLocalGame={startLocalGame}
         onStartOnlineGame={startOnlineGame}
+        onUpdateNow={reloadToUpdate}
         updateNotice={hasUpdateNotice ? updateNotice : undefined}
       />
     );
