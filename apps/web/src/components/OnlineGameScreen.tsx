@@ -26,12 +26,14 @@ export interface OnlineGameScreenProps extends SessionScreenProps {
  */
 function OnlineGameScreen({
   applyUpdateWhenSafe,
+  isApplyingUpdate,
   isUpdatePending,
   onJoinOnlineGame,
   onLeaveSession,
   onReplay,
   onStartLocalGame,
   onStartOnlineGame,
+  onUpdateNow,
   session,
   updateNotice,
 }: OnlineGameScreenProps) {
@@ -136,12 +138,14 @@ function OnlineGameScreen({
           />
         }
         gameBoard={gameBoard}
+        isApplyingUpdate={isApplyingUpdate}
         isGameOver={gameState.gameIsOver}
         isUpdatePending={isUpdatePending}
         onJoinOnlineGame={onJoinOnlineGame}
         onReplay={onReplay}
         onStartLocalGame={onStartLocalGame}
         onStartOnlineGame={onStartOnlineGame}
+        onUpdateNow={onUpdateNow}
         statusStrip={
           <OnlineStatusStrip
             canStartGame={canStartGame}
