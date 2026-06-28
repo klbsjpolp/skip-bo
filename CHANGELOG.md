@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.12.0](https://github.com/klbsjpolp/skip-bo/compare/v2.11.0...v2.12.0) (2026-06-28)
+
+
+### Features
+
+* **web:** add game-stats core, history, and Sentry reporting ([2660666](https://github.com/klbsjpolp/skip-bo/commit/26606669430a453d9d2c02a3cabb492964f1bb98))
+* **web:** record game stats and show a victory-screen summary ([2f10957](https://github.com/klbsjpolp/skip-bo/commit/2f1095741950efb04038122e005ae5982d67638e))
+
 ## [2.11.0](https://github.com/klbsjpolp/skip-bo/compare/v2.10.6...v2.11.0) (2026-06-27)
 
 
