@@ -87,7 +87,12 @@ export function GameStatsDialog({ record }: GameStatsDialogProps) {
                 <tr key={player.index} className="border-t border-border/60">
                   <td className="py-1.5 pr-3">
                     <span className="inline-flex items-center gap-1.5">
-                      {player.isWinner ? <Trophy className="size-3.5 text-primary" aria-label="Vainqueur" /> : null}
+                      {player.isWinner ? (
+                        <Trophy
+                          className="size-3.5 text-success-foreground bg-success rounded-lg p-0.5"
+                          aria-label="Vainqueur"
+                        />
+                      ) : null}
                       <span className="font-medium">{player.name}</span>
                     </span>
                   </td>
