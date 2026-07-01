@@ -10,7 +10,7 @@ import { OnlineGameBoard } from '@/components/OnlineGameBoard';
 import { OnlineStatusStrip } from '@/components/OnlineStatusStrip';
 import { useLocalSkipBoGame } from '@/hooks/useLocalSkipBoGame';
 import { useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
-import { buildGameStatsSnapshot, useGameStatsRecorder } from '@/hooks/useGameStatsRecorder';
+import { buildGameStatsSnapshot, shouldRecordOnlineStats, useGameStatsRecorder } from '@/hooks/useGameStatsRecorder';
 import { canPlayCard } from '@/lib/validators';
 
 export interface OnlineGameScreenProps extends SessionScreenProps {
@@ -77,7 +77,7 @@ function OnlineGameScreen({
   // `gameState` is the seat-capacity placeholder (4 seats, no display names).
   // Recording it would freeze the wrong player count and generic "IA" names for
   // the whole game (the tracker snapshots names when it opens the recording).
-  const isLiveGame = (roomStatus === 'ACTIVE' || roomStatus === 'FINISHED') && hasGameView;
+  const isLiveGame = shouldRecordOnlineStats(roomStatus, hasGameView);
   const statsSnapshot = useMemo(
     () => (isLiveGame ? buildGameStatsSnapshot(gameState, 'online') : null),
     [isLiveGame, gameState],
