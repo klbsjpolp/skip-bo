@@ -17,4 +17,5 @@
 ## Current Notes
 
 - [ai-discard-strategy.md](ai-discard-strategy.md)
+- [architecture-revision-2026-07.md](architecture-revision-2026-07.md)
 - [online-multiplayer-ui.md](online-multiplayer-ui.md)
