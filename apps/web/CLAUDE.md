@@ -43,6 +43,12 @@ applies **optimistic updates** for `PLAY_CARD`/`DISCARD_CARD`, reconciled when t
 next authoritative view arrives. Lobby data comes from `presence` (there is no
 game view during `WAITING`).
 
+**Placeholder gotcha:** `useOnlineSkipBoGame` returns a seat-capacity placeholder
+`gameState` (`createPlaceholderGameState` — 4 seats, no `displayName`, `isAI` by
+index) until the first real `view` is ingested, while `roomStatus` may already be
+`ACTIVE`/`FINISHED` via presence. Any consumer reading `gameState.players` (stats,
+summaries) must gate on the returned `hasGameView` flag, not on `roomStatus` alone.
+
 ## AI
 
 Entry point: `src/ai/computeBestMove.ts`  
@@ -111,3 +117,9 @@ pnpm test:visual:update
 
 Unit tests: `src/**/__tests__/`  
 E2E + visual: `tests/ui/`
+
+## Coverage
+
+`codecov/patch` is a **required** check — new/changed lines need test coverage.
+Component-inline expressions are awkward to render-test; extract non-trivial logic
+into an exported pure helper (e.g. `shouldRecordOnlineStats`) and unit-test that.
