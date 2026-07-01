@@ -67,6 +67,7 @@ The exact contract lives in [../protocols/realtime-events.md](../protocols/realt
 - `OnlineGameBoard` owns the viewer-relative online presentation and room-aware status controls.
 - `OnlineStatusStrip` is the waiting-room control surface on the play screen; lobby data comes from `presence`.
 - Host and guest share one rendering path (`ingestView`); online animations are inferred from successive `ClientGameView` diffs.
+- Guests apply moves optimistically and the host echoes one authoritative view per move. Echoes that predate a newer in-flight local move (fast select→play, drag-and-drop) are stale and are skipped, not rendered — otherwise they would briefly revert the optimistic play and be mis-inferred as a draw animation.
 
 ## Runtime Topology
 
