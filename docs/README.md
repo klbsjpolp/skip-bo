@@ -55,6 +55,7 @@
 
 - [backlog/README.md](backlog/README.md): rules for non-normative design docs.
 - [backlog/ai-discard-strategy.md](backlog/ai-discard-strategy.md): AI discard-strategy backlog note.
+- [backlog/architecture-revision-2026-07.md](backlog/architecture-revision-2026-07.md): whole-of-game architecture review and phased revision plan.
 
 ## Role Boundaries
 
