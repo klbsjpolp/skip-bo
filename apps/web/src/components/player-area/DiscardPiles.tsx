@@ -1,6 +1,5 @@
 import type { Card as CardType, GameState, MoveResult, Player } from '@/types';
 import type { CSSProperties } from 'react';
-import { Fragment } from 'react';
 
 import { Card } from '@/components/Card';
 import { EmptyCard } from '@/components/EmptyCard.tsx';
@@ -101,6 +100,12 @@ function DiscardPile({
     return { card, cardIdx, isAnimated, key: `discard-${pileIndex}-card-${cardIdx}` };
   });
 
+  // True while the pile's only card is still masked behind the flying
+  // animated replica — visually the pile still reads as empty, so the
+  // "Vide" placeholder should stay shown rather than flip to hidden and
+  // back, which would otherwise mount a second empty-card on top of it.
+  const soleCardMasked = computedPiles.length === 1 && computedPiles[0].isAnimated;
+
   const canInteract = isHuman && isCurrentPlayer;
 
   const handleDiscardPilePress = () => {
@@ -159,26 +164,18 @@ function DiscardPile({
     >
       <EmptyCard
         canDropCard={computedPiles.length === 0}
-        hideLabel={computedPiles.length > 0}
+        hideLabel={computedPiles.length > 0 && !soleCardMasked}
         className="absolute inset-0"
       />
       {computedPiles.map(({ card, cardIdx, isAnimated, key }) => {
         if (isAnimated) {
-          const fakeCard = (
+          return (
             <div
               key={key}
               className="card opacity-0 pointer-events-none"
               style={{ top: `${cardIdx * 20}px`, zIndex: cardIdx }}
             />
           );
-          if (cardIdx === 0)
-            return (
-              <Fragment key={key}>
-                <EmptyCard />
-                {fakeCard}
-              </Fragment>
-            );
-          else return fakeCard;
         }
         const isTop = cardIdx === pile.length - 1;
         if (isTop && isHuman && isCurrentPlayer) {
