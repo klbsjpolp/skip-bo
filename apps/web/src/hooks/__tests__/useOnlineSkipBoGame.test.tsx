@@ -1137,6 +1137,93 @@ describe('useOnlineSkipBoGame', () => {
     expect(result.current.gameState.buildPiles[0]).toHaveLength(1);
   });
 
+  it('relays guest debug actions as events without counting a view echo', async () => {
+    const session = createSession();
+    const { baseState } = createFastPlayStates();
+    const initialView = createOnlineView(baseState, 1);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      socket.emitView(initialView);
+      await Promise.resolve();
+    });
+
+    act(() => {
+      result.current.debugWin();
+    });
+
+    expect(JSON.parse(socket.sent.at(-1) ?? '{}')).toMatchObject({
+      type: 'relay',
+      kind: 'event',
+      payload: { move: { type: 'DEBUG_WIN' } },
+    });
+    expect(getMoveMessages(socket)).toHaveLength(0);
+
+    // Debug events produce no guaranteed echo, so the next view must render.
+    await act(async () => {
+      socket.emitView(createOnlineView(baseState, 2));
+      await Promise.resolve();
+    });
+
+    expect(result.current.gameState.message).toBe(initialView.message);
+  });
+
+  it('drops sends while the socket is not open instead of counting an echo', async () => {
+    const session = createSession();
+    const { baseState } = createFastPlayStates();
+    const initialView = createOnlineView(baseState, 1);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+
+    // Socket still CONNECTING: nothing goes on the wire.
+    act(() => {
+      result.current.sendSetReady('Alice');
+    });
+    expect(socket.sent).toHaveLength(0);
+
+    await act(async () => {
+      socket.open();
+      socket.emitView(initialView);
+      await Promise.resolve();
+    });
+
+    // Socket closed: the move is dropped and must not be counted as owed —
+    // otherwise the first view after reconnecting would be swallowed.
+    await act(async () => {
+      socket.close();
+      await Promise.resolve();
+    });
+    act(() => {
+      result.current.clearSelection();
+    });
+    expect(getMoveMessages(socket).filter((m) => m.payload?.type === 'CLEAR_SELECTION')).toHaveLength(0);
+
+    await act(async () => {
+      vi.advanceTimersByTime(10_000);
+    });
+    const reconnectedSocket = MockWebSocket.instances.at(-1)!;
+    await act(async () => {
+      reconnectedSocket.open();
+      reconnectedSocket.emitView(createOnlineView(baseState, 2));
+      await Promise.resolve();
+    });
+
+    expect(result.current.gameState.message).toBe(initialView.message);
+  });
+
   it('allows the host to start a waiting room as soon as all connected players are ready', async () => {
     const session = createHostSession();
     const allReadyLobbySeats: LobbySeatInfo[] = [
