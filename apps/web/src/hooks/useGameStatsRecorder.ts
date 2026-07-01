@@ -36,6 +36,16 @@ const resolvePlayerName = (player: Player, index: number, aiCount: number): stri
 };
 
 /**
+ * Whether an online game should be recorded this tick. The game must be in a
+ * playable/finished room state *and* a real server view must have been ingested
+ * — until then `gameState` is the seat-capacity placeholder (wrong player count,
+ * generic "IA" names), which the tracker would otherwise freeze for the whole
+ * game since it snapshots names when it opens the recording.
+ */
+export const shouldRecordOnlineStats = (roomStatus: string, hasGameView: boolean): boolean =>
+  (roomStatus === 'ACTIVE' || roomStatus === 'FINISHED') && hasGameView;
+
+/**
  * Projects a `GameState` (local) or cloned `ClientGameView` (online) onto the
  * minimal snapshot the tracker consumes. Online games are always human-vs-human
  * — the view marks opponents `isAI: true` only as a rendering role — so `isAI`

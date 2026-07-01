@@ -5,7 +5,7 @@ import type { Card, GameConfig, GameState, Player } from '@/types';
 import type { GameStatsRecord, GameStatsSnapshot } from '@/monitoring/gameStats';
 import { appendGameStatsRecord } from '@/state/gameStatsHistory';
 import { reportGameCompleted } from '@/monitoring/gameAnalytics';
-import { buildGameStatsSnapshot, useGameStatsRecorder } from '../useGameStatsRecorder';
+import { buildGameStatsSnapshot, shouldRecordOnlineStats, useGameStatsRecorder } from '../useGameStatsRecorder';
 
 vi.mock('@/lib/appVersion', () => ({ APP_VERSION: 'vTEST' }));
 vi.mock('@/state/gameStatsHistory', () => ({ appendGameStatsRecord: vi.fn() }));
@@ -86,6 +86,22 @@ describe('buildGameStatsSnapshot', () => {
     const snapshot = buildGameStatsSnapshot(gameState, 'online');
     expect(snapshot.players[1]).toEqual({ name: 'Bob', isAI: false, leftoverStock: 5 });
     expect(snapshot.players.every((player) => !player.isAI)).toBe(true);
+  });
+});
+
+describe('shouldRecordOnlineStats', () => {
+  it('records only an active/finished game whose real view has been ingested', () => {
+    expect(shouldRecordOnlineStats('ACTIVE', true)).toBe(true);
+    expect(shouldRecordOnlineStats('FINISHED', true)).toBe(true);
+  });
+
+  it('does not record before the first real view (placeholder window)', () => {
+    expect(shouldRecordOnlineStats('ACTIVE', false)).toBe(false);
+    expect(shouldRecordOnlineStats('FINISHED', false)).toBe(false);
+  });
+
+  it('does not record the lobby even once a view exists', () => {
+    expect(shouldRecordOnlineStats('WAITING', true)).toBe(false);
   });
 });
 
