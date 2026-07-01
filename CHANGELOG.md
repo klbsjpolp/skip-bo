@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.12.3](https://github.com/klbsjpolp/skip-bo/compare/v2.12.2...v2.12.3) (2026-07-01)
+
+
+### Bug Fixes
+
+* prevent empty-card flash on discard-into-empty-pile animation ([07b12c6](https://github.com/klbsjpolp/skip-bo/commit/07b12c66babb11f7a445be3b8673c8cd114fe0c0))
+* **web:** make online endgame stats host-authoritative ([d8bd943](https://github.com/klbsjpolp/skip-bo/commit/d8bd94371f9d53a9dbcb81437ac79b0001b34b70))
+
 ## [2.12.2](https://github.com/klbsjpolp/skip-bo/compare/v2.12.1...v2.12.2) (2026-07-01)
 
 
