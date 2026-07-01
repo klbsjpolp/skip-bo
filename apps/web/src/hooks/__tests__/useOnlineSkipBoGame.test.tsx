@@ -7,6 +7,7 @@ import { serializeClientGameView, type ClientGameView } from '@skipbo/skipbo-run
 
 import { inferOpponentTransition, useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
 import { WEBSOCKET_PING_INTERVAL_MS } from '@/config/timing';
+import type { GameStatsRecord } from '@/monitoring/gameStats';
 
 const {
   activeAnimationsState,
@@ -1320,6 +1321,129 @@ describe('useOnlineSkipBoGame', () => {
 
     expect(result.current.lobbyRemovalReason).toBeNull();
     expect(result.current.lastError).toBe('Invalid move');
+  });
+
+  describe('game stats broadcast', () => {
+    const statsRecord: GameStatsRecord = {
+      id: 'game-1',
+      schemaVersion: 1,
+      appVersion: 'vTEST',
+      mode: 'online',
+      startedAt: '2026-04-05T12:00:00.000Z',
+      endedAt: '2026-04-05T12:10:00.000Z',
+      durationMs: 600_000,
+      totalTurns: 12,
+      playerCount: 2,
+      stockSize: 10,
+      winnerIndex: 0,
+      winnerName: 'Alice',
+      winnerIsAI: false,
+      players: [
+        {
+          index: 0,
+          name: 'Alice',
+          isAI: false,
+          startStock: 10,
+          leftoverStock: 0,
+          cardsCleared: 10,
+          turns: 6,
+          playTimeMs: 300_000,
+          isWinner: true,
+        },
+        {
+          index: 1,
+          name: 'Bob',
+          isAI: false,
+          startStock: 10,
+          leftoverStock: 4,
+          cardsCleared: 6,
+          turns: 6,
+          playTimeMs: 300_000,
+          isWinner: false,
+        },
+      ],
+    };
+
+    it('broadcasts the host authoritative record as a relay event to every seat', async () => {
+      const session = createHostSession();
+      const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+      await act(async () => {
+        vi.runOnlyPendingTimers();
+      });
+
+      const socket = MockWebSocket.instances[0];
+      await act(async () => {
+        socket.open();
+        await Promise.resolve();
+      });
+
+      act(() => {
+        result.current.broadcastGameStats(statsRecord);
+      });
+
+      const sent = parseSent(socket);
+      expect(sent).toContainEqual({
+        type: 'relay',
+        kind: 'event',
+        payload: { gameStats: statsRecord },
+        toSeats: undefined,
+      });
+    });
+
+    it('stores the host authoritative record received as a relayed event (guest)', async () => {
+      const session = createSession();
+      const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+      await act(async () => {
+        vi.runOnlyPendingTimers();
+      });
+
+      const socket = MockWebSocket.instances[0];
+      await act(async () => {
+        socket.open();
+        await Promise.resolve();
+      });
+
+      expect(result.current.receivedGameStats).toBeNull();
+
+      await act(async () => {
+        socket.emitMessage({ type: 'relayed', fromSeat: 0, kind: 'event', payload: { gameStats: statsRecord } });
+        await Promise.resolve();
+      });
+
+      expect(result.current.receivedGameStats).toEqual(statsRecord);
+    });
+
+    it('resets the received record when a new game starts', async () => {
+      const session = createSession();
+      const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+      await act(async () => {
+        vi.runOnlyPendingTimers();
+      });
+
+      const socket = MockWebSocket.instances[0];
+      await act(async () => {
+        socket.open();
+        socket.emitMessage({ type: 'relayed', fromSeat: 0, kind: 'event', payload: { gameStats: statsRecord } });
+        await Promise.resolve();
+      });
+
+      expect(result.current.receivedGameStats).toEqual(statsRecord);
+
+      await act(async () => {
+        socket.emitMessage({
+          type: 'gameStarted',
+          activeSeatIndices: [0, 1],
+          currentSeatIndex: 0,
+          gameConfig: { stockSize: 10 },
+        });
+        await Promise.resolve();
+      });
+
+      expect(result.current.receivedGameStats).toBeNull();
+    });
   });
 
   describe('opponent build pile completion (12)', () => {

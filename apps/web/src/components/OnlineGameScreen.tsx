@@ -12,6 +12,7 @@ import { useLocalSkipBoGame } from '@/hooks/useLocalSkipBoGame';
 import { useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
 import { buildGameStatsSnapshot, shouldRecordOnlineStats, useGameStatsRecorder } from '@/hooks/useGameStatsRecorder';
 import { canPlayCard } from '@/lib/validators';
+import { appendGameStatsRecord } from '@/state/gameStatsHistory';
 
 export interface OnlineGameScreenProps extends SessionScreenProps {
   applyUpdateWhenSafe: () => void;
@@ -39,6 +40,7 @@ function OnlineGameScreen({
   updateNotice,
 }: OnlineGameScreenProps) {
   const {
+    broadcastGameStats,
     canStartGame,
     clearSelection,
     connectedSeats,
@@ -59,6 +61,7 @@ function OnlineGameScreen({
     myReadyState,
     playCard,
     playersBySeatIndex,
+    receivedGameStats,
     roomCode,
     roomStatus,
     seatCapacity,
@@ -70,22 +73,44 @@ function OnlineGameScreen({
   } = useOnlineSkipBoGame(session);
   const { gameState: localGameState } = useLocalSkipBoGame();
 
-  // Record stats only once the game is actually being played (not during the
-  // lobby). Every seat keeps its own local history; only the host emits the
-  // centralized report so a finished game is counted once globally.
-  // Gate on `hasGameView`: while a real server view has not been ingested,
-  // `gameState` is the seat-capacity placeholder (4 seats, no display names).
-  // Recording it would freeze the wrong player count and generic "IA" names for
-  // the whole game (the tracker snapshots names when it opens the recording).
-  const isLiveGame = shouldRecordOnlineStats(roomStatus, hasGameView);
+  // Only the host tracks stats: its own view is produced synchronously from
+  // its own state with no network delay, so it is the only client that can
+  // reconstruct an accurate turn count / duration. Guests would otherwise
+  // reconstruct their own approximation from asynchronously-delivered views,
+  // producing different numbers per seat for the same finished game (see the
+  // broadcast below). Gate on `hasGameView`: while a real server view has not
+  // been ingested, `gameState` is the seat-capacity placeholder (4 seats, no
+  // display names). Recording it would freeze the wrong player count and
+  // generic "IA" names for the whole game (the tracker snapshots names when it
+  // opens the recording).
+  const isLiveGame = isLocalHost && shouldRecordOnlineStats(roomStatus, hasGameView);
   const statsSnapshot = useMemo(
     () => (isLiveGame ? buildGameStatsSnapshot(gameState, 'online') : null),
     [isLiveGame, gameState],
   );
-  const { lastRecord: statsRecord } = useGameStatsRecorder(statsSnapshot, {
+  const { lastRecord: hostStatsRecord } = useGameStatsRecorder(statsSnapshot, {
     mode: 'online',
     isCentralReporter: isLocalHost,
   });
+
+  // Broadcast the host's finalized record to every guest so all seats display
+  // the same numbers for the game that just ended.
+  useEffect(() => {
+    if (isLocalHost && hostStatsRecord) {
+      broadcastGameStats(hostStatsRecord);
+    }
+  }, [isLocalHost, hostStatsRecord, broadcastGameStats]);
+
+  // Guests persist the host's authoritative record (rather than a self-tracked
+  // approximation) so the local history stays consistent with what every
+  // other seat saw.
+  useEffect(() => {
+    if (!isLocalHost && receivedGameStats) {
+      appendGameStatsRecord(receivedGameStats);
+    }
+  }, [isLocalHost, receivedGameStats]);
+
+  const statsRecord = isLocalHost ? hostStatsRecord : receivedGameStats;
 
   // Online state is rebuilt from the server snapshot after a reload, so applying
   // a pending update is lossless. Only do it at a "safe" moment — never while it

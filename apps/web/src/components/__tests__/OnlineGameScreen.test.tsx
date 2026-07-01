@@ -2,18 +2,21 @@ import { render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { GameConfig, GameState } from '@/types';
-import type { GameStatsSnapshot } from '@/monitoring/gameStats';
+import type { GameStatsRecord, GameStatsSnapshot } from '@/monitoring/gameStats';
 
 // Capture the snapshot the screen feeds the recorder each render, so we can
-// assert the online recording gate (placeholder window vs. real view).
+// assert the online recording gate (placeholder window vs. real view). The
+// record it returns is controllable so tests can simulate the host's tracker
+// finalizing a game.
 const recorderCalls: (GameStatsSnapshot | null)[] = [];
+let recorderLastRecord: GameStatsRecord | null = null;
 vi.mock('@/hooks/useGameStatsRecorder', async () => {
   const actual = await vi.importActual<typeof import('@/hooks/useGameStatsRecorder')>('@/hooks/useGameStatsRecorder');
   return {
     ...actual,
     useGameStatsRecorder: (snapshot: GameStatsSnapshot | null) => {
       recorderCalls.push(snapshot);
-      return { lastRecord: null };
+      return { lastRecord: recorderLastRecord };
     },
   };
 });
@@ -25,8 +28,17 @@ vi.mock('@/hooks/useLocalSkipBoGame', () => ({
   useLocalSkipBoGame: () => ({ gameState: makeGameState() }),
 }));
 
-// Heavy children are irrelevant to the recording gate — render nothing.
-vi.mock('@/components/AppShell', () => ({ AppShell: () => null }));
+vi.mock('@/state/gameStatsHistory', () => ({ appendGameStatsRecord: vi.fn() }));
+
+// Heavy children are irrelevant to the recording gate — render nothing, but
+// capture the props each render so the stats-related ones can be asserted.
+const appShellCalls: Array<{ statsRecord?: GameStatsRecord | null }> = [];
+vi.mock('@/components/AppShell', () => ({
+  AppShell: (props: { statsRecord?: GameStatsRecord | null }) => {
+    appShellCalls.push(props);
+    return null;
+  },
+}));
 vi.mock('@/components/DebugStrip', () => ({ DebugStrip: () => null }));
 vi.mock('@/components/LobbyDialog', () => ({ LobbyDialog: () => null, LobbyRemovedDialog: () => null }));
 vi.mock('@/components/OnlineGameBoard', () => ({ OnlineGameBoard: () => null }));
@@ -56,6 +68,7 @@ function makeGameState(playerCount = 3): GameState {
 }
 
 const baseHookReturn = () => ({
+  broadcastGameStats: vi.fn(),
   canStartGame: false,
   clearSelection: vi.fn(),
   connectedSeats: [],
@@ -76,6 +89,7 @@ const baseHookReturn = () => ({
   myReadyState: 'never-ready',
   playCard: vi.fn(),
   playersBySeatIndex: {},
+  receivedGameStats: null,
   roomCode: 'ABCD',
   roomStatus: 'ACTIVE',
   seatCapacity: 4,
@@ -103,6 +117,8 @@ const screenProps = {
 
 afterEach(() => {
   recorderCalls.length = 0;
+  recorderLastRecord = null;
+  appShellCalls.length = 0;
   vi.clearAllMocks();
 });
 
@@ -118,5 +134,73 @@ describe('OnlineGameScreen stats gate', () => {
     render(<OnlineGameScreen {...screenProps} />);
     expect(recorderCalls.at(-1)).toMatchObject({ players: expect.any(Array) });
     expect(recorderCalls.at(-1)?.players).toHaveLength(3);
+  });
+
+  it('feeds no snapshot for a guest, even once the game view has been ingested', () => {
+    // Only the host's tracker is trustworthy (no network delay); a guest must
+    // rely solely on the host-broadcast record, never self-track.
+    onlineHook.mockReturnValue({
+      ...baseHookReturn(),
+      isLocalHost: false,
+      roomStatus: 'ACTIVE',
+      hasGameView: true,
+    });
+    render(<OnlineGameScreen {...screenProps} />);
+    expect(recorderCalls.at(-1)).toBeNull();
+  });
+});
+
+describe('OnlineGameScreen stats broadcast/receive', () => {
+  const statsRecord: GameStatsRecord = {
+    id: 'game-1',
+    schemaVersion: 1,
+    appVersion: 'vTEST',
+    mode: 'online',
+    startedAt: '2026-04-05T12:00:00.000Z',
+    endedAt: '2026-04-05T12:10:00.000Z',
+    durationMs: 600_000,
+    totalTurns: 12,
+    playerCount: 2,
+    stockSize: 10,
+    winnerIndex: 0,
+    winnerName: 'Alice',
+    winnerIsAI: false,
+    players: [],
+  };
+
+  it('broadcasts the host tracker record once it finalizes and displays it', async () => {
+    recorderLastRecord = statsRecord;
+    const broadcastGameStats = vi.fn();
+    onlineHook.mockReturnValue({
+      ...baseHookReturn(),
+      broadcastGameStats,
+      isLocalHost: true,
+      roomStatus: 'FINISHED',
+      hasGameView: true,
+    });
+
+    render(<OnlineGameScreen {...screenProps} />);
+
+    expect(broadcastGameStats).toHaveBeenCalledWith(statsRecord);
+    expect(appShellCalls.at(-1)?.statsRecord).toBe(statsRecord);
+  });
+
+  it('displays and persists the host-broadcast record for a guest, without broadcasting', async () => {
+    const { appendGameStatsRecord } = await import('@/state/gameStatsHistory');
+    const broadcastGameStats = vi.fn();
+    onlineHook.mockReturnValue({
+      ...baseHookReturn(),
+      broadcastGameStats,
+      isLocalHost: false,
+      receivedGameStats: statsRecord,
+      roomStatus: 'FINISHED',
+      hasGameView: true,
+    });
+
+    render(<OnlineGameScreen {...screenProps} />);
+
+    expect(broadcastGameStats).not.toHaveBeenCalled();
+    expect(appendGameStatsRecord).toHaveBeenCalledWith(statsRecord);
+    expect(appShellCalls.at(-1)?.statsRecord).toBe(statsRecord);
   });
 });

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { canPlayCard, type Card, getCompletedBuildPileCards, type MoveResult } from '@skipbo/game-core';
 
 import type { GameAction } from '@/state/gameActions';
+import type { GameStatsRecord } from '@/monitoring/gameStats';
 import {
   type CreateRoomResponse,
   type DisconnectedSeatInfo,
@@ -49,6 +50,9 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const [lastError, setLastError] = useState<string | null>(null);
   const [turnPresentationOverride, setTurnPresentationOverride] = useState<TurnPresentationOverride | null>(null);
   const [lobbyRemovalReason, setLobbyRemovalReason] = useState<'host-left' | 'kicked' | null>(null);
+  // The host-computed, authoritative end-of-game stats record, relayed to every
+  // guest so all seats display identical numbers (see `broadcastGameStats`).
+  const [receivedGameStats, setReceivedGameStats] = useState<GameStatsRecord | null>(null);
   const authoritativeViewRef = useRef<ClientGameView | null>(null);
   const interactionLockRef = useRef(false);
   const intentionalLeaveRef = useRef(false);
@@ -105,6 +109,18 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       sendRaw({ type: 'relay', kind, payload, toSeats });
     },
     [sendRaw],
+  );
+
+  // The host computes end-of-game stats from its own state — no network delay,
+  // no risk of missing an intermediate view — so it is the only trustworthy
+  // source. Broadcast the finalized record to every other seat (defaults to
+  // all other seats) so guests display and persist the same numbers instead of
+  // reconstructing an approximation from asynchronously-delivered views.
+  const broadcastGameStats = useCallback(
+    (record: GameStatsRecord): void => {
+      sendRelay('event', { gameStats: record });
+    },
+    [sendRelay],
   );
 
   // ---------------------------------------------------------------------------
@@ -338,6 +354,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     setLastError,
     setRoomSummary,
     setLobbyRemovalReason,
+    setReceivedGameStats,
   });
 
   const gameState = useMemo(() => {
@@ -573,6 +590,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   );
 
   return {
+    broadcastGameStats,
     canStartGame,
     clearSelection,
     connectedSeats,
@@ -584,6 +602,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     debugWin,
     disconnectedSeats,
     gameState,
+    receivedGameStats,
     // True once a real server view has been ingested. Until then `gameState`
     // is the seat-capacity placeholder, which must not be recorded as a game.
     hasGameView: view !== null,
