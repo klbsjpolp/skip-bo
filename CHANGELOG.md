@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.12.5](https://github.com/klbsjpolp/skip-bo/compare/v2.12.4...v2.12.5) (2026-07-01)
+
+
+### Bug Fixes
+
+* **web:** skip stale view echoes for optimistic guest moves ([a4d118c](https://github.com/klbsjpolp/skip-bo/commit/a4d118c376549ceb2c259d707892da8e8fec01ba))
+
 ## [2.12.4](https://github.com/klbsjpolp/skip-bo/compare/v2.12.3...v2.12.4) (2026-07-01)
 
 ## [2.12.3](https://github.com/klbsjpolp/skip-bo/compare/v2.12.2...v2.12.3) (2026-07-01)
