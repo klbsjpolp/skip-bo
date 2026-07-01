@@ -1415,6 +1415,50 @@ describe('useOnlineSkipBoGame', () => {
       expect(result.current.receivedGameStats).toEqual(statsRecord);
     });
 
+    it('ignores a relayed move kind (guests never act on it, only on view/event)', async () => {
+      const session = createSession();
+      const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+      await act(async () => {
+        vi.runOnlyPendingTimers();
+      });
+
+      const socket = MockWebSocket.instances[0];
+      await act(async () => {
+        socket.open();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        socket.emitMessage({ type: 'relayed', fromSeat: 0, kind: 'move', payload: { type: 'DRAW' } });
+        await Promise.resolve();
+      });
+
+      expect(result.current.receivedGameStats).toBeNull();
+    });
+
+    it('ignores a relayed event with no gameStats payload (guest)', async () => {
+      const session = createSession();
+      const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+      await act(async () => {
+        vi.runOnlyPendingTimers();
+      });
+
+      const socket = MockWebSocket.instances[0];
+      await act(async () => {
+        socket.open();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        socket.emitMessage({ type: 'relayed', fromSeat: 0, kind: 'event', payload: { resync: true } });
+        await Promise.resolve();
+      });
+
+      expect(result.current.receivedGameStats).toBeNull();
+    });
+
     it('resets the received record when a new game starts', async () => {
       const session = createSession();
       const { result } = renderHook(() => useOnlineSkipBoGame(session));
