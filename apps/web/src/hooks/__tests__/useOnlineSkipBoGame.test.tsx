@@ -970,6 +970,173 @@ describe('useOnlineSkipBoGame', () => {
     expect(drawCall[4]).toBe(discardDuration);
   });
 
+  // --- Stale view echoes (fast select→play, drag-and-drop) --------------------
+
+  const createFastPlayStates = (): { baseState: GameState; selectedState: GameState; playedState: GameState } => {
+    const baseState = initialGameState();
+
+    baseState.currentPlayerIndex = 0;
+    baseState.buildPiles = [[], [], [], []];
+    baseState.completedBuildPiles = [];
+    baseState.deck = [card(8), card(9)];
+    baseState.players[0].hand = [card(1), card(5), null, null, null];
+    baseState.players[1].isAI = false;
+    baseState.selectedCard = null;
+    baseState.message = "C'est votre tour";
+
+    const selectedState = structuredClone(baseState);
+    selectedState.selectedCard = { card: card(1), source: 'hand', index: 0 };
+    selectedState.message = 'Sélectionnez une destination';
+
+    const playedState = gameReducer(selectedState, { type: 'PLAY_CARD', buildPile: 0 });
+
+    return { baseState, selectedState, playedState };
+  };
+
+  it('does not revert an optimistic play when the stale SELECT_CARD echo arrives late', async () => {
+    const session = createSession();
+    const { baseState, selectedState, playedState } = createFastPlayStates();
+    const initialView = createOnlineView(baseState, 1);
+    const staleSelectEcho = createOnlineView(selectedState, 2);
+    const playEcho = createOnlineView(playedState, 3);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      socket.emitView(initialView);
+      await Promise.resolve();
+    });
+
+    // Select then play within one round-trip (a drag does exactly this).
+    act(() => {
+      result.current.selectCard('hand', 0);
+    });
+    await act(async () => {
+      const moveResult = await result.current.playCard(0);
+      expect(moveResult).toEqual({ success: true, message: 'Carte jouée' });
+    });
+
+    expect(result.current.gameState.buildPiles[0]).toHaveLength(1);
+    expect(result.current.gameState.players[0].hand[0]).toBeNull();
+
+    // The SELECT_CARD echo still shows the card in hand and an empty build
+    // pile: rendering it would revert the play and fake a deck→hand draw.
+    await act(async () => {
+      socket.emitView(staleSelectEcho);
+      await Promise.resolve();
+    });
+
+    expect(result.current.gameState.buildPiles[0]).toHaveLength(1);
+    expect(result.current.gameState.players[0].hand[0]).toBeNull();
+    expect(triggerMultipleDrawAnimations).not.toHaveBeenCalled();
+
+    // The PLAY_CARD echo reflects every local move and is rendered normally.
+    await act(async () => {
+      socket.emitView(playEcho);
+      await Promise.resolve();
+    });
+
+    expect(result.current.gameState.buildPiles[0]).toHaveLength(1);
+    expect(result.current.gameState.players[0].hand[0]).toBeNull();
+    expect(result.current.gameState.selectedCard).toBeNull();
+    expect(triggerMultipleDrawAnimations).not.toHaveBeenCalled();
+  });
+
+  it('renders the first view after a reconnect even when echoes were outstanding', async () => {
+    const session = createSession();
+    const { baseState, playedState } = createFastPlayStates();
+    const initialView = createOnlineView(baseState, 1);
+    const resyncView = createOnlineView(playedState, 2);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      socket.emitView(initialView);
+      await Promise.resolve();
+    });
+
+    act(() => {
+      result.current.selectCard('hand', 0);
+    });
+    await act(async () => {
+      await result.current.playCard(0);
+    });
+
+    // The socket drops before any echo arrives; those echoes are lost.
+    await act(async () => {
+      socket.close();
+      await Promise.resolve();
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(10_000);
+    });
+
+    const reconnectedSocket = MockWebSocket.instances.at(-1)!;
+    expect(reconnectedSocket).not.toBe(socket);
+
+    await act(async () => {
+      reconnectedSocket.open();
+      reconnectedSocket.emitView(resyncView);
+      await Promise.resolve();
+    });
+
+    expect(result.current.gameState.message).toBe(resyncView.message);
+    expect(result.current.gameState.buildPiles[0]).toHaveLength(1);
+  });
+
+  it('stops waiting for view echoes after a server-side actionRejected', async () => {
+    const session = createSession();
+    const { baseState, playedState } = createFastPlayStates();
+    const initialView = createOnlineView(baseState, 1);
+    const correctionView = createOnlineView(playedState, 2);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      socket.emitView(initialView);
+      await Promise.resolve();
+    });
+
+    act(() => {
+      result.current.selectCard('hand', 0);
+    });
+    await act(async () => {
+      await result.current.playCard(0);
+    });
+
+    await act(async () => {
+      socket.emitMessage({ type: 'actionRejected', code: 'invalid_action', reason: 'Invalid move' });
+      await Promise.resolve();
+    });
+
+    // With the pending echoes cleared, the next view must render.
+    await act(async () => {
+      socket.emitView(correctionView);
+      await Promise.resolve();
+    });
+
+    expect(result.current.gameState.message).toBe(correctionView.message);
+    expect(result.current.gameState.buildPiles[0]).toHaveLength(1);
+  });
+
   it('allows the host to start a waiting room as soon as all connected players are ready', async () => {
     const session = createHostSession();
     const allReadyLobbySeats: LobbySeatInfo[] = [

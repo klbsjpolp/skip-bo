@@ -69,6 +69,15 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   // is held back by this much so the acting player sees the same sequence
   // (own move first, then the next player drawing) that remote players see.
   const pendingLocalActionAnimationRef = useRef(0);
+  // Guest only: number of authoritative view echoes the host still owes us for
+  // moves already applied optimistically. The host answers every relayed move
+  // with exactly one view (the new state on success, a correction on
+  // rejection). While more than one echo is outstanding — e.g. a drag sends
+  // SELECT_CARD then PLAY_CARD within a round-trip — the earlier echoes are
+  // stale snapshots taken before the latest local action: rendering them would
+  // briefly revert the optimistic play and make the reappearing hand card look
+  // like a deck→hand draw. Only the final echo is rendered.
+  const pendingViewEchoesRef = useRef(0);
   const { removeAnimation, startAnimation, waitForAnimations } = useCardAnimation();
 
   const isHost = session != null && session.seatIndex === session.hostSeatIndex;
@@ -96,18 +105,18 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   // ---------------------------------------------------------------------------
   // Wire helpers
   // ---------------------------------------------------------------------------
-  const sendRaw = useCallback((message: unknown): void => {
+  const sendRaw = useCallback((message: unknown): boolean => {
     if (!websocketRef.current || websocketRef.current.readyState !== WebSocket.OPEN) {
-      return;
+      return false;
     }
 
     websocketRef.current.send(JSON.stringify(message));
+    return true;
   }, []);
 
   const sendRelay = useCallback(
-    (kind: 'move' | 'event' | 'view', payload: unknown, toSeats?: number[]): void => {
-      sendRaw({ type: 'relay', kind, payload, toSeats });
-    },
+    (kind: 'move' | 'event' | 'view', payload: unknown, toSeats?: number[]): boolean =>
+      sendRaw({ type: 'relay', kind, payload, toSeats }),
     [sendRaw],
   );
 
@@ -248,6 +257,33 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     [clearTurnPresentationTimeout, commitView, setInteractionLocked],
   );
 
+  // Guest entry point for views relayed by the host. Drops stale echoes (see
+  // pendingViewEchoesRef); everything else flows into ingestView unchanged.
+  const ingestRelayedView = useCallback(
+    (incomingView: ClientGameView): void => {
+      if (pendingViewEchoesRef.current > 0) {
+        pendingViewEchoesRef.current -= 1;
+        if (pendingViewEchoesRef.current > 0) {
+          // Stale echo: a newer view reflecting our latest move is on its way.
+          // Record it as the authoritative fallback (actionRejected recovery)
+          // without rendering it.
+          authoritativeViewRef.current = incomingView;
+          return;
+        }
+      }
+
+      ingestView(incomingView);
+    },
+    [ingestView],
+  );
+
+  // Outstanding echoes belong to a socket + host lifetime: after a reconnect or
+  // a server-side rejection the missing echoes will never arrive, and the next
+  // view (resync or correction) must not be swallowed.
+  const resetPendingViewEchoes = useCallback((): void => {
+    pendingViewEchoesRef.current = 0;
+  }, []);
+
   // ---------------------------------------------------------------------------
   // Host authority: push each guest its redacted view, the abstract turn, the
   // reconnection snapshot, and the game-over signal.
@@ -316,8 +352,10 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
 
       if (isDebugAction(action)) {
         sendRelay('event', { move: action });
-      } else {
-        sendRelay('move', action);
+      } else if (sendRelay('move', action)) {
+        // The host will echo exactly one view for this move; count it so
+        // ingestRelayedView can skip echoes that predate later local moves.
+        pendingViewEchoesRef.current += 1;
       }
     },
     [applyHostAction, isHost, sendRelay],
@@ -345,6 +383,8 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     setInteractionLocked,
     clearTurnPresentationTimeout,
     ingestView,
+    ingestRelayedView,
+    resetPendingViewEchoes,
     pushAuthority,
     sendRaw,
     sendRelay,

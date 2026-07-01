@@ -36,6 +36,10 @@ export interface UseOnlineConnectionParams {
   setInteractionLocked: (locked: boolean) => void;
   clearTurnPresentationTimeout: () => void;
   ingestView: (incomingView: ClientGameView) => void;
+  /** Guest path for host-relayed views: skips echoes made stale by newer local moves. */
+  ingestRelayedView: (incomingView: ClientGameView) => void;
+  /** Clears the outstanding-echo count when the missing echoes can no longer arrive. */
+  resetPendingViewEchoes: () => void;
   pushAuthority: () => void;
   sendRaw: (message: unknown) => void;
   sendRelay: (kind: 'move' | 'event' | 'view', payload: unknown, toSeats?: number[]) => void;
@@ -83,6 +87,8 @@ export function useOnlineConnection(params: UseOnlineConnectionParams): void {
       setInteractionLocked,
       clearTurnPresentationTimeout,
       ingestView,
+      ingestRelayedView,
+      resetPendingViewEchoes,
       pushAuthority,
       sendRaw,
       sendRelay,
@@ -111,6 +117,7 @@ export function useOnlineConnection(params: UseOnlineConnectionParams): void {
 
     if (!session) {
       setInteractionLocked(false);
+      resetPendingViewEchoes();
       clearReconnectTimeout();
       clearPingInterval();
       clearTurnPresentationTimeout();
@@ -173,6 +180,9 @@ export function useOnlineConnection(params: UseOnlineConnectionParams): void {
       const currentSocket = new WebSocket(activeSession.wsUrl);
       socket = currentSocket;
       websocketRef.current = currentSocket;
+      // Echoes owed on the previous socket will never arrive on this one; the
+      // resync view requested below must not be swallowed as a stale echo.
+      resetPendingViewEchoes();
       // Guests request a fresh view from the host once per socket (covers
       // reconnect mid-game; the host has no other way to know we came back).
       let resyncRequested = false;
@@ -210,6 +220,7 @@ export function useOnlineConnection(params: UseOnlineConnectionParams): void {
           switch (message.type) {
             case 'gameStarted': {
               setInteractionLocked(false);
+              resetPendingViewEchoes();
               setConnectionStatus('connected');
               setLastError(null);
               setReceivedGameStats(null);
@@ -296,7 +307,7 @@ export function useOnlineConnection(params: UseOnlineConnectionParams): void {
                 }
                 // Host ignores relayed 'view'.
               } else if (message.kind === 'view') {
-                ingestView(message.payload as ClientGameView);
+                ingestRelayedView(message.payload as ClientGameView);
               } else if (message.kind === 'event') {
                 const payload = message.payload as { gameStats?: GameStatsRecord } | null;
                 if (payload?.gameStats) {
@@ -329,6 +340,9 @@ export function useOnlineConnection(params: UseOnlineConnectionParams): void {
             }
             case 'actionRejected': {
               setInteractionLocked(false);
+              // The rejected move never reached the host, so its echo is not
+              // coming; stop waiting for it before restoring the fallback view.
+              resetPendingViewEchoes();
               const knownStatus = authoritativeViewRef.current?.room.status ?? roomMetaRef.current?.status ?? null;
               if (knownStatus === null) {
                 intentionalLeaveRef.current = true;

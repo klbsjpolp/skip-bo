@@ -40,8 +40,12 @@ the views the host relays.
 Both roles share **one** rendering path: `ingestView(view)` — the host generates
 the view locally, a guest receives it over the wire. `useOnlineSkipBoGame` still
 applies **optimistic updates** for `PLAY_CARD`/`DISCARD_CARD`, reconciled when the
-next authoritative view arrives. Lobby data comes from `presence` (there is no
-game view during `WAITING`).
+next authoritative view arrives. The host echoes exactly one view per relayed
+move; when several guest moves are in flight (select→play within one round-trip,
+e.g. a drag), `ingestRelayedView` skips the earlier, stale echoes — rendering
+them would revert the optimistic play and fake a deck→hand draw animation — and
+renders only the final one. Lobby data comes from `presence` (there is no game
+view during `WAITING`).
 
 **Placeholder gotcha:** `useOnlineSkipBoGame` returns a seat-capacity placeholder
 `gameState` (`createPlaceholderGameState` — 4 seats, no `displayName`, `isAI` by
