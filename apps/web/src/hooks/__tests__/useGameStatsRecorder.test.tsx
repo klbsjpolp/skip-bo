@@ -150,4 +150,44 @@ describe('useGameStatsRecorder', () => {
     expect(report).not.toHaveBeenCalled();
     expect(captured).toBeNull();
   });
+
+  // Regression: online games briefly render a seat-capacity placeholder (4 seats,
+  // generic "IA" names) before the first real view arrives. OnlineGameScreen keeps
+  // the snapshot null during that window, so the recorder must open on the first
+  // real snapshot and record the true player count/names — not the placeholder's.
+  it('records the real players when a placeholder window precedes the first view', () => {
+    captured = null;
+    const realActive: GameStatsSnapshot = {
+      gameIsOver: false,
+      currentPlayerIndex: 0,
+      winnerIndex: null,
+      stockSize: 30,
+      players: [
+        { name: 'Joueur', isAI: false, leftoverStock: 30 },
+        { name: 'Bob', isAI: false, leftoverStock: 30 },
+        { name: 'Carol', isAI: false, leftoverStock: 30 },
+      ],
+    };
+    const realOver: GameStatsSnapshot = {
+      ...realActive,
+      gameIsOver: true,
+      winnerIndex: 1,
+      players: [
+        { name: 'Joueur', isAI: false, leftoverStock: 17 },
+        { name: 'Bob', isAI: false, leftoverStock: 0 },
+        { name: 'Carol', isAI: false, leftoverStock: 15 },
+      ],
+    };
+
+    // Placeholder window: OnlineGameScreen passes null, then the real view arrives.
+    const { rerender } = render(<Harness snapshot={null} isCentralReporter />);
+    rerender(<Harness snapshot={realActive} isCentralReporter />);
+    rerender(<Harness snapshot={realOver} isCentralReporter />);
+
+    expect(append).toHaveBeenCalledTimes(1);
+    const recorded = append.mock.calls[0][0];
+    expect(recorded.playerCount).toBe(3);
+    expect(recorded.players.map((player) => player.name)).toEqual(['Joueur', 'Bob', 'Carol']);
+    expect(recorded.winnerName).toBe('Bob');
+  });
 });

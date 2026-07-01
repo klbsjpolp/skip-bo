@@ -584,6 +584,9 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     debugWin,
     disconnectedSeats,
     gameState,
+    // True once a real server view has been ingested. Until then `gameState`
+    // is the seat-capacity placeholder, which must not be recorded as a game.
+    hasGameView: view !== null,
     hostSeatIndex,
     isLocalHost,
     kickSeat,

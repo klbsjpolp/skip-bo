@@ -51,6 +51,7 @@ function OnlineGameScreen({
     discardCard,
     disconnectedSeats,
     gameState,
+    hasGameView,
     isLocalHost,
     kickSeat,
     leaveLobby,
@@ -72,7 +73,11 @@ function OnlineGameScreen({
   // Record stats only once the game is actually being played (not during the
   // lobby). Every seat keeps its own local history; only the host emits the
   // centralized report so a finished game is counted once globally.
-  const isLiveGame = roomStatus === 'ACTIVE' || roomStatus === 'FINISHED';
+  // Gate on `hasGameView`: while a real server view has not been ingested,
+  // `gameState` is the seat-capacity placeholder (4 seats, no display names).
+  // Recording it would freeze the wrong player count and generic "IA" names for
+  // the whole game (the tracker snapshots names when it opens the recording).
+  const isLiveGame = (roomStatus === 'ACTIVE' || roomStatus === 'FINISHED') && hasGameView;
   const statsSnapshot = useMemo(
     () => (isLiveGame ? buildGameStatsSnapshot(gameState, 'online') : null),
     [isLiveGame, gameState],
