@@ -9,6 +9,7 @@ import {
 import { SkipboHost, type ClientGameView, type HostRoomMeta } from '@skipbo/skipbo-runtime';
 
 import type { GameAction } from '@/state/gameActions';
+import type { GameStatsRecord } from '@/monitoring/gameStats';
 import { RECONNECT_DELAYS_MS, WEBSOCKET_PING_INTERVAL_MS } from '@/config/timing';
 import { clearOnlineSession } from '@/state/sessionPersistence';
 
@@ -44,6 +45,7 @@ export interface UseOnlineConnectionParams {
   setLastError: (error: string | null) => void;
   setRoomSummary: Dispatch<SetStateAction<RoomSummary | null>>;
   setLobbyRemovalReason: (reason: 'host-left' | 'kicked' | null) => void;
+  setReceivedGameStats: Dispatch<SetStateAction<GameStatsRecord | null>>;
 }
 
 /**
@@ -90,6 +92,7 @@ export function useOnlineConnection(params: UseOnlineConnectionParams): void {
       setLastError,
       setRoomSummary,
       setLobbyRemovalReason,
+      setReceivedGameStats,
     } = paramsRef.current;
 
     const clearPingInterval = () => {
@@ -119,6 +122,7 @@ export function useOnlineConnection(params: UseOnlineConnectionParams): void {
       roomMetaRef.current = null;
       activeSeatIndicesRef.current = [];
       lastBroadcastTurnRef.current = null;
+      setReceivedGameStats(null);
       return;
     }
 
@@ -208,6 +212,7 @@ export function useOnlineConnection(params: UseOnlineConnectionParams): void {
               setInteractionLocked(false);
               setConnectionStatus('connected');
               setLastError(null);
+              setReceivedGameStats(null);
               activeSeatIndicesRef.current = message.activeSeatIndices;
               lastBroadcastTurnRef.current = message.currentSeatIndex;
 
@@ -292,6 +297,11 @@ export function useOnlineConnection(params: UseOnlineConnectionParams): void {
                 // Host ignores relayed 'view'.
               } else if (message.kind === 'view') {
                 ingestView(message.payload as ClientGameView);
+              } else if (message.kind === 'event') {
+                const payload = message.payload as { gameStats?: GameStatsRecord } | null;
+                if (payload?.gameStats) {
+                  setReceivedGameStats(payload.gameStats);
+                }
               }
               break;
             }

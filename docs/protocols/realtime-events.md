@@ -81,6 +81,13 @@ Gating: a `move` is accepted only from `room.currentSeatIndex`; `view` only from
 the host. Debug actions are sent as `relay { kind: 'event', payload: { move } }`
 to bypass the turn gate — the host applies them behind its own DEV flag.
 
+The host also broadcasts its finalized end-of-game stats as
+`relay { kind: 'event', payload: { gameStats } }` once the game ends. Only the
+host's own `GameStatsRecord` (computed from its own state, with no network
+delay) is trustworthy; guests display and persist that record instead of
+reconstructing their own from asynchronously-delivered `view`s, which would
+otherwise show a different duration/turn count per seat.
+
 ### Server → client
 
 | Type              | Shape                                                 | Notes                                                            |
