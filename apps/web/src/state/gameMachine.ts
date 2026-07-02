@@ -3,8 +3,8 @@ import {
   gameReducer,
   getCompletedBuildPileCards,
   initialGameState,
-  planHandRefill,
   planPostPlayRefill,
+  planStartOfTurnDraw,
   willPlayCardEmptyHand,
   type Card,
   type GameAction,
@@ -17,6 +17,13 @@ import { triggerMultipleDrawAnimations } from '@/services/drawAnimationService';
 import { animationGate } from '@/services/animationGate';
 import { animationServiceBridge } from '@/lib/animationServiceBridge.ts';
 
+/**
+ * Machine event envelope: a rules action plus the presentation-only
+ * animation hint. `animationDuration` is a web-layer concern and rides on the
+ * event, never on the `GameAction` itself (game-core stays presentation-free).
+ */
+export type LocalGameEvent = GameAction & { animationDuration?: number };
+
 export const gameMachine = createMachine(
   {
     id: 'skipbo',
@@ -26,7 +33,7 @@ export const gameMachine = createMachine(
         G: GameState;
         animationDuration: number;
       };
-      events: GameAction;
+      events: LocalGameEvent;
     },
     context: () => ({
       G: initialGameState(),
@@ -278,19 +285,7 @@ export const gameMachine = createMachine(
           }
           return context.G;
         },
-        animationDuration: ({ event }) => {
-          if (event && typeof event === 'object' && 'output' in event) {
-            const { animationDuration } = (
-              event as unknown as { output: { action: GameAction; animationDuration: number } }
-            ).output;
-            return animationDuration;
-          }
-          if (event && typeof event === 'object' && 'animationDuration' in event) {
-            const { animationDuration } = event as { animationDuration?: number };
-            return animationDuration ?? 0;
-          }
-          return 0;
-        },
+        animationDuration: ({ event }) => event.animationDuration ?? 0,
       }),
       logAIAction: () => {
         // No-op in production, can be used for debugging if needed
@@ -445,18 +440,20 @@ export const gameMachine = createMachine(
             /* ignore invalid aiHand param */
           }
         }
-        const { cards, handIndices } = planHandRefill(player.hand, gameState.deck, gameState.completedBuildPiles);
-        const cardsToDraw = cards.length;
+        // The turn-boundary rule (turn starts → current player draws) lives in
+        // game-core's planStartOfTurnDraw, shared with the online runtime.
+        const { action, plan } = planStartOfTurnDraw(gameState);
         let animationDuration = 0;
 
-        if (cardsToDraw > 0) {
-          // Fire and forget: start animations but don't block the draw state update.
-          if (cards.length > 0) {
-            animationDuration = await triggerMultipleDrawAnimations(gameState.currentPlayerIndex, cards, handIndices);
-          }
+        if (plan.cards.length > 0) {
+          animationDuration = await triggerMultipleDrawAnimations(
+            gameState.currentPlayerIndex,
+            plan.cards,
+            plan.handIndices,
+          );
         }
 
-        return { type: 'DRAW', count: cardsToDraw, animationDuration };
+        return { ...action, animationDuration };
       }),
     },
   },

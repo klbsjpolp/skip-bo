@@ -50,7 +50,7 @@ const createGameState = (): GameState => ({
   gameIsOver: false,
   winnerIndex: null,
   selectedCard: null,
-  message: '',
+  message: { code: 'SELECT_CARD' },
   config: {
     BUILD_PILES_COUNT: 4,
     CARD_VALUES_MAX: 12,

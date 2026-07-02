@@ -2,7 +2,6 @@ import { produce } from 'immer';
 import type { Card, GameState } from '../types/index.js';
 import type { GameAction } from './gameActions.js';
 import { initialGameState } from './initialGameState.js';
-import { MESSAGES } from '../lib/config.js';
 import { refillHand } from '../lib/handRefill.js';
 import { canPlayCard, hasValidDiscardPileIndex, hasValidSelectedSource } from '../lib/validators.js';
 
@@ -47,13 +46,13 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       player.hand = newHand;
       // Clear selection to avoid stale indices
       draft.selectedCard = null;
-      draft.message = 'Main IA forcée (debug)';
+      draft.message = { code: 'DEBUG_AI_HAND_SET' };
       return;
     }
 
     case 'DEBUG_FILL_BUILD_PILE': {
       if (action.buildPile < 0 || action.buildPile >= draft.buildPiles.length) {
-        draft.message = MESSAGES.INVALID_MOVE;
+        draft.message = { code: 'INVALID_MOVE' };
         return;
       }
 
@@ -71,7 +70,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       }
 
       draft.selectedCard = null;
-      draft.message = 'Pile de construction prête (debug)';
+      draft.message = { code: 'DEBUG_BUILD_PILE_READY' };
       return;
     }
 
@@ -82,7 +81,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
         isSkipBo: true,
       }));
       draft.selectedCard = null;
-      draft.message = 'Main remplie de Skip-Bo (debug)';
+      draft.message = { code: 'DEBUG_HAND_SKIPBO_FILLED' };
       return;
     }
 
@@ -90,14 +89,14 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       const player = draft.players[0];
       player.stockPile = [{ value: 0, isSkipBo: true }];
       draft.selectedCard = null;
-      draft.message = 'Pile de réserve vidée (debug)';
+      draft.message = { code: 'DEBUG_STOCK_PILE_CLEARED' };
       return;
     }
 
     case 'DEBUG_CLEAR_AI_STOCK_PILE': {
       const aiIndex = draft.players.findIndex((p) => p.isAI);
       if (aiIndex === -1) {
-        draft.message = MESSAGES.INVALID_MOVE;
+        draft.message = { code: 'INVALID_MOVE' };
         return;
       }
 
@@ -105,7 +104,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       // Hand the turn to the AI so it plays its last stock card and wins.
       draft.currentPlayerIndex = aiIndex;
       draft.selectedCard = null;
-      draft.message = 'Pile de réserve IA vidée (debug)';
+      draft.message = { code: 'DEBUG_AI_STOCK_PILE_CLEARED' };
       return;
     }
 
@@ -116,7 +115,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       draft.selectedCard = null;
       draft.gameIsOver = true;
       draft.winnerIndex = winnerIndex;
-      draft.message = MESSAGES.GAME_WON.replace('{player}', winner.isAI ? "l'IA" : 'le joueur');
+      draft.message = { code: 'GAME_WON', winnerIsAI: winner.isAI };
       return;
     }
 
@@ -144,7 +143,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
           plannedDiscardPileIndex: action.plannedDiscardPileIndex,
         };
         const player = draft.players[draft.currentPlayerIndex];
-        draft.message = player.isAI ? "L'IA joue" : 'Sélectionnez une destination';
+        draft.message = player.isAI ? { code: 'AI_PLAYING' } : { code: 'SELECT_DESTINATION' };
       }
       break;
     }
@@ -152,7 +151,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
     case 'CLEAR_SELECTION': {
       draft.selectedCard = null;
       const player = draft.players[draft.currentPlayerIndex];
-      draft.message = player.isAI ? "L'IA joue" : 'Sélectionnez une carte';
+      draft.message = player.isAI ? { code: 'AI_PLAYING' } : { code: 'SELECT_CARD' };
       break;
     }
 
@@ -161,19 +160,19 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
 
       // Validation
       if (!selectedCard) {
-        draft.message = MESSAGES.INVALID_MOVE_NO_SELECTION;
+        draft.message = { code: 'INVALID_MOVE_NO_SELECTION' };
         return;
       }
 
       if (!canPlayCard(selectedCard.card, action.buildPile, draft)) {
-        draft.message = MESSAGES.INVALID_MOVE_CANNOT_PLAY;
+        draft.message = { code: 'INVALID_MOVE_CANNOT_PLAY' };
         return;
       }
 
       const player = draft.players[draft.currentPlayerIndex];
 
       if (!hasValidSelectedSource(player, selectedCard)) {
-        draft.message = MESSAGES.INVALID_MOVE;
+        draft.message = { code: 'INVALID_MOVE' };
         draft.selectedCard = null;
         return;
       }
@@ -210,9 +209,9 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       if (player.stockPile.length === 0) {
         draft.gameIsOver = true;
         draft.winnerIndex = draft.currentPlayerIndex;
-        draft.message = MESSAGES.GAME_WON.replace('{player}', player.isAI ? "l'IA" : 'le joueur');
+        draft.message = { code: 'GAME_WON', winnerIsAI: player.isAI };
       } else {
-        draft.message = `${player.isAI ? "L'IA joue" : 'Vous avez joué une carte'}`;
+        draft.message = player.isAI ? { code: 'AI_PLAYING' } : { code: 'CARD_PLAYED' };
       }
 
       // Clear selection
@@ -225,17 +224,17 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
 
       // Validation
       if (!selectedCard) {
-        draft.message = MESSAGES.INVALID_MOVE_NO_SELECTION;
+        draft.message = { code: 'INVALID_MOVE_NO_SELECTION' };
         return;
       }
 
       if (selectedCard.source !== 'hand') {
-        draft.message = MESSAGES.INVALID_MOVE_MUST_DISCARD_FROM_HAND;
+        draft.message = { code: 'INVALID_MOVE_MUST_DISCARD_FROM_HAND' };
         return;
       }
 
       if (selectedCard.card.value === undefined) {
-        draft.message = 'Error: Invalid card value';
+        draft.message = { code: 'INVALID_CARD_VALUE' };
         return;
       }
 
@@ -243,7 +242,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       const discardPileIndex = action.discardPile;
 
       if (!hasValidSelectedSource(player, selectedCard) || !hasValidDiscardPileIndex(player, discardPileIndex)) {
-        draft.message = MESSAGES.INVALID_MOVE;
+        draft.message = { code: 'INVALID_MOVE' };
         draft.selectedCard = null;
         return;
       }
@@ -265,7 +264,7 @@ export const gameReducer = produce((draft: GameState, action: GameAction) => {
       // Set message
       const currentPlayer = draft.players[previousPlayerIndex];
       const nextPlayer = draft.players[draft.currentPlayerIndex]; // New current player
-      draft.message = `${currentPlayer.isAI ? "Tour de l'IA terminé" : 'Votre tour est terminé'}. ${nextPlayer.isAI ? "L'IA joue" : "C'est votre tour"}`;
+      draft.message = { code: 'TURN_ENDED', previousPlayerIsAI: currentPlayer.isAI, nextPlayerIsAI: nextPlayer.isAI };
 
       // Clear selection
       draft.selectedCard = null;

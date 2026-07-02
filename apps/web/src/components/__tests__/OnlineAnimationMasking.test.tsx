@@ -38,7 +38,7 @@ const createGameState = (): GameState => ({
   gameIsOver: false,
   winnerIndex: null,
   selectedCard: null,
-  message: '',
+  message: { code: 'SELECT_CARD' },
   config: FIXTURE_CONFIG,
 });
 

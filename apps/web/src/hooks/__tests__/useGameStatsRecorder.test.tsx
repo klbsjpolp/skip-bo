@@ -34,7 +34,7 @@ const makeGameState = (overrides: Partial<GameState>): GameState =>
     buildPiles: [],
     completedBuildPiles: [],
     selectedCard: null,
-    message: '',
+    message: { code: 'SELECT_CARD' },
     currentPlayerIndex: 0,
     gameIsOver: false,
     winnerIndex: null,

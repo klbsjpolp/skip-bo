@@ -90,7 +90,7 @@ const createSelectedHandCardState = (): GameState => {
     source: 'hand',
     index: 0,
   };
-  state.message = 'Sélectionnez une destination';
+  state.message = { code: 'SELECT_DESTINATION' };
 
   return state;
 };
@@ -111,7 +111,7 @@ const createCompletingHandCardState = (): GameState => {
     source: 'hand',
     index: 0,
   };
-  state.message = 'Sélectionnez une destination';
+  state.message = { code: 'SELECT_DESTINATION' };
 
   return state;
 };
@@ -129,7 +129,7 @@ const createSelectedStockCardState = (): GameState => {
     source: 'stock',
     index: 1,
   };
-  state.message = 'Sélectionnez une destination';
+  state.message = { code: 'SELECT_DESTINATION' };
 
   return state;
 };
@@ -148,7 +148,7 @@ const createSelectedDiscardCardState = (): GameState => {
     index: 1,
     discardPileIndex: 1,
   };
-  state.message = 'Sélectionnez une destination';
+  state.message = { code: 'SELECT_DESTINATION' };
 
   return state;
 };

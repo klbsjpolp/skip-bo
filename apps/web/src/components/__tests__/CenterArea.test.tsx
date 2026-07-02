@@ -36,7 +36,7 @@ const createGameState = (completedBuildPiles: Card[]): GameState => ({
   gameIsOver: false,
   winnerIndex: null,
   selectedCard: null,
-  message: '',
+  message: { code: 'SELECT_CARD' },
   config: FIXTURE_CONFIG,
 });
 

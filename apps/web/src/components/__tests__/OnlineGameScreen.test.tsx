@@ -62,7 +62,7 @@ function makeGameState(playerCount = 3): GameState {
     gameIsOver: false,
     winnerIndex: null,
     selectedCard: null,
-    message: '',
+    message: { code: 'SELECT_CARD' },
     config: { STOCK_SIZE: 30 } as GameConfig,
   } as GameState;
 }

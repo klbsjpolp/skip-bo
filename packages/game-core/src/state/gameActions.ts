@@ -13,8 +13,8 @@ export type GameAction =
       plannedDiscardPileIndex?: number;
     }
   | { type: 'CLEAR_SELECTION' }
-  | { type: 'PLAY_CARD'; buildPile: number; animationDuration?: number }
-  | { type: 'DISCARD_CARD'; discardPile: number; animationDuration?: number }
+  | { type: 'PLAY_CARD'; buildPile: number }
+  | { type: 'DISCARD_CARD'; discardPile: number }
   | { type: 'END_TURN' }
   | { type: 'RESET' }
   | { type: 'DEBUG_SET_AI_HAND'; hand: Card[] }
