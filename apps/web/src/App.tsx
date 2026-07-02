@@ -12,6 +12,7 @@ import { LocalGameBoard } from '@/components/LocalGameBoard';
 import { useCardAnimation } from '@/contexts/useCardAnimation';
 import { animationServiceBridge } from '@/lib/animationServiceBridge';
 import { isSafeToApplyLocalUpdate } from '@/lib/localUpdateGate';
+import { applyPendingUpdateBeforeOnlineStart } from '@/lib/onlineUpdateGate';
 import { canPlayCard } from '@/lib/validators';
 import { createOnlineRoom, joinOnlineRoom } from '@/online/api';
 import { getStoredStockSize } from '@/state/initialGameState';
@@ -179,7 +180,7 @@ function LiveApp() {
     // A required hard update was deferred while in local mode — apply it now and
     // abort the start (the reload boots into a fresh local game).
     if (isHardUpdateRequired) {
-      reloadToUpdate();
+      void reloadToUpdate();
       return;
     }
 
@@ -188,7 +189,7 @@ function LiveApp() {
     // worker has staged it, in which case `reloadToUpdate()` is a no-op. Fire it
     // and still start the game so a lagging SW can't leave "New Game" stuck.
     if (isUpdatePending) {
-      reloadToUpdate();
+      void reloadToUpdate();
     }
 
     setCurrentGameType('local-ai');
@@ -199,7 +200,14 @@ function LiveApp() {
     // Never contact the server on a build below the protocol floor — apply the
     // deferred hard update first (the reload aborts this start).
     if (isHardUpdateRequired) {
-      reloadToUpdate();
+      void reloadToUpdate();
+      return;
+    }
+
+    // Apply a pending soft update now, before a room code exists to share —
+    // the lobby is no longer a safe auto-apply moment. A committed reload
+    // aborts this start; otherwise fall through and create the room.
+    if (await applyPendingUpdateBeforeOnlineStart(isUpdatePending, reloadToUpdate)) {
       return;
     }
 
@@ -212,7 +220,13 @@ function LiveApp() {
 
   const joinGame = async (roomCode: string) => {
     if (isHardUpdateRequired) {
-      reloadToUpdate();
+      void reloadToUpdate();
+      return;
+    }
+
+    // Same as startOnlineGame: land a pending soft update on this deliberate
+    // action rather than reloading the lobby out from under the player.
+    if (await applyPendingUpdateBeforeOnlineStart(isUpdatePending, reloadToUpdate)) {
       return;
     }
 
@@ -270,6 +284,12 @@ function LiveApp() {
   );
   const hasUpdateNotice = showResumeBanner || showUpdatedBanner;
 
+  // Fire-and-forget form for void-returning UI callbacks; the start handlers
+  // above await the promise instead to know whether to abort.
+  const updateNow = () => {
+    void reloadToUpdate();
+  };
+
   const screen =
     currentGameType === 'online-human' && onlineSession ? (
       <Suspense fallback={null}>
@@ -283,7 +303,7 @@ function LiveApp() {
           onReplay={replayCurrentGame}
           onStartLocalGame={startLocalGame}
           onStartOnlineGame={startOnlineGame}
-          onUpdateNow={reloadToUpdate}
+          onUpdateNow={updateNow}
           session={onlineSession}
           updateNotice={hasUpdateNotice ? updateNotice : undefined}
         />
@@ -298,7 +318,7 @@ function LiveApp() {
         onReplay={replayCurrentGame}
         onStartLocalGame={startLocalGame}
         onStartOnlineGame={startOnlineGame}
-        onUpdateNow={reloadToUpdate}
+        onUpdateNow={updateNow}
         updateNotice={hasUpdateNotice ? updateNotice : undefined}
       />
     );
@@ -312,7 +332,7 @@ function LiveApp() {
           isReloading={isApplyingUpdate}
           latestVersion={latestAppVersion}
           minimumSupportedVersion={minimumSupportedVersion}
-          onReload={reloadToUpdate}
+          onReload={updateNow}
         />
       ) : null}
     </>

@@ -150,6 +150,40 @@ describe('OnlineGameScreen stats gate', () => {
   });
 });
 
+describe('OnlineGameScreen pending-update safe gate', () => {
+  it('does not auto-apply while the lobby is open (the room code is being shared)', () => {
+    onlineHook.mockReturnValue({ ...baseHookReturn(), roomStatus: 'WAITING' });
+    render(<OnlineGameScreen {...screenProps} isUpdatePending />);
+    expect(screenProps.applyUpdateWhenSafe).not.toHaveBeenCalled();
+  });
+
+  it("auto-applies during an opponent's turn in an active game", () => {
+    onlineHook.mockReturnValue({
+      ...baseHookReturn(),
+      roomStatus: 'ACTIVE',
+      gameState: { ...makeGameState(), currentPlayerIndex: 1 },
+    });
+    render(<OnlineGameScreen {...screenProps} isUpdatePending />);
+    expect(screenProps.applyUpdateWhenSafe).toHaveBeenCalled();
+  });
+
+  it("does not auto-apply during the local player's turn", () => {
+    onlineHook.mockReturnValue({ ...baseHookReturn(), roomStatus: 'ACTIVE' });
+    render(<OnlineGameScreen {...screenProps} isUpdatePending />);
+    expect(screenProps.applyUpdateWhenSafe).not.toHaveBeenCalled();
+  });
+
+  it('does not auto-apply on a finished game (victory screen stays up)', () => {
+    onlineHook.mockReturnValue({
+      ...baseHookReturn(),
+      roomStatus: 'FINISHED',
+      gameState: { ...makeGameState(), currentPlayerIndex: 1, gameIsOver: true, winnerIndex: 1 },
+    });
+    render(<OnlineGameScreen {...screenProps} isUpdatePending />);
+    expect(screenProps.applyUpdateWhenSafe).not.toHaveBeenCalled();
+  });
+});
+
 describe('OnlineGameScreen stats broadcast/receive', () => {
   const statsRecord: GameStatsRecord = {
     id: 'game-1',

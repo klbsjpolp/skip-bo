@@ -81,7 +81,11 @@ export interface PwaVersionGateState {
   applyUpdateOnceForCurrentTarget: () => void;
   dismissJustUpdated: () => void;
   dismissSoftUpdate: () => void;
-  reloadToUpdate: () => void;
+  // Resolves true when a reload actually committed (the page is about to
+  // navigate), false when there was nothing to apply — no staged worker yet, or
+  // an apply already in flight. Callers that want to abort an action when the
+  // reload fires (e.g. starting an online game) await this instead of racing it.
+  reloadToUpdate: () => Promise<boolean>;
   shouldShowSoftUpdate: boolean;
 }
 
@@ -128,9 +132,9 @@ export const usePwaVersionGate = ({ deferHardUpdate = false }: UsePwaVersionGate
     });
   });
 
-  const runReloadToUpdate = useCallback(async (onReloadCommitted?: () => void) => {
+  const runReloadToUpdate = useCallback(async (onReloadCommitted?: () => void): Promise<boolean> => {
     if (isApplyingUpdateRef.current) {
-      return;
+      return false;
     }
 
     isApplyingUpdateRef.current = true;
@@ -140,7 +144,7 @@ export const usePwaVersionGate = ({ deferHardUpdate = false }: UsePwaVersionGate
       // No `location.reload()` fallback: reloading without a freshly installed
       // worker re-serves the same precached bundle, which on iOS standalone
       // PWAs loops splash → blank → reload whenever a hard update is required.
-      await applyServiceWorkerUpdate(onReloadCommitted).catch(() => false);
+      return await applyServiceWorkerUpdate(onReloadCommitted).catch(() => false);
     } finally {
       isApplyingUpdateRef.current = false;
       setIsApplyingUpdate(false);
@@ -287,9 +291,7 @@ export const usePwaVersionGate = ({ deferHardUpdate = false }: UsePwaVersionGate
         setDismissedUpdateKey(updateKey);
       }
     },
-    reloadToUpdate: () => {
-      void runReloadToUpdate();
-    },
+    reloadToUpdate: () => runReloadToUpdate(),
     shouldShowSoftUpdate,
   };
 };
