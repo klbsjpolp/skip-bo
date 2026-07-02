@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { findBestDiscardPile } from '@/ai/discardUtils';
-import { initialGameState } from '@/state/initialGameState';
+import { initialGameState } from '@skipbo/game-core';
 
 describe('findBestDiscardPile', () => {
   afterEach(() => {

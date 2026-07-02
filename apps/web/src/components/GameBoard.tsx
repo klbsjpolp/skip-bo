@@ -1,4 +1,4 @@
-import type { Card as CardType, GameState } from '@/types';
+import type { Card as CardType, GameState } from '@skipbo/game-core';
 import { PlayerArea } from '@/components/PlayerArea';
 import { CenterArea } from '@/components/CenterArea';
 import { cn } from '@/lib/utils';

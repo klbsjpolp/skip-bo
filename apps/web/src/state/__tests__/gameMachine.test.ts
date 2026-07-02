@@ -1,10 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createActor, waitFor } from 'xstate';
 import { gameMachine } from '@/state/gameMachine';
-import { gameReducer } from '@/state/gameReducer';
-import type { GameAction } from '@/state/gameActions';
-import * as initialGameStateModule from '@/state/initialGameState';
-import { initialGameState } from '@/state/initialGameState';
+import { gameReducer, initialGameState, type GameAction } from '@skipbo/game-core';
 import { act } from '@testing-library/react';
 
 // Mock the AI module
@@ -35,8 +32,6 @@ describe('gameMachine', () => {
   });
 
   it('should rebuild the initial game state for each new actor', async () => {
-    const initialGameStateSpy = vi.spyOn(initialGameStateModule, 'initialGameState');
-
     const firstActor = createActor(gameMachine);
     firstActor.start();
     await waitFor(firstActor, (state) => state.matches('humanTurn.ready'));
@@ -45,7 +40,9 @@ describe('gameMachine', () => {
     secondActor.start();
     await waitFor(secondActor, (state) => state.matches('humanTurn.ready'));
 
-    expect(initialGameStateSpy).toHaveBeenCalledTimes(2);
+    // The machine's context is a factory: each actor must get its own freshly
+    // built game state, not a shared module-level object.
+    expect(secondActor.getSnapshot().context.G).not.toBe(firstActor.getSnapshot().context.G);
   });
 
   it('should handle INIT event from any state', async () => {

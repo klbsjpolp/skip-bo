@@ -1,4 +1,4 @@
-import type { GameState } from '@/types';
+import type { GameState } from '@skipbo/game-core';
 
 /**
  * Whether a pending PWA update can be applied to a local game without losing

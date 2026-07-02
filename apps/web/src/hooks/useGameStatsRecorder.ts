@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import type { GameState, Player } from '@/types';
+import type { GameState, Player } from '@skipbo/game-core';
 import { APP_VERSION } from '@/lib/appVersion';
 import { reportGameCompleted } from '@/monitoring/gameAnalytics';
 import {

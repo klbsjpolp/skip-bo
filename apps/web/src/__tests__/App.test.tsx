@@ -1,7 +1,7 @@
 import { act, render, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { GameConfig, GameState } from '@/types';
+import type { GameConfig, GameState } from '@skipbo/game-core';
 
 // Controllable stand-in for the version gate so tests can flip pending/hard
 // update states and observe what the start handlers do with reloadToUpdate.

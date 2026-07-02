@@ -1,5 +1,5 @@
-import type { GameState, Card } from '@/types';
-import type { GameAction } from '@/state/gameActions';
+import type { GameState, Card } from '@skipbo/game-core';
+import type { GameAction } from '@skipbo/game-core';
 import {
   getDiscardTopCardPosition,
   getHandCardPosition,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { gameReducer } from '@/state/gameReducer';
-import { initialGameState } from '@/state/initialGameState';
+import { gameReducer } from '@skipbo/game-core';
+import { initialGameState } from '@skipbo/game-core';
 
 describe('DEBUG_FILL_BUILD_PILE action', () => {
   it('prepares the first build pile for retreat animation testing', () => {

@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { computeBestMove } from '@/ai/computeBestMove';
-import { canPlayCard } from '@/lib/validators';
-import { gameReducer } from '@/state/gameReducer';
-import { initialGameState } from '@/state/initialGameState';
-import type { GameState } from '@/types';
+import { canPlayCard } from '@skipbo/game-core';
+import { gameReducer } from '@skipbo/game-core';
+import { initialGameState } from '@skipbo/game-core';
+import type { GameState } from '@skipbo/game-core';
 
 const runAIMove = async (gameState: GameState) => {
   const movePromise = computeBestMove(gameState);

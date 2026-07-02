@@ -1,8 +1,8 @@
 import App from '@/App.tsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
-import type { Theme } from '@/types';
-import { themes } from '@/types';
+import type { Theme } from '@skipbo/game-core';
+import { themes } from '@skipbo/game-core';
 import { CardAnimationProvider } from '@/contexts/CardAnimationContext.tsx';
 import { DragProvider } from '@/contexts/DragContext.tsx';
 import { CardAnimationLayer } from '@/components/CardAnimationLayer.tsx';

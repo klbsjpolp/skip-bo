@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { canPlayCard, type Card, getCompletedBuildPileCards, type MoveResult } from '@skipbo/game-core';
+import { canPlayCard, type Card, type GameAction, type MoveResult } from '@skipbo/game-core';
 
-import type { GameAction } from '@/state/gameActions';
 import type { GameStatsRecord } from '@/monitoring/gameStats';
 import {
   type CreateRoomResponse,
@@ -31,11 +30,12 @@ import {
   getMaxDrawAnimationDuration,
   inferOpponentTransition,
   scheduleDrawAnimations,
-  willPlayCardEmptyHand,
   type OpponentTransition,
   type TurnPresentationOverride,
 } from '@/hooks/useOnlineSkipBoGame/helpers';
-import { startDiscardCardAnimation, startPlayCardAnimation } from '@/hooks/useOnlineSkipBoGame/localActionAnimations';
+import { useDebugActions } from '@/game/debugActions';
+import { preparePlayCardIntent, prepareDiscardCardIntent } from '@/game/moveIntents';
+import { startDiscardCardAnimation, startPlayCardAnimation } from '@/game/moveAnimations';
 import { type ConnectionStatus, type HostSnapshotPayload } from '@/hooks/useOnlineSkipBoGame/types';
 import { useOnlineConnection } from '@/hooks/useOnlineSkipBoGame/useOnlineConnection';
 
@@ -413,28 +413,8 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     };
   }, [session?.roomCode, session?.seatCapacity, turnPresentationOverride, view]);
 
-  const debugFillBuildPile = useCallback(
-    (buildPile: number): void => {
-      sendAction({ type: 'DEBUG_FILL_BUILD_PILE', buildPile });
-    },
-    [sendAction],
-  );
-
-  const debugFillHandSkipBo = useCallback((): void => {
-    sendAction({ type: 'DEBUG_FILL_HAND_SKIPBO' });
-  }, [sendAction]);
-
-  const debugClearStockPile = useCallback((): void => {
-    sendAction({ type: 'DEBUG_CLEAR_STOCK_PILE' });
-  }, [sendAction]);
-
-  const debugClearAiStockPile = useCallback((): void => {
-    sendAction({ type: 'DEBUG_CLEAR_AI_STOCK_PILE' });
-  }, [sendAction]);
-
-  const debugWin = useCallback((): void => {
-    sendAction({ type: 'DEBUG_WIN' });
-  }, [sendAction]);
+  const { debugFillBuildPile, debugFillHandSkipBo, debugClearStockPile, debugClearAiStockPile, debugWin } =
+    useDebugActions(sendAction);
 
   const startGame = useCallback(() => {
     sendRaw({ type: 'startGame', clientVersion: roomMetaRef.current?.version ?? viewRef.current?.room.version });
@@ -501,28 +481,22 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         return { success: false, message: 'Aucune carte sélectionnée' };
       }
       const currentState = cloneGameStateFromView(currentView);
-      const completedBuildPileCards = getCompletedBuildPileCards(currentState, buildPile);
 
       if (isInteractionBlocked()) {
         return { success: false, message: 'Action en cours' };
       }
 
-      if (!currentState.selectedCard) {
-        return { success: false, message: 'Aucune carte sélectionnée' };
-      }
-
-      if (!canPlayCard(currentState.selectedCard.card, buildPile, currentState)) {
-        return { success: false, message: 'Vous ne pouvez pas jouer cette carte' };
+      const intent = preparePlayCardIntent(currentState, buildPile);
+      if (!intent.valid) {
+        return { success: false, message: intent.error };
       }
 
       setInteractionLocked(true);
 
-      const willEmptyHand = willPlayCardEmptyHand(currentState);
-
-      startPlayCardAnimation(currentState, buildPile, completedBuildPileCards, startAnimation);
+      startPlayCardAnimation(currentState, buildPile, intent.completedBuildPileCards, startAnimation);
 
       if (viewRef.current) {
-        commitView(applyOptimisticPlayView(viewRef.current, buildPile, willEmptyHand));
+        commitView(applyOptimisticPlayView(viewRef.current, buildPile, intent.willEmptyHand));
       }
 
       sendAction({ type: 'PLAY_CARD', buildPile });
@@ -547,13 +521,9 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
           return;
         }
 
-        if (!currentState.selectedCard) {
-          resolve({ success: false, message: 'Aucune carte sélectionnée' });
-          return;
-        }
-
-        if (currentState.selectedCard.source !== 'hand') {
-          resolve({ success: false, message: 'Vous devez défausser une carte de votre main' });
+        const intent = prepareDiscardCardIntent(currentState);
+        if (!intent.valid) {
+          resolve({ success: false, message: intent.error });
           return;
         }
 

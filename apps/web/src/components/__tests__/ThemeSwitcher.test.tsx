@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { ThemeProvider } from 'next-themes';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { themes } from '@/types';
+import { themes } from '@skipbo/game-core';
 import { trackThemeSelection } from '@/monitoring/themeAnalytics';
 import { ThemeSwitcher } from '../ThemeSwitcher';
 

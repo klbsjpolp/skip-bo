@@ -1,44 +1,18 @@
 import React, { useCallback, useRef } from 'react';
 import { useMachine } from '@xstate/react';
+import { canPlayCard, type Card, type GameState, type MoveResult } from '@skipbo/game-core';
 import { gameMachine } from '@/state/gameMachine';
-import type { Card, GameState, MoveResult } from '@/types';
-import { canPlayCard } from '@/lib/validators';
-import {
-  calculateAnimationDuration,
-  getBuildPilePosition,
-  getDiscardTopCardPosition,
-  getHandCardAngle,
-  getHandCardPosition,
-  getNextDiscardCardPosition,
-  getStockCardPosition,
-} from '@/utils/cardPositions';
+import { useDebugActions } from '@/game/debugActions';
+import { preparePlayCardIntent, prepareDiscardCardIntent } from '@/game/moveIntents';
+import { startDiscardCardAnimation, startPlayCardAnimation } from '@/game/moveAnimations';
 import { setGlobalAnimationContext } from '@/services/aiAnimationService';
 import {
   calculateMultipleDrawAnimationDuration,
   setGlobalDrawAnimationContext,
   triggerMultipleDrawAnimations,
 } from '@/services/drawAnimationService';
-import {
-  setGlobalCompletedPileAnimationContext,
-  triggerCompletedBuildPileAnimation,
-} from '@/services/completedBuildPileAnimationService';
+import { setGlobalCompletedPileAnimationContext } from '@/services/completedBuildPileAnimationService';
 import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
-import { consumeDragCommitOverride } from '@/services/dragCommitOverride';
-import { getCompletedBuildPileCards } from '@/lib/retreatPile';
-import { planHandRefill } from '@/lib/handRefill';
-
-// Helper function to check if a PLAY_CARD action will result in an empty hand
-const willPlayCardEmptyHand = (gameState: GameState): boolean => {
-  if (!gameState.selectedCard || gameState.selectedCard.source !== 'hand') {
-    return false;
-  }
-
-  const player = gameState.players[gameState.currentPlayerIndex];
-  const handAfterPlay = [...player.hand];
-  handAfterPlay[gameState.selectedCard.index] = null;
-
-  return handAfterPlay.every((card) => card === null);
-};
 
 export function useSkipBoGame() {
   const [snapshot, dispatch, actorRef] = useMachine(gameMachine);
@@ -63,28 +37,8 @@ export function useSkipBoGame() {
     dispatch({ type: 'INIT' });
   }, [dispatch]);
 
-  const debugFillBuildPile = useCallback(
-    (buildPile: number) => {
-      dispatch({ type: 'DEBUG_FILL_BUILD_PILE', buildPile });
-    },
-    [dispatch],
-  );
-
-  const debugFillHandSkipBo = useCallback(() => {
-    dispatch({ type: 'DEBUG_FILL_HAND_SKIPBO' });
-  }, [dispatch]);
-
-  const debugClearStockPile = useCallback(() => {
-    dispatch({ type: 'DEBUG_CLEAR_STOCK_PILE' });
-  }, [dispatch]);
-
-  const debugClearAiStockPile = useCallback(() => {
-    dispatch({ type: 'DEBUG_CLEAR_AI_STOCK_PILE' });
-  }, [dispatch]);
-
-  const debugWin = useCallback(() => {
-    dispatch({ type: 'DEBUG_WIN' });
-  }, [dispatch]);
+  const { debugFillBuildPile, debugFillHandSkipBo, debugClearStockPile, debugClearAiStockPile, debugWin } =
+    useDebugActions(dispatch);
 
   // Animations are decoupled from the interaction lock: the user can keep
   // selecting and playing cards while previous animations are still in flight.
@@ -112,151 +66,33 @@ export function useSkipBoGame() {
   const playCard = useCallback(
     async (buildPile: number): Promise<MoveResult> => {
       const currentState = stateRef.current;
-      const completedBuildPileCards = getCompletedBuildPileCards(currentState, buildPile);
 
       if (isInteractionBlocked()) {
         return { success: false, message: 'Action en cours' };
       }
 
-      // Validate before dispatching
-      if (!currentState.selectedCard) {
-        return { success: false, message: 'Aucune carte sélectionnée' };
+      // Validate and plan the move (refill + pile completion) before dispatching
+      const intent = preparePlayCardIntent(currentState, buildPile);
+      if (!intent.valid) {
+        return { success: false, message: intent.error };
       }
 
-      if (!canPlayCard(currentState.selectedCard.card, buildPile, currentState)) {
-        return { success: false, message: 'Vous ne pouvez pas jouer cette carte' };
-      }
-
-      // Check if this play will empty the hand and trigger animations accordingly
-      const willEmptyHand = willPlayCardEmptyHand(currentState);
-      let refillCards: Card[] = [];
-      let refillHandIndices: number[] = [];
-
-      if (willEmptyHand && currentState.selectedCard?.source === 'hand') {
-        const player = currentState.players[currentState.currentPlayerIndex];
-        const handAfterPlay = [...player.hand];
-        handAfterPlay[currentState.selectedCard.index] = null;
-
-        const refillPlan = planHandRefill(handAfterPlay, currentState.deck, currentState.completedBuildPiles);
-        refillCards = refillPlan.cards;
-        refillHandIndices = refillPlan.handIndices;
-      }
+      const { completedBuildPileCards } = intent;
+      const refillCards: Card[] = intent.refillPlan.cards;
+      const refillHandIndices: number[] = intent.refillPlan.handIndices;
 
       interactionLockRef.current = true;
 
-      // Compute play animation, then chain completion & refill via baseDelay so
-      // they queue up *without* awaiting. The dispatch happens immediately after,
-      // so further user actions (select / play / discard) aren't blocked by the
-      // visual animation. Cards in flight are masked at source/target via
-      // `isCardBeingAnimated` in PlayerArea/CenterArea.
-      let playAnimationDuration = 0;
-
-      const dragOverride = consumeDragCommitOverride();
-
-      // Trigger play animation first
-      try {
-        const playerAreaElement = document.querySelector<HTMLElement>(
-          `.player-area[data-player-index="${currentState.currentPlayerIndex}"]`,
-        );
-        const centerAreaElement = document.querySelector('.center-area') as HTMLElement;
-        let startAngleDeg: number | undefined;
-
-        if (playerAreaElement && centerAreaElement) {
-          let startPosition;
-
-          // Calculate start position based on source
-          if (currentState.selectedCard.source === 'hand') {
-            const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
-            if (handContainer) {
-              startPosition = getHandCardPosition(handContainer, currentState.selectedCard.index);
-              startAngleDeg = getHandCardAngle(handContainer, currentState.selectedCard.index);
-            }
-          } else if (currentState.selectedCard.source === 'stock') {
-            const stockContainer = playerAreaElement.querySelector('.stock-pile') as HTMLElement;
-            if (stockContainer) {
-              startPosition = getStockCardPosition(stockContainer);
-            }
-          } else if (currentState.selectedCard.source === 'discard') {
-            const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
-            if (discardContainer && currentState.selectedCard.discardPileIndex !== undefined) {
-              startPosition = getDiscardTopCardPosition(discardContainer, currentState.selectedCard.discardPileIndex);
-            }
-          }
-
-          // If the play was committed via drag-and-drop, override the start
-          // position with where the user released the pointer so the fly-to-target
-          // animation continues from the ghost rather than jumping back to the
-          // source slot.
-          if (dragOverride?.startPosition) {
-            startPosition = dragOverride.startPosition;
-            startAngleDeg = undefined;
-          }
-
-          // Calculate end position (build pile)
-          const endPosition = getBuildPilePosition(centerAreaElement, buildPile);
-
-          if (startPosition) {
-            const duration = calculateAnimationDuration(startPosition, endPosition);
-            playAnimationDuration = duration * 1.2;
-            // Mask the freshly-dispatched card at the build pile until the play
-            // animation has actually landed. Without targetSettledInState the
-            // top of the pile would render the new card immediately (because we
-            // dispatched PLAY_CARD before the animation), making the card appear
-            // teleported to its destination before flying there.
-            //
-            // When this play completes the pile, the committed state clears the
-            // build pile (length 0). targetPileLength must reflect that committed
-            // length so CenterArea masks the in-flight card with the pre-completion
-            // backdrop instead of painting the final card on the pile early.
-            const previousBuildPileLength = currentState.buildPiles[buildPile].length;
-            const settledBuildPileLength = completedBuildPileCards ? 0 : previousBuildPileLength + 1;
-            startAnimation({
-              card: currentState.selectedCard.card,
-              startPosition,
-              endPosition,
-              startAngleDeg,
-              animationType: 'play',
-              sourceRevealed: true,
-              targetRevealed: true,
-              initialDelay: 0,
-              duration: playAnimationDuration,
-              targetSettledInState: true,
-              targetPileLength: settledBuildPileLength,
-              sourceInfo: {
-                playerIndex: currentState.currentPlayerIndex,
-                source: currentState.selectedCard.source,
-                index: currentState.selectedCard.index,
-                discardPileIndex: currentState.selectedCard.discardPileIndex,
-              },
-              targetInfo: {
-                playerIndex: currentState.currentPlayerIndex,
-                source: 'build',
-                index: buildPile,
-              },
-            });
-          }
-        }
-      } catch (error) {
-        console.warn('Play animation failed, continuing with game logic:', error);
-      }
-
-      // Schedule completion animation to start once the play animation has landed.
-      let completionAnimationDuration = 0;
-
-      if (completedBuildPileCards) {
-        try {
-          completionAnimationDuration = triggerCompletedBuildPileAnimation(
-            currentState,
-            buildPile,
-            completedBuildPileCards,
-            currentState.completedBuildPiles.length,
-            100,
-            playAnimationDuration,
-          );
-        } catch (error) {
-          console.warn('Completed build pile animation failed, continuing with game logic:', error);
-        }
-      }
+      // Fire the play animation (and pile-completion retreat) immediately; the
+      // dispatch happens right after, so further user actions (select / play /
+      // discard) aren't blocked by the visual animation. Cards in flight are
+      // masked at source/target via `isCardBeingAnimated` in PlayerArea/CenterArea.
+      const { playAnimationDuration, completionAnimationDuration } = startPlayCardAnimation(
+        currentState,
+        buildPile,
+        completedBuildPileCards,
+        startAnimation,
+      );
 
       // completionAnimationDuration already includes playAnimationDuration as its baseDelay,
       // so when there is a completion the refill must wait until all retreat cards have landed.
@@ -306,12 +142,9 @@ export function useSkipBoGame() {
         return { success: false, message: 'Action en cours' };
       }
 
-      if (!currentState.selectedCard) {
-        return { success: false, message: 'Aucune carte sélectionnée' };
-      }
-
-      if (currentState.selectedCard.source !== 'hand') {
-        return { success: false, message: 'Vous devez défausser une carte de votre main' };
+      const intent = prepareDiscardCardIntent(currentState);
+      if (!intent.valid) {
+        return { success: false, message: intent.error };
       }
 
       interactionLockRef.current = true;
@@ -322,62 +155,7 @@ export function useSkipBoGame() {
       // selections / plays issued *before* the discard ran can still complete
       // their visual animations because the animationGate keeps waiting on
       // `waitForAnimations()` until the queue is empty.
-      let discardAnimationDuration = 0;
-      const dragOverride = consumeDragCommitOverride();
-
-      // Trigger animation before state change
-      try {
-        const playerAreaElement = document.querySelector<HTMLElement>(
-          `.player-area[data-player-index="${currentState.currentPlayerIndex}"]`,
-        );
-
-        if (playerAreaElement) {
-          const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
-          if (handContainer) {
-            const startPosition =
-              dragOverride?.startPosition ?? getHandCardPosition(handContainer, currentState.selectedCard.index);
-            const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
-            if (discardContainer) {
-              const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
-              discardAnimationDuration = calculateAnimationDuration(startPosition, endPosition);
-              // Mask the freshly-dispatched card on the discard pile until the
-              // animation lands — the dispatch happens immediately, so without
-              // this the card would teleport to the pile and then re-animate.
-              const previousDiscardPileLength =
-                currentState.players[currentState.currentPlayerIndex].discardPiles[discardPile].length;
-              startAnimation({
-                card: currentState.selectedCard.card,
-                startPosition,
-                endPosition,
-                animationType: 'discard',
-                sourceRevealed: true,
-                targetRevealed: true,
-                initialDelay: 0,
-                duration: discardAnimationDuration,
-                startAngleDeg: dragOverride?.startPosition
-                  ? undefined
-                  : getHandCardAngle(handContainer, currentState.selectedCard.index),
-                targetSettledInState: true,
-                targetPileLength: previousDiscardPileLength + 1,
-                sourceInfo: {
-                  playerIndex: currentState.currentPlayerIndex,
-                  source: currentState.selectedCard.source,
-                  index: currentState.selectedCard.index,
-                  discardPileIndex: currentState.selectedCard.discardPileIndex,
-                },
-                targetInfo: {
-                  playerIndex: currentState.currentPlayerIndex,
-                  source: 'discard',
-                  index: discardPile,
-                  discardPileIndex: discardPile,
-                },
-              });
-            }
-          }
-        }
-      } catch (error) {
-        console.warn('Animation failed, continuing with game logic:', error);
-      }
+      const discardAnimationDuration = startDiscardCardAnimation(currentState, discardPile, startAnimation);
 
       dispatch({ type: 'DISCARD_CARD', discardPile, animationDuration: discardAnimationDuration });
       interactionLockRef.current = false;

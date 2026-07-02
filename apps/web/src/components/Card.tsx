@@ -1,4 +1,4 @@
-import type { Card as CardType } from '@/types';
+import type { Card as CardType } from '@skipbo/game-core';
 import { cn } from '@/lib/utils';
 import { HAND_Y_OFFSETS } from '@/utils/cardPositions';
 import type { CSSProperties, HTMLAttributes, MouseEventHandler } from 'react';

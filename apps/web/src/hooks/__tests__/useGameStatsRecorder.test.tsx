@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { Card, GameConfig, GameState, Player } from '@/types';
+import type { Card, GameConfig, GameState, Player } from '@skipbo/game-core';
 import type { GameStatsRecord, GameStatsSnapshot } from '@/monitoring/gameStats';
 import { appendGameStatsRecord } from '@/state/gameStatsHistory';
 import { reportGameCompleted } from '@/monitoring/gameAnalytics';

@@ -13,9 +13,9 @@ import { useCardAnimation } from '@/contexts/useCardAnimation';
 import { animationServiceBridge } from '@/lib/animationServiceBridge';
 import { isSafeToApplyLocalUpdate } from '@/lib/localUpdateGate';
 import { applyPendingUpdateBeforeOnlineStart } from '@/lib/onlineUpdateGate';
-import { canPlayCard } from '@/lib/validators';
+import { canPlayCard } from '@skipbo/game-core';
 import { createOnlineRoom, joinOnlineRoom } from '@/online/api';
-import { getStoredStockSize } from '@/state/initialGameState';
+import { getStoredStockSize } from '@skipbo/game-core';
 import { clearOnlineSession, loadOnlineSession, saveOnlineSession } from '@/state/sessionPersistence';
 import {
   getRequestedStatsDialogMode,

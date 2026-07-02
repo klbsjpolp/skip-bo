@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { expect, type Locator, type Page, type TestInfo } from '@playwright/test';
 
-import type { Theme } from '../../src/types/index.ts';
+import type { Theme } from '@skipbo/game-core';
 import type { UiFixtureName } from '../../src/testing/uiFixtures.ts';
 
 const stableScreenshotCss = readFileSync(new URL('./stable-screenshot.css', import.meta.url), 'utf8');

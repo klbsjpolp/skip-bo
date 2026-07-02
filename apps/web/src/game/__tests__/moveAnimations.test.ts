@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initialGameState, type Card, type GameState } from '@skipbo/game-core';
 
 import type { CardAnimationData } from '@/contexts/CardAnimationContext';
-import { startDiscardCardAnimation, startPlayCardAnimation } from '@/hooks/useOnlineSkipBoGame/localActionAnimations';
+import { startDiscardCardAnimation, startPlayCardAnimation } from '@/game/moveAnimations';
 import type { CardPosition } from '@/utils/cardPositions';
 
 vi.mock('@/services/completedBuildPileAnimationService', () => ({
@@ -133,14 +133,17 @@ describe('startPlayCardAnimation', () => {
     const state = baseState('hand');
     state.selectedCard = null;
 
-    expect(startPlayCardAnimation(state, 0, null, startAnimation)).toBe(0);
+    expect(startPlayCardAnimation(state, 0, null, startAnimation)).toEqual({
+      playAnimationDuration: 0,
+      completionAnimationDuration: 0,
+    });
     expect(startAnimation).not.toHaveBeenCalled();
   });
 
   it('returns 0 and fires nothing when the board is not in the DOM', () => {
     const startAnimation = makeStartAnimation();
 
-    expect(startPlayCardAnimation(baseState('hand'), 0, null, startAnimation)).toBe(0);
+    expect(startPlayCardAnimation(baseState('hand'), 0, null, startAnimation).playAnimationDuration).toBe(0);
     expect(startAnimation).not.toHaveBeenCalled();
   });
 
@@ -148,9 +151,9 @@ describe('startPlayCardAnimation', () => {
     mountAnimationDom();
     const startAnimation = makeStartAnimation();
 
-    const duration = startPlayCardAnimation(baseState('hand'), 0, null, startAnimation);
+    const { playAnimationDuration } = startPlayCardAnimation(baseState('hand'), 0, null, startAnimation);
 
-    expect(duration).toBeGreaterThan(0);
+    expect(playAnimationDuration).toBeGreaterThan(0);
     expect(startAnimation).toHaveBeenCalledTimes(1);
     const animation = firstAnimationArg(startAnimation);
     expect(animation.animationType).toBe('play');

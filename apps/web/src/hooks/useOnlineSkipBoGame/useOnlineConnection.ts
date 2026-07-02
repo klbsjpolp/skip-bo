@@ -8,7 +8,7 @@ import {
 } from '@klbsjpolp/realtime-core';
 import { SkipboHost, type ClientGameView, type HostRoomMeta } from '@skipbo/skipbo-runtime';
 
-import type { GameAction } from '@/state/gameActions';
+import type { GameAction } from '@skipbo/game-core';
 import type { GameStatsRecord } from '@/monitoring/gameStats';
 import { RECONNECT_DELAYS_MS, WEBSOCKET_PING_INTERVAL_MS } from '@/config/timing';
 import { clearOnlineSession } from '@/state/sessionPersistence';

@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { GameConfig, GameState } from '@/types';
+import type { GameConfig, GameState } from '@skipbo/game-core';
 import type { GameStatsRecord, GameStatsSnapshot } from '@/monitoring/gameStats';
 
 // Capture the snapshot the screen feeds the recorder each render, so we can
