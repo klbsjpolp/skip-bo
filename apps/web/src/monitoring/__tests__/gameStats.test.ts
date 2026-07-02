@@ -103,7 +103,7 @@ describe('createGameStatsTracker', () => {
     });
   });
 
-  it('excludes hidden time from a player play time', () => {
+  it('excludes hidden time from a player play time and from the total duration', () => {
     const onComplete = vi.fn();
     const tracker = makeTracker(onComplete);
 
@@ -126,7 +126,87 @@ describe('createGameStatsTracker', () => {
 
     const record = onComplete.mock.calls[0][0] as GameStatsRecord;
     expect(record.players[0].playTimeMs).toBe(2000); // 1000 before hide + 1000 after resume
-    expect(record.durationMs).toBe(6000); // wall-clock duration is unaffected
+    expect(record.durationMs).toBe(2000); // hidden span is paused in lockstep with play time
+  });
+
+  it('keeps duration paused if the game ends while still hidden', () => {
+    const onComplete = vi.fn();
+    const tracker = makeTracker(onComplete);
+
+    tracker.observe(
+      snap(false, 0, null, [
+        ['Alice', false, 10],
+        ['Bot', true, 10],
+      ]),
+      0,
+    );
+    tracker.setHidden(true, 1000); // P0 has played 1000ms so far
+    // The game ends (e.g. a debug win) while the tab is still hidden.
+    tracker.observe(
+      snap(true, 0, 0, [
+        ['Alice', false, 0],
+        ['Bot', true, 5],
+      ]),
+      9000,
+    );
+
+    const record = onComplete.mock.calls[0][0] as GameStatsRecord;
+    expect(record.players[0].playTimeMs).toBe(1000);
+    expect(record.durationMs).toBe(1000); // the 8000ms hidden span never counted
+  });
+
+  it('begins a recording already paused if the tab is hidden when the game starts', () => {
+    const onComplete = vi.fn();
+    const tracker = makeTracker(onComplete);
+
+    // Hidden before any game is open — setHidden must not touch a nonexistent recording.
+    tracker.setHidden(true, 0);
+    // The game starts while still hidden; the opening segment must not run.
+    tracker.observe(
+      snap(false, 0, null, [
+        ['Alice', false, 10],
+        ['Bot', true, 10],
+      ]),
+      100,
+    );
+    tracker.setHidden(false, 500); // resume 400ms later
+    tracker.observe(
+      snap(true, 0, 0, [
+        ['Alice', false, 0],
+        ['Bot', true, 10],
+      ]),
+      700,
+    );
+
+    const record = onComplete.mock.calls[0][0] as GameStatsRecord;
+    expect(record.players[0].playTimeMs).toBe(200); // only the post-resume 500->700 span
+    expect(record.durationMs).toBe(200); // the 100->500 hidden span never counted
+  });
+
+  it('ignores a zero-length hidden span', () => {
+    const onComplete = vi.fn();
+    const tracker = makeTracker(onComplete);
+
+    tracker.observe(
+      snap(false, 0, null, [
+        ['Alice', false, 10],
+        ['Bot', true, 10],
+      ]),
+      0,
+    );
+    tracker.setHidden(true, 500);
+    tracker.setHidden(false, 500); // hidden and resumed at the exact same instant
+    tracker.observe(
+      snap(true, 0, 0, [
+        ['Alice', false, 0],
+        ['Bot', true, 5],
+      ]),
+      1000,
+    );
+
+    const record = onComplete.mock.calls[0][0] as GameStatsRecord;
+    expect(record.players[0].playTimeMs).toBe(1000); // no time excluded
+    expect(record.durationMs).toBe(1000);
   });
 
   it('does not increment turns when the current player is unchanged', () => {
@@ -290,6 +370,7 @@ describe('createGameStatsTracker', () => {
     expect(record.totalTurns).toBe(2);
     expect(record.players[0].playTimeMs).toBe(1000); // only the pre-hide time
     expect(record.players[1].playTimeMs).toBe(1000); // only the post-resume time
+    expect(record.durationMs).toBe(2000); // the 5000ms hidden span is excluded too
   });
 
   it('does not open a recording for an empty-player snapshot', () => {
