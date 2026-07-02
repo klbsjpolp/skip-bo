@@ -4,6 +4,8 @@ import { Card } from '@/components/Card';
 import type { CardAnimationData } from '@/contexts/CardAnimationContext';
 import { useCardAnimation } from '@/contexts/useCardAnimation';
 import { cn } from '@/lib/utils';
+import { playSound } from '@/sound/controller';
+import { soundForAnimation } from '@/sound/soundForAnimation';
 
 interface AnimatedCardProps {
   animation: CardAnimationData;
@@ -65,6 +67,13 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
     const { animation, needsFlip, portalTarget, markAnimationStarted, removeAnimation } = effectInputsRef.current;
 
     markAnimationStarted(animation.id);
+
+    // Fire the matching sound exactly when this card starts travelling, so
+    // staggered sequences (multi-draws) play spread out rather than all at once.
+    const soundEvent = soundForAnimation(animation);
+    if (soundEvent) {
+      playSound(soundEvent);
+    }
 
     const el = rootRef.current;
     if (!el) return;

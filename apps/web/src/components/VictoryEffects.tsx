@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import type { CSSProperties } from 'react';
 import { cn } from '@/lib/utils.ts';
+import { playSound } from '@/sound/controller';
 
 type VictoryStyle = CSSProperties;
 
@@ -55,6 +57,12 @@ const BURST_GROUPS = [
 ];
 
 export function VictoryEffects() {
+  // VictoryEffects only mounts for the winner, so this fires the fanfare exactly
+  // once per game-over.
+  useEffect(() => {
+    playSound('victory');
+  }, []);
+
   return (
     <>
       <div className="victory-layer victory-persistent-layer" aria-hidden="true" data-testid="victory-effects">
