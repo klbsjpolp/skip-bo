@@ -18,6 +18,6 @@ describe('DEBUG_FILL_BUILD_PILE action', () => {
     expect(next.buildPiles[0][10]).toEqual({ value: 11, isSkipBo: false });
     expect(next.players[0].hand[0]).toEqual({ value: 12, isSkipBo: false });
     expect(next.selectedCard).toBeNull();
-    expect(next.message).toBe('Pile de construction prête (debug)');
+    expect(next.message).toEqual({ code: 'DEBUG_BUILD_PILE_READY' });
   });
 });

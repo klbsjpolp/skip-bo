@@ -451,7 +451,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         previousView
           ? {
               ...previousView,
-              message: 'Sélectionnez une destination',
+              message: { code: 'SELECT_DESTINATION' as const },
               selectedCard: { card, source, index, discardPileIndex },
             }
           : previousView,
@@ -468,7 +468,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     }
 
     updateView((previousView) =>
-      previousView ? { ...previousView, message: "C'est votre tour", selectedCard: null } : previousView,
+      previousView ? { ...previousView, message: { code: 'YOUR_TURN' as const }, selectedCard: null } : previousView,
     );
 
     sendAction({ type: 'CLEAR_SELECTION' });

@@ -1,4 +1,11 @@
-import { type Card, type GameAction, gameReducer, type GameState, initialGameState } from '@skipbo/game-core';
+import {
+  type Card,
+  type GameAction,
+  type GameMessage,
+  gameReducer,
+  type GameState,
+  initialGameState,
+} from '@skipbo/game-core';
 import { type ClientGameView, serializeClientGameView } from '@skipbo/skipbo-runtime';
 
 import { calculateMultipleDrawAnimationDuration, triggerMultipleDrawAnimations } from '@/services/drawAnimationService';
@@ -20,7 +27,7 @@ export interface OpponentTransition {
 
 export interface TurnPresentationOverride {
   currentPlayerIndex: number;
-  message: string;
+  message: GameMessage;
 }
 
 export const cloneGameStateFromView = (view: ClientGameView): GameState => ({
@@ -56,7 +63,7 @@ export const createPlaceholderGameState = (roomCode: string, seatCapacity: numbe
     seatIndex: playerIndex,
     stockPile: [],
   }));
-  state.message = `Connexion à la partie ${roomCode}`;
+  state.message = { code: 'CONNECTING', roomCode };
 
   return state;
 };

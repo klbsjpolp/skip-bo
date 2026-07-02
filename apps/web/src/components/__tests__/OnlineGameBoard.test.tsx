@@ -38,7 +38,7 @@ const createOnlineState = (): GameState => {
   state.players[2].discardPiles[1] = [card(9)];
   state.players[3].stockPile = [card(5)];
   state.players[3].discardPiles[2] = [card(10)];
-  state.message = 'En attente du démarrage';
+  state.message = { code: 'WAITING_FOR_START' };
 
   return state;
 };
@@ -52,7 +52,7 @@ const createTwoPlayerOnlineState = (): GameState => {
     kind: 'human',
     seatIndex: playerIndex,
   }));
-  state.message = "C'est votre tour";
+  state.message = { code: 'YOUR_TURN' };
 
   return state;
 };

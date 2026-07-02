@@ -16,7 +16,7 @@
 - `selectedCard` can carry `plannedBuildPileIndex` and `plannedDiscardPileIndex`, and AI flow depends on those planned targets surviving between selection and resolution.
 - `Skip-Bo` cards can be played as wildcards and may also be discarded to a discard pile (per official Skip-Bo rules).
 - Completed build piles move into `completedBuildPiles` and are reshuffled back into `deck` when more draw cards are needed.
-- Start-of-turn draws belong to the local state machine draw service. `END_TURN` only flips `currentPlayerIndex`.
+- Start-of-turn draws belong to the turn boundary, not to `END_TURN`/`DISCARD_CARD` (those only flip `currentPlayerIndex`). The rule is owned by `planStartOfTurnDraw` in `packages/game-core/src/lib/turnFlow.ts`; the local machine's draw service and the online runtime's `applyOnlineAction` both delegate to it.
 - Online rooms are host-authoritative. The server relays opaque messages and never sees game state; the host seat owns the game and redacts hidden information, relaying a `ClientGameView` per seat.
 - Online client views are viewer-relative. In online mode the receiving player is rendered at index `0` even though seat order is preserved separately.
 - Online active turn order is locked from the connected seats present when the host starts the room.
@@ -25,7 +25,7 @@
 
 These are true today and matter operationally, but they are easier to change than the durable invariants above:
 
-- User-visible status strings currently live in `packages/game-core/src/lib/config.ts` and are French.
+- Game status messages are semantic codes (`GameMessage` in `packages/game-core/src/types/index.ts`); the French strings are rendered only in `apps/web/src/game/gameMessages.ts`.
 - Human play and discard animations are kicked off from `apps/web/src/hooks/useSkipBoGame.ts`.
 - AI play, discard, and start-of-turn draw animations are driven by `apps/web/src/services/aiAnimationService.ts` and `apps/web/src/services/drawAnimationService.ts`.
 - Online opponent animations are inferred from snapshot-to-snapshot diffs in `apps/web/src/hooks/useOnlineSkipBoGame.ts`.

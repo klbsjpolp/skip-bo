@@ -1,4 +1,4 @@
-import type { Card, GameConfig, GameState, Player, SelectedCard } from '@skipbo/game-core';
+import type { Card, GameConfig, GameMessage, GameState, Player, SelectedCard } from '@skipbo/game-core';
 import {
   getDefaultPlayerName,
   normalizePlayerName,
@@ -26,7 +26,7 @@ export interface ClientGameView {
   currentPlayerIndex: number;
   deck: Card[];
   gameIsOver: boolean;
-  message: string;
+  message: GameMessage;
   players: PlayerView[];
   room: RoomSummary;
   selectedCard: SelectedCardView | null;
@@ -118,28 +118,28 @@ const getViewMessage = (
   status: RoomStatus,
   connectedSeats: number[],
   players: PlayerView[],
-): string => {
+): GameMessage => {
   const playerCount = gameState.players.length;
   const rotatedWinnerIndex = rotateIndex(gameState.winnerIndex, viewerSeatIndex, playerCount);
   const rotatedCurrentPlayerIndex = rotateIndex(gameState.currentPlayerIndex, viewerSeatIndex, playerCount) ?? 0;
 
   if (status === 'WAITING') {
-    return connectedSeats.length < 2 ? 'En attente d’au moins un autre joueur' : 'En attente du démarrage';
+    return connectedSeats.length < 2 ? { code: 'WAITING_FOR_PLAYERS' } : { code: 'WAITING_FOR_START' };
   }
 
   if (gameState.gameIsOver) {
-    if (rotatedWinnerIndex === 0) return 'Vous avez gagné !';
+    if (rotatedWinnerIndex === 0) return { code: 'YOU_WON' };
     const winnerName = rotatedWinnerIndex !== null ? players[rotatedWinnerIndex]?.displayName : undefined;
-    return winnerName ? `${winnerName} a gagné.` : 'Un adversaire a gagné.';
+    return { code: 'OPPONENT_WON', winnerName };
   }
 
   if (rotatedCurrentPlayerIndex === 0) {
-    return gameState.selectedCard ? 'Sélectionnez une destination' : 'C’est votre tour';
+    return gameState.selectedCard ? { code: 'SELECT_DESTINATION' } : { code: 'YOUR_TURN' };
   }
 
   const currentPlayerName = players[rotatedCurrentPlayerIndex]?.displayName;
   const stockPileLength = players[rotatedCurrentPlayerIndex]?.stockPile?.length;
-  return currentPlayerName ? `Tour de ${currentPlayerName} (${stockPileLength ?? 0})` : 'Tour d’un adversaire';
+  return { code: 'OPPONENT_TURN', playerName: currentPlayerName, stockPileLength };
 };
 
 const toSelectedCardView = (

@@ -4,6 +4,7 @@ import {
   hasValidDiscardPileIndex,
   hasValidSelectedSource,
   initialGameState,
+  planStartOfTurnDraw,
   type GameAction,
   type GameState,
 } from '@skipbo/game-core';
@@ -91,7 +92,7 @@ export const createWaitingRoomState = (stockSize?: number, seatCapacity: number 
     discardPiles: player.discardPiles.map(() => []),
     stockPile: [],
   }));
-  state.message = 'En attente d’au moins un autre joueur';
+  state.message = { code: 'WAITING_FOR_PLAYERS' };
 
   return state;
 };
@@ -105,7 +106,7 @@ export const createOnlineInitialGameState = ({
   const state = initialGameState({ playerCount, stockSize });
 
   assignOnlinePlayerMetadata(state, seatIndices, playerNames);
-  state.message = "C'est votre tour";
+  state.message = { code: 'YOUR_TURN' };
 
   return state;
 };
@@ -185,7 +186,9 @@ export const applyOnlineAction = (gameState: GameState, action: GameAction): Gam
   let nextState = gameReducer(gameState, action);
 
   if (nextState.currentPlayerIndex !== previousCurrentPlayer) {
-    nextState = gameReducer(nextState, { type: 'DRAW' });
+    // Turn advanced: the new current player draws. The rule itself lives in
+    // game-core's planStartOfTurnDraw, shared with the local turn machine.
+    nextState = gameReducer(nextState, planStartOfTurnDraw(nextState).action);
   }
 
   return nextState;

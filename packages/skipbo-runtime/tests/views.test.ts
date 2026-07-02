@@ -84,7 +84,7 @@ describe('serializeClientGameView', () => {
     expect(view.room.hostSeatIndex).toBe(0);
     expect(view.room.seatCapacity).toBe(4);
     expect(view.room.currentSeatIndex).toBe(2);
-    expect(view.message).toBe('En attente du démarrage');
+    expect(view.message).toEqual({ code: 'WAITING_FOR_START' });
   });
 
   it('exposes disconnected seats in the room summary, defaulting to an empty array', () => {

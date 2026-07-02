@@ -151,7 +151,7 @@ describe('gameReducer', () => {
     it('should not play card if no card is selected', () => {
       const result = gameReducer(initialState, { type: 'PLAY_CARD', buildPile: 0 });
 
-      expect(result.message).toContain('Aucune carte sélectionnée');
+      expect(result.message).toEqual({ code: 'INVALID_MOVE_NO_SELECTION' });
     });
 
     it('should play a valid card to build pile', () => {
@@ -270,7 +270,7 @@ describe('gameReducer', () => {
     it('should not discard if no card is selected', () => {
       const result = gameReducer(initialState, { type: 'DISCARD_CARD', discardPile: 0 });
 
-      expect(result.message).toContain('Aucune carte sélectionnée');
+      expect(result.message).toEqual({ code: 'INVALID_MOVE_NO_SELECTION' });
     });
 
     it('should allow discarding Skip-Bo cards (official rule)', () => {
@@ -796,7 +796,7 @@ describe('gameReducer', () => {
           buildPile: 99,
         });
 
-        expect(result.message).toContain('Vous ne pouvez pas jouer cette carte');
+        expect(result.message).toEqual({ code: 'INVALID_MOVE_CANNOT_PLAY' });
         expect(result.buildPiles[0]).toHaveLength(0);
         expect(result.players[0].hand[0]).toEqual({ value: 1, isSkipBo: false });
       });
@@ -823,7 +823,7 @@ describe('gameReducer', () => {
           discardPile: 0,
         });
 
-        expect(result.message).toBe('Mouvement invalide');
+        expect(result.message).toEqual({ code: 'INVALID_MOVE' });
         expect(result.selectedCard).toBeNull();
         expect(result.players[0].hand).toHaveLength(5);
         expect(result.players[0].discardPiles[0]).toHaveLength(0);

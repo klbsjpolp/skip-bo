@@ -110,7 +110,7 @@ const createSelectedLastCardState = (): GameState => {
     source: 'hand',
     index: 0,
   };
-  state.message = 'Sélectionnez une destination';
+  state.message = { code: 'SELECT_DESTINATION' };
 
   return state;
 };
@@ -131,7 +131,7 @@ const createSelectedCompletingHandState = (): GameState => {
     source: 'hand',
     index: 0,
   };
-  state.message = 'Sélectionnez une destination';
+  state.message = { code: 'SELECT_DESTINATION' };
 
   return state;
 };
@@ -149,7 +149,7 @@ const createSelectedStockCardState = (): GameState => {
     source: 'stock',
     index: 1,
   };
-  state.message = 'Sélectionnez une destination';
+  state.message = { code: 'SELECT_DESTINATION' };
 
   return state;
 };
@@ -168,7 +168,7 @@ const createSelectedDiscardCardState = (): GameState => {
     index: 1,
     discardPileIndex: 1,
   };
-  state.message = 'Sélectionnez une destination';
+  state.message = { code: 'SELECT_DESTINATION' };
 
   return state;
 };
@@ -179,7 +179,7 @@ const createInteractiveOnlineState = (): GameState => {
   state.currentPlayerIndex = 0;
   state.players[1].isAI = false;
   state.selectedCard = null;
-  state.message = "C'est votre tour";
+  state.message = { code: 'YOUR_TURN' };
 
   return state;
 };
@@ -587,7 +587,7 @@ describe('useOnlineSkipBoGame', () => {
       source: 'hand',
       index: 0,
     };
-    previousState.message = 'Sélectionnez une destination';
+    previousState.message = { code: 'SELECT_DESTINATION' };
     const nextState = gameReducer(previousState, { type: 'PLAY_CARD', buildPile: 0 });
     const previousView = createOnlineView(previousState, 1);
     const nextView = createOnlineView(nextState, 2);
@@ -876,7 +876,7 @@ describe('useOnlineSkipBoGame', () => {
       await Promise.resolve();
     });
 
-    expect(result.current.gameState.message).toBe(previousView.message);
+    expect(result.current.gameState.message).toEqual(previousView.message);
 
     await act(async () => {
       socket.emitView(nextView);
@@ -884,20 +884,20 @@ describe('useOnlineSkipBoGame', () => {
 
     expect(triggerAIAnimation).toHaveBeenCalledTimes(1);
     expect(triggerMultipleDrawAnimations).toHaveBeenCalledTimes(1);
-    expect(result.current.gameState.message).toBe(previousView.message);
+    expect(result.current.gameState.message).toEqual(previousView.message);
     expect(result.current.gameState.currentPlayerIndex).toBe(previousView.currentPlayerIndex);
 
     await act(async () => {
       vi.advanceTimersByTime(699);
     });
 
-    expect(result.current.gameState.message).toBe(previousView.message);
+    expect(result.current.gameState.message).toEqual(previousView.message);
 
     await act(async () => {
       vi.advanceTimersByTime(1);
     });
 
-    expect(result.current.gameState.message).toBe(nextView.message);
+    expect(result.current.gameState.message).toEqual(nextView.message);
     expect(result.current.gameState.currentPlayerIndex).toBe(nextView.currentPlayerIndex);
   });
 
@@ -910,7 +910,7 @@ describe('useOnlineSkipBoGame', () => {
     initialState.players[0].hand = [card(7), null, null, null, null];
     initialState.players[1].isAI = false;
     initialState.selectedCard = { card: card(7), source: 'hand', index: 0 };
-    initialState.message = 'Sélectionnez une destination';
+    initialState.message = { code: 'SELECT_DESTINATION' };
     const initialView = createOnlineView(initialState, 1);
 
     const { result } = renderHook(() => useOnlineSkipBoGame(session));
@@ -947,7 +947,7 @@ describe('useOnlineSkipBoGame', () => {
     initialState.players[0].stockPile = [card(9), card(4)];
     initialState.players[1].isAI = false;
     initialState.selectedCard = { card: card(4), source: 'stock', index: 1 };
-    initialState.message = 'Sélectionnez une destination';
+    initialState.message = { code: 'SELECT_DESTINATION' };
     const initialView = createOnlineView(initialState, 1);
 
     const { result } = renderHook(() => useOnlineSkipBoGame(session));
@@ -989,7 +989,7 @@ describe('useOnlineSkipBoGame', () => {
     initialState.players[1].isAI = false;
     initialState.players[1].hand = [null, null, card(4), card(5), card(6)];
     initialState.selectedCard = { card: card(6), source: 'hand', index: 0 };
-    initialState.message = 'Sélectionnez une destination';
+    initialState.message = { code: 'SELECT_DESTINATION' };
 
     // Authoritative result of the discard: the turn advances AND the next
     // player draws to refill their hand, all in one view.
@@ -1056,11 +1056,11 @@ describe('useOnlineSkipBoGame', () => {
     baseState.players[0].hand = [card(1), card(5), null, null, null];
     baseState.players[1].isAI = false;
     baseState.selectedCard = null;
-    baseState.message = "C'est votre tour";
+    baseState.message = { code: 'YOUR_TURN' };
 
     const selectedState = structuredClone(baseState);
     selectedState.selectedCard = { card: card(1), source: 'hand', index: 0 };
-    selectedState.message = 'Sélectionnez une destination';
+    selectedState.message = { code: 'SELECT_DESTINATION' };
 
     const playedState = gameReducer(selectedState, { type: 'PLAY_CARD', buildPile: 0 });
 
@@ -1166,7 +1166,7 @@ describe('useOnlineSkipBoGame', () => {
       await Promise.resolve();
     });
 
-    expect(result.current.gameState.message).toBe(resyncView.message);
+    expect(result.current.gameState.message).toEqual(resyncView.message);
     expect(result.current.gameState.buildPiles[0]).toHaveLength(1);
   });
 
@@ -1207,7 +1207,7 @@ describe('useOnlineSkipBoGame', () => {
       await Promise.resolve();
     });
 
-    expect(result.current.gameState.message).toBe(correctionView.message);
+    expect(result.current.gameState.message).toEqual(correctionView.message);
     expect(result.current.gameState.buildPiles[0]).toHaveLength(1);
   });
 
@@ -1246,7 +1246,7 @@ describe('useOnlineSkipBoGame', () => {
       await Promise.resolve();
     });
 
-    expect(result.current.gameState.message).toBe(initialView.message);
+    expect(result.current.gameState.message).toEqual(initialView.message);
   });
 
   it('drops sends while the socket is not open instead of counting an echo', async () => {
@@ -1295,7 +1295,7 @@ describe('useOnlineSkipBoGame', () => {
       await Promise.resolve();
     });
 
-    expect(result.current.gameState.message).toBe(initialView.message);
+    expect(result.current.gameState.message).toEqual(initialView.message);
   });
 
   it('allows the host to start a waiting room as soon as all connected players are ready', async () => {
@@ -1836,7 +1836,7 @@ describe('useOnlineSkipBoGame', () => {
         source: 'hand',
         index: 0,
       };
-      previousState.message = 'Sélectionnez une destination';
+      previousState.message = { code: 'SELECT_DESTINATION' };
 
       const nextState = gameReducer(previousState, { type: 'PLAY_CARD', buildPile: 0 });
 
@@ -1974,7 +1974,7 @@ describe('useOnlineSkipBoGame', () => {
         source: 'hand',
         index: 4,
       };
-      previousState.message = 'Sélectionnez une destination';
+      previousState.message = { code: 'SELECT_DESTINATION' };
 
       const nextState = gameReducer(previousState, { type: 'PLAY_CARD', buildPile: 0 });
 

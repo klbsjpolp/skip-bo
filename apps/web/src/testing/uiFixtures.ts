@@ -1,6 +1,5 @@
 import type { Card, GameConfig, GameState, Player, SelectedCard } from '@skipbo/game-core';
 import type { GameStatsMode, GameStatsRecord } from '@/monitoring/gameStats';
-import { MESSAGES } from '@skipbo/game-core';
 
 export const uiFixtureNames = [
   'ready-human',
@@ -70,7 +69,7 @@ const createBaseState = (): GameState => ({
   gameIsOver: false,
   winnerIndex: null,
   selectedCard: null,
-  message: MESSAGES.SELECT_CARD,
+  message: { code: 'SELECT_CARD' },
   config: FIXTURE_CONFIG,
 });
 
@@ -82,7 +81,7 @@ const createSelectedHandCard = (): SelectedCard => ({
 
 const createReadyHumanFixture = (): GameState => ({
   ...createBaseState(),
-  message: MESSAGES.SELECT_CARD,
+  message: { code: 'SELECT_CARD' },
 });
 
 const createSelectedHandFixture = (): GameState => {
@@ -90,20 +89,20 @@ const createSelectedHandFixture = (): GameState => {
   state.players[0].hand = [createSelectedHandCard().card, card(5), card(0, true), card(9), card(12)];
   state.buildPiles = [[], [], [card(1), card(2), card(3), card(4)], []];
   state.selectedCard = createSelectedHandCard();
-  state.message = MESSAGES.SELECT_DESTINATION;
+  state.message = { code: 'SELECT_DESTINATION' };
   return state;
 };
 
 const createAiTurnFixture = (): GameState => ({
   ...createBaseState(),
   currentPlayerIndex: 1,
-  message: "L'IA joue",
+  message: { code: 'AI_PLAYING' },
 });
 
 const createRetreatFilledFixture = (): GameState => ({
   ...createBaseState(),
   completedBuildPiles: [card(2), card(5), card(7, true), card(9), card(11)],
-  message: MESSAGES.SELECT_CARD,
+  message: { code: 'SELECT_CARD' },
 });
 
 const createVictoryHumanFixture = (): GameState => {
@@ -111,7 +110,7 @@ const createVictoryHumanFixture = (): GameState => {
   state.players[0].stockPile = [];
   state.gameIsOver = true;
   state.winnerIndex = 0;
-  state.message = MESSAGES.GAME_WON.replace('{player}', 'le joueur');
+  state.message = { code: 'GAME_WON', winnerIsAI: false };
   return state;
 };
 

@@ -1,4 +1,5 @@
 import type { Card as CardType, GameState } from '@skipbo/game-core';
+import { renderGameMessage } from '@/game/gameMessages';
 import { PlayerArea } from '@/components/PlayerArea';
 import { CenterArea } from '@/components/CenterArea';
 import { cn } from '@/lib/utils';
@@ -45,7 +46,7 @@ export function GameBoard({
 
       {/* Game Message */}
       <h1 className="my-4 lg:my-6" data-testid="game-message">
-        {gameState.message}
+        {renderGameMessage(gameState.message)}
       </h1>
 
       {/* Human Player Area */}

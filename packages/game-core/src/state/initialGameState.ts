@@ -145,7 +145,7 @@ export const initialGameState = (options: InitialGameStateOptions = {}): GameSta
     players,
     currentPlayerIndex: 0,
     selectedCard: null,
-    message: 'Nouvelle partie commencée !',
+    message: { code: 'GAME_START' },
     gameIsOver: false,
     winnerIndex: null,
     config,

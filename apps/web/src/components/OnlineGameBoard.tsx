@@ -1,4 +1,5 @@
 import { CenterArea } from '@/components/CenterArea';
+import { renderGameMessage } from '@/game/gameMessages';
 import type { GameBoardProps } from '@/components/GameBoard';
 import { GameBoard } from '@/components/GameBoard';
 import { DiscardPiles, HandSection, PlayerArea, StockPile } from '@/components/PlayerArea';
@@ -145,7 +146,7 @@ export function OnlineGameBoard({
       <CenterArea gameState={gameState} playCard={playCard} canPlayCard={canPlayCard} />
 
       <h1 className="my-4 lg:my-6" data-testid="game-message">
-        {gameState.message}
+        {renderGameMessage(gameState.message)}
       </h1>
 
       <PlayerArea
