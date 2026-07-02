@@ -4,7 +4,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { PlayerArea } from '@/components/PlayerArea';
 import { DragProvider } from '@/contexts/DragContext';
 import { CardAnimationProvider } from '@/contexts/CardAnimationContext';
-import type { Card, GameConfig, GameState, MoveResult, Player, SelectedCard } from '@/types';
+import type { Card, GameConfig, GameState, MoveResult, Player, SelectedCard } from '@skipbo/game-core';
 
 type SelectCardFn = (source: 'hand' | 'stock' | 'discard', index: number, discardPileIndex?: number) => void;
 type PlayCardFn = (buildPileIndex: number) => Promise<MoveResult>;
@@ -57,7 +57,7 @@ const createGameState = (selectedCard: SelectedCard | null): GameState => ({
   gameIsOver: false,
   winnerIndex: null,
   selectedCard,
-  message: '',
+  message: { code: 'SELECT_CARD' },
   config: FIXTURE_CONFIG,
 });
 

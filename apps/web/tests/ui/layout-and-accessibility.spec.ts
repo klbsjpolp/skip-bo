@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
-import { themes, type Theme } from '../../src/types/index.ts';
+import { themes, type Theme } from '@skipbo/game-core';
 import {
   expectScreenshotIfBaselineExists,
   expectNoHorizontalOverflow,

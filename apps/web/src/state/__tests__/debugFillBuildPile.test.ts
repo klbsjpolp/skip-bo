@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { gameReducer } from '@/state/gameReducer';
-import { initialGameState } from '@/state/initialGameState';
+import { gameReducer } from '@skipbo/game-core';
+import { initialGameState } from '@skipbo/game-core';
 
 describe('DEBUG_FILL_BUILD_PILE action', () => {
   it('prepares the first build pile for retreat animation testing', () => {
@@ -18,6 +18,6 @@ describe('DEBUG_FILL_BUILD_PILE action', () => {
     expect(next.buildPiles[0][10]).toEqual({ value: 11, isSkipBo: false });
     expect(next.players[0].hand[0]).toEqual({ value: 12, isSkipBo: false });
     expect(next.selectedCard).toBeNull();
-    expect(next.message).toBe('Pile de construction prête (debug)');
+    expect(next.message).toEqual({ code: 'DEBUG_BUILD_PILE_READY' });
   });
 });

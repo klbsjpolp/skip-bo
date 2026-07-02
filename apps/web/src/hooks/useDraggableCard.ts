@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
-import type { Card, GameState, MoveResult } from '@/types';
-import { canPlayCard } from '@/lib/validators';
+import type { Card, GameState, MoveResult } from '@skipbo/game-core';
+import { canPlayCard } from '@skipbo/game-core';
 import { useDrag, type DragSource, type DragTargetId } from '@/contexts/useDrag';
 import { setDragCommitOverride } from '@/services/dragCommitOverride';
 

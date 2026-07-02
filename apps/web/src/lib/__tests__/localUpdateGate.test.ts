@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { isSafeToApplyLocalUpdate } from '@/lib/localUpdateGate';
-import { initialGameState } from '@/state/initialGameState';
-import type { Card } from '@/types';
+import { initialGameState } from '@skipbo/game-core';
+import type { Card } from '@skipbo/game-core';
 
 const card: Card = { value: 5, isSkipBo: false };
 

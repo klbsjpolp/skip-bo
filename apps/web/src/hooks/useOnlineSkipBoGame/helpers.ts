@@ -1,7 +1,13 @@
-import { type Card, gameReducer, type GameState, initialGameState } from '@skipbo/game-core';
+import {
+  type Card,
+  type GameAction,
+  type GameMessage,
+  gameReducer,
+  type GameState,
+  initialGameState,
+} from '@skipbo/game-core';
 import { type ClientGameView, serializeClientGameView } from '@skipbo/skipbo-runtime';
 
-import type { GameAction } from '@/state/gameActions';
 import { calculateMultipleDrawAnimationDuration, triggerMultipleDrawAnimations } from '@/services/drawAnimationService';
 
 export interface DrawTransition {
@@ -21,7 +27,7 @@ export interface OpponentTransition {
 
 export interface TurnPresentationOverride {
   currentPlayerIndex: number;
-  message: string;
+  message: GameMessage;
 }
 
 export const cloneGameStateFromView = (view: ClientGameView): GameState => ({
@@ -57,21 +63,9 @@ export const createPlaceholderGameState = (roomCode: string, seatCapacity: numbe
     seatIndex: playerIndex,
     stockPile: [],
   }));
-  state.message = `Connexion à la partie ${roomCode}`;
+  state.message = { code: 'CONNECTING', roomCode };
 
   return state;
-};
-
-export const willPlayCardEmptyHand = (gameState: GameState): boolean => {
-  if (!gameState.selectedCard || gameState.selectedCard.source !== 'hand') {
-    return false;
-  }
-
-  const player = gameState.players[gameState.currentPlayerIndex];
-  const handAfterPlay = [...player.hand];
-  handAfterPlay[gameState.selectedCard.index] = null;
-
-  return handAfterPlay.every((card) => card === null);
 };
 
 const serializeLocalView = (gameState: GameState, currentView: ClientGameView): ClientGameView =>

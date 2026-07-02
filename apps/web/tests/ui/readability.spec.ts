@@ -20,7 +20,7 @@
 
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
-import { themes, type Theme } from '../../src/types/index.ts';
+import { themes, type Theme } from '@skipbo/game-core';
 import { expectThemeClass, gotoFixture } from './helpers.ts';
 
 // WCAG AA threshold for "large text" (≥18pt bold or ≥24px). Card values render

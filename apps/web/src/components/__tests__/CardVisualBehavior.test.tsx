@@ -1,5 +1,5 @@
 import { describe, expect, test, beforeEach, afterEach } from 'vitest';
-import { themes } from '@/types';
+import { themes } from '@skipbo/game-core';
 
 /**
  * CSS Visual Behavior Tests

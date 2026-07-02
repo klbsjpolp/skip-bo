@@ -11,7 +11,7 @@ import { OnlineStatusStrip } from '@/components/OnlineStatusStrip';
 import { useLocalSkipBoGame } from '@/hooks/useLocalSkipBoGame';
 import { useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
 import { buildGameStatsSnapshot, shouldRecordOnlineStats, useGameStatsRecorder } from '@/hooks/useGameStatsRecorder';
-import { canPlayCard } from '@/lib/validators';
+import { canPlayCard } from '@skipbo/game-core';
 import { appendGameStatsRecord } from '@/state/gameStatsHistory';
 
 export interface OnlineGameScreenProps extends SessionScreenProps {

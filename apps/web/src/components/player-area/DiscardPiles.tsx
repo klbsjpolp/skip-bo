@@ -1,4 +1,4 @@
-import type { Card as CardType, GameState, MoveResult, Player } from '@/types';
+import type { Card as CardType, GameState, MoveResult, Player } from '@skipbo/game-core';
 import type { CSSProperties } from 'react';
 
 import { Card } from '@/components/Card';

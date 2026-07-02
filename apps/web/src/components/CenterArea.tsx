@@ -1,10 +1,10 @@
-import type { Card as CardType, GameState } from '@/types';
+import type { Card as CardType, GameState } from '@skipbo/game-core';
 import { Card } from '@/components/Card';
 import { EmptyCard } from '@/components/EmptyCard.tsx';
 import { cn } from '@/lib/utils';
 import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
 import { useDrag } from '@/contexts/useDrag';
-import { getRetreatPileAngle, RETREAT_PILE_PREVIEW_LIMIT } from '@/lib/retreatPile';
+import { getRetreatPileAngle, RETREAT_PILE_PREVIEW_LIMIT } from '@skipbo/game-core';
 
 interface CenterAreaProps {
   gameState: GameState;

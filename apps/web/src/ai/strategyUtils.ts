@@ -1,5 +1,5 @@
-import type { Card, GameState, Player } from '@/types';
-import { canPlayCard } from '@/lib/validators';
+import type { Card, GameState, Player } from '@skipbo/game-core';
+import { canPlayCard } from '@skipbo/game-core';
 
 export const getAIPlayer = (gameState: GameState, playerIndex: number = gameState.currentPlayerIndex): Player =>
   gameState.players[playerIndex];

@@ -90,7 +90,7 @@ const createSelectedHandCardState = (): GameState => {
     source: 'hand',
     index: 0,
   };
-  state.message = 'Sélectionnez une destination';
+  state.message = { code: 'SELECT_DESTINATION' };
 
   return state;
 };
@@ -111,7 +111,7 @@ const createCompletingHandCardState = (): GameState => {
     source: 'hand',
     index: 0,
   };
-  state.message = 'Sélectionnez une destination';
+  state.message = { code: 'SELECT_DESTINATION' };
 
   return state;
 };
@@ -129,7 +129,7 @@ const createSelectedStockCardState = (): GameState => {
     source: 'stock',
     index: 1,
   };
-  state.message = 'Sélectionnez une destination';
+  state.message = { code: 'SELECT_DESTINATION' };
 
   return state;
 };
@@ -148,7 +148,7 @@ const createSelectedDiscardCardState = (): GameState => {
     index: 1,
     discardPileIndex: 1,
   };
-  state.message = 'Sélectionnez une destination';
+  state.message = { code: 'SELECT_DESTINATION' };
 
   return state;
 };
@@ -371,6 +371,57 @@ describe('useSkipBoGame', () => {
       ]);
     },
   );
+
+  it('rejects a play when no card is selected, without dispatching', async () => {
+    const state = createSelectedHandCardState();
+    state.selectedCard = null;
+    workingState.current = state;
+    appendHandArea();
+
+    const { result } = renderHook(() => useSkipBoGame());
+
+    await act(async () => {
+      expect(await result.current.playCard(0)).toEqual({ success: false, message: 'Aucune carte sélectionnée' });
+    });
+
+    expect(send).not.toHaveBeenCalled();
+    expect(startAnimation).not.toHaveBeenCalled();
+  });
+
+  it('rejects an illegal play with the shared error message, without dispatching', async () => {
+    const state = createSelectedHandCardState();
+    state.selectedCard = { card: card(7), source: 'hand', index: 0 };
+    state.players[0].hand = [card(7), null, null, null, null];
+    workingState.current = state;
+    appendHandArea();
+
+    const { result } = renderHook(() => useSkipBoGame());
+
+    await act(async () => {
+      expect(await result.current.playCard(0)).toEqual({
+        success: false,
+        message: 'Vous ne pouvez pas jouer cette carte',
+      });
+    });
+
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('rejects discarding a non-hand selection, without dispatching', async () => {
+    workingState.current = createSelectedStockCardState();
+    appendHandAndDiscardArea();
+
+    const { result } = renderHook(() => useSkipBoGame());
+
+    await act(async () => {
+      expect(await result.current.discardCard(0)).toEqual({
+        success: false,
+        message: 'Vous devez défausser une carte de votre main',
+      });
+    });
+
+    expect(send).not.toHaveBeenCalled();
+  });
 
   it('reports the cleared pile length (0) for a play that completes a build pile', async () => {
     workingState.current = createCompletingHandCardState();

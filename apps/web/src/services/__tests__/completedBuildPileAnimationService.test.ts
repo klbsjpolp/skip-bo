@@ -4,7 +4,7 @@ import {
   setGlobalCompletedPileAnimationContext,
   triggerCompletedBuildPileAnimation,
 } from '@/services/completedBuildPileAnimationService';
-import type { Card, GameState } from '@/types';
+import type { Card, GameState } from '@skipbo/game-core';
 
 const card = (value: number): Card => ({ value, isSkipBo: false });
 
@@ -50,7 +50,7 @@ const createGameState = (): GameState => ({
   gameIsOver: false,
   winnerIndex: null,
   selectedCard: null,
-  message: '',
+  message: { code: 'SELECT_CARD' },
   config: {
     BUILD_PILES_COUNT: 4,
     CARD_VALUES_MAX: 12,

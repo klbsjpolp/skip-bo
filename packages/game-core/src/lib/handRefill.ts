@@ -54,6 +54,26 @@ export const planHandRefill = (
 };
 
 /**
+ * Refill plan for the hand as it will look after the currently selected hand
+ * card has been played. Callers use it to animate the empty-hand refill that
+ * the reducer performs inside PLAY_CARD; it is only meaningful when
+ * `willPlayCardEmptyHand(state)` is true. Returns an empty plan when the
+ * selection is not a hand card.
+ */
+export const planPostPlayRefill = (state: GameState): HandRefillAnimationPlan => {
+  const selectedCard = state.selectedCard;
+  if (!selectedCard || selectedCard.source !== 'hand') {
+    return { cards: [], handIndices: [] };
+  }
+
+  const player = state.players[state.currentPlayerIndex];
+  const handAfterPlay = [...player.hand];
+  handAfterPlay[selectedCard.index] = null;
+
+  return planHandRefill(handAfterPlay, state.deck, state.completedBuildPiles);
+};
+
+/**
  * Fill `player.hand`'s `null` slots from `draft.deck`, reshuffling
  * `draft.completedBuildPiles` back into the deck if more cards are needed.
  * Mutates the Immer draft in place. `requestedCount` defaults to filling all

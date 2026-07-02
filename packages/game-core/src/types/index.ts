@@ -13,6 +13,41 @@ export interface Player {
   discardPiles: Card[][];
 }
 
+/**
+ * Semantic status-message code plus interpolation params. The rules layer
+ * only ever emits codes; user-facing text (French today, i18n-able tomorrow)
+ * is rendered in the web layer (`apps/web/src/game/gameMessages.ts`).
+ *
+ * The first group is produced by the game-core reducer; the second group is
+ * viewer-relative and produced by the online view layer (`skipbo-runtime`)
+ * and the web shell.
+ */
+export type GameMessage =
+  | { code: 'GAME_START' }
+  | { code: 'INVALID_MOVE' }
+  | { code: 'INVALID_MOVE_NO_SELECTION' }
+  | { code: 'INVALID_MOVE_CANNOT_PLAY' }
+  | { code: 'INVALID_MOVE_MUST_DISCARD_FROM_HAND' }
+  | { code: 'INVALID_CARD_VALUE' }
+  | { code: 'SELECT_CARD' }
+  | { code: 'SELECT_DESTINATION' }
+  | { code: 'AI_PLAYING' }
+  | { code: 'CARD_PLAYED' }
+  | { code: 'TURN_ENDED'; previousPlayerIsAI: boolean; nextPlayerIsAI: boolean }
+  | { code: 'GAME_WON'; winnerIsAI: boolean }
+  | { code: 'DEBUG_AI_HAND_SET' }
+  | { code: 'DEBUG_BUILD_PILE_READY' }
+  | { code: 'DEBUG_HAND_SKIPBO_FILLED' }
+  | { code: 'DEBUG_STOCK_PILE_CLEARED' }
+  | { code: 'DEBUG_AI_STOCK_PILE_CLEARED' }
+  | { code: 'WAITING_FOR_PLAYERS' }
+  | { code: 'WAITING_FOR_START' }
+  | { code: 'YOU_WON' }
+  | { code: 'OPPONENT_WON'; winnerName?: string }
+  | { code: 'YOUR_TURN' }
+  | { code: 'OPPONENT_TURN'; playerName?: string; stockPileLength?: number }
+  | { code: 'CONNECTING'; roomCode?: string };
+
 export interface GameState {
   deck: Card[];
   buildPiles: Card[][];
@@ -22,7 +57,7 @@ export interface GameState {
   gameIsOver: boolean;
   winnerIndex: number | null;
   selectedCard: SelectedCard | null;
-  message: string;
+  message: GameMessage;
   config: GameConfig;
 }
 

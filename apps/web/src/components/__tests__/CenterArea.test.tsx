@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { CenterArea } from '@/components/CenterArea';
 import type { AnimationContextType, CardAnimationData } from '@/contexts/CardAnimationContext';
 import { CardAnimationContext } from '@/contexts/useCardAnimation.ts';
-import type { Card, GameConfig, GameState, Player } from '@/types';
+import type { Card, GameConfig, GameState, Player } from '@skipbo/game-core';
 
 const FIXTURE_CONFIG: GameConfig = {
   DECK_SIZE: 162,
@@ -36,7 +36,7 @@ const createGameState = (completedBuildPiles: Card[]): GameState => ({
   gameIsOver: false,
   winnerIndex: null,
   selectedCard: null,
-  message: '',
+  message: { code: 'SELECT_CARD' },
   config: FIXTURE_CONFIG,
 });
 

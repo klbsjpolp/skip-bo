@@ -45,3 +45,20 @@ export const isHandEmpty = (state: GameState, playerIndex: number): boolean =>
 
 export const countEmptyHandSlots = (state: GameState, playerIndex: number): number =>
   state.players[playerIndex].hand.filter((card) => card === null).length;
+
+/**
+ * True when playing the currently selected card would leave the active
+ * player's hand empty (which triggers an immediate refill in the reducer).
+ * Only hand cards can empty the hand; stock/discard selections return false.
+ */
+export const willPlayCardEmptyHand = (state: GameState): boolean => {
+  if (!state.selectedCard || state.selectedCard.source !== 'hand') {
+    return false;
+  }
+
+  const player = state.players[state.currentPlayerIndex];
+  const handAfterPlay = [...player.hand];
+  handAfterPlay[state.selectedCard.index] = null;
+
+  return handAfterPlay.every((card) => card === null);
+};

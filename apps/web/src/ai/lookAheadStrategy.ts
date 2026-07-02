@@ -1,7 +1,7 @@
-import type { Card, GameState } from '@/types';
-import type { GameAction } from '@/state/gameActions';
-import { gameReducer } from '@/state/gameReducer';
-import { canPlayCard } from '@/lib/validators';
+import type { Card, GameState } from '@skipbo/game-core';
+import type { GameAction } from '@skipbo/game-core';
+import { gameReducer } from '@skipbo/game-core';
+import { canPlayCard } from '@skipbo/game-core';
 import { evaluateDiscardMove } from './discardUtils';
 import { getRandomnessWindow, getStockWinBonus, getWeights } from './aiConfig';
 import {

@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { GameConfig, GameState } from '@/types';
+import type { GameConfig, GameState } from '@skipbo/game-core';
 import type { GameStatsRecord, GameStatsSnapshot } from '@/monitoring/gameStats';
 
 // Capture the snapshot the screen feeds the recorder each render, so we can
@@ -62,7 +62,7 @@ function makeGameState(playerCount = 3): GameState {
     gameIsOver: false,
     winnerIndex: null,
     selectedCard: null,
-    message: '',
+    message: { code: 'SELECT_CARD' },
     config: { STOCK_SIZE: 30 } as GameConfig,
   } as GameState;
 }
