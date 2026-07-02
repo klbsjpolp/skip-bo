@@ -271,6 +271,32 @@ describe('usePwaVersionGate', () => {
     });
   });
 
+  it('resolves false for a reload requested while another apply is in flight', async () => {
+    let resolveApply: ((committed: boolean) => void) | undefined;
+    applyServiceWorkerUpdateMock.mockImplementation(
+      () =>
+        new Promise<boolean>((resolve) => {
+          resolveApply = resolve;
+        }),
+    );
+
+    const { result } = renderHook(() => usePwaVersionGate());
+
+    await waitFor(() => {
+      expect(fetchRuntimeConfigMock).toHaveBeenCalledTimes(1);
+    });
+
+    await act(async () => {
+      const first = result.current.reloadToUpdate();
+      // The guard is set synchronously, so a second request short-circuits.
+      await expect(result.current.reloadToUpdate()).resolves.toBe(false);
+      resolveApply?.(true);
+      await expect(first).resolves.toBe(true);
+    });
+
+    expect(applyServiceWorkerUpdateMock).toHaveBeenCalledTimes(1);
+  });
+
   it('reports the previous version when the build just moved to a newer one', async () => {
     globalThis.localStorage?.setItem('skipbo:last-seen-version', 'v0.9.0');
 
