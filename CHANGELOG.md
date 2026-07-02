@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.12.6](https://github.com/klbsjpolp/skip-bo/compare/v2.12.5...v2.12.6) (2026-07-02)
+
+
+### Bug Fixes
+
+* **web:** stop reloading for updates while the lobby dialog is open ([3fa2f4f](https://github.com/klbsjpolp/skip-bo/commit/3fa2f4f88fdc0f6a16416ce3aa13b453c2faa4a7))
+
 ## [2.12.5](https://github.com/klbsjpolp/skip-bo/compare/v2.12.4...v2.12.5) (2026-07-01)
 
 
