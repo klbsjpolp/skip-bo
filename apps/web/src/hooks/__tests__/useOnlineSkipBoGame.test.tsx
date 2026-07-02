@@ -901,6 +901,80 @@ describe('useOnlineSkipBoGame', () => {
     expect(result.current.gameState.currentPlayerIndex).toBe(nextView.currentPlayerIndex);
   });
 
+  it('rejects an illegal online play locally without relaying a move', async () => {
+    const session = createSession();
+
+    const initialState = initialGameState();
+    initialState.currentPlayerIndex = 0;
+    initialState.buildPiles = [[], [], [], []];
+    initialState.players[0].hand = [card(7), null, null, null, null];
+    initialState.players[1].isAI = false;
+    initialState.selectedCard = { card: card(7), source: 'hand', index: 0 };
+    initialState.message = 'Sélectionnez une destination';
+    const initialView = createOnlineView(initialState, 1);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      socket.emitView(initialView);
+      await Promise.resolve();
+    });
+
+    const sentBefore = socket.sent.length;
+
+    await act(async () => {
+      expect(await result.current.playCard(0)).toEqual({
+        success: false,
+        message: 'Vous ne pouvez pas jouer cette carte',
+      });
+    });
+
+    expect(socket.sent.length).toBe(sentBefore);
+  });
+
+  it('rejects an online discard of a non-hand selection without relaying a move', async () => {
+    const session = createSession();
+
+    const initialState = initialGameState();
+    initialState.currentPlayerIndex = 0;
+    initialState.buildPiles = [[], [], [], []];
+    initialState.players[0].stockPile = [card(9), card(4)];
+    initialState.players[1].isAI = false;
+    initialState.selectedCard = { card: card(4), source: 'stock', index: 1 };
+    initialState.message = 'Sélectionnez une destination';
+    const initialView = createOnlineView(initialState, 1);
+
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      socket.emitView(initialView);
+      await Promise.resolve();
+    });
+
+    const sentBefore = socket.sent.length;
+
+    await act(async () => {
+      expect(await result.current.discardCard(0)).toEqual({
+        success: false,
+        message: 'Vous devez défausser une carte de votre main',
+      });
+    });
+
+    expect(socket.sent.length).toBe(sentBefore);
+  });
+
   it('holds the next player draw until the local discard animation finishes online', async () => {
     const session = createSession();
 

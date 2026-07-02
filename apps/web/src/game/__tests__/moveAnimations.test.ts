@@ -194,6 +194,39 @@ describe('startPlayCardAnimation', () => {
     expect(animation.startAngleDeg).toBeUndefined();
   });
 
+  it('continues with game logic when the play animation itself throws', () => {
+    mountAnimationDom();
+    const startAnimation = vi.fn<(data: Omit<CardAnimationData, 'id'>) => string>(() => {
+      throw new Error('boom');
+    });
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    expect(() => startPlayCardAnimation(baseState('hand'), 0, null, startAnimation)).not.toThrow();
+    expect(warn).toHaveBeenCalledWith('Play animation failed, continuing with game logic:', expect.any(Error));
+  });
+
+  it('continues with game logic when the completion animation throws', () => {
+    mountAnimationDom();
+    vi.mocked(triggerCompletedBuildPileAnimation).mockImplementationOnce(() => {
+      throw new Error('boom');
+    });
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const startAnimation = makeStartAnimation();
+
+    const { completionAnimationDuration } = startPlayCardAnimation(
+      baseState('hand'),
+      0,
+      [card(1), card(2), card(3)],
+      startAnimation,
+    );
+
+    expect(completionAnimationDuration).toBe(0);
+    expect(warn).toHaveBeenCalledWith(
+      'Completed build pile animation failed, continuing with game logic:',
+      expect.any(Error),
+    );
+  });
+
   it('reports a settled pile length of 0 and fires completion when the play completes a pile', () => {
     mountAnimationDom();
     const startAnimation = makeStartAnimation();
@@ -247,5 +280,16 @@ describe('startDiscardCardAnimation', () => {
     const animation = firstAnimationArg(startAnimation);
     expect(animation.startPosition).toEqual({ x: 7, y: 8 });
     expect(animation.startAngleDeg).toBeUndefined();
+  });
+
+  it('continues with game logic when the discard animation throws', () => {
+    mountAnimationDom();
+    const startAnimation = vi.fn<(data: Omit<CardAnimationData, 'id'>) => string>(() => {
+      throw new Error('boom');
+    });
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    expect(() => startDiscardCardAnimation(baseState('hand'), 1, startAnimation)).not.toThrow();
+    expect(warn).toHaveBeenCalledWith('Discard animation failed, continuing with game logic:', expect.any(Error));
   });
 });
