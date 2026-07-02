@@ -1,6 +1,6 @@
-import type { GameState } from '@/types';
-import type { GameAction } from '@/state/gameActions';
-import { canPlayCard } from '@/lib/validators';
+import type { GameState } from '@skipbo/game-core';
+import type { GameAction } from '@skipbo/game-core';
+import { canPlayCard } from '@skipbo/game-core';
 import { findBestDiscardPile, findBestDiscardPileToPlayFrom, selectCardToDiscard } from './discardUtils';
 import { getDelay, getRandomnessWindow, getSearchDepth } from './aiConfig';
 import type { MoveEvaluation } from './lookAheadStrategy';

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
 
-import { STOCK_STORAGE_KEY } from '@/state/initialGameState.ts';
+import { STOCK_STORAGE_KEY } from '@skipbo/game-core';
 import NewGame from '../NewGame';
 
 describe('NewGame', () => {

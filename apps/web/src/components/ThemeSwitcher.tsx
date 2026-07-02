@@ -1,7 +1,7 @@
 import { useTheme } from 'next-themes';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
-import type { ThemeDetail } from '@/types';
-import { themes } from '@/types';
+import type { ThemeDetail } from '@skipbo/game-core';
+import { themes } from '@skipbo/game-core';
 import { Button } from '@/components/ui/button';
 import * as Lucide from 'lucide-react';
 import type { ComponentType, SVGProps } from 'react';

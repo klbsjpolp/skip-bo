@@ -15,30 +15,44 @@ import {
 
 type StartAnimation = (animationData: Omit<CardAnimationData, 'id'>) => string;
 
+export interface PlayCardAnimationDurations {
+  /** Duration of the card's flight to the build pile. */
+  playAnimationDuration: number;
+  /**
+   * Total duration of the pile-completion retreat (includes the play flight as
+   * its base delay). 0 when this play does not complete the pile.
+   */
+  completionAnimationDuration: number;
+}
+
 /**
- * Builds and fires the play animation for the local player's selected card,
+ * Builds and fires the play animation for the acting player's selected card,
  * measuring its rendered start position from the DOM (honoring an in-flight drag
  * override) and the destination build pile. Also fires the completed-build-pile
- * animation when this play finishes the pile. Returns the play animation's
- * duration so the caller can sequence follow-up effects.
+ * animation when this play finishes the pile. Returns the durations so the
+ * caller can sequence follow-up effects (hand refill, turn presentation).
  *
- * Extracted verbatim from the online hook's `playCard`; behavior is unchanged.
+ * Shared by the local and online hooks — the acting player is
+ * `currentState.currentPlayerIndex` (always 0 online, where the viewer is
+ * rotated to `players[0]`).
  */
 export function startPlayCardAnimation(
   currentState: GameState,
   buildPile: number,
   completedBuildPileCards: Card[] | null,
   startAnimation: StartAnimation,
-): number {
+): PlayCardAnimationDurations {
   const selectedCard = currentState.selectedCard;
   if (!selectedCard) {
-    return 0;
+    return { playAnimationDuration: 0, completionAnimationDuration: 0 };
   }
 
   let playAnimationDuration = 0;
   const dragOverride = consumeDragCommitOverride();
   try {
-    const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
+    const playerAreaElement = document.querySelector<HTMLElement>(
+      `.player-area[data-player-index="${currentState.currentPlayerIndex}"]`,
+    );
     const centerAreaElement = document.querySelector('.center-area') as HTMLElement;
     let startAngleDeg: number | undefined;
 
@@ -63,6 +77,10 @@ export function startPlayCardAnimation(
         }
       }
 
+      // If the play was committed via drag-and-drop, override the start
+      // position with where the user released the pointer so the fly-to-target
+      // animation continues from the ghost rather than jumping back to the
+      // source slot.
       if (dragOverride?.startPosition) {
         startPosition = dragOverride.startPosition;
         startAngleDeg = undefined;
@@ -72,6 +90,12 @@ export function startPlayCardAnimation(
 
       if (startPosition) {
         playAnimationDuration = calculateAnimationDuration(startPosition, endPosition) * 1.2;
+        // Mask the freshly-dispatched card at the build pile until the play
+        // animation has actually landed. Without targetSettledInState the
+        // top of the pile would render the new card immediately (because the
+        // caller dispatches PLAY_CARD before the animation lands), making the
+        // card appear teleported to its destination before flying there.
+        //
         // When this play completes the pile, the committed state clears the
         // build pile (length 0). targetPileLength must reflect that committed
         // length so CenterArea masks the in-flight card with the pre-completion
@@ -105,30 +129,34 @@ export function startPlayCardAnimation(
       }
     }
   } catch (error) {
-    console.warn('Play animation failed, continuing with online game logic:', error);
+    console.warn('Play animation failed, continuing with game logic:', error);
   }
 
+  // Schedule the completion animation to start once the play animation has landed.
+  let completionAnimationDuration = 0;
   if (completedBuildPileCards) {
-    triggerCompletedBuildPileAnimation(
-      currentState,
-      buildPile,
-      completedBuildPileCards,
-      currentState.completedBuildPiles.length,
-      100,
-      playAnimationDuration,
-    );
+    try {
+      completionAnimationDuration = triggerCompletedBuildPileAnimation(
+        currentState,
+        buildPile,
+        completedBuildPileCards,
+        currentState.completedBuildPiles.length,
+        100,
+        playAnimationDuration,
+      );
+    } catch (error) {
+      console.warn('Completed build pile animation failed, continuing with game logic:', error);
+    }
   }
 
-  return playAnimationDuration;
+  return { playAnimationDuration, completionAnimationDuration };
 }
 
 /**
- * Builds and fires the discard animation for the local player's selected hand
+ * Builds and fires the discard animation for the acting player's selected hand
  * card, measuring its rendered start position from the DOM (honoring an in-flight
  * drag override) and the destination discard pile. Returns the animation's
  * duration so the caller can hold the next player's draw until it finishes.
- *
- * Extracted verbatim from the online hook's `discardCard`; behavior is unchanged.
  */
 export function startDiscardCardAnimation(
   currentState: GameState,
@@ -144,7 +172,9 @@ export function startDiscardCardAnimation(
   let discardAnimationDuration = 0;
 
   try {
-    const playerAreaElement = document.querySelector<HTMLElement>('.player-area[data-player-index="0"]');
+    const playerAreaElement = document.querySelector<HTMLElement>(
+      `.player-area[data-player-index="${currentState.currentPlayerIndex}"]`,
+    );
 
     if (playerAreaElement) {
       const handContainer = playerAreaElement.querySelector('.hand-area') as HTMLElement;
@@ -153,8 +183,10 @@ export function startDiscardCardAnimation(
         const discardContainer = playerAreaElement.querySelector('.discard-piles') as HTMLElement;
         if (discardContainer) {
           const endPosition = getNextDiscardCardPosition(discardContainer, discardPile);
-          const animationDuration = calculateAnimationDuration(startPosition, endPosition);
-          discardAnimationDuration = animationDuration;
+          discardAnimationDuration = calculateAnimationDuration(startPosition, endPosition);
+          // Mask the freshly-dispatched card on the discard pile until the
+          // animation lands — the dispatch happens immediately, so without
+          // this the card would teleport to the pile and then re-animate.
           const previousDiscardPileLength =
             currentState.players[currentState.currentPlayerIndex].discardPiles[discardPile].length;
           startAnimation({
@@ -165,7 +197,7 @@ export function startDiscardCardAnimation(
             sourceRevealed: true,
             targetRevealed: true,
             initialDelay: 0,
-            duration: animationDuration,
+            duration: discardAnimationDuration,
             startAngleDeg: dragOverride?.startPosition
               ? undefined
               : getHandCardAngle(handContainer, selectedCard.index),
@@ -188,7 +220,7 @@ export function startDiscardCardAnimation(
       }
     }
   } catch (error) {
-    console.warn('Discard animation failed, continuing with online game logic:', error);
+    console.warn('Discard animation failed, continuing with game logic:', error);
   }
 
   return discardAnimationDuration;

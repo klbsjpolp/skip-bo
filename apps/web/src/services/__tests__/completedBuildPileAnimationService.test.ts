@@ -4,7 +4,7 @@ import {
   setGlobalCompletedPileAnimationContext,
   triggerCompletedBuildPileAnimation,
 } from '@/services/completedBuildPileAnimationService';
-import type { Card, GameState } from '@/types';
+import type { Card, GameState } from '@skipbo/game-core';
 
 const card = (value: number): Card => ({ value, isSkipBo: false });
 

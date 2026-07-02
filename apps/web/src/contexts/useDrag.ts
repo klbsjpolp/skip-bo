@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { Card } from '@/types';
+import type { Card } from '@skipbo/game-core';
 
 export type DragSource =
   | { kind: 'hand'; index: number }

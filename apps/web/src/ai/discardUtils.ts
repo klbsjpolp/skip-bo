@@ -1,5 +1,5 @@
-import type { Card, GameState } from '@/types';
-import { canPlayCard } from '@/lib/validators';
+import type { Card, GameState } from '@skipbo/game-core';
+import { canPlayCard } from '@skipbo/game-core';
 import { getRandomnessWindow, getWeights } from './aiConfig';
 import {
   collectNeededValues,

@@ -1,6 +1,6 @@
 import type { CardAnimationData } from '@/contexts/CardAnimationContext.tsx';
-import { getRetreatPileAngle } from '@/lib/retreatPile';
-import type { Card, GameState } from '@/types';
+import { getRetreatPileAngle } from '@skipbo/game-core';
+import type { Card, GameState } from '@skipbo/game-core';
 import { calculateAnimationDuration, getBuildPilePosition, getRetreatPilePosition } from '@/utils/cardPositions';
 
 let globalAnimationContext: {

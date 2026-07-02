@@ -1,4 +1,4 @@
-import type { Card } from '@/types';
+import type { Card } from '@skipbo/game-core';
 import {
   calculateAnimationDuration,
   getDeckPosition,

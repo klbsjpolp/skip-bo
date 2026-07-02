@@ -1,29 +1,21 @@
 import { assign, createMachine, fromPromise } from 'xstate';
-import { gameReducer } from './gameReducer';
-import type { GameAction } from './gameActions';
-import { initialGameState } from './initialGameState';
+import {
+  gameReducer,
+  getCompletedBuildPileCards,
+  initialGameState,
+  planHandRefill,
+  planPostPlayRefill,
+  willPlayCardEmptyHand,
+  type Card,
+  type GameAction,
+  type GameState,
+} from '@skipbo/game-core';
 import { computeBestMove } from '@/ai/computeBestMove';
-import type { Card, GameState } from '@/types';
 import { triggerAIAnimation } from '@/services/aiAnimationService';
 import { triggerCompletedBuildPileAnimation } from '@/services/completedBuildPileAnimationService';
 import { triggerMultipleDrawAnimations } from '@/services/drawAnimationService';
 import { animationGate } from '@/services/animationGate';
 import { animationServiceBridge } from '@/lib/animationServiceBridge.ts';
-import { getCompletedBuildPileCards } from '@/lib/retreatPile';
-import { planHandRefill } from '@/lib/handRefill';
-
-// Helper function to check if a PLAY_CARD action will result in an empty hand
-const willPlayCardEmptyHand = (gameState: GameState): boolean => {
-  if (!gameState.selectedCard || gameState.selectedCard.source !== 'hand') {
-    return false;
-  }
-
-  const player = gameState.players[gameState.currentPlayerIndex];
-  const handAfterPlay = [...player.hand];
-  handAfterPlay[gameState.selectedCard.index] = null;
-
-  return handAfterPlay.every((card) => card === null);
-};
 
 export const gameMachine = createMachine(
   {
@@ -377,12 +369,8 @@ export const gameMachine = createMachine(
           animationDuration = completionAnimationDuration;
 
           // Then trigger draw animations for the hand refill.
-          const player = input.G.players[input.G.currentPlayerIndex];
           if (input.G.selectedCard?.source === 'hand') {
-            const handAfterPlay = [...player.hand];
-            handAfterPlay[input.G.selectedCard.index] = null;
-
-            const { cards, handIndices } = planHandRefill(handAfterPlay, input.G.deck, input.G.completedBuildPiles);
+            const { cards, handIndices } = planPostPlayRefill(input.G);
 
             if (cards.length > 0) {
               animationDuration = Math.max(

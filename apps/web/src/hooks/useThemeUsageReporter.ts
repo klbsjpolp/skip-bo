@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useTheme } from 'next-themes';
-import type { Theme } from '@/types';
+import type { Theme } from '@skipbo/game-core';
 import { recordActiveTheme, resumeThemeTimer, suspendThemeTimer } from '@/monitoring/themeUsageTimer';
 
 /**

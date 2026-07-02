@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { initialGameState } from '@/state/initialGameState';
-import { gameReducer } from '@/state/gameReducer';
-import type { Card } from '@/types';
+import { initialGameState } from '@skipbo/game-core';
+import { gameReducer } from '@skipbo/game-core';
+import type { Card } from '@skipbo/game-core';
 
 describe('DEBUG_SET_AI_HAND action', () => {
   it('sets the AI hand to provided values and pads to hand size', () => {

@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react';
-import type { Theme } from '@/types';
+import type { Theme } from '@skipbo/game-core';
 import { tagActiveTheme } from './themeAnalytics';
 
 /**

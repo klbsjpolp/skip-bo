@@ -1,6 +1,6 @@
-import type { Card, GameConfig, GameState, Player, SelectedCard } from '@/types';
+import type { Card, GameConfig, GameState, Player, SelectedCard } from '@skipbo/game-core';
 import type { GameStatsMode, GameStatsRecord } from '@/monitoring/gameStats';
-import { MESSAGES } from '@/lib/config';
+import { MESSAGES } from '@skipbo/game-core';
 
 export const uiFixtureNames = [
   'ready-human',

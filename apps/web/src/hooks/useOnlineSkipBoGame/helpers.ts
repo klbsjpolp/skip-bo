@@ -1,7 +1,6 @@
-import { type Card, gameReducer, type GameState, initialGameState } from '@skipbo/game-core';
+import { type Card, type GameAction, gameReducer, type GameState, initialGameState } from '@skipbo/game-core';
 import { type ClientGameView, serializeClientGameView } from '@skipbo/skipbo-runtime';
 
-import type { GameAction } from '@/state/gameActions';
 import { calculateMultipleDrawAnimationDuration, triggerMultipleDrawAnimations } from '@/services/drawAnimationService';
 
 export interface DrawTransition {
@@ -60,18 +59,6 @@ export const createPlaceholderGameState = (roomCode: string, seatCapacity: numbe
   state.message = `Connexion à la partie ${roomCode}`;
 
   return state;
-};
-
-export const willPlayCardEmptyHand = (gameState: GameState): boolean => {
-  if (!gameState.selectedCard || gameState.selectedCard.source !== 'hand') {
-    return false;
-  }
-
-  const player = gameState.players[gameState.currentPlayerIndex];
-  const handAfterPlay = [...player.hand];
-  handAfterPlay[gameState.selectedCard.index] = null;
-
-  return handAfterPlay.every((card) => card === null);
 };
 
 const serializeLocalView = (gameState: GameState, currentView: ClientGameView): ClientGameView =>

@@ -5,7 +5,7 @@ import { StockPileSizeSwitcher } from '@/components/StockPileSizeSwitcher.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { getStoredStockSize } from '@/state/initialGameState.ts';
+import { getStoredStockSize } from '@skipbo/game-core';
 import { ROOM_CODE_LENGTH, isValidRoomCode, normalizeRoomCode } from '@klbsjpolp/realtime-core';
 import { Alert, AlertTitle } from '@/components/ui/alert.tsx';
 

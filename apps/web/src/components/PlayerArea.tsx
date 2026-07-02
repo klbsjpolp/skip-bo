@@ -1,4 +1,4 @@
-import type { GameState, MoveResult, Player } from '@/types';
+import type { GameState, MoveResult, Player } from '@skipbo/game-core';
 
 import { VictoryEffects } from '@/components/VictoryEffects';
 import { DiscardPiles } from '@/components/player-area/DiscardPiles';
