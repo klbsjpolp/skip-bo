@@ -12,6 +12,13 @@
  * The tracker takes explicit `now` timestamps so its turn-counting and
  * play-time arithmetic can be unit-tested deterministically; the React hook
  * that owns it injects `Date.now()` and tab-visibility changes.
+ *
+ * `setHidden` pauses both the active player's segment and the overall
+ * duration in lockstep, so `durationMs` always equals the sum of every
+ * player's `playTimeMs` — hidden time simply doesn't happen. Online games
+ * never call `setHidden` (see `useGameStatsRecorder`): a guest's own tab
+ * visibility says nothing about whether the game itself is paused, since
+ * other seats keep playing regardless.
  */
 
 export const GAME_STATS_SCHEMA_VERSION = 1;
@@ -90,7 +97,7 @@ export interface GameStatsTrackerOptions {
 export interface GameStatsTracker {
   /** Feed the current game snapshot and the current wall-clock instant. */
   observe: (snapshot: GameStatsSnapshot, nowMs: number) => void;
-  /** Pause/resume play-time counting (e.g. while the tab is hidden). */
+  /** Pause/resume play-time and duration counting (e.g. while the tab is hidden). */
   setHidden: (hidden: boolean, nowMs: number) => void;
   /** Whether a game is currently being recorded. */
   isRecording: () => boolean;
@@ -112,6 +119,10 @@ interface OpenRecording {
   players: PlayerAccumulator[];
   /** Start of the running play-time segment, or null while paused/hidden. */
   segmentStartMs: number | null;
+  /** Start of the current hidden span, or null while visible. */
+  hiddenSinceMs: number | null;
+  /** Accumulated hidden time, subtracted from wall-clock duration at finalize. */
+  totalHiddenMs: number;
 }
 
 const defaultGenerateId = (): string => {
@@ -158,6 +169,8 @@ export function createGameStatsTracker(options: GameStatsTrackerOptions): GameSt
         playTimeMs: 0,
       })),
       segmentStartMs: null,
+      hiddenSinceMs: hidden ? nowMs : null,
+      totalHiddenMs: 0,
     };
     // The opening player's first turn is already underway.
     if (open.players[snapshot.currentPlayerIndex]) {
@@ -166,9 +179,21 @@ export function createGameStatsTracker(options: GameStatsTrackerOptions): GameSt
     startSegment(nowMs);
   };
 
+  /** Credit the running hidden span to the total and stop counting it. */
+  const closeHiddenSpan = (nowMs: number): void => {
+    if (open && open.hiddenSinceMs !== null) {
+      const elapsed = nowMs - open.hiddenSinceMs;
+      if (elapsed > 0) {
+        open.totalHiddenMs += elapsed;
+      }
+      open.hiddenSinceMs = null;
+    }
+  };
+
   const finalize = (snapshot: GameStatsSnapshot, nowMs: number): void => {
     if (!open) return;
     closeSegment(nowMs);
+    closeHiddenSpan(nowMs);
 
     const winnerIndex = snapshot.winnerIndex;
     const players: GameStatsPlayer[] = open.players.map((accumulator, index) => {
@@ -194,7 +219,7 @@ export function createGameStatsTracker(options: GameStatsTrackerOptions): GameSt
       mode: options.mode,
       startedAt: new Date(open.startedAtMs).toISOString(),
       endedAt: new Date(nowMs).toISOString(),
-      durationMs: Math.max(0, nowMs - open.startedAtMs),
+      durationMs: Math.max(0, nowMs - open.startedAtMs - open.totalHiddenMs),
       totalTurns: open.totalTurns,
       playerCount: players.length,
       stockSize: open.stockSize,
@@ -241,7 +266,9 @@ export function createGameStatsTracker(options: GameStatsTrackerOptions): GameSt
       hidden = nextHidden;
       if (hidden) {
         closeSegment(nowMs);
+        if (open) open.hiddenSinceMs = nowMs;
       } else {
+        closeHiddenSpan(nowMs);
         startSegment(nowMs);
       }
     },
