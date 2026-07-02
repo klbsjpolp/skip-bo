@@ -116,9 +116,12 @@ function OnlineGameScreen({
   // a pending update is lossless. Only do it at a "safe" moment — never while it
   // is the local player's active turn (index 0 in the recentred view), to avoid
   // cutting off an in-progress action, and never on a finished game so the
-  // victory/defeat screen is preserved. The update then lands during an
-  // opponent's turn, in the next lobby, or on the user's next deliberate action.
-  const isSafeToApplyUpdate = !gameState.gameIsOver && (roomStatus === 'WAITING' || gameState.currentPlayerIndex !== 0);
+  // victory/defeat screen is preserved. The WAITING lobby is deliberately NOT
+  // safe either: the lobby dialog is showing the room code the player is trying
+  // to share, and a reload would yank it away and bounce them through the resume
+  // banner. Updates instead apply before the room is even created (see
+  // startOnlineGame/joinGame in App.tsx) or during an opponent's turn.
+  const isSafeToApplyUpdate = !gameState.gameIsOver && roomStatus === 'ACTIVE' && gameState.currentPlayerIndex !== 0;
 
   useEffect(() => {
     if (isUpdatePending && isSafeToApplyUpdate) {

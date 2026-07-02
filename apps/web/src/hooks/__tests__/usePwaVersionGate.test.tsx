@@ -250,6 +250,27 @@ describe('usePwaVersionGate', () => {
     expect(applyServiceWorkerUpdateMock).not.toHaveBeenCalled();
   });
 
+  it('resolves reloadToUpdate with whether a reload actually committed', async () => {
+    const { result } = renderHook(() => usePwaVersionGate());
+
+    await waitFor(() => {
+      expect(fetchRuntimeConfigMock).toHaveBeenCalledTimes(1);
+    });
+
+    // No worker staged yet — the apply is a no-op, callers may proceed.
+    applyServiceWorkerUpdateMock.mockResolvedValueOnce(false);
+    await act(async () => {
+      await expect(result.current.reloadToUpdate()).resolves.toBe(false);
+    });
+
+    // A staged worker commits the reload — callers must abort what they were
+    // about to do (the page is navigating).
+    applyServiceWorkerUpdateMock.mockResolvedValueOnce(true);
+    await act(async () => {
+      await expect(result.current.reloadToUpdate()).resolves.toBe(true);
+    });
+  });
+
   it('reports the previous version when the build just moved to a newer one', async () => {
     globalThis.localStorage?.setItem('skipbo:last-seen-version', 'v0.9.0');
 
