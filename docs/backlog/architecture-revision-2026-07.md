@@ -65,7 +65,7 @@ Any rule change (e.g. a new source of playable cards) currently needs four
 synchronized edits, and only some of them are covered by tests that would
 catch the drift.
 
-**Revision.** Extract a shared client-side *move intent* module (proposed:
+**Revision.** Extract a shared client-side _move intent_ module (proposed:
 `apps/web/src/game/moveIntents.ts`, or `game-core` for the pure parts):
 `prepareMoveIntent(state, action)` returns `{ valid, error?, willEmptyHand,
 refillPlan, completedBuildPileCards }`. Both hooks and the machine's
@@ -89,7 +89,7 @@ Two leaks, both in `game-core`:
   needs four near-identical `assign` actions and `as unknown as` casts to
   shuttle it.
 
-**Revision.** Replace `GameState.message` with a message *code* +
+**Revision.** Replace `GameState.message` with a message _code_ +
 interpolation params (e.g. `{ code: 'GAME_WON', player: 1 }`); render text in
 the web layer. Move `animationDuration` out of `GameAction` into the machine
 event envelope (XState events can extend the action type in the web layer:
@@ -110,7 +110,7 @@ actors reach sideways:
   override (`gameMachine.ts:424-459`) — ~35 lines of URL parsing inside the
   turn engine.
 
-**Revision.** Give the machine an injected *presentation driver* interface
+**Revision.** Give the machine an injected _presentation driver_ interface
 (`{ animateBotMove, animateDraws, animateCompletion, waitForAnimations }`)
 supplied as machine `input`, with the current services as the production
 implementation and a no-op driver in tests. Move the `aiHand` parsing into a
@@ -120,7 +120,7 @@ small `debugOverrides.ts` consulted by the driver setup, not the machine.
 
 `setGlobalAnimationContext`, `setGlobalDrawAnimationContext`, and
 `setGlobalCompletedPileAnimationContext` are module-level mutable slots, set
-from `useEffect` in *both* `useSkipBoGame.ts:55-59` and
+from `useEffect` in _both_ `useSkipBoGame.ts:55-59` and
 `useOnlineSkipBoGame.ts:364-368`. Whichever game screen mounted last owns the
 globals; the services silently no-op (or worse, animate a stale context) if
 called before a hook has run. This is the root reason the machine actors
@@ -151,7 +151,7 @@ protocol switch, `SkipboHost` orchestration, echo counting, and an
 stays React-side because it touches the animation driver. This mirrors the
 `SkipboHost` pattern that already works, makes reconnect/echo logic testable
 without jsdom + fake sockets threaded through a hook, and dissolves the
-23-parameter seam. Do this *after* F-4 so the client does not inherit the
+23-parameter seam. Do this _after_ F-4 so the client does not inherit the
 globals.
 
 ### F-6: "Turn ends → next player draws" is encoded twice, differently
@@ -174,7 +174,7 @@ Low urgency; do it opportunistically with the next turn-flow change.
 ### F-7: Two-step selection travels the wire and forces the echo machinery
 
 Locally, `SELECT_CARD` → `PLAY_CARD` is the right UI grammar (a durable
-invariant). Online, the same two-step grammar is sent as *two relayed moves*,
+invariant). Online, the same two-step grammar is sent as _two relayed moves_,
 which is why one user gesture (drag = select + play inside one round trip)
 produces two authoritative echoes and requires `pendingViewEchoesRef` /
 `ingestRelayedView` stale-echo skipping — some of the subtlest code in the
@@ -234,14 +234,14 @@ the relay protocol all stay as decided in D-001/D-003/D-006/D-007.
 Each phase is independently shippable and validated per the
 [AGENTS.md](../../AGENTS.md) change matrix.
 
-| Phase | Contents | Findings | Risk | Validation |
-| ----- | -------- | -------- | ---- | ---------- |
-| 1 | Dedupe move pipeline: pure helpers to `game-core`, shared intent module, delete shim re-exports | F-1, F-8 | Low | `game-core` + web unit tests; `pnpm test:e2e` |
-| 2 | Message codes in reducer; move `animationDuration` off `GameAction` | F-2 | Medium (touches wire views + reducer tests) | `game-core`, `skipbo-runtime`, web state tests; two-browser smoke |
-| 3 | AnimationDriver: kill global setters; inject driver into machine actors; extract `aiHand` debug parsing | F-3, F-4 | Medium (animation timing) | web state tests; `pnpm test:e2e`; visual contract |
-| 4 | Extract `OnlineGameClient`; hook becomes adapter | F-5 | Medium-high (reconnect paths) | online hook tests rewritten against the client; two-browser smoke incl. host/guest reconnect |
-| 5 | Composite `MOVE_CARD` online; retire echo counting | F-7 | High (protocol discipline) | `skipbo-runtime` tests; drag-and-drop E2E; mixed-version smoke |
-| — | Turn-boundary helper | F-6 | Low | fold into whichever of phases 1–2 touches it first |
+| Phase | Contents                                                                                                | Findings | Risk                                        | Validation                                                                                   |
+| ----- | ------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| 1     | Dedupe move pipeline: pure helpers to `game-core`, shared intent module, delete shim re-exports         | F-1, F-8 | Low                                         | `game-core` + web unit tests; `pnpm test:e2e`                                                |
+| 2     | Message codes in reducer; move `animationDuration` off `GameAction`                                     | F-2      | Medium (touches wire views + reducer tests) | `game-core`, `skipbo-runtime`, web state tests; two-browser smoke                            |
+| 3     | AnimationDriver: kill global setters; inject driver into machine actors; extract `aiHand` debug parsing | F-3, F-4 | Medium (animation timing)                   | web state tests; `pnpm test:e2e`; visual contract                                            |
+| 4     | Extract `OnlineGameClient`; hook becomes adapter                                                        | F-5      | Medium-high (reconnect paths)               | online hook tests rewritten against the client; two-browser smoke incl. host/guest reconnect |
+| 5     | Composite `MOVE_CARD` online; retire echo counting                                                      | F-7      | High (protocol discipline)                  | `skipbo-runtime` tests; drag-and-drop E2E; mixed-version smoke                               |
+| —     | Turn-boundary helper                                                                                    | F-6      | Low                                         | fold into whichever of phases 1–2 touches it first                                           |
 
 Phases 1–3 are pure consolidation and can proceed anytime. Phase 4 should
 precede 5 (the client extraction is where echo logic lives). If only one phase
