@@ -207,3 +207,60 @@ describe('useGameStatsRecorder', () => {
     expect(recorded.winnerName).toBe('Bob');
   });
 });
+
+describe('visibility pausing', () => {
+  function ModeHarness({ snapshot, mode }: { snapshot: GameStatsSnapshot | null; mode: 'local' | 'online' }) {
+    const { lastRecord } = useGameStatsRecorder(snapshot, { mode, isCentralReporter: true });
+    captured = lastRecord;
+    return null;
+  }
+
+  const originalVisibilityState = Object.getOwnPropertyDescriptor(document, 'visibilityState');
+
+  const setVisibility = (state: 'visible' | 'hidden') => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => state });
+    document.dispatchEvent(new Event('visibilitychange'));
+  };
+
+  afterEach(() => {
+    vi.useRealTimers();
+    if (originalVisibilityState) {
+      Object.defineProperty(document, 'visibilityState', originalVisibilityState);
+    }
+  });
+
+  it('local: pauses both play time and total duration while the tab is hidden', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(0);
+    captured = null;
+
+    const { rerender } = render(<ModeHarness snapshot={activeSnapshot} mode="local" />);
+
+    setVisibility('hidden');
+    vi.setSystemTime(4000);
+    setVisibility('visible');
+
+    rerender(<ModeHarness snapshot={overSnapshot} mode="local" />);
+
+    expect(captured).not.toBeNull();
+    // The whole 4s elapsed while hidden, so both duration and play time are 0.
+    expect(captured!.durationMs).toBe(0);
+  });
+
+  it("online: keeps counting through a hidden tab (a guest's own tab does not pause the game)", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(0);
+    captured = null;
+
+    const { rerender } = render(<ModeHarness snapshot={activeSnapshot} mode="online" />);
+
+    setVisibility('hidden');
+    vi.setSystemTime(4000);
+    setVisibility('visible');
+
+    rerender(<ModeHarness snapshot={overSnapshot} mode="online" />);
+
+    expect(captured).not.toBeNull();
+    expect(captured!.durationMs).toBe(4000);
+  });
+});

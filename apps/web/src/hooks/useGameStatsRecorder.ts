@@ -108,9 +108,15 @@ export function useGameStatsRecorder(
     }
   }, [lastRecord]);
 
-  // Pause play-time counting while the tab is hidden, like the theme timer, so
-  // background time is not attributed to whoever's turn it is.
+  // Pause play-time (and duration) counting while the tab is hidden, like the
+  // theme timer, so background time is not attributed to whoever's turn it
+  // is. Local only: in a local game a hidden tab means nobody can act, so the
+  // whole game is genuinely paused. Online, this client's own tab visibility
+  // says nothing about whether the game is paused — other seats keep playing
+  // regardless — so online games never pause.
   useEffect(() => {
+    if (mode !== 'local') return;
+
     const onVisibilityChange = () => tracker.setHidden(document.visibilityState === 'hidden', Date.now());
     const onPageHide = () => tracker.setHidden(true, Date.now());
 
@@ -121,7 +127,7 @@ export function useGameStatsRecorder(
       document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('pagehide', onPageHide);
     };
-  }, [tracker]);
+  }, [mode, tracker]);
 
   return { lastRecord };
 }
