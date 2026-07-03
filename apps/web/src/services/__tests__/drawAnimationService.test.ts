@@ -49,7 +49,10 @@ const mountBoard = (): void => {
 };
 
 describe('drawAnimationService', () => {
-  const startAnimation = vi.fn(() => 'animation-id');
+  const startAnimation = vi.fn((animation: { initialDelay: number }) => {
+    void animation;
+    return 'animation-id';
+  });
 
   beforeEach(() => {
     document.body.innerHTML = '';
@@ -66,9 +69,7 @@ describe('drawAnimationService', () => {
     const total = await triggerMultipleDrawAnimations({ startAnimation }, 0, cards, [0, 1], 500, 0);
 
     expect(startAnimation).toHaveBeenCalledTimes(2);
-    expect(
-      startAnimation.mock.calls.map(([animation]) => (animation as { initialDelay: number }).initialDelay),
-    ).toEqual([0, 500]);
+    expect(startAnimation.mock.calls.map(([animation]) => animation.initialDelay)).toEqual([0, 500]);
     expect(total).toBeGreaterThan(0);
     expect(total).toBe(calculateMultipleDrawAnimationDuration(0, [0, 1], 500, 0));
   });

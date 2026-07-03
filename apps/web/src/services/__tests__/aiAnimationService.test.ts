@@ -69,7 +69,10 @@ const aiPlayState = (): GameState => {
 };
 
 describe('triggerAIAnimation', () => {
-  const startAnimation = vi.fn(() => 'animation-id');
+  const startAnimation = vi.fn((animation: { animationType: string }) => {
+    void animation;
+    return 'animation-id';
+  });
 
   beforeEach(() => {
     document.body.innerHTML = '';

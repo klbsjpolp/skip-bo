@@ -77,18 +77,19 @@ install('sessionStorage');
  * jsdom doesn't implement the Pointer Events / ResizeObserver APIs that
  * Radix UI primitives (Select, Dialog, Popper, ...) call when opening or
  * positioning. Without these, opening a Radix Select in jsdom throws
- * "... is not a function".
+ * "... is not a function". Guarded so `@vitest-environment node` test files
+ * (no DOM at all) can share this setup.
  */
-if (!Element.prototype.hasPointerCapture) {
+if (typeof Element !== 'undefined' && !Element.prototype.hasPointerCapture) {
   Element.prototype.hasPointerCapture = () => false;
 }
-if (!Element.prototype.setPointerCapture) {
+if (typeof Element !== 'undefined' && !Element.prototype.setPointerCapture) {
   Element.prototype.setPointerCapture = () => undefined;
 }
-if (!Element.prototype.releasePointerCapture) {
+if (typeof Element !== 'undefined' && !Element.prototype.releasePointerCapture) {
   Element.prototype.releasePointerCapture = () => undefined;
 }
-if (!Element.prototype.scrollIntoView) {
+if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = () => undefined;
 }
 if (typeof globalThis.ResizeObserver === 'undefined') {
