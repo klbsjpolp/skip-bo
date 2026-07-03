@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.12.8](https://github.com/klbsjpolp/skip-bo/compare/v2.12.7...v2.12.8) (2026-07-03)
+
+
+### Bug Fixes
+
+* **web:** align duration pausing with per-player play time by mode ([1a16a94](https://github.com/klbsjpolp/skip-bo/commit/1a16a9403b6ff2f2346ba9a8c3c44c4ade70a643))
+
 ## [2.12.7](https://github.com/klbsjpolp/skip-bo/compare/v2.12.6...v2.12.7) (2026-07-02)
 
 ## [2.12.6](https://github.com/klbsjpolp/skip-bo/compare/v2.12.5...v2.12.6) (2026-07-02)
