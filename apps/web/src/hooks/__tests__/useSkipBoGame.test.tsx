@@ -371,6 +371,22 @@ describe('useSkipBoGame', () => {
     },
   );
 
+  it('warns and continues when the refill draw animation rejects', async () => {
+    workingState.current = createSelectedHandCardState();
+    appendHandArea();
+    triggerMultipleDrawAnimations.mockRejectedValueOnce(new Error('boom'));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const { result } = renderHook(() => useSkipBoGame());
+
+    await act(async () => {
+      expect(await result.current.playCard(0)).toEqual({ success: true, message: 'Carte jouée' });
+      await Promise.resolve();
+    });
+
+    expect(warn).toHaveBeenCalledWith('Draw animation failed, continuing with game logic:', expect.any(Error));
+  });
+
   it('rejects a play when no card is selected, without dispatching', async () => {
     const state = createSelectedHandCardState();
     state.selectedCard = null;

@@ -44,6 +44,67 @@ describe('gameMachine with an injected AnimationDriver', () => {
     ).toEqual([1, 2, 3, 4, 5]);
   });
 
+  it('animates the start-of-turn refill draw through the driver after a discard', async () => {
+    const driver = makeDriver();
+    computeBestMove.mockResolvedValue({ type: 'END_TURN' });
+
+    const actor = createActor(gameMachine, { input: { driver } });
+    actor.start();
+    await waitFor(actor, (state) => state.matches('humanTurn.ready'));
+
+    // Discard a hand card (no animationDuration on the event) to end the turn.
+    actor.send({ type: 'SELECT_CARD', source: 'hand', index: 0 });
+    actor.send({ type: 'DISCARD_CARD', discardPile: 0 });
+
+    // AI passes; back on the human turn, the vacated hand slot refills through
+    // the injected driver.
+    await waitFor(actor, (state) => state.matches('humanTurn.ready') && state.context.G.currentPlayerIndex === 0, {
+      timeout: 5000,
+    });
+
+    const humanRefill = vi.mocked(driver.animateDraws).mock.calls.find(([playerIndex]) => playerIndex === 0);
+    expect(humanRefill).toBeDefined();
+    expect(actor.getSnapshot().context.G.players[0].hand.every((c) => c !== null)).toBe(true);
+  });
+
+  it('animates a non-emptying AI play through the driver without a refill', async () => {
+    const driver = makeDriver();
+    // Card 12 completes the debug-filled pile; card 5 keeps the hand non-empty.
+    const debugAiHand = [card(12), card(5)];
+    let aiMoves = 0;
+    computeBestMove.mockImplementation(async ({ selectedCard, currentPlayerIndex, players }) => {
+      if (!players[currentPlayerIndex].isAI) {
+        return { type: 'END_TURN' };
+      }
+      aiMoves += 1;
+      if (aiMoves > 4) {
+        return { type: 'END_TURN' };
+      }
+      if (!selectedCard) {
+        return { type: 'SELECT_CARD', source: 'hand', index: 0 };
+      }
+      // First selection plays card 1 (hand still holds card 2 — not emptying).
+      return { type: 'PLAY_CARD', buildPile: 0 };
+    });
+
+    const actor = createActor(gameMachine, { input: { driver, debugAiHand } });
+    actor.start();
+    await waitFor(actor, (state) => state.matches('humanTurn.ready'));
+
+    // Fill build pile 0 to one card before completion, then hand the turn over.
+    actor.send({ type: 'DEBUG_FILL_BUILD_PILE', buildPile: 0 });
+    actor.send({ type: 'END_TURN' });
+    await waitFor(actor, (state) => state.matches('humanTurn.ready') && state.context.G.currentPlayerIndex === 0, {
+      timeout: 5000,
+    });
+
+    expect(driver.animateMove).toHaveBeenCalled();
+    // The 12 completed the pile on a non-emptying play: the completion retreat
+    // was animated through the driver too.
+    expect(driver.animateCompletion).toHaveBeenCalled();
+    expect(actor.getSnapshot().context.G.completedBuildPiles.length).toBeGreaterThan(0);
+  });
+
   it('animates an emptying AI play through the driver: move, completion wait, then refill draws', async () => {
     const driver = makeDriver();
     // Force the AI hand to a single playable card so the play empties the hand.

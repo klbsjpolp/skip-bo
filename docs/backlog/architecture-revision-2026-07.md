@@ -42,7 +42,7 @@ or the offline-first shell (D-001).
 
 Ordered by how much accumulated risk each one carries, not by effort.
 
-### F-1: Two parallel orchestration stacks duplicate the move pipeline
+### ~~F-1: Two parallel orchestration stacks duplicate the move pipeline~~ (done — PR [#186](https://github.com/klbsjpolp/skip-bo/pull/186))
 
 Local play runs `gameMachine.ts` (XState) dispatching reducer actions; online
 play runs view ingestion + optimistic updates in `useOnlineSkipBoGame`. Both
@@ -72,7 +72,7 @@ refillPlan, completedBuildPileCards }`. Both hooks and the machine's
 `botService` consume it. `willPlayCardEmptyHand` and the refill plan are pure
 state functions and belong in `game-core` next to `planHandRefill`.
 
-### F-2: Presentation concerns leak into the domain layer
+### ~~F-2: Presentation concerns leak into the domain layer~~ (done — PR [#186](https://github.com/klbsjpolp/skip-bo/pull/186))
 
 Two leaks, both in `game-core`:
 
@@ -97,7 +97,7 @@ event envelope (XState events can extend the action type in the web layer:
 `game-core` stays presentation-free. Both are behavior-preserving for players;
 the message change also shrinks the wire views.
 
-### F-3: The turn machine's actors are DOM- and debug-coupled
+### ~~F-3: The turn machine's actors are DOM- and debug-coupled~~ (done — PR [#186](https://github.com/klbsjpolp/skip-bo/pull/186))
 
 `gameMachine.ts` is nominally the "local turn orchestration" owner, but its
 actors reach sideways:
@@ -116,7 +116,7 @@ supplied as machine `input`, with the current services as the production
 implementation and a no-op driver in tests. Move the `aiHand` parsing into a
 small `debugOverrides.ts` consulted by the driver setup, not the machine.
 
-### F-4: Animation services are wired through mutable module globals
+### ~~F-4: Animation services are wired through mutable module globals~~ (done — PR [#186](https://github.com/klbsjpolp/skip-bo/pull/186))
 
 `setGlobalAnimationContext`, `setGlobalDrawAnimationContext`, and
 `setGlobalCompletedPileAnimationContext` are module-level mutable slots, set
@@ -154,7 +154,7 @@ without jsdom + fake sockets threaded through a hook, and dissolves the
 23-parameter seam. Do this _after_ F-4 so the client does not inherit the
 globals.
 
-### F-6: "Turn ends → next player draws" is encoded twice, differently
+### ~~F-6: "Turn ends → next player draws" is encoded twice, differently~~ (done — PR [#186](https://github.com/klbsjpolp/skip-bo/pull/186), `planStartOfTurnDraw`)
 
 Local: `END_TURN`/`DISCARD_CARD` only flip `currentPlayerIndex`; the machine's
 `drawing` state invokes `drawService` which dispatches `DRAW` (per the
@@ -192,7 +192,7 @@ relay instead). This deletes the echo-counting invariant class entirely. Cost:
 `skipboActionSchema` change + host/guest version discipline; keep v1 moves
 accepted during transition.
 
-### F-8: Minor consistencies worth sweeping
+### ~~F-8: Minor consistencies worth sweeping~~ (done — PR [#186](https://github.com/klbsjpolp/skip-bo/pull/186))
 
 - **Shim re-exports**: `apps/web/src/state/gameReducer.ts`, `state/gameActions.ts`,
   `state/initialGameState.ts`, `lib/validators.ts`, `lib/handRefill.ts`,
@@ -234,19 +234,22 @@ the relay protocol all stay as decided in D-001/D-003/D-006/D-007.
 Each phase is independently shippable and validated per the
 [AGENTS.md](../../AGENTS.md) change matrix.
 
-| Phase | Contents                                                                                                | Findings | Risk                                        | Validation                                                                                   |
-| ----- | ------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| 1     | Dedupe move pipeline: pure helpers to `game-core`, shared intent module, delete shim re-exports         | F-1, F-8 | Low                                         | `game-core` + web unit tests; `pnpm test:e2e`                                                |
-| 2     | Message codes in reducer; move `animationDuration` off `GameAction`                                     | F-2      | Medium (touches wire views + reducer tests) | `game-core`, `skipbo-runtime`, web state tests; two-browser smoke                            |
-| 3     | AnimationDriver: kill global setters; inject driver into machine actors; extract `aiHand` debug parsing | F-3, F-4 | Medium (animation timing)                   | web state tests; `pnpm test:e2e`; visual contract                                            |
-| 4     | Extract `OnlineGameClient`; hook becomes adapter                                                        | F-5      | Medium-high (reconnect paths)               | online hook tests rewritten against the client; two-browser smoke incl. host/guest reconnect |
-| 5     | Composite `MOVE_CARD` online; retire echo counting                                                      | F-7      | High (protocol discipline)                  | `skipbo-runtime` tests; drag-and-drop E2E; mixed-version smoke                               |
-| —     | Turn-boundary helper                                                                                    | F-6      | Low                                         | fold into whichever of phases 1–2 touches it first                                           |
+| Phase | Contents                                                                                                                                                               | Findings | Risk                                        | Validation                                                                                   |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| ~~1~~ | ~~Dedupe move pipeline: pure helpers to `game-core`, shared intent module, delete shim re-exports~~ (PR [#186](https://github.com/klbsjpolp/skip-bo/pull/186))         | F-1, F-8 | Low                                         | `game-core` + web unit tests; `pnpm test:e2e`                                                |
+| ~~2~~ | ~~Message codes in reducer; move `animationDuration` off `GameAction`~~ (PR [#186](https://github.com/klbsjpolp/skip-bo/pull/186))                                     | F-2      | Medium (touches wire views + reducer tests) | `game-core`, `skipbo-runtime`, web state tests; two-browser smoke                            |
+| ~~3~~ | ~~AnimationDriver: kill global setters; inject driver into machine actors; extract `aiHand` debug parsing~~ (PR [#186](https://github.com/klbsjpolp/skip-bo/pull/186)) | F-3, F-4 | Medium (animation timing)                   | web state tests; `pnpm test:e2e`; visual contract                                            |
+| 4     | Extract `OnlineGameClient`; hook becomes adapter                                                                                                                       | F-5      | Medium-high (reconnect paths)               | online hook tests rewritten against the client; two-browser smoke incl. host/guest reconnect |
+| 5     | Composite `MOVE_CARD` online; retire echo counting                                                                                                                     | F-7      | High (protocol discipline)                  | `skipbo-runtime` tests; drag-and-drop E2E; mixed-version smoke                               |
+| —     | Turn-boundary helper                                                                                                                                                   | F-6      | Low                                         | fold into whichever of phases 1–2 touches it first                                           |
 
-Phases 1–3 are pure consolidation and can proceed anytime. Phase 4 should
-precede 5 (the client extraction is where echo logic lives). If only one phase
-happens, make it Phase 1 — it removes the drift that makes every later change
-a four-file edit.
+Phases 1–3 (and F-6) landed in PR
+[#186](https://github.com/klbsjpolp/skip-bo/pull/186) (July 2026). Phases 4
+and 5 remain: their mandated validations (two-browser smoke incl. host/guest
+reconnect; mixed-version smoke) need a workstation with the realtime-infra
+relay running locally, so they should be executed in a session where that
+smoke test is possible. Phase 4 should precede 5 (the client extraction is
+where echo logic lives).
 
 ## Docs To Move With The Work
 
