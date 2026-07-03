@@ -896,6 +896,30 @@ describe('useOnlineSkipBoGame', () => {
     expect(result.current.gameState.currentPlayerIndex).toBe(nextView.currentPlayerIndex);
   });
 
+  it('relays CLEAR_SELECTION even before any view is ingested', async () => {
+    const session = createSession();
+    const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+    });
+
+    const socket = MockWebSocket.instances[0];
+    await act(async () => {
+      socket.open();
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      result.current.clearSelection();
+    });
+
+    const lastMessage = JSON.parse(socket.sent.at(-1) ?? '{}');
+    expect(lastMessage).toMatchObject({ type: 'relay', kind: 'move', payload: { type: 'CLEAR_SELECTION' } });
+    // No view existed, so nothing was committed optimistically.
+    expect(result.current.hasGameView).toBe(false);
+  });
+
   it('rejects an illegal online play locally without relaying a move', async () => {
     const session = createSession();
 

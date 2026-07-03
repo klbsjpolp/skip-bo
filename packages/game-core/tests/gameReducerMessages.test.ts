@@ -91,6 +91,35 @@ describe('gameReducer message codes', () => {
     });
   });
 
+  it('emits INVALID_MOVE for stale selections and bad discard piles', () => {
+    const staleSelection = initialGameState();
+    staleSelection.players[0].hand = [card(2), null, null, null, null];
+    staleSelection.buildPiles = [[], [], [], []];
+    staleSelection.selectedCard = { card: card(1), source: 'hand', index: 9 };
+    expect(gameReducer(staleSelection, { type: 'PLAY_CARD', buildPile: 0 }).message).toEqual({
+      code: 'INVALID_MOVE',
+    });
+
+    const badPile = withSelectedHandCard(3);
+    expect(gameReducer(badPile, { type: 'DISCARD_CARD', discardPile: 99 }).message).toEqual({
+      code: 'INVALID_MOVE',
+    });
+
+    const noAi = initialGameState();
+    noAi.players = noAi.players.map((player) => ({ ...player, isAI: false }));
+    expect(gameReducer(noAi, { type: 'DEBUG_CLEAR_AI_STOCK_PILE' }).message).toEqual({ code: 'INVALID_MOVE' });
+  });
+
+  it('emits AI_PLAYING after a successful AI play', () => {
+    const state = initialGameState();
+    state.currentPlayerIndex = 1;
+    state.buildPiles = [[], [], [], []];
+    state.players[1].hand = [card(1), card(9), null, null, null];
+    state.selectedCard = { card: card(1), source: 'hand', index: 0 };
+
+    expect(gameReducer(state, { type: 'PLAY_CARD', buildPile: 0 }).message).toEqual({ code: 'AI_PLAYING' });
+  });
+
   it('keeps GAME_START on init and INVALID_CARD_VALUE for corrupted selections', () => {
     expect(initialGameState().message).toEqual({ code: 'GAME_START' });
 

@@ -3,6 +3,17 @@ import { describe, expect, it } from 'vitest';
 import { getAiHandOverride } from '@/lib/debugOverrides';
 
 describe('getAiHandOverride', () => {
+  it('reads window.location.search when no query is given', () => {
+    expect(getAiHandOverride()).toBeNull();
+  });
+
+  it('parses JSON arrays with string members', () => {
+    expect(getAiHandOverride('?aiHand=' + encodeURIComponent('["1","2"]'))).toEqual([
+      { value: 1, isSkipBo: false },
+      { value: 2, isSkipBo: false },
+    ]);
+  });
+
   it('parses a JSON array', () => {
     expect(getAiHandOverride('?aiHand=[1,2,3]')).toEqual([
       { value: 1, isSkipBo: false },
