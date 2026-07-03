@@ -11,11 +11,8 @@ import {
   type GameState,
 } from '@skipbo/game-core';
 import { computeBestMove } from '@/ai/computeBestMove';
-import { triggerAIAnimation } from '@/services/aiAnimationService';
-import { triggerCompletedBuildPileAnimation } from '@/services/completedBuildPileAnimationService';
-import { triggerMultipleDrawAnimations } from '@/services/drawAnimationService';
 import { animationGate } from '@/services/animationGate';
-import { animationServiceBridge } from '@/lib/animationServiceBridge.ts';
+import { noopAnimationDriver, type AnimationDriver } from '@/services/animationDriver';
 
 /**
  * Machine event envelope: a rules action plus the presentation-only
@@ -23,6 +20,17 @@ import { animationServiceBridge } from '@/lib/animationServiceBridge.ts';
  * event, never on the `GameAction` itself (game-core stays presentation-free).
  */
 export type LocalGameEvent = GameAction & { animationDuration?: number };
+
+/**
+ * Machine input: the presentation driver (the machine's actors animate only
+ * through this injected handle) and the optional `aiHand` debug override
+ * parsed by `lib/debugOverrides.ts`. Both default to inert values so the
+ * machine runs headless in tests.
+ */
+export interface GameMachineInput {
+  driver?: AnimationDriver;
+  debugAiHand?: Card[] | null;
+}
 
 export const gameMachine = createMachine(
   {
@@ -32,12 +40,17 @@ export const gameMachine = createMachine(
       context: {
         G: GameState;
         animationDuration: number;
+        driver: AnimationDriver;
+        debugAiHand: Card[] | null;
       };
       events: LocalGameEvent;
+      input: GameMachineInput | undefined;
     },
-    context: () => ({
+    context: ({ input }: { input: GameMachineInput | undefined }) => ({
       G: initialGameState(),
       animationDuration: 0,
+      driver: input?.driver ?? noopAnimationDriver,
+      debugAiHand: input?.debugAiHand ?? null,
     }),
     on: {
       DEBUG_WIN: {
@@ -57,7 +70,7 @@ export const gameMachine = createMachine(
           drawing: {
             invoke: {
               src: 'drawService',
-              input: ({ context }) => ({ G: context.G }),
+              input: ({ context }) => ({ G: context.G, driver: context.driver, debugAiHand: context.debugAiHand }),
               onDone: {
                 actions: 'applyDrawAndStoreAnimation',
                 target: 'drawAnimating',
@@ -67,7 +80,10 @@ export const gameMachine = createMachine(
           drawAnimating: {
             invoke: {
               src: 'animationGate',
-              input: ({ context }) => ({ duration: context.animationDuration }),
+              input: ({ context }) => ({
+                duration: context.animationDuration,
+                waitForAnimations: context.driver.waitForAnimations,
+              }),
               onDone: {
                 target: 'ready',
               },
@@ -157,7 +173,10 @@ export const gameMachine = createMachine(
             },
             invoke: {
               src: 'animationGate',
-              input: ({ context }) => ({ duration: context.animationDuration }),
+              input: ({ context }) => ({
+                duration: context.animationDuration,
+                waitForAnimations: context.driver.waitForAnimations,
+              }),
               onDone: {
                 target: 'ready',
               },
@@ -172,7 +191,7 @@ export const gameMachine = createMachine(
           drawing: {
             invoke: {
               src: 'drawService',
-              input: ({ context }) => ({ G: context.G }),
+              input: ({ context }) => ({ G: context.G, driver: context.driver, debugAiHand: context.debugAiHand }),
               onDone: {
                 actions: 'applyDrawAndStoreAnimation',
                 target: 'drawAnimating',
@@ -182,7 +201,10 @@ export const gameMachine = createMachine(
           drawAnimating: {
             invoke: {
               src: 'animationGate',
-              input: ({ context }) => ({ duration: context.animationDuration }),
+              input: ({ context }) => ({
+                duration: context.animationDuration,
+                waitForAnimations: context.driver.waitForAnimations,
+              }),
               onDone: {
                 target: 'ready',
               },
@@ -198,7 +220,7 @@ export const gameMachine = createMachine(
           thinking: {
             invoke: {
               src: 'botService',
-              input: ({ context }) => ({ G: context.G }),
+              input: ({ context }) => ({ G: context.G, driver: context.driver }),
               onDone: {
                 actions: 'applyBotAndStoreAnimation',
                 target: 'animating',
@@ -208,7 +230,10 @@ export const gameMachine = createMachine(
           animating: {
             invoke: {
               src: 'animationGate',
-              input: ({ context }) => ({ duration: context.animationDuration }),
+              input: ({ context }) => ({
+                duration: context.animationDuration,
+                waitForAnimations: context.driver.waitForAnimations,
+              }),
               onDone: {
                 target: 'checkState',
               },
@@ -336,7 +361,8 @@ export const gameMachine = createMachine(
     },
     actors: {
       animationGate,
-      botService: fromPromise(async ({ input }: { input: { G: GameState } }) => {
+      botService: fromPromise(async ({ input }: { input: { G: GameState; driver: AnimationDriver } }) => {
+        const { driver } = input;
         const action = await computeBestMove(input.G);
         const completedBuildPileCards =
           action.type === 'PLAY_CARD' ? getCompletedBuildPileCards(input.G, action.buildPile) : null;
@@ -344,16 +370,16 @@ export const gameMachine = createMachine(
 
         // Check if PLAY_CARD will empty the hand and trigger draw animations
         if (action.type === 'PLAY_CARD' && willPlayCardEmptyHand(input.G)) {
-          // First trigger the play card animation. triggerAIAnimation is
-          // synchronous — the actual wait happens via waitForAnimations().
+          // First trigger the play card animation. animateMove is synchronous —
+          // the actual wait happens via waitForAnimations().
           if (input.G.selectedCard) {
-            triggerAIAnimation(input.G, action);
-            await animationServiceBridge.waitForAnimations();
+            driver.animateMove(input.G, action);
+            await driver.waitForAnimations();
           }
 
           const completionAnimationDuration =
             action.type === 'PLAY_CARD' && completedBuildPileCards
-              ? triggerCompletedBuildPileAnimation(
+              ? driver.animateCompletion(
                   input.G,
                   action.buildPile,
                   completedBuildPileCards,
@@ -370,7 +396,7 @@ export const gameMachine = createMachine(
             if (cards.length > 0) {
               animationDuration = Math.max(
                 animationDuration,
-                await triggerMultipleDrawAnimations(
+                await driver.animateDraws(
                   input.G.currentPlayerIndex,
                   cards,
                   handIndices,
@@ -381,16 +407,15 @@ export const gameMachine = createMachine(
             }
           }
         } else {
-          // Trigger animation for other AI actions that need it.
-          // triggerAIAnimation is synchronous — the actual wait happens via
-          // waitForAnimations().
+          // Trigger animation for other AI actions that need it. animateMove is
+          // synchronous — the actual wait happens via waitForAnimations().
           if ((action.type === 'PLAY_CARD' || action.type === 'DISCARD_CARD') && input.G.selectedCard) {
-            triggerAIAnimation(input.G, action);
-            await animationServiceBridge.waitForAnimations();
+            driver.animateMove(input.G, action);
+            await driver.waitForAnimations();
           }
 
           if (action.type === 'PLAY_CARD' && completedBuildPileCards) {
-            animationDuration = triggerCompletedBuildPileAnimation(
+            animationDuration = driver.animateCompletion(
               input.G,
               action.buildPile,
               completedBuildPileCards,
@@ -401,60 +426,32 @@ export const gameMachine = createMachine(
 
         return { action, animationDuration };
       }),
-      drawService: fromPromise(async ({ input }: { input: { G: GameState } }) => {
-        const gameState = input.G;
-        const player = gameState.players[gameState.currentPlayerIndex];
-        // Debug: override AI hand via query param aiHand (supports [1,2,3,4,5], 1,2,3,4,5 and 1-2-3-4-5)
-        if (typeof window !== 'undefined' && player.isAI) {
-          try {
-            const params = new URLSearchParams(window.location.search);
-            const raw = params.get('aiHand');
-            if (raw) {
-              let numbers: number[] = [];
+      drawService: fromPromise(
+        async ({ input }: { input: { G: GameState; driver: AnimationDriver; debugAiHand: Card[] | null } }) => {
+          const gameState = input.G;
+          const player = gameState.players[gameState.currentPlayerIndex];
 
-              // 1) Try JSON array first (e.g., "[1,2,3,4,5]")
-              try {
-                const maybe: unknown = JSON.parse(raw);
-                if (Array.isArray(maybe)) {
-                  numbers = maybe
-                    .map((n) => (typeof n === 'string' ? parseInt(n, 10) : Number(n)))
-                    .filter((n) => Number.isFinite(n) && n >= 1);
-                }
-              } catch {
-                // Not JSON, fall through
-              }
-
-              // 2) Fallback: remove brackets/spaces and split by comma or dash
-              if (numbers.length === 0) {
-                const cleaned = raw.replace(/\[/g, '').replace(/]/g, '').replace(/\s/g, '');
-                const tokens = cleaned.split(/[,-]/).filter(Boolean);
-                numbers = tokens.map((t) => parseInt(t, 10)).filter((n) => Number.isFinite(n) && n >= 1);
-              }
-
-              if (numbers.length > 0) {
-                const hand: Card[] = numbers.map((v) => ({ value: v, isSkipBo: false }));
-                return { type: 'DEBUG_SET_AI_HAND', hand, animationDuration: 0 };
-              }
-            }
-          } catch {
-            /* ignore invalid aiHand param */
+          // Debug override parsed at machine setup (lib/debugOverrides.ts).
+          if (player.isAI && input.debugAiHand) {
+            return { type: 'DEBUG_SET_AI_HAND', hand: input.debugAiHand, animationDuration: 0 };
           }
-        }
-        // The turn-boundary rule (turn starts → current player draws) lives in
-        // game-core's planStartOfTurnDraw, shared with the online runtime.
-        const { action, plan } = planStartOfTurnDraw(gameState);
-        let animationDuration = 0;
 
-        if (plan.cards.length > 0) {
-          animationDuration = await triggerMultipleDrawAnimations(
-            gameState.currentPlayerIndex,
-            plan.cards,
-            plan.handIndices,
-          );
-        }
+          // The turn-boundary rule (turn starts → current player draws) lives in
+          // game-core's planStartOfTurnDraw, shared with the online runtime.
+          const { action, plan } = planStartOfTurnDraw(gameState);
+          let animationDuration = 0;
 
-        return { ...action, animationDuration };
-      }),
+          if (plan.cards.length > 0) {
+            animationDuration = await input.driver.animateDraws(
+              gameState.currentPlayerIndex,
+              plan.cards,
+              plan.handIndices,
+            );
+          }
+
+          return { ...action, animationDuration };
+        },
+      ),
     },
   },
 );

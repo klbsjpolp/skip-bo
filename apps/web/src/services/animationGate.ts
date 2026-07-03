@@ -1,8 +1,9 @@
 import { fromPromise } from 'xstate';
-import { animationServiceBridge } from '@/lib/animationServiceBridge';
 
 type AnimationGateInput = {
   duration: number;
+  /** Injected by the machine from its AnimationDriver (no global bridge). */
+  waitForAnimations: () => Promise<void>;
 };
 
 export const animationGate = fromPromise(async ({ input }: { input: AnimationGateInput }) => {
@@ -11,7 +12,7 @@ export const animationGate = fromPromise(async ({ input }: { input: AnimationGat
   const timeoutPromise = new Promise((resolve) => setTimeout(resolve, input.duration));
 
   // Get the promise that resolves when all current animations are complete.
-  const animationPromise = animationServiceBridge.waitForAnimations();
+  const animationPromise = input.waitForAnimations();
 
   // Wait for both the minimum duration and the animations to complete.
   // This ensures that even very fast animations have a minimum display time,

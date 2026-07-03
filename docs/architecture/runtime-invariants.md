@@ -27,7 +27,7 @@ These are true today and matter operationally, but they are easier to change tha
 
 - Game status messages are semantic codes (`GameMessage` in `packages/game-core/src/types/index.ts`); the French strings are rendered only in `apps/web/src/game/gameMessages.ts`.
 - Human play and discard animations are kicked off from `apps/web/src/hooks/useSkipBoGame.ts`.
-- AI play, discard, and start-of-turn draw animations are driven by `apps/web/src/services/aiAnimationService.ts` and `apps/web/src/services/drawAnimationService.ts`.
+- All animation effects run through the explicit `AnimationDriver` (`apps/web/src/services/animationDriver.ts`), created by `CardAnimationProvider` and injected into the turn machine (actor input) and the online view ingestion — there are no module-global animation slots.
 - Online opponent animations are inferred from snapshot-to-snapshot diffs in `apps/web/src/hooks/useOnlineSkipBoGame.ts`.
 
 ## Likely To Drift

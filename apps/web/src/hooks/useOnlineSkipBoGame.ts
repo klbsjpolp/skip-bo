@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { canPlayCard, type Card, type GameAction, type MoveResult } from '@skipbo/game-core';
 
@@ -13,12 +13,6 @@ import {
 import { isDebugAction, type ClientGameView, type HostRoomMeta, type SkipboHost } from '@skipbo/skipbo-runtime';
 
 import { useCardAnimation } from '@/contexts/useCardAnimation';
-import {
-  setGlobalCompletedPileAnimationContext,
-  triggerCompletedBuildPileAnimation,
-} from '@/services/completedBuildPileAnimationService';
-import { setGlobalDrawAnimationContext } from '@/services/drawAnimationService';
-import { setGlobalAnimationContext, triggerAIAnimation } from '@/services/aiAnimationService';
 import { clearOnlineSession } from '@/state/sessionPersistence';
 
 import {
@@ -78,7 +72,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   // briefly revert the optimistic play and make the reappearing hand card look
   // like a deck→hand draw. Only the final echo is rendered.
   const pendingViewEchoesRef = useRef(0);
-  const { removeAnimation, startAnimation, waitForAnimations } = useCardAnimation();
+  const { driver } = useCardAnimation();
 
   const isHost = session != null && session.seatIndex === session.hostSeatIndex;
 
@@ -216,7 +210,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       if (opponentTransition) {
         holdPreviousTurnPresentation();
         commitView(incomingView);
-        const opponentAnimationDuration = triggerAIAnimation(previousState, opponentTransition.action, {
+        const opponentAnimationDuration = driver.animateMove(previousState, opponentTransition.action, {
           cardOverride: opponentTransition.animationCard,
           sourceRevealedOverride: opponentTransition.sourceRevealed,
           targetSettledInStateOverride: true,
@@ -224,7 +218,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
           targetRevealedOverride: true,
         });
         if (opponentTransition.completedCards && opponentTransition.completedBuildPileIndex !== undefined) {
-          triggerCompletedBuildPileAnimation(
+          driver.animateCompletion(
             previousState,
             opponentTransition.completedBuildPileIndex,
             opponentTransition.completedCards,
@@ -234,9 +228,12 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
           );
         }
 
-        scheduleDrawAnimations(drawTransitions, opponentAnimationDuration);
+        scheduleDrawAnimations(driver, drawTransitions, opponentAnimationDuration);
         applyTurnPresentationDelay(
-          Math.max(opponentAnimationDuration, getMaxDrawAnimationDuration(drawTransitions, opponentAnimationDuration)),
+          Math.max(
+            opponentAnimationDuration,
+            getMaxDrawAnimationDuration(driver, drawTransitions, opponentAnimationDuration),
+          ),
         );
       } else {
         // After the local player's own turn-ending discard, the authoritative
@@ -245,16 +242,16 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         // acting player sees the same sequence (own discard, then the next
         // player drawing) that remote players see.
         const drawBaseDelay = localActionAnimationDuration;
-        const drawAnimationDuration = getMaxDrawAnimationDuration(drawTransitions, drawBaseDelay);
+        const drawAnimationDuration = getMaxDrawAnimationDuration(driver, drawTransitions, drawBaseDelay);
         if (drawAnimationDuration > 0) {
           holdPreviousTurnPresentation();
         }
-        scheduleDrawAnimations(drawTransitions, drawBaseDelay);
+        scheduleDrawAnimations(driver, drawTransitions, drawBaseDelay);
         applyTurnPresentationDelay(drawAnimationDuration);
         commitView(incomingView);
       }
     },
-    [clearTurnPresentationTimeout, commitView, setInteractionLocked],
+    [clearTurnPresentationTimeout, commitView, driver, setInteractionLocked],
   );
 
   // Guest entry point for views relayed by the host. Drops stale echoes (see
@@ -360,12 +357,6 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     },
     [applyHostAction, isHost, sendRelay],
   );
-
-  useEffect(() => {
-    setGlobalAnimationContext({ startAnimation, waitForAnimations });
-    setGlobalDrawAnimationContext({ startAnimation, removeAnimation });
-    setGlobalCompletedPileAnimationContext({ startAnimation });
-  }, [removeAnimation, startAnimation, waitForAnimations]);
 
   // Owns the WebSocket lifecycle (connect / ping / reconnect) and routes server
   // messages back through the collaborators below. All shared state and host
@@ -493,7 +484,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
 
       setInteractionLocked(true);
 
-      startPlayCardAnimation(currentState, buildPile, intent.completedBuildPileCards, startAnimation);
+      startPlayCardAnimation(currentState, buildPile, intent.completedBuildPileCards, driver);
 
       if (viewRef.current) {
         commitView(applyOptimisticPlayView(viewRef.current, buildPile, intent.willEmptyHand));
@@ -503,7 +494,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       setInteractionLocked(false);
       return { success: true, message: 'Carte jouée' };
     },
-    [commitView, isInteractionBlocked, sendAction, setInteractionLocked, startAnimation],
+    [commitView, driver, isInteractionBlocked, sendAction, setInteractionLocked],
   );
 
   const discardCard = useCallback(
@@ -529,7 +520,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
 
         setInteractionLocked(true);
 
-        const discardAnimationDuration = startDiscardCardAnimation(currentState, discardPile, startAnimation);
+        const discardAnimationDuration = startDiscardCardAnimation(currentState, discardPile, driver);
 
         if (viewRef.current) {
           commitView(applyOptimisticDiscardView(viewRef.current, discardPile));
@@ -542,7 +533,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         setInteractionLocked(false);
         resolve({ success: true, message: 'Carte défaussée' });
       }),
-    [commitView, isInteractionBlocked, sendAction, setInteractionLocked, startAnimation],
+    [commitView, driver, isInteractionBlocked, sendAction, setInteractionLocked],
   );
 
   const sendSetReady = useCallback(

@@ -37,23 +37,18 @@ vi.mock('@/contexts/useCardAnimation', () => ({
     removeAnimation,
     startAnimation,
     waitForAnimations,
+    // The hook animates exclusively through the injected driver; the hoisted
+    // mocks keep their historical names so assertions read the same.
+    driver: {
+      startAnimation,
+      removeAnimation,
+      waitForAnimations,
+      animateMove: triggerAIAnimation,
+      animateDraws: triggerMultipleDrawAnimations,
+      calculateDrawsDuration: calculateMultipleDrawAnimationDuration,
+      animateCompletion: triggerCompletedBuildPileAnimation,
+    },
   }),
-}));
-
-vi.mock('@/services/drawAnimationService', () => ({
-  calculateMultipleDrawAnimationDuration,
-  setGlobalDrawAnimationContext: vi.fn(),
-  triggerMultipleDrawAnimations,
-}));
-
-vi.mock('@/services/completedBuildPileAnimationService', () => ({
-  setGlobalCompletedPileAnimationContext: vi.fn(),
-  triggerCompletedBuildPileAnimation,
-}));
-
-vi.mock('@/services/aiAnimationService', () => ({
-  setGlobalAnimationContext: vi.fn(),
-  triggerAIAnimation,
 }));
 
 const card = (value: number, isSkipBo = false): Card => ({ value, isSkipBo });

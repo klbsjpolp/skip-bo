@@ -9,18 +9,12 @@ vi.mock('@/ai/computeBestMove', () => ({
   computeBestMove: vi.fn(() => Promise.resolve({ type: 'END_TURN' })),
 }));
 
-// Mock animation services to avoid timing issues in tests
-vi.mock('@/services/aiAnimationService', () => ({
-  triggerAIAnimation: vi.fn(() => Promise.resolve(0)),
-}));
-
-vi.mock('@/services/drawAnimationService', () => ({
-  triggerMultipleDrawAnimations: vi.fn(async () => 0),
-}));
+// The machine defaults to the inert noopAnimationDriver when no input is
+// given, so no animation mocking is needed.
 
 describe('gameMachine', () => {
   it('should start in setup state and transition to humanTurn', async () => {
-    const actor = createActor(gameMachine);
+    const actor = createActor(gameMachine, { input: undefined });
     actor.start();
 
     // Wait for the machine to reach a stable state
@@ -32,11 +26,11 @@ describe('gameMachine', () => {
   });
 
   it('should rebuild the initial game state for each new actor', async () => {
-    const firstActor = createActor(gameMachine);
+    const firstActor = createActor(gameMachine, { input: undefined });
     firstActor.start();
     await waitFor(firstActor, (state) => state.matches('humanTurn.ready'));
 
-    const secondActor = createActor(gameMachine);
+    const secondActor = createActor(gameMachine, { input: undefined });
     secondActor.start();
     await waitFor(secondActor, (state) => state.matches('humanTurn.ready'));
 
@@ -46,7 +40,7 @@ describe('gameMachine', () => {
   });
 
   it('should handle INIT event from any state', async () => {
-    const actor = createActor(gameMachine);
+    const actor = createActor(gameMachine, { input: undefined });
     actor.start();
 
     // Wait for initial state to stabilize
@@ -64,7 +58,7 @@ describe('gameMachine', () => {
   });
 
   it('should handle SELECT_CARD event in humanTurn state', async () => {
-    const actor = createActor(gameMachine);
+    const actor = createActor(gameMachine, { input: undefined });
     actor.start();
 
     // Wait for the drawing phase to complete
@@ -84,7 +78,7 @@ describe('gameMachine', () => {
   });
 
   it('should handle CLEAR_SELECTION event', async () => {
-    const actor = createActor(gameMachine);
+    const actor = createActor(gameMachine, { input: undefined });
     actor.start();
 
     // Wait for the drawing phase to complete
@@ -106,7 +100,7 @@ describe('gameMachine', () => {
   });
 
   it('should transition to botTurn on END_TURN', async () => {
-    const actor = createActor(gameMachine);
+    const actor = createActor(gameMachine, { input: undefined });
     actor.start();
 
     // Wait for the drawing phase to complete
@@ -127,7 +121,7 @@ describe('gameMachine', () => {
   });
 
   it('should handle RESET event and return to setup', async () => {
-    const actor = createActor(gameMachine);
+    const actor = createActor(gameMachine, { input: undefined });
     actor.start();
 
     // Wait for initial state
@@ -154,7 +148,7 @@ describe('gameMachine', () => {
   });
 
   it('should not process events when guard conditions are not met', async () => {
-    const actor = createActor(gameMachine);
+    const actor = createActor(gameMachine, { input: undefined });
     actor.start();
 
     // Wait for the drawing phase to complete
@@ -181,7 +175,7 @@ describe('gameMachine', () => {
   });
 
   it('should handle events sent to finished state', async () => {
-    const actor = createActor(gameMachine);
+    const actor = createActor(gameMachine, { input: undefined });
     actor.start();
 
     // Wait for initial state
@@ -199,7 +193,7 @@ describe('gameMachine', () => {
   });
 
   it('should maintain immutability of state', async () => {
-    const actor = createActor(gameMachine);
+    const actor = createActor(gameMachine, { input: undefined });
     actor.start();
 
     // Wait for the drawing phase to complete
@@ -225,7 +219,7 @@ describe('gameMachine', () => {
   });
 
   it('should handle multiple rapid events without errors', async () => {
-    const actor = createActor(gameMachine);
+    const actor = createActor(gameMachine, { input: undefined });
     actor.start();
 
     // Wait for initial state
@@ -247,7 +241,7 @@ describe('gameMachine', () => {
   });
 
   it('should apply selection changes while a human action animation is running', async () => {
-    const actor = createActor(gameMachine);
+    const actor = createActor(gameMachine, { input: undefined });
     actor.start();
 
     await waitFor(actor, (state) => state.matches('humanTurn.ready'));
@@ -321,7 +315,7 @@ describe('gameMachine', () => {
   });
 
   it('should NOT draw at the beginning of AI turn', async () => {
-    const actor = createActor(gameMachine);
+    const actor = createActor(gameMachine, { input: undefined });
     actor.start();
 
     // Wait for initial human turn setup

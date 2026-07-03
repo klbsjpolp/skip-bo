@@ -5,32 +5,24 @@ import { gameMachine } from '@/state/gameMachine';
 import { useDebugActions } from '@/game/debugActions';
 import { preparePlayCardIntent, prepareDiscardCardIntent } from '@/game/moveIntents';
 import { startDiscardCardAnimation, startPlayCardAnimation } from '@/game/moveAnimations';
-import { setGlobalAnimationContext } from '@/services/aiAnimationService';
-import {
-  calculateMultipleDrawAnimationDuration,
-  setGlobalDrawAnimationContext,
-  triggerMultipleDrawAnimations,
-} from '@/services/drawAnimationService';
-import { setGlobalCompletedPileAnimationContext } from '@/services/completedBuildPileAnimationService';
+import { getAiHandOverride } from '@/lib/debugOverrides';
 import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
 
 export function useSkipBoGame() {
-  const [snapshot, dispatch, actorRef] = useMachine(gameMachine);
+  const { driver } = useCardAnimation();
+  // Machine input is read once at actor creation; the driver from context is
+  // stable for the provider's lifetime, and the aiHand debug override is
+  // parsed here (lib/debugOverrides.ts) so the machine never touches the URL.
+  const [snapshot, dispatch, actorRef] = useMachine(gameMachine, {
+    input: { driver, debugAiHand: getAiHandOverride() },
+  });
   const state = snapshot.context.G;
   const stateRef = useRef<GameState>(state);
   const interactionLockRef = useRef(false);
-  const { startAnimation, removeAnimation, waitForAnimations } = useCardAnimation();
 
   React.useLayoutEffect(() => {
     stateRef.current = state;
   }, [state]);
-
-  // Set up global animation context for AI animations and draw animations
-  React.useEffect(() => {
-    setGlobalAnimationContext({ startAnimation, waitForAnimations });
-    setGlobalDrawAnimationContext({ startAnimation, removeAnimation });
-    setGlobalCompletedPileAnimationContext({ startAnimation });
-  }, [startAnimation, removeAnimation, waitForAnimations]);
 
   /* wrappers compatibles avec l'UI existante */
   const initializeGame = useCallback(() => {
@@ -91,7 +83,7 @@ export function useSkipBoGame() {
         currentState,
         buildPile,
         completedBuildPileCards,
-        startAnimation,
+        driver,
       );
 
       // completionAnimationDuration already includes playAnimationDuration as its baseDelay,
@@ -100,12 +92,7 @@ export function useSkipBoGame() {
       const refillBaseDelay = completedBuildPileCards ? completionAnimationDuration : playAnimationDuration;
       const drawAnimationDuration =
         refillHandIndices.length > 0
-          ? calculateMultipleDrawAnimationDuration(
-              currentState.currentPlayerIndex,
-              refillHandIndices,
-              500,
-              refillBaseDelay,
-            )
+          ? driver.calculateDrawsDuration(currentState.currentPlayerIndex, refillHandIndices, 500, refillBaseDelay)
           : 0;
 
       // Dispatch immediately. The xstate machine transitions to
@@ -118,20 +105,16 @@ export function useSkipBoGame() {
       });
 
       if (refillCards.length > 0) {
-        void triggerMultipleDrawAnimations(
-          currentState.currentPlayerIndex,
-          refillCards,
-          refillHandIndices,
-          500,
-          refillBaseDelay,
-        ).catch((error) => {
-          console.warn('Draw animation failed, continuing with game logic:', error);
-        });
+        void driver
+          .animateDraws(currentState.currentPlayerIndex, refillCards, refillHandIndices, 500, refillBaseDelay)
+          .catch((error) => {
+            console.warn('Draw animation failed, continuing with game logic:', error);
+          });
       }
       interactionLockRef.current = false;
       return { success: true, message: 'Carte jouée' };
     },
-    [dispatch, isInteractionBlocked, startAnimation],
+    [dispatch, isInteractionBlocked, driver],
   );
 
   const discardCard = useCallback(
@@ -155,13 +138,13 @@ export function useSkipBoGame() {
       // selections / plays issued *before* the discard ran can still complete
       // their visual animations because the animationGate keeps waiting on
       // `waitForAnimations()` until the queue is empty.
-      const discardAnimationDuration = startDiscardCardAnimation(currentState, discardPile, startAnimation);
+      const discardAnimationDuration = startDiscardCardAnimation(currentState, discardPile, driver);
 
       dispatch({ type: 'DISCARD_CARD', discardPile, animationDuration: discardAnimationDuration });
       interactionLockRef.current = false;
       return { success: true, message: 'Carte défaussée' };
     },
-    [dispatch, isInteractionBlocked, startAnimation],
+    [dispatch, isInteractionBlocked, driver],
   );
 
   const clearSelection = useCallback(() => {

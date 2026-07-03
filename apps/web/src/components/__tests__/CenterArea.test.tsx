@@ -1,3 +1,4 @@
+import { noopAnimationDriver } from '@/services/animationDriver';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
 import { CenterArea } from '@/components/CenterArea';
@@ -47,6 +48,7 @@ const createAnimationContext = (activeAnimations: CardAnimationData[] = []): Ani
   markAnimationStarted: vi.fn(),
   isCardBeingAnimated: vi.fn(() => false),
   waitForAnimations: vi.fn(async () => undefined),
+  driver: noopAnimationDriver,
 });
 
 const createCompletionAnimations = (count: number): CardAnimationData[] =>

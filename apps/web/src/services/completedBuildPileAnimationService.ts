@@ -3,15 +3,8 @@ import { getRetreatPileAngle } from '@skipbo/game-core';
 import type { Card, GameState } from '@skipbo/game-core';
 import { calculateAnimationDuration, getBuildPilePosition, getRetreatPilePosition } from '@/utils/cardPositions';
 
-let globalAnimationContext: {
-  startAnimation: (animationData: Omit<CardAnimationData, 'id'>) => string;
-} | null = null;
-
-export const setGlobalCompletedPileAnimationContext = (context: typeof globalAnimationContext) => {
-  globalAnimationContext = context;
-};
-
 export const triggerCompletedBuildPileAnimation = (
+  anim: { startAnimation: (animationData: Omit<CardAnimationData, 'id'>) => string },
   gameState: GameState,
   buildPileIndex: number,
   cards: Card[],
@@ -19,13 +12,6 @@ export const triggerCompletedBuildPileAnimation = (
   staggerDelay: number = 100,
   baseDelay: number = 0,
 ): number => {
-  if (!globalAnimationContext) {
-    console.warn('Animation context not available for completed build pile animation');
-    return 0;
-  }
-
-  const animationContext = globalAnimationContext;
-
   if (cards.length === 0) {
     return 0;
   }
@@ -50,7 +36,7 @@ export const triggerCompletedBuildPileAnimation = (
       // animation to land on the build pile before retreat begins).
       const initialDelay = baseDelay + index * staggerDelay;
 
-      animationContext.startAnimation({
+      anim.startAnimation({
         card,
         startPosition,
         endPosition,

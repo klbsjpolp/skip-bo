@@ -9,8 +9,6 @@ import { AppUpdatedBanner } from '@/components/AppUpdatedBanner';
 import { ForcedUpdateOverlay } from '@/components/ForcedUpdateOverlay';
 import { ResumeGameBanner } from '@/components/ResumeGameBanner';
 import { LocalGameBoard } from '@/components/LocalGameBoard';
-import { useCardAnimation } from '@/contexts/useCardAnimation';
-import { animationServiceBridge } from '@/lib/animationServiceBridge';
 import { isSafeToApplyLocalUpdate } from '@/lib/localUpdateGate';
 import { applyPendingUpdateBeforeOnlineStart } from '@/lib/onlineUpdateGate';
 import { canPlayCard } from '@skipbo/game-core';
@@ -148,7 +146,6 @@ function LocalGameScreen({
 }
 
 function LiveApp() {
-  const { waitForAnimations } = useCardAnimation();
   const [currentGameType, setCurrentGameType] = useState<GameType>('local-ai');
   const [localSessionVersion, setLocalSessionVersion] = useState(0);
   const [onlineSession, setOnlineSession] = useState<CreateRoomResponse | null>(null);
@@ -171,10 +168,6 @@ function LiveApp() {
     minimumSupportedVersion,
     reloadToUpdate,
   } = usePwaVersionGate({ deferHardUpdate: isLocalMode });
-
-  useEffect(() => {
-    animationServiceBridge.waitForAnimations = waitForAnimations;
-  }, [waitForAnimations]);
 
   const startLocalGame = () => {
     // A required hard update was deferred while in local mode — apply it now and
