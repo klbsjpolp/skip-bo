@@ -1,9 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  setGlobalCompletedPileAnimationContext,
-  triggerCompletedBuildPileAnimation,
-} from '@/services/completedBuildPileAnimationService';
+import { triggerCompletedBuildPileAnimation } from '@/services/completedBuildPileAnimationService';
 import type { Card, GameState } from '@skipbo/game-core';
 
 const card = (value: number): Card => ({ value, isSkipBo: false });
@@ -74,7 +71,6 @@ describe('completedBuildPileAnimationService', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     startAnimation.mockClear();
-    setGlobalCompletedPileAnimationContext({ startAnimation });
 
     const centerArea = document.createElement('div');
     centerArea.className = 'center-area';
@@ -92,12 +88,14 @@ describe('completedBuildPileAnimationService', () => {
     document.body.append(centerArea);
   });
 
-  afterEach(() => {
-    setGlobalCompletedPileAnimationContext(null);
-  });
-
   it('staggers completed build pile cards 100ms apart so only one is visible at the departure point at a time', () => {
-    const totalDuration = triggerCompletedBuildPileAnimation(createGameState(), 0, [card(10), card(11), card(12)], 4);
+    const totalDuration = triggerCompletedBuildPileAnimation(
+      { startAnimation },
+      createGameState(),
+      0,
+      [card(10), card(11), card(12)],
+      4,
+    );
 
     expect(startAnimation).toHaveBeenCalledTimes(3);
 

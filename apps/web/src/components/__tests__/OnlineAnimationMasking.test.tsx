@@ -1,3 +1,4 @@
+import { noopAnimationDriver } from '@/services/animationDriver';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
 
@@ -49,6 +50,7 @@ const createAnimationContext = (activeAnimations: CardAnimationData[] = []): Ani
   markAnimationStarted: vi.fn(),
   isCardBeingAnimated: vi.fn(() => false),
   waitForAnimations: vi.fn(async () => undefined),
+  driver: noopAnimationDriver,
 });
 
 const createIncomingBuildAnimation = (buildPileIndex: number): CardAnimationData => ({
@@ -126,6 +128,7 @@ const createStockAnimationContext = (playerIndex: number, stockIndex: number): A
       candidatePlayerIndex === playerIndex && source === 'stock' && index === stockIndex,
   ),
   waitForAnimations: vi.fn(async () => undefined),
+  driver: noopAnimationDriver,
 });
 
 describe('Online animation masking', () => {

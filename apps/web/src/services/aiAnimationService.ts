@@ -11,24 +11,13 @@ import {
 } from '@/utils/cardPositions';
 import type { CardAnimationData } from '@/contexts/CardAnimationContext.tsx';
 
-interface TriggerAIAnimationOptions {
+export interface TriggerAIAnimationOptions {
   cardOverride?: Card;
   sourceRevealedOverride?: boolean;
   targetSettledInStateOverride?: boolean;
   targetPileLengthOverride?: number;
   targetRevealedOverride?: boolean;
 }
-
-// Global reference to the animation context
-let globalAnimationContext: {
-  startAnimation: (animationData: Omit<CardAnimationData, 'id'>) => void;
-  waitForAnimations: () => Promise<void>;
-} | null = null;
-
-// Function to set the global animation context (called from React component)
-export const setGlobalAnimationContext = (context: typeof globalAnimationContext) => {
-  globalAnimationContext = context;
-};
 
 // Function to trigger AI animations.
 //
@@ -43,15 +32,11 @@ export const setGlobalAnimationContext = (context: typeof globalAnimationContext
 // See useOnlineSkipBoGame snapshot handling for the call site that depends on
 // this contract.
 export const triggerAIAnimation = (
+  anim: { startAnimation: (animationData: Omit<CardAnimationData, 'id'>) => string },
   gameState: GameState,
   action: GameAction,
   options: TriggerAIAnimationOptions = {},
 ): number => {
-  if (!globalAnimationContext) {
-    console.warn('Animation context not available for AI action');
-    return 0;
-  }
-
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   if (!currentPlayer.isAI) {
     return 0; // Only animate AI actions
@@ -146,7 +131,7 @@ export const triggerAIAnimation = (
     if (startPosition && endPosition && animationCard) {
       const duration = calculateAnimationDuration(startPosition, endPosition);
 
-      globalAnimationContext.startAnimation({
+      anim.startAnimation({
         card: animationCard,
         startPosition,
         endPosition,

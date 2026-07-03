@@ -7,6 +7,7 @@ import { useSkipBoGame } from '@/hooks/useSkipBoGame';
 
 const {
   activeAnimationsState,
+  calculateDrawsDuration,
   removeAnimation,
   send,
   startAnimation,
@@ -19,6 +20,7 @@ const {
   const activeAnimationsState = {
     current: [] as Array<Record<string, unknown>>,
   };
+  const calculateDrawsDuration = vi.fn(() => 0);
   const removeAnimation = vi.fn();
   const send = vi.fn();
   const startAnimation = vi.fn();
@@ -35,6 +37,7 @@ const {
 
   return {
     activeAnimationsState,
+    calculateDrawsDuration,
     removeAnimation,
     send,
     startAnimation,
@@ -56,22 +59,18 @@ vi.mock('@/contexts/useCardAnimation', () => ({
     removeAnimation,
     startAnimation,
     waitForAnimations,
+    // The hook animates exclusively through the injected driver; the hoisted
+    // mocks keep their historical names so assertions read the same.
+    driver: {
+      startAnimation,
+      removeAnimation,
+      waitForAnimations,
+      animateMove: vi.fn(() => 0),
+      animateDraws: triggerMultipleDrawAnimations,
+      calculateDrawsDuration,
+      animateCompletion: triggerCompletedBuildPileAnimation,
+    },
   }),
-}));
-
-vi.mock('@/services/aiAnimationService', () => ({
-  setGlobalAnimationContext: vi.fn(),
-}));
-
-vi.mock('@/services/drawAnimationService', () => ({
-  calculateMultipleDrawAnimationDuration: vi.fn(() => 0),
-  setGlobalDrawAnimationContext: vi.fn(),
-  triggerMultipleDrawAnimations,
-}));
-
-vi.mock('@/services/completedBuildPileAnimationService', () => ({
-  setGlobalCompletedPileAnimationContext: vi.fn(),
-  triggerCompletedBuildPileAnimation,
 }));
 
 const card = (value: number, isSkipBo = false): Card => ({ value, isSkipBo });

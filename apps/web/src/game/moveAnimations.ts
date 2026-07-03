@@ -1,7 +1,6 @@
 import type { Card, GameState } from '@skipbo/game-core';
 
-import type { CardAnimationData } from '@/contexts/CardAnimationContext';
-import { triggerCompletedBuildPileAnimation } from '@/services/completedBuildPileAnimationService';
+import type { AnimationDriver } from '@/services/animationDriver';
 import { consumeDragCommitOverride } from '@/services/dragCommitOverride';
 import {
   calculateAnimationDuration,
@@ -13,7 +12,7 @@ import {
   getStockCardPosition,
 } from '@/utils/cardPositions';
 
-type StartAnimation = (animationData: Omit<CardAnimationData, 'id'>) => string;
+type MoveAnimationDriver = Pick<AnimationDriver, 'startAnimation' | 'animateCompletion'>;
 
 export interface PlayCardAnimationDurations {
   /** Duration of the card's flight to the build pile. */
@@ -40,7 +39,7 @@ export function startPlayCardAnimation(
   currentState: GameState,
   buildPile: number,
   completedBuildPileCards: Card[] | null,
-  startAnimation: StartAnimation,
+  driver: MoveAnimationDriver,
 ): PlayCardAnimationDurations {
   const selectedCard = currentState.selectedCard;
   if (!selectedCard) {
@@ -102,7 +101,7 @@ export function startPlayCardAnimation(
         // backdrop instead of painting the final card on the pile early.
         const previousBuildPileLength = currentState.buildPiles[buildPile].length;
         const settledBuildPileLength = completedBuildPileCards ? 0 : previousBuildPileLength + 1;
-        startAnimation({
+        driver.startAnimation({
           card: selectedCard.card,
           startPosition,
           endPosition,
@@ -136,7 +135,7 @@ export function startPlayCardAnimation(
   let completionAnimationDuration = 0;
   if (completedBuildPileCards) {
     try {
-      completionAnimationDuration = triggerCompletedBuildPileAnimation(
+      completionAnimationDuration = driver.animateCompletion(
         currentState,
         buildPile,
         completedBuildPileCards,
@@ -161,7 +160,7 @@ export function startPlayCardAnimation(
 export function startDiscardCardAnimation(
   currentState: GameState,
   discardPile: number,
-  startAnimation: StartAnimation,
+  driver: MoveAnimationDriver,
 ): number {
   const selectedCard = currentState.selectedCard;
   if (!selectedCard) {
@@ -189,7 +188,7 @@ export function startDiscardCardAnimation(
           // this the card would teleport to the pile and then re-animate.
           const previousDiscardPileLength =
             currentState.players[currentState.currentPlayerIndex].discardPiles[discardPile].length;
-          startAnimation({
+          driver.startAnimation({
             card: selectedCard.card,
             startPosition,
             endPosition,

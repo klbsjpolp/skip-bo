@@ -3,6 +3,7 @@ import { useCallback, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import type { Card } from '@skipbo/game-core';
 import { CardAnimationContext } from './useCardAnimation';
+import { useAnimationDriver, type AnimationDriver } from '@/services/animationDriver';
 
 export interface CardAnimationData {
   id: string;
@@ -51,6 +52,8 @@ export interface AnimationContextType {
     discardPileIndex?: number,
   ) => boolean;
   waitForAnimations: () => Promise<void>;
+  /** Explicit handle for everything that animates; see AnimationDriver. */
+  driver: AnimationDriver;
 }
 
 interface CardAnimationProviderProps {
@@ -138,6 +141,8 @@ export const CardAnimationProvider: FC<CardAnimationProviderProps> = ({ children
     [activeAnimations],
   );
 
+  const driver = useAnimationDriver(startAnimation, removeAnimation, waitForAnimations);
+
   const value: AnimationContextType = {
     activeAnimations,
     startAnimation,
@@ -145,6 +150,7 @@ export const CardAnimationProvider: FC<CardAnimationProviderProps> = ({ children
     markAnimationStarted,
     isCardBeingAnimated,
     waitForAnimations,
+    driver,
   };
 
   return <CardAnimationContext.Provider value={value}>{children}</CardAnimationContext.Provider>;

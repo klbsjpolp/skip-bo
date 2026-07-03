@@ -6,21 +6,20 @@ import type { CardAnimationData } from '@/contexts/CardAnimationContext';
 import { startDiscardCardAnimation, startPlayCardAnimation } from '@/game/moveAnimations';
 import type { CardPosition } from '@/utils/cardPositions';
 
-vi.mock('@/services/completedBuildPileAnimationService', () => ({
-  triggerCompletedBuildPileAnimation: vi.fn(),
-}));
 vi.mock('@/services/dragCommitOverride', () => ({
   consumeDragCommitOverride: vi.fn((): { startPosition: CardPosition } | null => null),
 }));
 
-import { triggerCompletedBuildPileAnimation } from '@/services/completedBuildPileAnimationService';
 import { consumeDragCommitOverride } from '@/services/dragCommitOverride';
 
 const card = (value: number, isSkipBo = false): Card => ({ value, isSkipBo });
 
-const makeStartAnimation = () => vi.fn<(data: Omit<CardAnimationData, 'id'>) => string>(() => 'id');
+const makeDriver = () => ({
+  startAnimation: vi.fn<(data: Omit<CardAnimationData, 'id'>) => string>(() => 'id'),
+  animateCompletion: vi.fn(() => 0),
+});
 
-const firstAnimationArg = (mock: ReturnType<typeof makeStartAnimation>): Omit<CardAnimationData, 'id'> => {
+const firstAnimationArg = (mock: ReturnType<typeof makeDriver>['startAnimation']): Omit<CardAnimationData, 'id'> => {
   const animation = mock.mock.calls[0]?.[0];
   expect(animation).toBeDefined();
   return animation!;
@@ -129,33 +128,33 @@ afterEach(() => {
 
 describe('startPlayCardAnimation', () => {
   it('returns 0 and fires nothing when no card is selected', () => {
-    const startAnimation = makeStartAnimation();
+    const driver = makeDriver();
     const state = baseState('hand');
     state.selectedCard = null;
 
-    expect(startPlayCardAnimation(state, 0, null, startAnimation)).toEqual({
+    expect(startPlayCardAnimation(state, 0, null, driver)).toEqual({
       playAnimationDuration: 0,
       completionAnimationDuration: 0,
     });
-    expect(startAnimation).not.toHaveBeenCalled();
+    expect(driver.startAnimation).not.toHaveBeenCalled();
   });
 
   it('returns 0 and fires nothing when the board is not in the DOM', () => {
-    const startAnimation = makeStartAnimation();
+    const driver = makeDriver();
 
-    expect(startPlayCardAnimation(baseState('hand'), 0, null, startAnimation).playAnimationDuration).toBe(0);
-    expect(startAnimation).not.toHaveBeenCalled();
+    expect(startPlayCardAnimation(baseState('hand'), 0, null, driver).playAnimationDuration).toBe(0);
+    expect(driver.startAnimation).not.toHaveBeenCalled();
   });
 
   it('fires a hand-source play animation from the rendered card position', () => {
     mountAnimationDom();
-    const startAnimation = makeStartAnimation();
+    const driver = makeDriver();
 
-    const { playAnimationDuration } = startPlayCardAnimation(baseState('hand'), 0, null, startAnimation);
+    const { playAnimationDuration } = startPlayCardAnimation(baseState('hand'), 0, null, driver);
 
     expect(playAnimationDuration).toBeGreaterThan(0);
-    expect(startAnimation).toHaveBeenCalledTimes(1);
-    const animation = firstAnimationArg(startAnimation);
+    expect(driver.startAnimation).toHaveBeenCalledTimes(1);
+    const animation = firstAnimationArg(driver.startAnimation);
     expect(animation.animationType).toBe('play');
     expect(animation.startAngleDeg).toBeDefined();
     expect(animation.startPosition).toBeDefined();
@@ -164,60 +163,61 @@ describe('startPlayCardAnimation', () => {
 
   it('fires a stock-source play animation', () => {
     mountAnimationDom();
-    const startAnimation = makeStartAnimation();
+    const driver = makeDriver();
 
-    startPlayCardAnimation(baseState('stock'), 0, null, startAnimation);
+    startPlayCardAnimation(baseState('stock'), 0, null, driver);
 
-    expect(startAnimation).toHaveBeenCalledTimes(1);
-    expect(firstAnimationArg(startAnimation).sourceInfo.source).toBe('stock');
+    expect(driver.startAnimation).toHaveBeenCalledTimes(1);
+    expect(firstAnimationArg(driver.startAnimation).sourceInfo.source).toBe('stock');
   });
 
   it('fires a discard-source play animation', () => {
     mountAnimationDom();
-    const startAnimation = makeStartAnimation();
+    const driver = makeDriver();
 
-    startPlayCardAnimation(baseState('discard', 0), 0, null, startAnimation);
+    startPlayCardAnimation(baseState('discard', 0), 0, null, driver);
 
-    expect(startAnimation).toHaveBeenCalledTimes(1);
-    expect(firstAnimationArg(startAnimation).sourceInfo.source).toBe('discard');
+    expect(driver.startAnimation).toHaveBeenCalledTimes(1);
+    expect(firstAnimationArg(driver.startAnimation).sourceInfo.source).toBe('discard');
   });
 
   it('honors a drag-commit override and drops the start angle', () => {
     mountAnimationDom();
     vi.mocked(consumeDragCommitOverride).mockReturnValue({ startPosition: { x: 11, y: 22 } });
-    const startAnimation = makeStartAnimation();
+    const driver = makeDriver();
 
-    startPlayCardAnimation(baseState('hand'), 0, null, startAnimation);
+    startPlayCardAnimation(baseState('hand'), 0, null, driver);
 
-    const animation = firstAnimationArg(startAnimation);
+    const animation = firstAnimationArg(driver.startAnimation);
     expect(animation.startPosition).toEqual({ x: 11, y: 22 });
     expect(animation.startAngleDeg).toBeUndefined();
   });
 
   it('continues with game logic when the play animation itself throws', () => {
     mountAnimationDom();
-    const startAnimation = vi.fn<(data: Omit<CardAnimationData, 'id'>) => string>(() => {
+    const driver = makeDriver();
+    driver.startAnimation.mockImplementation(() => {
       throw new Error('boom');
     });
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    expect(() => startPlayCardAnimation(baseState('hand'), 0, null, startAnimation)).not.toThrow();
+    expect(() => startPlayCardAnimation(baseState('hand'), 0, null, driver)).not.toThrow();
     expect(warn).toHaveBeenCalledWith('Play animation failed, continuing with game logic:', expect.any(Error));
   });
 
   it('continues with game logic when the completion animation throws', () => {
     mountAnimationDom();
-    vi.mocked(triggerCompletedBuildPileAnimation).mockImplementationOnce(() => {
+    const driver = makeDriver();
+    driver.animateCompletion.mockImplementationOnce(() => {
       throw new Error('boom');
     });
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const startAnimation = makeStartAnimation();
 
     const { completionAnimationDuration } = startPlayCardAnimation(
       baseState('hand'),
       0,
       [card(1), card(2), card(3)],
-      startAnimation,
+      driver,
     );
 
     expect(completionAnimationDuration).toBe(0);
@@ -229,42 +229,42 @@ describe('startPlayCardAnimation', () => {
 
   it('reports a settled pile length of 0 and fires completion when the play completes a pile', () => {
     mountAnimationDom();
-    const startAnimation = makeStartAnimation();
+    const driver = makeDriver();
     const completed: Card[] = [card(1), card(2), card(3)];
 
-    startPlayCardAnimation(baseState('hand'), 0, completed, startAnimation);
+    startPlayCardAnimation(baseState('hand'), 0, completed, driver);
 
-    expect(firstAnimationArg(startAnimation).targetPileLength).toBe(0);
-    expect(triggerCompletedBuildPileAnimation).toHaveBeenCalledTimes(1);
+    expect(firstAnimationArg(driver.startAnimation).targetPileLength).toBe(0);
+    expect(driver.animateCompletion).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('startDiscardCardAnimation', () => {
   it('returns 0 and fires nothing when no card is selected', () => {
-    const startAnimation = makeStartAnimation();
+    const driver = makeDriver();
     const state = baseState('hand');
     state.selectedCard = null;
 
-    expect(startDiscardCardAnimation(state, 1, startAnimation)).toBe(0);
-    expect(startAnimation).not.toHaveBeenCalled();
+    expect(startDiscardCardAnimation(state, 1, driver)).toBe(0);
+    expect(driver.startAnimation).not.toHaveBeenCalled();
   });
 
   it('returns 0 when the board is not in the DOM', () => {
-    const startAnimation = makeStartAnimation();
+    const driver = makeDriver();
 
-    expect(startDiscardCardAnimation(baseState('hand'), 1, startAnimation)).toBe(0);
-    expect(startAnimation).not.toHaveBeenCalled();
+    expect(startDiscardCardAnimation(baseState('hand'), 1, driver)).toBe(0);
+    expect(driver.startAnimation).not.toHaveBeenCalled();
   });
 
   it('fires a discard animation and returns its duration', () => {
     mountAnimationDom();
-    const startAnimation = makeStartAnimation();
+    const driver = makeDriver();
 
-    const duration = startDiscardCardAnimation(baseState('hand'), 1, startAnimation);
+    const duration = startDiscardCardAnimation(baseState('hand'), 1, driver);
 
     expect(duration).toBeGreaterThan(0);
-    expect(startAnimation).toHaveBeenCalledTimes(1);
-    const animation = firstAnimationArg(startAnimation);
+    expect(driver.startAnimation).toHaveBeenCalledTimes(1);
+    const animation = firstAnimationArg(driver.startAnimation);
     expect(animation.animationType).toBe('discard');
     expect(animation.startAngleDeg).toBeDefined();
     expect(animation.targetInfo?.index).toBe(1);
@@ -273,23 +273,24 @@ describe('startDiscardCardAnimation', () => {
   it('honors a drag-commit override and drops the start angle', () => {
     mountAnimationDom();
     vi.mocked(consumeDragCommitOverride).mockReturnValue({ startPosition: { x: 7, y: 8 } });
-    const startAnimation = makeStartAnimation();
+    const driver = makeDriver();
 
-    startDiscardCardAnimation(baseState('hand'), 1, startAnimation);
+    startDiscardCardAnimation(baseState('hand'), 1, driver);
 
-    const animation = firstAnimationArg(startAnimation);
+    const animation = firstAnimationArg(driver.startAnimation);
     expect(animation.startPosition).toEqual({ x: 7, y: 8 });
     expect(animation.startAngleDeg).toBeUndefined();
   });
 
   it('continues with game logic when the discard animation throws', () => {
     mountAnimationDom();
-    const startAnimation = vi.fn<(data: Omit<CardAnimationData, 'id'>) => string>(() => {
+    const driver = makeDriver();
+    driver.startAnimation.mockImplementation(() => {
       throw new Error('boom');
     });
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    expect(() => startDiscardCardAnimation(baseState('hand'), 1, startAnimation)).not.toThrow();
+    expect(() => startDiscardCardAnimation(baseState('hand'), 1, driver)).not.toThrow();
     expect(warn).toHaveBeenCalledWith('Discard animation failed, continuing with game logic:', expect.any(Error));
   });
 });

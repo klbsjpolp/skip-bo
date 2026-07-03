@@ -7,16 +7,7 @@ import {
 } from '@/utils/cardPositions';
 import type { CardAnimationData } from '@/contexts/CardAnimationContext.tsx';
 
-// Global reference to the animation context
-let globalAnimationContext: {
-  startAnimation: (animationData: Omit<CardAnimationData, 'id'>) => string;
-  removeAnimation: (id: string) => void;
-} | null = null;
-
-// Function to set the global animation context (called from React component)
-export const setGlobalDrawAnimationContext = (context: typeof globalAnimationContext) => {
-  globalAnimationContext = context;
-};
+type DrawAnimationPrimitives = { startAnimation: (animationData: Omit<CardAnimationData, 'id'>) => string };
 
 const getDrawAnimationMetrics = (
   playerIndex: number,
@@ -63,23 +54,19 @@ const getDrawAnimationMetrics = (
 };
 
 const triggerDrawAnimation = (
+  anim: DrawAnimationPrimitives,
   playerIndex: number,
   card: Card,
   handIndex: number,
   initialDelay: number = 0,
 ): { duration: number; animationId: string } => {
-  if (!globalAnimationContext) {
-    console.warn('Animation context not available for draw action');
-    return { duration: 0, animationId: '' };
-  }
-
   const metrics = getDrawAnimationMetrics(playerIndex, handIndex);
   if (!metrics) {
     return { duration: 0, animationId: '' };
   }
 
   try {
-    const animationId = globalAnimationContext.startAnimation({
+    const animationId = anim.startAnimation({
       card,
       startPosition: metrics.startPosition,
       endPosition: metrics.endPosition,
@@ -122,6 +109,7 @@ export const calculateMultipleDrawAnimationDuration = (
 
 // Function to trigger multiple draw animations with staggered start times (no cumulative delays)
 export const triggerMultipleDrawAnimations = async (
+  anim: DrawAnimationPrimitives,
   playerIndex: number,
   cards: Card[],
   handIndices: number[],
@@ -139,7 +127,7 @@ export const triggerMultipleDrawAnimations = async (
 
   const animationResults = cards.map((card, index) => {
     const initialDelay = baseDelay + index * staggerDelay;
-    return triggerDrawAnimation(playerIndex, card, handIndices[index], initialDelay);
+    return triggerDrawAnimation(anim, playerIndex, card, handIndices[index], initialDelay);
   });
 
   try {

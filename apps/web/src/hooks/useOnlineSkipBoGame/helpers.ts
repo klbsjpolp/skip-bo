@@ -8,7 +8,7 @@ import {
 } from '@skipbo/game-core';
 import { type ClientGameView, serializeClientGameView } from '@skipbo/skipbo-runtime';
 
-import { calculateMultipleDrawAnimationDuration, triggerMultipleDrawAnimations } from '@/services/drawAnimationService';
+import type { AnimationDriver } from '@/services/animationDriver';
 
 export interface DrawTransition {
   cards: Card[];
@@ -207,26 +207,30 @@ export const inferOpponentTransition = (previousState: GameState, nextState: Gam
   };
 };
 
-export const scheduleDrawAnimations = (drawTransitions: DrawTransition[], baseDelay: number = 0): void => {
+export const scheduleDrawAnimations = (
+  driver: Pick<AnimationDriver, 'animateDraws'>,
+  drawTransitions: DrawTransition[],
+  baseDelay: number = 0,
+): void => {
   drawTransitions.forEach((drawTransition) => {
-    void triggerMultipleDrawAnimations(
-      drawTransition.playerIndex,
-      drawTransition.cards,
-      drawTransition.handIndices,
-      500,
-      baseDelay,
-    ).catch((error) => {
-      console.warn('Draw animation failed during online transition:', error);
-    });
+    void driver
+      .animateDraws(drawTransition.playerIndex, drawTransition.cards, drawTransition.handIndices, 500, baseDelay)
+      .catch((error) => {
+        console.warn('Draw animation failed during online transition:', error);
+      });
   });
 };
 
-export const getMaxDrawAnimationDuration = (drawTransitions: DrawTransition[], baseDelay: number = 0): number =>
+export const getMaxDrawAnimationDuration = (
+  driver: Pick<AnimationDriver, 'calculateDrawsDuration'>,
+  drawTransitions: DrawTransition[],
+  baseDelay: number = 0,
+): number =>
   drawTransitions.reduce(
     (maxDuration, drawTransition) =>
       Math.max(
         maxDuration,
-        calculateMultipleDrawAnimationDuration(drawTransition.playerIndex, drawTransition.handIndices, 500, baseDelay),
+        driver.calculateDrawsDuration(drawTransition.playerIndex, drawTransition.handIndices, 500, baseDelay),
       ),
     0,
   );
