@@ -167,4 +167,19 @@
         cover;
     }
   }
+
+  /* Paper's cream card front (#fbf6e7 ≈ rgb(251,246,231)) sits only a few
+     points shy of white on every channel. The shared brighten filters in
+     styles/animations.css (up to brightness(1.1)) clip all three channels to
+     255 mid-flight, so a played/dragged/drawn card flashes solid white
+     instead of a subtle highlight. Scale the boost down to what this card
+     front can take before clipping. */
+  .animation-play,
+  .animation-draw {
+    filter: brightness(1.02);
+  }
+
+  .animation-complete {
+    filter: brightness(1.02) saturate(1.02);
+  }
 }
