@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.12.9](https://github.com/klbsjpolp/skip-bo/compare/v2.12.8...v2.12.9) (2026-07-05)
+
+
+### Bug Fixes
+
+* **web:** tone down paper theme's card-move brighten filter ([3efaa5e](https://github.com/klbsjpolp/skip-bo/commit/3efaa5efa44dfea15e3aa8e92cc311a4deec6cd5)), closes [#fbf6e7](https://github.com/klbsjpolp/skip-bo/issues/fbf6e7)
+
 ## [2.12.8](https://github.com/klbsjpolp/skip-bo/compare/v2.12.7...v2.12.8) (2026-07-03)
 
 
