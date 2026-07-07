@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
+import { SoundToggle } from '@/components/SoundToggle';
 import { Button } from '@/components/ui/button';
 import { GameStatsDialog } from '@/components/GameStatsDialog';
 import NewGame from '@/components/NewGame';
@@ -70,7 +71,10 @@ export function AppShell({
             />
             {statusStrip}
           </div>
-          <ThemeSwitcher />
+          <div className="flex items-center gap-2">
+            <SoundToggle />
+            <ThemeSwitcher />
+          </div>
         </div>
         {updateNotice ? <div className="mb-3">{updateNotice}</div> : null}
         {gameBoard}
