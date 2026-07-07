@@ -53,6 +53,22 @@ index) until the first real `view` is ingested, while `roomStatus` may already b
 `ACTIVE`/`FINISHED` via presence. Any consumer reading `gameState.players` (stats,
 summaries) must gate on the returned `hasGameView` flag, not on `roomStatus` alone.
 
+### Testing multiplayer without the real backend
+
+`tests/mock-relay/mockRelayServer.ts` is an in-process, protocol-v2-faithful fake
+of the relay server (HTTP room create/join + WebSocket lobby/relay; it validates
+inbound messages with `@klbsjpolp/realtime-core`'s zod schemas and never inspects
+payloads). Deterministic on purpose: sequential room codes, and `startGame` keeps
+seat order unless `shuffleSeats: true` — so tests know the host plays first.
+
+- **Automated:** `tests/ui/online-multiplayer.spec.ts` starts the mock relay and
+  drives two browser contexts (host + guest) through lobby → moves in both
+  directions → redaction check → end of game.
+  `pnpm --filter @skipbo/web exec playwright test tests/ui/online-multiplayer.spec.ts --project=chromium-desktop`
+- **Manual:** `pnpm --filter @skipbo/web mock:relay` (port 8787, honours
+  `MOCK_RELAY_PORT`), then `VITE_SKIPBO_API_URL=http://127.0.0.1:8787 pnpm dev`
+  and open two tabs.
+
 ## AI
 
 Entry point: `src/ai/computeBestMove.ts`  

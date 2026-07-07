@@ -31,6 +31,13 @@ server from the [`realtime-infra`](https://github.com/klbsjpolp/realtime-infra) 
 (`pnpm dev:api`, serves http://127.0.0.1:8787). Point the web app at it by setting
 `VITE_SKIPBO_API_URL=http://127.0.0.1:8787`.
 
+Without the realtime-infra repo, use the in-repo **mock relay** instead
+(`apps/web/tests/mock-relay/`, protocol-v2-faithful, in-memory):
+`pnpm --filter @skipbo/web mock:relay` then
+`VITE_SKIPBO_API_URL=http://127.0.0.1:8787 pnpm dev` and open two tabs.
+The automated two-browser multiplayer E2E test
+(`apps/web/tests/ui/online-multiplayer.spec.ts`) runs against the same mock.
+
 See each app/package CLAUDE.md for scoped test commands.
 
 ## Debug Buttons
