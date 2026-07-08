@@ -271,6 +271,21 @@ describe('usePwaVersionGate', () => {
     });
   });
 
+  it('forwards the force option so explicit user presses can escape a stuck worker', async () => {
+    const { result } = renderHook(() => usePwaVersionGate());
+
+    await waitFor(() => {
+      expect(fetchRuntimeConfigMock).toHaveBeenCalledTimes(1);
+    });
+
+    applyServiceWorkerUpdateMock.mockResolvedValueOnce(true);
+    await act(async () => {
+      await expect(result.current.reloadToUpdate({ forceReloadIfNotStaged: true })).resolves.toBe(true);
+    });
+
+    expect(applyServiceWorkerUpdateMock).toHaveBeenCalledWith(undefined, { forceReloadIfNotStaged: true });
+  });
+
   it('resolves false for a reload requested while another apply is in flight', async () => {
     let resolveApply: ((committed: boolean) => void) | undefined;
     applyServiceWorkerUpdateMock.mockImplementation(
