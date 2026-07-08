@@ -285,9 +285,13 @@ function LiveApp() {
   const hasUpdateNotice = showResumeBanner || showUpdatedBanner;
 
   // Fire-and-forget form for void-returning UI callbacks; the start handlers
-  // above await the promise instead to know whether to abort.
+  // above await the promise instead to know whether to abort. Explicit user
+  // presses (the update button, the forced-update overlay) escalate a no-op
+  // apply to a network force-refresh — without it, a client whose service
+  // worker never stages the advertised build (seen on iOS standalone PWAs)
+  // presses the button, the label flashes, and nothing else ever happens.
   const updateNow = () => {
-    void reloadToUpdate();
+    void reloadToUpdate({ forceReloadIfNotStaged: true });
   };
 
   const screen =
