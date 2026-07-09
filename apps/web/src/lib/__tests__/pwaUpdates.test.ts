@@ -323,6 +323,11 @@ describe('pwaUpdates', () => {
     });
 
     it('force-reloads even when the service worker never registered', async () => {
+      // Also drop serviceWorker/CacheStorage support entirely — the cleanup must
+      // tolerate their absence, not just empty results.
+      Reflect.deleteProperty(window.navigator, 'serviceWorker');
+      vi.unstubAllGlobals();
+
       const { initializePwaUpdates, applyServiceWorkerUpdate } = await loadPwaUpdates();
       initializePwaUpdates();
 
@@ -330,6 +335,33 @@ describe('pwaUpdates', () => {
       const applied = await applyServiceWorkerUpdate(undefined, { forceReloadIfNotStaged: true });
 
       expect(applied).toBe(true);
+      expect(reloadMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns false with no registration when force is not requested', async () => {
+      const { initializePwaUpdates, applyServiceWorkerUpdate } = await loadPwaUpdates();
+      initializePwaUpdates();
+
+      const applied = await applyServiceWorkerUpdate();
+
+      expect(applied).toBe(false);
+      expect(reloadMock).not.toHaveBeenCalled();
+    });
+
+    it('still reloads when unregistering or cache cleanup fails', async () => {
+      Object.defineProperty(window.navigator, 'serviceWorker', {
+        configurable: true,
+        value: { getRegistrations: vi.fn().mockRejectedValue(new Error('sw registry unavailable')) },
+      });
+      cacheKeysMock.mockRejectedValueOnce(new Error('cache storage unavailable'));
+
+      const { initializePwaUpdates, applyServiceWorkerUpdate } = await loadPwaUpdates();
+      initializePwaUpdates();
+
+      const applied = await applyServiceWorkerUpdate(undefined, { forceReloadIfNotStaged: true });
+
+      expect(applied).toBe(true);
+      expect(sentryCaptureException).toHaveBeenCalledTimes(2);
       expect(reloadMock).toHaveBeenCalledTimes(1);
     });
 
