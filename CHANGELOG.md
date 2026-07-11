@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.12.17](https://github.com/klbsjpolp/skip-bo/compare/v2.12.16...v2.12.17) (2026-07-11)
+
+
+### Bug Fixes
+
+* **web:** adjust spacing in layout components for improved UI consistency ([95ebd30](https://github.com/klbsjpolp/skip-bo/commit/95ebd30b6705c86abcba38b9a809391faffb3d07))
+
 ## [2.12.16](https://github.com/klbsjpolp/skip-bo/compare/v2.12.15...v2.12.16) (2026-07-11)
 
 
