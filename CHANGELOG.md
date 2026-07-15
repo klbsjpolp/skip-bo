@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.12.17](https://github.com/klbsjpolp/skip-bo/compare/v2.12.16...v2.12.17) (2026-07-11)
+
+
+### Bug Fixes
+
+* **web:** adjust spacing in layout components for improved UI consistency ([95ebd30](https://github.com/klbsjpolp/skip-bo/commit/95ebd30b6705c86abcba38b9a809391faffb3d07))
+
+## [2.12.16](https://github.com/klbsjpolp/skip-bo/compare/v2.12.15...v2.12.16) (2026-07-11)
+
+
+### Bug Fixes
+
+* **deps:** dedupe lockfile to drop vulnerable js-yaml 4.1.1 ([2feb87c](https://github.com/klbsjpolp/skip-bo/commit/2feb87cee6c79d45b37500d768b65d0f52e41796))
+
 ## [2.12.15](https://github.com/klbsjpolp/skip-bo/compare/v2.12.14...v2.12.15) (2026-07-10)
 
 ## [2.12.14](https://github.com/klbsjpolp/skip-bo/compare/v2.12.13...v2.12.14) (2026-07-09)

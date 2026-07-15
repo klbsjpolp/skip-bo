@@ -61,7 +61,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
   return (
     <div className="center-area" data-testid="center-area">
       <div className="bg-layer" />
-      <div className="content-layer flex items-center gap-2 lg:gap-4 h-full flex-wrap">
+      <div className="content-layer flex items-center gap-1 lg:gap-4 h-full flex-wrap">
         <div className="flex items-center gap-2 lg:gap-4" data-testid="center-deck-section">
           <h2 className="min-w-fit vertical-text" data-testid="center-deck-title">
             Pioche ({gameState.deck.length})
