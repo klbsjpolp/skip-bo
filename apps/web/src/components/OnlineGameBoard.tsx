@@ -43,11 +43,7 @@ function RemoteSeat({
       <div className="bg-layer" />
       {isWinner && <VictoryEffects />}
       <div className="content-layer flex h-full flex-wrap items-start gap-2 lg:gap-4">
-        {player.name ? (
-          <div className="vertical-text self-center border-l border-primary">
-            {player.name}
-          </div>
-        ) : null}
+        {player.name ? <div className="vertical-text self-center border-l border-primary">{player.name}</div> : null}
 
         <StockPile
           player={player}
