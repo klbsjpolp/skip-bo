@@ -42,14 +42,11 @@ function RemoteSeat({
     >
       <div className="bg-layer" />
       {isWinner && <VictoryEffects />}
-      <div
-        className={cn(
-          'content-layer flex h-full flex-wrap items-center gap-2 lg:gap-4',
-          'xl:grid xl:grid-cols-[auto_auto_auto_1fr] xl:items-start xl:gap-x-4 xl:gap-y-3',
-        )}
-      >
+      <div className="content-layer flex h-full flex-wrap items-start gap-2 lg:gap-4">
         {player.name ? (
-          <div className="vertical-text self-center border-l border-primary xl:row-span-2">{player.name}</div>
+          <div className="vertical-text self-center border-l border-primary">
+            {player.name}
+          </div>
         ) : null}
 
         <StockPile
@@ -123,9 +120,7 @@ export function OnlineGameBoard({
   return (
     <div className={cn('game-board max-w-7xl mx-auto', winner && 'game-board-victory')} data-testid="game-board">
       {remotePlayers.length > 0 ? (
-        <div
-          className={cn('mb-4 grid gap-3', remotePlayers.length === 1 ? 'grid-cols-1' : 'grid-cols-1 xl:grid-cols-2')}
-        >
+        <div className="mb-4 grid gap-3 grid-cols-1">
           {remotePlayers.map((player, remotePlayerOffset) => {
             const playerIndex = remotePlayerOffset + 1;
 
