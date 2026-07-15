@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.12.18](https://github.com/klbsjpolp/skip-bo/compare/v2.12.17...v2.12.18) (2026-07-15)
+
+
+### Bug Fixes
+
+* **web:** refine selected shadow effect in candy.css for improved visibility ([b62c5e1](https://github.com/klbsjpolp/skip-bo/commit/b62c5e126bb41e3ce6ddcb88bab356cb4ea8e922))
+* **web:** simplify layout structure in OnlineGameBoard for improved readability ([2e10c01](https://github.com/klbsjpolp/skip-bo/commit/2e10c017626db1f35317ad3ebce0660d7c708127))
+* **web:** streamline player name display in OnlineGameBoard for cleaner layout ([68c7670](https://github.com/klbsjpolp/skip-bo/commit/68c767014011c73fab5e1ee61e94ac0db9dea4d5))
+
 ## [2.12.17](https://github.com/klbsjpolp/skip-bo/compare/v2.12.16...v2.12.17) (2026-07-11)
 
 
