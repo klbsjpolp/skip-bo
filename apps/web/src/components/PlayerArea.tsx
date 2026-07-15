@@ -42,7 +42,7 @@ export function PlayerArea({
     >
       <div className="bg-layer" />
       {isWinner && <VictoryEffects />}
-      <div className="content-layer flex items-center gap-2 lg:gap-4 h-full flex-wrap">
+      <div className="content-layer flex items-center gap-1 lg:gap-4 h-full flex-wrap">
         {player.name && <h2 className="vertical-text border-l border-primary">{player.name}</h2>}
         <StockPile
           player={player}

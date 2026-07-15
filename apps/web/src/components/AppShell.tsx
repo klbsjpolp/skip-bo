@@ -53,15 +53,12 @@ export function AppShell({
   return (
     <main
       id="main"
-      className="min-h-screen px-4 pb-4 pt-1 lg:px-10 lg:pb-10 lg:pt-2"
+      className="min-h-svh px-4 pb-4 pt-1 lg:px-10 lg:pb-10 lg:pt-2"
       data-testid="app-main"
       data-ui-fixture={fixtureName}
     >
       <div className="mx-auto max-w-7xl">
-        <div
-          className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
-          data-testid="app-toolbar"
-        >
+        <div className="mb-3 flex gap-2 flex-row items-start justify-between" data-testid="app-toolbar">
           <div className="flex flex-row gap-2 items-center" data-testid="app-toolbar-left">
             <NewGame
               onJoinOnlineGame={onJoinOnlineGame}
