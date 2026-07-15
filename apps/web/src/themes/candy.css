@@ -28,7 +28,7 @@
   --card-back-color: #ff8cb2;
   --card-back-color-2: #85dfc1;
   --selected-border-color: #ff6f9f;
-  --selected-shadow: 0 0 0 3px rgb(255 255 255 / 0.7), 0 0 24px rgb(255 111 159 / 0.45);
+  --selected-shadow: 0 0 24px rgb(255 111 159 / 0.45);
   --can-drop-shadow: 0 12px 30px rgb(255 111 159 / 0.25);
   --active-turn-color: #73e1bd;
   --drop-indicator-color: #ff5c92;
