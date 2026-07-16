@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.12.21](https://github.com/klbsjpolp/skip-bo/compare/v2.12.20...v2.12.21) (2026-07-16)
+
+
+### Bug Fixes
+
+* pin typescript to ^6.0.3, typescript-eslint 8.64.0 breaks on TS7 ([57814b7](https://github.com/klbsjpolp/skip-bo/commit/57814b74da7c8156d5a34eddd75c4caee576e748))
+
 ## [2.12.20](https://github.com/klbsjpolp/skip-bo/compare/v2.12.19...v2.12.20) (2026-07-16)
 
 
