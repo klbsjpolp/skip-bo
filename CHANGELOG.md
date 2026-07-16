@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.12.20](https://github.com/klbsjpolp/skip-bo/compare/v2.12.19...v2.12.20) (2026-07-16)
+
+
+### Bug Fixes
+
+* **web:** use straight apostrophe in online-multiplayer e2e test ([4f9e9a0](https://github.com/klbsjpolp/skip-bo/commit/4f9e9a09ec2d5f242576ededbf86ab75a4aee38f))
+
 ## [2.12.19](https://github.com/klbsjpolp/skip-bo/compare/v2.12.18...v2.12.19) (2026-07-15)
 
 ## [2.12.18](https://github.com/klbsjpolp/skip-bo/compare/v2.12.17...v2.12.18) (2026-07-15)
