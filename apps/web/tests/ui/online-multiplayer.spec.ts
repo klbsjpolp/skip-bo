@@ -86,7 +86,7 @@ test.describe('Online multiplayer', () => {
       await hostPage.getByRole('button', { name: 'Démarrer la partie' }).click();
 
       // Seats are not shuffled by the mock relay: the host plays first.
-      await expect(hostPage.getByTestId('game-message')).toHaveText('C’est votre tour');
+      await expect(hostPage.getByTestId('game-message')).toHaveText("C'est votre tour");
       await expect(guestPage.getByTestId('game-message')).toHaveText(new RegExp(`Tour de ${HOST_NAME}`));
 
       // Redaction: the guest sees the host's five hand cards face down.
@@ -95,7 +95,7 @@ test.describe('Online multiplayer', () => {
       // --- Host plays a move (discard ends the turn) -----------------------
       const hostCardValue = await discardFirstHandCard(hostPage);
       await expect(hostPage.getByTestId('game-message')).toHaveText(new RegExp(`Tour de ${GUEST_NAME}`));
-      await expect(guestPage.getByTestId('game-message')).toHaveText('C’est votre tour');
+      await expect(guestPage.getByTestId('game-message')).toHaveText("C'est votre tour");
 
       // The host's discard pile is public: the guest sees the discarded card.
       await expect(
@@ -105,7 +105,7 @@ test.describe('Online multiplayer', () => {
       // --- Guest answers with a move of their own --------------------------
       const guestCardValue = await discardFirstHandCard(guestPage);
       await expect(guestPage.getByTestId('game-message')).toHaveText(new RegExp(`Tour de ${HOST_NAME}`));
-      await expect(hostPage.getByTestId('game-message')).toHaveText('C’est votre tour');
+      await expect(hostPage.getByTestId('game-message')).toHaveText("C'est votre tour");
       await expect(
         hostPage.locator('[data-testid="ai-player-area"] .discard-pile-stack[data-pile-index="0"] .card-number'),
       ).toHaveText(guestCardValue);
@@ -143,7 +143,7 @@ test.describe('Online multiplayer', () => {
       await readyUp(firstGuestPage, GUEST_NAME);
       await readyUp(hostPage, HOST_NAME);
       await hostPage.getByRole('button', { name: 'Démarrer la partie' }).click();
-      await expect(hostPage.getByTestId('game-message')).toHaveText('C’est votre tour');
+      await expect(hostPage.getByTestId('game-message')).toHaveText("C'est votre tour");
 
       // A latecomer is rejected because the room is no longer WAITING.
       await openApp(page);
