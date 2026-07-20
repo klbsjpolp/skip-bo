@@ -92,3 +92,12 @@ Before finishing, confirm all of the following:
 - You did not copy likely-to-drift details into a stable doc without re-verifying them.
 - You checked moved or renamed Markdown links after editing.
 - You left the repo in a state where another agent can find the current truth quickly.
+
+<!-- openwolf:begin -->
+
+# OpenWolf
+
+@.wolf/OPENWOLF.md
+
+This project uses OpenWolf for context management. Read and follow .wolf/OPENWOLF.md every session. Check .wolf/cerebrum.md before generating code. Check .wolf/anatomy.md before reading files.
+<!-- openwolf:end -->
