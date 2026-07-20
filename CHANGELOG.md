@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.12.23](https://github.com/klbsjpolp/skip-bo/compare/v2.12.22...v2.12.23) (2026-07-20)
+
+
+### Bug Fixes
+
+* **web:** fix animated card border and colour flash in rummy theme ([a21513e](https://github.com/klbsjpolp/skip-bo/commit/a21513e24c6adc79730198125059e48d9da1004a))
+
 ## [2.12.22](https://github.com/klbsjpolp/skip-bo/compare/v2.12.21...v2.12.22) (2026-07-19)
 
 ## [2.12.21](https://github.com/klbsjpolp/skip-bo/compare/v2.12.20...v2.12.21) (2026-07-16)
