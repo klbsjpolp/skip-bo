@@ -40,8 +40,18 @@
       @apply relative z-[11];
       /* Remove flexbox properties that conflict with absolute positioning */
       .card {
-        /* Left positioning is handled by inline styles from Card component */
-        @apply absolute top-0 transition-all duration-200 ease-in-out;
+        /* Left positioning is handled by inline styles from Card component.
+           Scope the transition to layout/hover-lift properties only —
+           `transition-all` also caught background-color/color/border-color,
+           so a draw animation's flip (which swaps isRevealed, and with it
+           the card's colour classes, via flushSync mid-flight) smoothly
+           cross-faded from white to the revealed colour over 200ms instead
+           of snapping, since draw animations portal into this hand-area and
+           inherit the rule. */
+        @apply absolute top-0;
+        transition-property: left, top, transform;
+        transition-duration: 200ms;
+        transition-timing-function: ease-in-out;
 
         &.selected {
           z-index: 101 !important;
