@@ -1,9 +1,9 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { createPortal, flushSync } from 'react-dom';
 import { Card } from '@/components/Card';
 import type { CardAnimationData } from '@/contexts/CardAnimationContext';
 import { useCardAnimation } from '@/contexts/useCardAnimation';
-import { cn } from '@/lib/utils';
 
 interface AnimatedCardProps {
   animation: CardAnimationData;
@@ -167,17 +167,46 @@ export const AnimatedCard: React.FC<AnimatedCardProps> = ({ animation }) => {
   const node = (
     <div
       ref={rootRef}
-      className={cn('animated-card', `animation-${animation.animationType}`)}
-      style={{
-        zIndex,
-      }}
+      className="animated-card"
+      style={
+        {
+          zIndex,
+          // `.card`'s own transform (rotate(var(--card-rotate))) is what makes it
+          // a containing block for `.card-inner`/`.card-inner-2` (its bordered
+          // face layers). Board containers (hand/piles) always set this var, but
+          // nothing does inside the animation layer, so it resolves to an
+          // invalid `inherit` and the whole transform computes to `none` —
+          // `.card` stops being a containing block and the face layers fall
+          // back to sizing against this wrapper instead, painting over `.card`'s
+          // border. Pin a concrete value so `.card` keeps its own transform.
+          '--card-rotate': '0deg',
+        } as CSSProperties
+      }
     >
       {needsFlip ? (
+        // `filter` (below, via the animation-* class) forces the browser to
+        // flatten and re-rasterize its whole subtree every frame — which
+        // glitches a `rotateY` 3D flip happening underneath it, flashing the
+        // card's own unstyled white background for a frame or two. Keep the
+        // filtered element (Card's root) *inside* flipRef, as a descendant of
+        // the rotation rather than an ancestor of it.
         <div ref={flipRef}>
-          <Card hint="AnimatedCard" card={animation.card} isRevealed={isRevealed} canBeGrabbed={false} />
+          <Card
+            hint="AnimatedCard"
+            card={animation.card}
+            isRevealed={isRevealed}
+            canBeGrabbed={false}
+            className={`animation-${animation.animationType}`}
+          />
         </div>
       ) : (
-        <Card hint="AnimatedCard" card={animation.card} isRevealed={animation.sourceRevealed} canBeGrabbed={false} />
+        <Card
+          hint="AnimatedCard"
+          card={animation.card}
+          isRevealed={animation.sourceRevealed}
+          canBeGrabbed={false}
+          className={`animation-${animation.animationType}`}
+        />
       )}
     </div>
   );
