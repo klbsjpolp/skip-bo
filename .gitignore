@@ -26,3 +26,11 @@ docs/runbooks/TOFU_BACKEND_CONFIG_HCL.hcl
 # Visual baselines generated on non-macOS machines (committed baselines are -darwin; CI runs macOS)
 apps/web/tests/ui/**/*-linux.png
 apps/web/tests/ui/**/*-win32.png
+
+# OpenWolf local tooling / state (not shared via git)
+.wolf/
+# OpenWolf-dependent agent config kept local (references .wolf/, per-dev install)
+/GEMINI.md
+.claude/rules/openwolf.md
+.codex/config.toml
+.codex/hooks.json
