@@ -247,6 +247,20 @@
       @apply z-11!;
     }
 
+    /* Always show the corner number on the top (front) numbered card too.
+       The base rule is `invisible lg:visible`, and card.css only bumps the
+       collapsed non-top cards to `visible`, so on mobile the front card was
+       the only one in the pile without a corner number. */
+    .card.normal-card:nth-last-child(1 of :not(.empty-card)) .card-corner-number {
+      @apply visible;
+    }
+
+    /* Once a discard pile holds cards, hide the build-pile "+" hint that
+       would otherwise show through the empty-card sitting behind them. */
+    &:has(.card.normal-card, .card.skip-bo) .empty-card::after {
+      @apply content-none;
+    }
+
     /* Collapse non-top NUMBERED cards down to just their corner number
        (card-corner-number is bumped to `visible` from card.css). Skip-Bo
        cards are intentionally excluded so their top sliver remains
