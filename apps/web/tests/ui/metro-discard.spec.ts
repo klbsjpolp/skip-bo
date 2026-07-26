@@ -31,9 +31,7 @@ test.describe('Metro discard piles', () => {
     await expectThemeClass(page, 'theme-metro');
 
     const pile = page.getByTestId('human-player-area').locator('.discard-pile-stack').first();
-    const afterContent = await pile
-      .locator('.empty-card')
-      .evaluate((el) => getComputedStyle(el, '::after').content);
+    const afterContent = await pile.locator('.empty-card').evaluate((el) => getComputedStyle(el, '::after').content);
 
     expect(afterContent, 'the "+" hint must be suppressed behind a populated discard pile').toBe('none');
   });
