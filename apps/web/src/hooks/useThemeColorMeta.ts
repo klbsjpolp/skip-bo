@@ -6,8 +6,11 @@ export function useThemeColorMeta() {
 
   useEffect(() => {
     const handle = requestAnimationFrame(() => {
-      let background = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim();
-      if (!background) background = getComputedStyle(document.documentElement).getPropertyValue('--background').trim();
+      // A theme may tint the page separately from the board via `--theme-color`
+      // (see `#root` in base.css); otherwise the board colour is the page colour.
+      const styles = getComputedStyle(document.documentElement);
+      const background =
+        styles.getPropertyValue('--theme-color').trim() || styles.getPropertyValue('--background').trim();
       if (!background) return;
 
       let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
