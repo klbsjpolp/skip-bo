@@ -6,7 +6,8 @@ export function useThemeColorMeta() {
 
   useEffect(() => {
     const handle = requestAnimationFrame(() => {
-      const background = getComputedStyle(document.documentElement).getPropertyValue('--background').trim();
+      let background = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim();
+      if (!background) background = getComputedStyle(document.documentElement).getPropertyValue('--background').trim();
       if (!background) return;
 
       let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');

@@ -45,6 +45,22 @@
   --metro-tile-11: #e51400;
   --metro-tile-12: #da532c;
 
+  --toolbar-bg: #234f52;
+  /* Page/status-bar tint matches the toolbar stripe, so the board keeps its
+     own colour via `--board-bg` (see `#root` in base.css). */
+  --theme-color: var(--toolbar-bg);
+  --board-bg: var(--background);
+
+  /* Size of the corner badge, and the matching clip target for the discard
+     collapse (badge + the card's 1px border, measured from the border box).
+     One token because the collapse has to land exactly on the badge edge. */
+  --metro-corner-size: 1rem;
+  --metro-corner-tile: calc(var(--metro-corner-size) + 1px);
+
+  @variant lg {
+    --metro-corner-size: 1.125rem;
+  }
+
   font-family:
     'Segoe UI',
     'Segoe UI Light',
@@ -131,9 +147,15 @@
       letter-spacing: -0.02em;
     }
 
+    /* The corner tile is part of Metro's card identity, so it shows on every
+       numbered card at every breakpoint — the base utility is
+       `invisible lg:visible`, which would drop it on mobile outside the
+       discard piles. Skip-Bo cards still hide it (see `&.skipbo-text`). */
     .card-corner-number {
-      @apply font-semibold absolute flex items-center justify-center text-2xs lg:text-xs text-white
-        w-4 lg:w-4.5 h-4 lg:h-4.5 top-0 left-0;
+      @apply visible font-semibold absolute flex items-center justify-center text-2xs lg:text-xs text-white
+        top-0 left-0;
+      width: var(--metro-corner-size);
+      height: var(--metro-corner-size);
       background: var(--card-corner-bg);
       letter-spacing: 0;
     }
@@ -181,7 +203,8 @@
   /* #4 Top toolbar as a full-width accent stripe */
 
   [data-testid='app-toolbar'] {
-    @apply bg-black/25 -mx-4 -mt-4 mb-4 px-4 py-3 items-center;
+    @apply -mx-4 -mt-4 mb-4 px-4 py-3 items-center;
+    background-color: var(--toolbar-bg);
   }
 
   /* #5 Tile-tilt press animation */
@@ -242,17 +265,18 @@
   }
 
   .discard-pile-stack {
+    /* The z-bumps below only order cards *within* one pile, so keep them in
+       their own stacking context. Without this the stack is `position:
+       relative; z-index: auto`, so a z-11 top card competes directly with
+       `.hand-area.overlap-hand` (also z-11) in the player-area context and
+       wins on DOM order — which made a draw animation portaled into the hand
+       fly *behind* the discard piles in the landscape-mobile layout, where
+       the défausses sit between the pioche and the main. */
+    @apply isolate;
+
     /* The topmost real card (numbered or Skip-Bo) wins z-order. */
     .card:not(.empty-card):nth-last-child(1 of :not(.empty-card)) {
       @apply z-11!;
-    }
-
-    /* Always show the corner number on the top (front) numbered card too.
-       The base rule is `invisible lg:visible`, and card.css only bumps the
-       collapsed non-top cards to `visible`, so on mobile the front card was
-       the only one in the pile without a corner number. */
-    .card.normal-card:nth-last-child(1 of :not(.empty-card)) .card-corner-number {
-      @apply visible;
     }
 
     /* Once a discard pile holds cards, hide the build-pile "+" hint that
@@ -261,20 +285,39 @@
       @apply content-none;
     }
 
+    /* The collapse is a wipe down to the corner tile, not a fade: the tile
+       retracts into its own number badge and grows back out of it, which is
+       the Metro motion vocabulary (and the same easing as the active-turn
+       wipe). Clipping to the badge also removes the card's inner layers,
+       number, border and shadow for free — no per-child rules needed.
+
+       The clip lives on the base card, and the top card must state
+       `inset(0)` explicitly: `none` does not interpolate, so leaving it
+       unset would make the reveal snap. `transform` is repeated because this
+       selector outranks the tile-tilt rule above. */
+
+    .card.normal-card {
+      clip-path: inset(0 0 0 0);
+      transition:
+        transform 0.15s ease-out,
+        clip-path 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+
+      @variant motion-reduce {
+        transition: transform 0.15s ease-out;
+      }
+    }
+
     /* Collapse non-top NUMBERED cards down to just their corner number
        (card-corner-number is bumped to `visible` from card.css). Skip-Bo
        cards are intentionally excluded so their top sliver remains
        visible when stacked between or beneath numbered cards. */
     .card.normal-card:not(:nth-last-child(1 of :not(.empty-card))) {
-      @apply bg-transparent shadow-none border-transparent pointer-events-none z-10!;
-      transition: background-color 0.3s ease-in 0.1s !important;
+      @apply pointer-events-none z-10!;
+      clip-path: inset(0 calc(100% - var(--metro-corner-tile)) calc(100% - var(--metro-corner-tile)) 0);
 
-      .card-inner,
-      .card-inner-2,
-      .card-number,
-      .card-corner-inset {
-        @apply hidden;
-      }
+      /* Collapse direction only — the incoming card lands before the one
+         beneath it retracts. Entry order matches the base `transition`. */
+      transition-delay: 0s, 0.1s;
     }
   }
 

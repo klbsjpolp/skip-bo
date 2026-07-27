@@ -72,6 +72,13 @@
   }
 
   #root {
+    /* Opt-in, and transparent by default: a theme only needs to restore the
+       board colour here if it tints the page separately via `--theme-color`
+       (the padding below is inside the background box, so an opaque `#root`
+       would otherwise swallow the gutter tint). Themes that paint a gradient
+       or texture on `body` — glass, rainbow, cinema… — need this to stay
+       transparent so that artwork still shows through the board. */
+    background-color: var(--board-bg, transparent);
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 
@@ -84,7 +91,12 @@
   }
 
   body {
-    @apply bg-background;
+    /* Themes may tint the safe-area gutter separately from the board via
+       `--theme-color` (iOS Safari also samples this for the status bar).
+       The fallback is load-bearing: an unresolved `var()` is invalid at
+       computed-value time, which makes `background-color` fall back to its
+       initial value — transparent — not to an earlier declaration. */
+    background-color: var(--theme-color, var(--background));
     color: var(--text-color);
     font-family: 'Inter', sans-serif;
   }
