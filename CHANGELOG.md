@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.13.0](https://github.com/klbsjpolp/skip-bo/compare/v2.12.28...v2.13.0) (2026-07-28)
+
+### Features
+
+* **metro:** wipe discard cards down to their corner badge ([3cd9b2a](https://github.com/klbsjpolp/skip-bo/commit/3cd9b2acedda65174ce1c32faa82c6383922b3d8))
 ## [2.12.28](https://github.com/klbsjpolp/skip-bo/compare/v2.12.27...v2.12.28) (2026-07-26)
 
 ### Bug Fixes
