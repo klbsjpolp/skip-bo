@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
 
 import { PlayerArea } from '@/components/PlayerArea';
@@ -87,6 +87,28 @@ const tree = (gameState: GameState) => (
   </CardAnimationProvider>
 );
 
+/** Both seats inside one DragProvider, so a drag session is visible to both. */
+const bothPlayers = (gameState: GameState) => (
+  <CardAnimationProvider>
+    <DragProvider>
+      {gameState.players.map((player, index) => (
+        <PlayerArea
+          key={index}
+          player={player}
+          playerIndex={index}
+          isCurrentPlayer={index === gameState.currentPlayerIndex}
+          isWinner={false}
+          gameState={gameState}
+          selectCard={handlers.selectCard}
+          playCard={handlers.playCard}
+          discardCard={handlers.discardCard}
+          clearSelection={handlers.clearSelection}
+        />
+      ))}
+    </DragProvider>
+  </CardAnimationProvider>
+);
+
 const cardNode = (value: string) =>
   screen.getByLabelText('Défausse 1').querySelector<HTMLElement>(`.card[data-value="${value}"]`);
 
@@ -120,5 +142,54 @@ describe('Discard stack DOM identity', () => {
 
     expect(cardNode('9')?.hasAttribute('data-drag-source')).toBe(true);
     expect(cardNode('8')?.hasAttribute('data-drag-source')).toBe(false);
+  });
+
+  test("dragging a discard card does not hide the opponent's card at the same position", () => {
+    // `DragSource` is {kind, index, discardPileIndex} with no player, so the
+    // opponent's card in the same slot matches the drag session identically.
+    // Both players hold two cards in pile 0 so the coordinates collide exactly.
+    const pile: Card[][] = [[card(8), card(9)], [], [], []];
+    const gameState = createGameState(pile);
+    gameState.players[1] = createPlayer([[card(4), card(5)], [], [], []], { isAI: true });
+
+    render(bothPlayers(gameState));
+
+    const human = screen.getByTestId('human-player-area');
+    const ai = screen.getByTestId('ai-player-area');
+    const humanTop = within(human).getByLabelText('Défausse 1').querySelector<HTMLElement>('.card[data-value="9"]')!;
+    const aiTwin = within(ai).getByLabelText('Défausse 1').querySelector<HTMLElement>('.card[data-value="5"]')!;
+
+    act(() => {
+      fireEvent.pointerDown(humanTop, { pointerId: 9, pointerType: 'mouse', button: 0, clientX: 100, clientY: 100 });
+      fireEvent(
+        window,
+        new PointerEvent('pointermove', {
+          pointerId: 9,
+          pointerType: 'mouse',
+          buttons: 1,
+          clientX: 200,
+          clientY: 100,
+          bubbles: true,
+        }),
+      );
+    });
+
+    expect(humanTop.className, 'the dragged card hides behind its floating replica').toContain('is-drag-source');
+    expect(aiTwin.className, "the opponent's card is not the one being dragged").not.toContain('is-drag-source');
+
+    act(() => {
+      fireEvent(
+        window,
+        new PointerEvent('pointerup', {
+          pointerId: 9,
+          pointerType: 'mouse',
+          clientX: 200,
+          clientY: 100,
+          bubbles: true,
+        }),
+      );
+      // Consume the swallow-click listener the drag hook installs on drag-end.
+      fireEvent.click(window);
+    });
   });
 });

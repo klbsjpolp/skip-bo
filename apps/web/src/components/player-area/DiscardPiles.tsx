@@ -240,7 +240,11 @@ function DiscardCard({
     playCard,
     discardCard,
   });
-  const isDragging = useIsDragSource(source);
+  // `DragSource` identifies a discard card by pile and index only, with no
+  // player, so the opponent's card at the same coordinates matches the session
+  // just as well. Only a card that can actually be dragged can be the one being
+  // dragged, which disambiguates without widening the drag protocol.
+  const isDragging = useIsDragSource(source) && canDrag;
   const isSelected =
     gameState.selectedCard?.source === 'discard' &&
     gameState.selectedCard.discardPileIndex === pileIndex &&
