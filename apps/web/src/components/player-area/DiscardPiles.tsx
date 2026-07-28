@@ -178,35 +178,19 @@ function DiscardPile({
           );
         }
         const isTop = cardIdx === pile.length - 1;
-        if (isTop && isHuman && isCurrentPlayer) {
-          return (
-            <DraggableDiscardTop
-              key={`discard-${pileIndex}-card-${cardIdx}`}
-              card={card}
-              pileIndex={pileIndex}
-              cardIndex={cardIdx}
-              playerIndex={playerIndex}
-              gameState={gameState}
-              selectCard={selectCard}
-              playCard={playCard}
-              discardCard={discardCard}
-            />
-          );
-        }
         return (
-          <Card
-            hint={`discard pile ${pileIndex + 1}, card ${cardIdx + 1}`}
-            key={`discard-${pileIndex}-card-${cardIdx}`}
+          <DiscardCard
+            key={key}
             card={card}
-            isRevealed={true}
-            isSelected={
-              gameState.selectedCard?.source === 'discard' &&
-              gameState.selectedCard.discardPileIndex === pileIndex &&
-              gameState.currentPlayerIndex === playerIndex &&
-              cardIdx === pile.length - 1
-            }
-            canBeGrabbed={isHuman && isCurrentPlayer && isTop}
-            stackIndex={cardIdx}
+            pileIndex={pileIndex}
+            cardIndex={cardIdx}
+            playerIndex={playerIndex}
+            isTop={isTop}
+            canDrag={isTop && isHuman && isCurrentPlayer}
+            gameState={gameState}
+            selectCard={selectCard}
+            playCard={playCard}
+            discardCard={discardCard}
           />
         );
       })}
@@ -214,32 +198,43 @@ function DiscardPile({
   );
 }
 
-interface DraggableDiscardTopProps {
+interface DiscardCardProps {
   card: CardType;
   pileIndex: number;
   cardIndex: number;
   playerIndex: number;
+  isTop: boolean;
+  canDrag: boolean;
   gameState: GameState;
   selectCard: DiscardPileProps['selectCard'];
   playCard: DiscardPileProps['playCard'];
   discardCard: DiscardPileProps['discardCard'];
 }
 
-function DraggableDiscardTop({
+/**
+ * Every card in a pile renders through this one component, draggable or not.
+ * Splitting it into two components by position would reuse the same React key
+ * for a different element type as a card stops being the top one, which
+ * remounts the DOM node — and a freshly mounted node has no previous computed
+ * style, so CSS transitions on it (Metro's clip-path collapse) never run.
+ */
+function DiscardCard({
   card,
   pileIndex,
   cardIndex,
   playerIndex,
+  isTop,
+  canDrag,
   gameState,
   selectCard,
   playCard,
   discardCard,
-}: DraggableDiscardTopProps) {
+}: DiscardCardProps) {
   const source = { kind: 'discard' as const, index: cardIndex, discardPileIndex: pileIndex };
   const draggable = useDraggableCard({
     source,
     card,
-    enabled: true,
+    enabled: canDrag,
     gameState,
     selectCard,
     playCard,
@@ -249,17 +244,20 @@ function DraggableDiscardTop({
   const isSelected =
     gameState.selectedCard?.source === 'discard' &&
     gameState.selectedCard.discardPileIndex === pileIndex &&
-    gameState.currentPlayerIndex === playerIndex;
+    gameState.currentPlayerIndex === playerIndex &&
+    isTop;
   return (
     <Card
       hint={`discard pile ${pileIndex + 1}, card ${cardIndex + 1}`}
       card={card}
       isRevealed={true}
       isSelected={isSelected}
-      canBeGrabbed={true}
+      canBeGrabbed={canDrag}
       stackIndex={cardIndex}
       className={isDragging ? 'is-drag-source' : undefined}
-      extraProps={draggable}
+      // Kept off non-draggable cards so they don't advertise drag-source
+      // attributes they cannot honour.
+      extraProps={canDrag ? draggable : undefined}
     />
   );
 }

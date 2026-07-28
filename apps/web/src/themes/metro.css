@@ -55,7 +55,7 @@
      collapse (badge + the card's 1px border, measured from the border box).
      One token because the collapse has to land exactly on the badge edge. */
   --metro-corner-size: 1rem;
-  --metro-corner-tile: calc(var(--metro-corner-size) + 1px);
+  --metro-corner-tile: calc(var(--metro-corner-size) + 2px);
 
   @variant lg {
     --metro-corner-size: 1.125rem;

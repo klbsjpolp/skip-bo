@@ -47,7 +47,7 @@ test.describe('Metro discard piles', () => {
     expect(new Set(skipBo), 'Skip-Bo cards have no number to show').toEqual(new Set(['none']));
   });
 
-  test('@desktop @mobile the collapse clips exactly to the corner badge', async ({ page }) => {
+  test('@desktop @mobile the collapse clips to the corner badge', async ({ page }) => {
     await gotoFixture(page, 'one-of-each', 'theme-metro');
     await expectThemeClass(page, 'theme-metro');
 
@@ -76,10 +76,22 @@ test.describe('Metro discard piles', () => {
       };
     });
 
-    // Runs at both viewports, so it also pins the `lg` step of the corner-size
-    // token to the badge that reads it — 17px at 390 wide, 19px at 1440.
-    expect(geometry.tilePx, 'clip target must reach the badge edge').toBeCloseTo(geometry.badgeRight, 1);
-    expect(geometry.tilePx, 'badge is square').toBeCloseTo(geometry.badgeBottom, 1);
+    // The clip must cover the whole badge — falling short clips part of it
+    // away — without running far past it, which would leave a strip of bare
+    // card colour beside the badge. The small overshoot is deliberate: it hides
+    // the cut edge of the card's border.
+    //
+    // Runs at both viewports so the relationship holds at both badge sizes.
+    // It deliberately cannot catch the `lg` step disappearing: the badge reads
+    // the same `--metro-corner-size` as the clip, so the two shrink together —
+    // making them impossible to desync is the point of that shared token.
+    for (const [edge, badgeEdge] of [
+      ['right', geometry.badgeRight],
+      ['bottom', geometry.badgeBottom],
+    ] as const) {
+      expect(geometry.tilePx, `clip must cover the badge's ${edge} edge`).toBeGreaterThanOrEqual(badgeEdge);
+      expect(geometry.tilePx, `clip must stay tight to the badge's ${edge} edge`).toBeLessThanOrEqual(badgeEdge + 2);
+    }
 
     // The top card must state inset(0) rather than leaving clip-path at `none`:
     // `none` does not interpolate, so the reveal would snap instead of wiping.
