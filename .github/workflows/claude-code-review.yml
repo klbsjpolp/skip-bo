@@ -43,10 +43,5 @@ jobs:
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
-          # TEMPORARY (diagnostic): the action hides the result message when
-          # is_error is true (anthropics/claude-code-action#880), so every recent
-          # run only reports "result is_error:true" with no cause. Revert once the
-          # underlying failure is identified.
-          show_full_output: true
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
