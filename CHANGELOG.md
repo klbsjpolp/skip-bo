@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.13.1](https://github.com/klbsjpolp/skip-bo/compare/v2.13.0...v2.13.1) (2026-07-29)
+
+### Bug Fixes
+
+* **drag:** scope the drag-source mask to the dragged player ([05e3569](https://github.com/klbsjpolp/skip-bo/commit/05e35693d028ae9cacfbfeeae50d93f9c3f73fe0))
+* **metro:** keep discard cards' DOM nodes so the wipe runs ([1993dcb](https://github.com/klbsjpolp/skip-bo/commit/1993dcb014d8589a6860fd71d0141809076f2218))
 ## [2.13.0](https://github.com/klbsjpolp/skip-bo/compare/v2.12.28...v2.13.0) (2026-07-28)
 
 ### Features
