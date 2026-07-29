@@ -4,6 +4,10 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
+    # pnpm rejects lockfile entries younger than its 24h minimumReleaseAge;
+    # hold updates a few days so CI can install what Dependabot proposes.
+    cooldown:
+      default-days: 3
     groups:
       react:
         patterns:
