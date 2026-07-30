@@ -165,7 +165,8 @@ export interface ApplyServiceWorkerUpdateOptions {
   // Escape hatch for clients whose service worker never stages the advertised
   // build: fall back to `forceRefreshFromNetwork` instead of returning false.
   // Only set this on an explicit user action (the update button, the forced
-  // update overlay) — automatic apply paths must keep the no-op behavior, or a
+  // update overlay, the hard-update branches of the New Game / Play Online /
+  // Join handlers) — automatic apply paths must keep the no-op behavior, or a
   // stale runtime config could reload-loop the app.
   forceReloadIfNotStaged?: boolean;
 }

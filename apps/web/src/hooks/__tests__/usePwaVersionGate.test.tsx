@@ -383,10 +383,16 @@ describe('usePwaVersionGate', () => {
     expect(applyServiceWorkerUpdateMock).not.toHaveBeenCalled();
   });
 
-  it('records the minimum supported version in sessionStorage before the auto-reload runs', async () => {
+  it('records the minimum supported version in sessionStorage when the auto-reload commits', async () => {
     fetchRuntimeConfigMock.mockResolvedValue({
       appVersion: 'v1.2.0',
       minimumSupportedVersion: 'v1.1.0',
+    });
+    // A committed reload invokes onReloadCommitted before navigating, so the
+    // guard lands in sessionStorage and survives the reload.
+    applyServiceWorkerUpdateMock.mockImplementation(async (onReloadCommitted?: () => void) => {
+      onReloadCommitted?.();
+      return true;
     });
 
     renderHook(() => usePwaVersionGate());
@@ -396,6 +402,26 @@ describe('usePwaVersionGate', () => {
     });
 
     expect(globalThis.sessionStorage?.getItem(AUTO_RELOAD_SESSION_STORAGE_KEY)).toBe('v1.1.0');
+  });
+
+  it('leaves the sessionStorage guard unset when the auto-reload finds nothing staged', async () => {
+    fetchRuntimeConfigMock.mockResolvedValue({
+      appVersion: 'v1.2.0',
+      minimumSupportedVersion: 'v1.1.0',
+    });
+    // No waiting worker: applyServiceWorkerUpdate returns false without ever
+    // calling onReloadCommitted. Burning the guard here would permanently
+    // disable the automatic hard update for this tab and strand the client
+    // below the protocol floor, so it must stay unset for the next load.
+    applyServiceWorkerUpdateMock.mockResolvedValue(false);
+
+    renderHook(() => usePwaVersionGate());
+
+    await waitFor(() => {
+      expect(applyServiceWorkerUpdateMock).toHaveBeenCalledTimes(1);
+    });
+
+    expect(globalThis.sessionStorage?.getItem(AUTO_RELOAD_SESSION_STORAGE_KEY)).toBeNull();
   });
 
   it('rechecks runtime config when the document becomes visible again', async () => {
