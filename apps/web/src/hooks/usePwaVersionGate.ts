@@ -159,10 +159,6 @@ export const usePwaVersionGate = ({ deferHardUpdate = false }: UsePwaVersionGate
     [],
   );
 
-  const reloadToUpdate = useEffectEvent(() => {
-    void runReloadToUpdate();
-  });
-
   useEffect(() => {
     void checkForUpdates();
 
@@ -260,7 +256,9 @@ export const usePwaVersionGate = ({ deferHardUpdate = false }: UsePwaVersionGate
   }, []);
 
   useEffect(() => {
-    if (!isHardUpdateRequired || !runtimeVersionSnapshot.minimumSupportedVersion) {
+    const requiredVersion = runtimeVersionSnapshot.minimumSupportedVersion;
+
+    if (!isHardUpdateRequired || !requiredVersion) {
       return;
     }
 
@@ -273,14 +271,22 @@ export const usePwaVersionGate = ({ deferHardUpdate = false }: UsePwaVersionGate
 
     // sessionStorage survives `location.reload()`, so this guard keeps a single
     // tab from re-auto-triggering the flow for the same minimum version after
-    // a reload — required retries must come from `ForcedUpdateOverlay`.
-    if (readAutoReloadVersion() === runtimeVersionSnapshot.minimumSupportedVersion) {
+    // a reload — required retries must come from `ForcedUpdateOverlay` or the
+    // explicit start handlers in `App`.
+    if (readAutoReloadVersion() === requiredVersion) {
       return;
     }
 
-    writeAutoReloadVersion(runtimeVersionSnapshot.minimumSupportedVersion);
-    void reloadToUpdate();
-  }, [deferHardUpdate, isHardUpdateRequired, runtimeVersionSnapshot.minimumSupportedVersion]);
+    // Same discipline as the soft path above: stamp the guard from
+    // `onReloadCommitted`, so it is only burned once a reload actually fires.
+    // Writing it up front made a no-op apply — the `runtime:` channel
+    // advertising a build the service worker hasn't staged, which Safari hits
+    // regularly — permanently disable the automatic hard update for this tab,
+    // leaving the client stuck below the protocol floor while it logged
+    // `pwa.apply-update.no-waiting-worker` on every attempt. Leaving the guard
+    // unset lets the next load retry; a no-op doesn't reload, so this can't loop.
+    void runReloadToUpdate(() => writeAutoReloadVersion(requiredVersion));
+  }, [deferHardUpdate, isHardUpdateRequired, runtimeVersionSnapshot.minimumSupportedVersion, runReloadToUpdate]);
 
   return {
     currentAppVersion: APP_VERSION,

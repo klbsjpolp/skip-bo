@@ -2,6 +2,7 @@ import { act, render, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { GameConfig, GameState } from '@skipbo/game-core';
+import type { ApplyServiceWorkerUpdateOptions } from '@/lib/pwaUpdates';
 
 // Controllable stand-in for the version gate so tests can flip pending/hard
 // update states and observe what the start handlers do with reloadToUpdate.
@@ -18,9 +19,12 @@ const versionGate = {
   lastCheckAt: null,
   latestAppVersion: null,
   minimumSupportedVersion: null as string | null,
-  reloadToUpdate: vi.fn<() => Promise<boolean>>(),
+  reloadToUpdate: vi.fn<(options?: ApplyServiceWorkerUpdateOptions) => Promise<boolean>>(),
   shouldShowSoftUpdate: false,
 };
+// A blocking hard update (and any explicit update press) must escalate a no-op
+// apply to a network force-refresh; the automatic soft path must not.
+const FORCE_UPDATE: ApplyServiceWorkerUpdateOptions = { forceReloadIfNotStaged: true };
 vi.mock('@/hooks/usePwaVersionGate', () => ({
   usePwaVersionGate: () => ({ ...versionGate }),
 }));
@@ -190,7 +194,7 @@ describe('App online start handlers and pending updates', () => {
       await lastShellProps().onStartOnlineGame();
     });
 
-    expect(versionGate.reloadToUpdate).toHaveBeenCalled();
+    expect(versionGate.reloadToUpdate).toHaveBeenCalledWith(FORCE_UPDATE);
     expect(createOnlineRoomMock).not.toHaveBeenCalled();
   });
 
@@ -203,7 +207,7 @@ describe('App online start handlers and pending updates', () => {
       await lastShellProps().onJoinOnlineGame('ABCD');
     });
 
-    expect(versionGate.reloadToUpdate).toHaveBeenCalled();
+    expect(versionGate.reloadToUpdate).toHaveBeenCalledWith(FORCE_UPDATE);
     expect(joinOnlineRoomMock).not.toHaveBeenCalled();
   });
 
@@ -217,7 +221,10 @@ describe('App online start handlers and pending updates', () => {
       lastShellProps().onStartLocalGame();
     });
 
+    // ForcedUpdateOverlay is not rendered in local mode, so this handler is the
+    // only escape a stuck client has — it must force rather than no-op.
     expect(versionGate.reloadToUpdate).toHaveBeenCalledTimes(1);
+    expect(versionGate.reloadToUpdate).toHaveBeenCalledWith(FORCE_UPDATE);
   });
 
   it('gates joining a room on the pending update the same way as creating one', async () => {
@@ -258,6 +265,7 @@ describe('App online start handlers and pending updates', () => {
     });
 
     expect(versionGate.reloadToUpdate).toHaveBeenCalledTimes(1);
+    expect(versionGate.reloadToUpdate).toHaveBeenCalledWith(FORCE_UPDATE);
   });
 
   it('fires the reload alongside starting a fresh local game while an update is pending', async () => {
@@ -272,6 +280,9 @@ describe('App online start handlers and pending updates', () => {
     });
 
     expect(versionGate.reloadToUpdate).toHaveBeenCalledTimes(1);
+    // A soft update is not blocking, so this path must stay a no-op when nothing
+    // is staged rather than nuking caches on every "New Game" press.
+    expect(versionGate.reloadToUpdate).toHaveBeenCalledWith();
     // The local start is not aborted — a lagging service worker must not leave
     // the "New Game" button stuck.
     expect(appShellCalls.length).toBeGreaterThan(0);

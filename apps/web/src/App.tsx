@@ -24,6 +24,7 @@ import {
 } from '@/testing/uiFixtures';
 import { DebugStrip } from '@/components/DebugStrip';
 import { usePwaVersionGate } from '@/hooks/usePwaVersionGate';
+import type { ApplyServiceWorkerUpdateOptions } from '@/lib/pwaUpdates';
 import { useThemeColorMeta } from '@/hooks/useThemeColorMeta';
 import { useThemeUsageReporter } from '@/hooks/useThemeUsageReporter';
 import { buildGameStatsSnapshot, useGameStatsRecorder } from '@/hooks/useGameStatsRecorder';
@@ -34,6 +35,14 @@ import { buildGameStatsSnapshot, useGameStatsRecorder } from '@/hooks/useGameSta
 const OnlineGameScreen = lazy(() => import('@/components/OnlineGameScreen'));
 
 const fixtureActionResult = Promise.resolve({ success: true, message: 'Fixture mode' });
+
+// A hard update is blocking — the build sits below the protocol floor — so a
+// no-op apply strands the player there rather than merely delaying a feature.
+// Every use below is an explicit user action (New Game / Play Online / Join /
+// the update button / the overlay), which is exactly the bar
+// `forceReloadIfNotStaged` sets, and in local mode `ForcedUpdateOverlay` isn't
+// rendered, so those handlers are the only recovery path a stuck client has.
+const FORCE_UPDATE: ApplyServiceWorkerUpdateOptions = { forceReloadIfNotStaged: true };
 
 function FixtureApp({ fixtureName }: { fixtureName: UiFixtureName }) {
   const gameState = getUiFixture(fixtureName);
@@ -173,7 +182,7 @@ function LiveApp() {
     // A required hard update was deferred while in local mode — apply it now and
     // abort the start (the reload boots into a fresh local game).
     if (isHardUpdateRequired) {
-      void reloadToUpdate();
+      void reloadToUpdate(FORCE_UPDATE);
       return;
     }
 
@@ -193,7 +202,7 @@ function LiveApp() {
     // Never contact the server on a build below the protocol floor — apply the
     // deferred hard update first (the reload aborts this start).
     if (isHardUpdateRequired) {
-      void reloadToUpdate();
+      void reloadToUpdate(FORCE_UPDATE);
       return;
     }
 
@@ -213,7 +222,7 @@ function LiveApp() {
 
   const joinGame = async (roomCode: string) => {
     if (isHardUpdateRequired) {
-      void reloadToUpdate();
+      void reloadToUpdate(FORCE_UPDATE);
       return;
     }
 
@@ -284,7 +293,7 @@ function LiveApp() {
   // worker never stages the advertised build (seen on iOS standalone PWAs)
   // presses the button, the label flashes, and nothing else ever happens.
   const updateNow = () => {
-    void reloadToUpdate({ forceReloadIfNotStaged: true });
+    void reloadToUpdate(FORCE_UPDATE);
   };
 
   const screen =
