@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.13.6](https://github.com/klbsjpolp/skip-bo/compare/v2.13.5...v2.13.6) (2026-07-30)
+
+### Bug Fixes
+
+* **ui:** show discard corner numbers on mobile stacks ([06d9a61](https://github.com/klbsjpolp/skip-bo/commit/06d9a612f1d41bc1a867e9b2b634a5cfdec89e77))
+* **web:** recover clients stuck below the PWA hard-update floor ([ce5d1db](https://github.com/klbsjpolp/skip-bo/commit/ce5d1dbe955b0808958f2a38e52af49bd875543b))
 ## [2.13.5](https://github.com/klbsjpolp/skip-bo/compare/v2.13.4...v2.13.5) (2026-07-29)
 ## [2.13.4](https://github.com/klbsjpolp/skip-bo/compare/v2.13.3...v2.13.4) (2026-07-29)
 ## [2.13.3](https://github.com/klbsjpolp/skip-bo/compare/v2.13.2...v2.13.3) (2026-07-29)
