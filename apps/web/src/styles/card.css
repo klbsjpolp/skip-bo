@@ -120,7 +120,19 @@
   @apply absolute top-0 left-0 z-2;
 }
 
-.discard-pile-stack .card.normal-card:not(:nth-last-child(1 of :not(.empty-card))) .card-corner-number {
+/* A discard pile holding more than one card keeps its corner numbers at every
+   breakpoint — on *every* card, top one included, not just the buried ones.
+   The buried cards are reduced to a sliver (or, in Metro, clipped down to the
+   badge itself), so the numbers read as a column; dropping the top card's
+   number below `lg` would leave that column a card short. A pile down to a
+   single card falls back to the base `invisible lg:visible`, since there is
+   nothing to enumerate.
+
+   The pile is counted with `:not(.empty-card)` — the same marker Metro's
+   collapse rule uses — so the zero-opacity placeholder standing in for a card
+   mid-animation counts too: it is what makes the card beneath it a buried one,
+   and that card must keep the badge it has been collapsed to. */
+.discard-pile-stack:has(.card:not(.empty-card) ~ .card:not(.empty-card)) .card.normal-card .card-corner-number {
   @apply visible;
 }
 
