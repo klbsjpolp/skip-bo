@@ -27,4 +27,5 @@ pnpm --filter @skipbo/game-core test -- tests/specific.test.ts
 ```
 
 Tests live in `tests/`. When changing the reducer or validators, update tests here first.
+Import from relative package paths (`../src/state/gameReducer.js`), not `@skipbo/game-core`.
 If turn flow is also affected, update `apps/web/src/state/__tests__` too.

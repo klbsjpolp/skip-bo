@@ -132,6 +132,9 @@ pnpm --filter @skipbo/web test:visual
 pnpm test:visual:update
 ```
 
+- Visual assertions go through `expectScreenshotIfBaselineExists` (not `toHaveScreenshot` directly), which
+  **silently skips** when no baseline is committed — a new visual test passes vacuously until you run `test:visual:update`.
+- `playwright test --list` gives the real count (186 instances vs 56 `test()` calls); specs loop over themes × 2 projects.
 - CI runs the `ui` job on **macOS**; baselines are committed as `*-darwin.png`, so regenerate snapshots locally on macOS to match.
 - Editing the `themes` array (order / label / `NEW`/`UPDATED` badge) or the default theme also changes `layout-and-accessibility.spec.ts`'s `theme-switcher-open` snapshot — regenerate it too, not just `theme-contract`/`readability`.
 

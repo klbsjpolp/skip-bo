@@ -19,7 +19,8 @@ Online play is **host-authoritative**: the server only relays opaque messages be
 pnpm install     # Install all workspace deps
 pnpm dev         # Vite dev server (http://localhost:5173)
 pnpm build       # Build all packages in dependency order
-pnpm lint        # ESLint across all packages (max-warnings 0)
+pnpm lint        # format:check, then ESLint across all packages (max-warnings 0)
+                 # run `pnpm format` first — a lint failure is often just formatting
 pnpm typecheck   # tsc --noEmit across all packages
 pnpm test        # Vitest unit tests across all packages
 pnpm test:e2e    # Playwright E2E tests
@@ -76,3 +77,6 @@ PWA_MINIMUM_SUPPORTED_VERSION  # Hard-update threshold for PWA clients
 | Web unit          | `apps/web/src/**/__tests__/`               | Vitest (jsdom)                |
 | E2E               | `apps/web/tests/ui/*.spec.ts`              | Playwright                    |
 | Visual regression | `apps/web/tests/ui/theme-contract.spec.ts` | Playwright (chromium-desktop) |
+
+Coverage is attributed **per package** (each vitest config scopes `include` to its own `src/`).
+A test in `apps/web` exercising `game-core` counts for neither — put tests in the package that owns the code.
