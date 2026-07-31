@@ -2,8 +2,10 @@ import type { Card as CardType, GameState, MoveResult, Player } from '@skipbo/ga
 import type { MouseEventHandler } from 'react';
 
 import { Card } from '@/components/Card';
+import { KeyHint } from '@/components/KeyHint';
 import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
 import { useIsDragSource } from '@/contexts/useDrag';
+import { HAND_KEYS } from '@/game/keyboardActions';
 import { useDraggableCard } from '@/hooks/useDraggableCard';
 import { cn } from '@/lib/utils';
 import { HAND_Y_OFFSETS } from '@/utils/cardPositions';
@@ -56,7 +58,14 @@ export function HandSection({
       <div className={cn('hand-area', handOverlaps && 'overlap-hand')}>
         {player.hand.map((card, index) => (
           <div
-            className="card-holder inline-flex flex-nowrap w-[calc(var(--hand-area-width)/5)] h-card"
+            // `relative` only while the hand is NOT overlapping. In overlap mode
+            // the cards are absolutely positioned against `.hand-area`, so making
+            // the holder a containing block would re-anchor them and break the
+            // fan. The key badge follows the same rule below.
+            className={cn(
+              'card-holder inline-flex flex-nowrap w-[calc(var(--hand-area-width)/5)] h-card',
+              !handOverlaps && 'relative',
+            )}
             key={`hand-${index}`}
             data-card-index={index}
             style={{
@@ -104,6 +113,25 @@ export function HandSection({
                 overlapIndex={handOverlaps ? index : undefined}
               />
             )}
+            {isHuman && playerIndex === 0 ? (
+              // Not overlapping: the holder is the containing block, so the badge
+              // centres itself under the slot. Overlapping: the holder is static
+              // and the badge anchors to `.hand-area`, so it gets the same column
+              // maths the card itself uses.
+              <KeyHint
+                code={HAND_KEYS[index]}
+                style={
+                  handOverlaps
+                    ? {
+                        left: `calc(${index} * (var(--card-width) - 10px))`,
+                        width: 'var(--card-width)',
+                        transform: 'none',
+                        textAlign: 'center',
+                      }
+                    : undefined
+                }
+              />
+            ) : null}
           </div>
         ))}
       </div>

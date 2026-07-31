@@ -3,7 +3,9 @@ import type { CSSProperties } from 'react';
 
 import { Card } from '@/components/Card';
 import { EmptyCard } from '@/components/EmptyCard.tsx';
+import { KeyHint } from '@/components/KeyHint';
 import { useIsDiscardPileArmed } from '@/contexts/useBoardKeyboard';
+import { DISCARD_KEYS } from '@/game/keyboardActions';
 import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
 import { useDrag, useIsDragSource } from '@/contexts/useDrag';
 import { useDraggableCard } from '@/hooks/useDraggableCard';
@@ -202,6 +204,7 @@ function DiscardPile({
           />
         );
       })}
+      {isHuman && playerIndex === 0 ? <KeyHint code={DISCARD_KEYS[pileIndex]} /> : null}
     </div>
   );
 }

@@ -1,9 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Card, GameConfig, GameState, MoveResult, Player } from '@skipbo/game-core';
 
 import { BoardKeyboardProvider } from '@/contexts/BoardKeyboardContext';
+import { CardAnimationProvider } from '@/contexts/CardAnimationContext';
 import { useBoardKeyboard } from '@/contexts/useBoardKeyboard';
 
 const FIXTURE_CONFIG: GameConfig = {
@@ -66,10 +68,13 @@ function ArmedProbe() {
 
 let handlers = createHandlers();
 
-const mount = (gameState: GameState, enabled = true) => {
-  handlers = createHandlers();
-
-  return render(
+/**
+ * The provider reads the animation queue to decide when the board is settled
+ * enough for the unprompted hint reveal, so it needs a CardAnimationProvider
+ * above it — as it always has in the app (both are mounted under Root).
+ */
+const tree = (gameState: GameState, enabled: boolean, children: ReactNode) => (
+  <CardAnimationProvider>
     <BoardKeyboardProvider
       enabled={enabled}
       gameState={gameState}
@@ -78,10 +83,24 @@ const mount = (gameState: GameState, enabled = true) => {
       discardCard={handlers.discardCard}
       clearSelection={handlers.clearSelection}
     >
-      <ArmedProbe />
-      <input data-testid="text-field" />
-      <button data-testid="a-button">bouton</button>
-    </BoardKeyboardProvider>,
+      {children}
+    </BoardKeyboardProvider>
+  </CardAnimationProvider>
+);
+
+const mount = (gameState: GameState, enabled = true) => {
+  handlers = createHandlers();
+
+  return render(
+    tree(
+      gameState,
+      enabled,
+      <>
+        <ArmedProbe />
+        <input data-testid="text-field" />
+        <button data-testid="a-button">bouton</button>
+      </>,
+    ),
   );
 };
 
@@ -150,15 +169,7 @@ describe('BoardKeyboardProvider', () => {
 
     // The player reaches for the mouse and picks up their stock card instead.
     rerender(
-      <BoardKeyboardProvider
-        gameState={createGameState({ selectedCard: { card: card(12), source: 'stock', index: 1 } })}
-        selectCard={handlers.selectCard}
-        playCard={handlers.playCard}
-        discardCard={handlers.discardCard}
-        clearSelection={handlers.clearSelection}
-      >
-        <ArmedProbe />
-      </BoardKeyboardProvider>,
+      tree(createGameState({ selectedCard: { card: card(12), source: 'stock', index: 1 } }), true, <ArmedProbe />),
     );
 
     expect(screen.getByTestId('armed').textContent).toBe('none');

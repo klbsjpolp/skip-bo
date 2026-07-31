@@ -3,7 +3,9 @@ import type { CSSProperties, MouseEventHandler } from 'react';
 
 import { Card } from '@/components/Card';
 import { EmptyCard } from '@/components/EmptyCard.tsx';
+import { KeyHint } from '@/components/KeyHint';
 import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
+import { STOCK_KEY } from '@/game/keyboardActions';
 import { useIsDragSource } from '@/contexts/useDrag';
 import { useDraggableCard } from '@/hooks/useDraggableCard';
 import { cn } from '@/lib/utils';
@@ -105,6 +107,8 @@ export function StockPile({
               className="relative z-10"
             />
           )}
+          {/* Only the local seat is keyboard-driven, so only it gets badges. */}
+          {isHuman && playerIndex === 0 ? <KeyHint code={STOCK_KEY} /> : null}
         </div>
       ) : (
         <EmptyCard />

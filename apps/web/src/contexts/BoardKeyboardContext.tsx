@@ -1,16 +1,28 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 
 import type { GameState, MoveResult } from '@skipbo/game-core';
 
 import { BoardKeyboardContext, type BoardKeyboardContextValue } from '@/contexts/useBoardKeyboard';
+import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
 import { useDrag } from '@/contexts/useDrag';
 import {
   BOUND_CODES,
+  FALLBACK_KEY_LABELS,
   resolveKeyboardIntent,
   shouldIgnoreKeyEvent,
   type KeyEventEnvironment,
 } from '@/game/keyboardActions';
+import {
+  ACTIVITY_REVEAL_MS,
+  AUTO_REVEAL_DELAY_MS,
+  AUTO_REVEAL_MS,
+  hasKeyboardPointer,
+  hasSeenKeyHintsThisSession,
+  markKeyHintsSeenThisSession,
+  resolveKeyLabels,
+  shouldAutoRevealKeyHints,
+} from '@/game/keyHints';
 
 export interface BoardKeyboardProviderProps {
   children: ReactNode;
@@ -73,6 +85,23 @@ export const BoardKeyboardProvider: FC<BoardKeyboardProviderProps> = ({
   // Space that discards something else entirely.
   const [armed, setArmed] = useState<{ pile: number; handIndex: number } | null>(null);
   const { session: dragSession } = useDrag();
+  const { activeAnimations } = useCardAnimation();
+
+  // Two independent reveals: `isAltHeld` while the recall gesture is down, and
+  // `isTimedVisible` for the auto-reveal and the post-key idle window. Keeping
+  // them apart means releasing Alt can't cut short a reveal a key press earned.
+  const [isAltHeld, setIsAltHeld] = useState(false);
+  const [isTimedVisible, setIsTimedVisible] = useState(false);
+  const [keyLabels, setKeyLabels] = useState<Record<string, string>>(FALLBACK_KEY_LABELS);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const revealTemporarily = useCallback((durationMs: number) => {
+    setIsTimedVisible(true);
+    clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => setIsTimedVisible(false), durationMs);
+  }, []);
+
+  useEffect(() => () => clearTimeout(hideTimer.current), []);
 
   const selectedCard = gameState.selectedCard;
   const isLocalTurn = gameState.currentPlayerIndex === 0 && !gameState.gameIsOver;
@@ -122,9 +151,20 @@ export const BoardKeyboardProvider: FC<BoardKeyboardProviderProps> = ({
         hasArmedDiscard: current.armedDiscardPile !== null,
       };
 
+      // Alt is the hold-to-recall gesture, so it never reaches the board.
+      if (event.key === 'Alt') {
+        setIsAltHeld(true);
+        return;
+      }
+
       if (shouldIgnoreKeyEvent(event, environment)) {
         return;
       }
+
+      // Any key that survives the guards — bound or not — means the player is
+      // reaching for the keyboard, so show them what the keys do. Someone
+      // pressing a key that does nothing is precisely who needs the badges.
+      revealTemporarily(ACTIVITY_REVEAL_MS);
 
       // Claim every bound code up front, whether or not it resolves to a legal
       // move. Otherwise Space scrolls the board away when there is nothing armed
@@ -172,11 +212,89 @@ export const BoardKeyboardProvider: FC<BoardKeyboardProviderProps> = ({
       }
     };
 
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [enabled]);
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (event.key === 'Alt') {
+        setIsAltHeld(false);
+      }
+    };
 
-  const value = useMemo<BoardKeyboardContextValue>(() => ({ armedDiscardPile }), [armedDiscardPile]);
+    // Alt-Tabbing away never delivers the keyup, which would strand the badges
+    // on until the next Alt press.
+    const onBlur = () => setIsAltHeld(false);
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('blur', onBlur);
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('blur', onBlur);
+    };
+  }, [enabled, revealTemporarily]);
+
+  // The one unprompted reveal, on the first turn the player can actually act on.
+  // The "already seen" flag is mirrored into state and only set once the reveal
+  // has actually started: deriving it straight from sessionStorage would flip
+  // `canAutoReveal` to false the moment the flag was written, and the effect
+  // cleanup would cancel the very timer that was about to show the badges.
+  const [hasSeenHints, setHasSeenHints] = useState(hasSeenKeyHintsThisSession);
+  const canAutoReveal = shouldAutoRevealKeyHints({
+    isEnabled: enabled,
+    hasSeenThisSession: hasSeenHints,
+    hasKeyboardPointer: hasKeyboardPointer(),
+    isLocalTurn,
+    isAnimating: activeAnimations.length > 0,
+  });
+
+  useEffect(() => {
+    if (!canAutoReveal) {
+      return undefined;
+    }
+
+    // Marking inside the timer means an attempt cancelled by a late animation
+    // doesn't burn the session's one unprompted reveal.
+    const timer = setTimeout(() => {
+      markKeyHintsSeenThisSession();
+      setHasSeenHints(true);
+      revealTemporarily(AUTO_REVEAL_MS);
+    }, AUTO_REVEAL_DELAY_MS);
+
+    return () => clearTimeout(timer);
+  }, [canAutoReveal, revealTemporarily]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void resolveKeyLabels().then((labels) => {
+      if (!cancelled) {
+        setKeyLabels(labels);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const areKeyHintsVisible = enabled && (isAltHeld || isTimedVisible);
+
+  // Drive visibility from a body attribute rather than per-badge props, the same
+  // way DragProvider lights up drop targets: one CSS toggle instead of a
+  // re-render of every pile on the board.
+  useEffect(() => {
+    if (!areKeyHintsVisible) {
+      return undefined;
+    }
+
+    document.body.setAttribute('data-key-hints', 'visible');
+    return () => document.body.removeAttribute('data-key-hints');
+  }, [areKeyHintsVisible]);
+
+  const value = useMemo<BoardKeyboardContextValue>(
+    () => ({ armedDiscardPile, keyLabels }),
+    [armedDiscardPile, keyLabels],
+  );
 
   return <BoardKeyboardContext.Provider value={value}>{children}</BoardKeyboardContext.Provider>;
 };

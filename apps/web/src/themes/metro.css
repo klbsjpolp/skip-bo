@@ -274,8 +274,11 @@
        the défausses sit between the pioche and the main. */
     @apply isolate;
 
-    /* The topmost real card (numbered or Skip-Bo) wins z-order. */
-    .card:not(.empty-card):nth-last-child(1 of :not(.empty-card)) {
+    /* The topmost real card (numbered or Skip-Bo) wins z-order.
+       The `of` set is scoped to `.card` rather than every non-empty-card child:
+       a pile may also hold non-card children (the keyboard hint badge), and a
+       looser set would hand "topmost" to one of those. */
+    .card:not(.empty-card):nth-last-child(1 of .card:not(.empty-card)) {
       @apply z-11!;
     }
 
@@ -311,7 +314,7 @@
        (card-corner-number is bumped to `visible` from card.css). Skip-Bo
        cards are intentionally excluded so their top sliver remains
        visible when stacked between or beneath numbered cards. */
-    .card.normal-card:not(:nth-last-child(1 of :not(.empty-card))) {
+    .card.normal-card:not(:nth-last-child(1 of .card:not(.empty-card))) {
       @apply pointer-events-none z-10!;
       clip-path: inset(0 calc(100% - var(--metro-corner-tile)) calc(100% - var(--metro-corner-tile)) 0);
 

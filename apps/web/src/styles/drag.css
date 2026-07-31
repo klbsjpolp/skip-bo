@@ -35,9 +35,13 @@
      drag reads as the "Vide" card itself bouncing. Keep the dashed border
      pulse, drop the translate — for both an EmptyCard that is itself the
      drop-indicator, and any drop-indicator parent (e.g. build-pile,
-     discard-pile-stack) whose only visible content is an EmptyCard. */
+     discard-pile-stack) whose only visible content is an EmptyCard.
+
+     That last case is spelled as "has a placeholder and no real card" rather
+     than `:only-child`: piles also carry a keyboard hint badge, which is a
+     child but not visible content. */
   body[data-drag-active='true'] &.can-drop.empty-card,
-  body[data-drag-active='true'] &.can-drop:has(> .empty-card:only-child) {
+  body[data-drag-active='true'] &.can-drop:has(> .empty-card):not(:has(> .card:not(.empty-card))) {
     @apply translate-y-0;
   }
 

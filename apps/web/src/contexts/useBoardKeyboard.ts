@@ -1,8 +1,12 @@
 import { createContext, useContext } from 'react';
 
+import { FALLBACK_KEY_LABELS } from '@/game/keyboardActions';
+
 export interface BoardKeyboardContextValue {
   /** Discard pile awaiting a Space confirmation, or `null`. */
   armedDiscardPile: number | null;
+  /** Printed key labels for the player's actual layout, keyed by `code`. */
+  keyLabels: Record<string, string>;
 }
 
 // A no-op default keeps the hook usable in fixtures and unit tests that render a
@@ -11,6 +15,7 @@ export interface BoardKeyboardContextValue {
 // did before the feature existed.
 const NOOP_BOARD_KEYBOARD_CONTEXT: BoardKeyboardContextValue = {
   armedDiscardPile: null,
+  keyLabels: FALLBACK_KEY_LABELS,
 };
 
 export const BoardKeyboardContext = createContext<BoardKeyboardContextValue>(NOOP_BOARD_KEYBOARD_CONTEXT);

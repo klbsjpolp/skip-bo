@@ -128,6 +128,50 @@ test.describe('@desktop keyboard shortcuts', () => {
     await expect(humanDiscardPile(page, 0).locator('.card:not(.empty-card)')).toHaveCount(1);
   });
 
+  test('reveals the key badges once unprompted, then puts them away', async ({ page }) => {
+    await gotoApp(page);
+    await waitForHumanTurn(page);
+
+    const hintsUp = page.locator('body[data-key-hints="visible"]');
+
+    // The one unprompted reveal, on the first turn the player can act on.
+    await expect(hintsUp).toBeVisible();
+
+    // Every bound key is labelled: talon, five hand slots, four discards,
+    // four build piles.
+    await expect(page.locator('.key-hint-badge')).toHaveCount(14);
+    await expect(humanArea(page).locator('[data-key-hint="KeyQ"]')).toHaveText(/q/i);
+    await expect(page.locator('[data-key-hint="Digit2"]')).toHaveText('2');
+
+    // The opponent's piles are not keyboard-driven, so they carry no badges.
+    await expect(page.getByTestId('ai-player-area').locator('.key-hint-badge')).toHaveCount(0);
+
+    // It drops on its own and leaves the board as it found it.
+    await expect(hintsUp).toHaveCount(0, { timeout: 10_000 });
+  });
+
+  test('brings the badges back on a key press, including an unbound one', async ({ page }) => {
+    await gotoApp(page);
+    await waitForHumanTurn(page);
+
+    const hintsUp = page.locator('body[data-key-hints="visible"]');
+    await expect(hintsUp).toHaveCount(0, { timeout: 10_000 });
+
+    // `k` does nothing on the board — which is exactly the player who needs to
+    // be told what the keys are.
+    await page.keyboard.press('k');
+    await expect(hintsUp).toBeVisible();
+    await expect(hintsUp).toHaveCount(0, { timeout: 10_000 });
+
+    // Holding Alt recalls them for as long as it is down, and acts on nothing.
+    await page.keyboard.down('Alt');
+    await expect(hintsUp).toBeVisible();
+    expect(await selectedCardCount(page)).toBe(0);
+
+    await page.keyboard.up('Alt');
+    await expect(hintsUp).toHaveCount(0);
+  });
+
   test('leaves the board alone while the New Game dialog is open', async ({ page }) => {
     await gotoApp(page);
     await waitForHumanTurn(page);
