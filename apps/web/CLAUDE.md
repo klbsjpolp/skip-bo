@@ -69,6 +69,27 @@ seat order unless `shuffleSeats: true` — so tests know the host plays first.
   `MOCK_RELAY_PORT`), then `VITE_SKIPBO_API_URL=http://127.0.0.1:8787 pnpm dev`
   and open two tabs.
 
+## Pile Presses
+
+`resolvePileIntent` (`src/game/pileIntents.ts`) is the **single** statement of what
+pressing a pile does, whatever pressed it. Click, Enter/Space on a focused pile and
+the keyboard shortcut layer all translate their own event into a `PilePressTarget`,
+call it, and perform the returned `BoardIntent` via `applyBoardIntent`. Three rules
+live there and nowhere else:
+
+1. A discard pile is a **discard target** while a hand card is selected, and a
+   **card source** otherwise.
+2. Pressing the source that is already selected deselects it.
+3. An empty slot is inert **as a source** (an empty pile is still a valid discard
+   target).
+
+It never returns a play — that is what keeps the "selection first, then play or
+discard" invariant true for every input method. The drag path shares rule 1 through
+`canDiscardFromSource`.
+
+Do not re-derive any of this in a component. These rules used to be restated per
+input method, and the copies drifted.
+
 ## Keyboard Layer (desktop)
 
 `BoardKeyboardProvider` (`src/contexts/BoardKeyboardContext.tsx`) mounts a global
@@ -84,6 +105,9 @@ mirroring the on-screen layout:
 - All mapping and legality lives in the pure `resolveKeyboardIntent`
   (`src/game/keyboardActions.ts`); the provider is a thin listener. Add bindings
   there, not in the hook.
+- **What a pile press means is not decided there.** `resolveKeyboardIntent` maps a
+  key onto a pile and defers to `resolvePileIntent` — see [Pile Presses](#pile-presses)
+  below. Its only departure is turning a returned `discard` into `armDiscard`.
 - Bind on `event.code`, never `event.key` — the layout is positional, and `code`
   preserves the finger pattern on AZERTY. `?` is the one exception (no stable
   code across layouts). Badge labels come from `navigator.keyboard.getLayoutMap()`

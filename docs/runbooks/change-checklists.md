@@ -43,7 +43,8 @@
 - Refresh visual baselines with `pnpm test:visual:update` when the visual change is intentional.
 - Update [../architecture/runtime-invariants.md](../architecture/runtime-invariants.md) if player-order or animation ownership assumptions changed.
 - Adding a child to a pile container (`.discard-pile-stack`, `.build-pile`) can retarget structural CSS that identifies the pile's cards — scope those selectors to `.card` and run the full `pnpm test:visual`, not just theme-contract.
-- New board input paths belong in the pure resolvers (`src/game/keyboardActions.ts` for keyboard) so they clear `codecov/patch` without a render test, and must go through the existing `selectCard` → `playCard`/`discardCard` callbacks rather than dispatching directly.
+- New board input paths belong in the pure resolvers (`src/game/pileIntents.ts` for what a pile press means, `src/game/keyboardActions.ts` for the key-to-pile mapping) so they clear `codecov/patch` without a render test, and must go through the existing `selectCard` → `playCard`/`discardCard` callbacks rather than dispatching directly.
+- Changing what pressing a pile does means changing `resolvePileIntent` only. A new input method translates its event into a `PilePressTarget` and performs the returned `BoardIntent`; it must not restate the select / deselect / discard rules — restating them per input method is exactly how the click and keyboard paths drifted before.
 
 ## Realtime Protocol Checklist
 
