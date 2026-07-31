@@ -52,6 +52,72 @@ export const FALLBACK_KEY_LABELS: Readonly<Record<string, string>> = {
   Digit5: '5',
 };
 
+/** What the DOM looked like when the key was pressed, reduced to decisions. */
+export interface KeyEventEnvironment {
+  /** Focus sits in an input, textarea, select or contenteditable. */
+  isTextEntry: boolean;
+  /** Focus sits on something Enter/Space would activate (a button or role=button). */
+  isActivatable: boolean;
+  /** A modal dialog, listbox or menu is open. */
+  hasOpenOverlay: boolean;
+  /** A pointer drag is in progress. */
+  isDragActive: boolean;
+  /** A discard is armed and waiting on its Space confirmation. */
+  hasArmedDiscard: boolean;
+}
+
+export interface KeyEventFlags {
+  code: string;
+  repeat: boolean;
+  ctrlKey: boolean;
+  metaKey: boolean;
+  altKey: boolean;
+  defaultPrevented: boolean;
+}
+
+/**
+ * Whether a key press should never reach the board. Split out from the listener
+ * so every guard is directly testable — these are the cases that make a global
+ * key handler misbehave, and each one is a real path in this app.
+ */
+export function shouldIgnoreKeyEvent(event: KeyEventFlags, environment: KeyEventEnvironment): boolean {
+  if (event.defaultPrevented || event.repeat) {
+    return true;
+  }
+
+  // Alt is reserved as the hold-to-reveal gesture for the hint badges, and the
+  // other modifiers belong to the browser (Cmd-1 switches tabs).
+  if (event.ctrlKey || event.metaKey || event.altKey) {
+    return true;
+  }
+
+  // The lobby has a room-code field: `u` must type a `u` there.
+  if (environment.isTextEntry || environment.hasOpenOverlay) {
+    return true;
+  }
+
+  // `useDraggableCard` owns Escape for the duration of a drag.
+  if (environment.isDragActive) {
+    return true;
+  }
+
+  // Cards and piles carry their own Enter/Space handlers for keyboard-only
+  // navigation. When one of them has focus it activates itself, so the board
+  // layer must not also fire — but letters and digits still belong to us, since
+  // having clicked a card is no reason to lose the shortcuts.
+  //
+  // The exception is an armed discard. Clicking a card focuses it (every card is
+  // tabIndex=0), so in a mixed mouse-then-keyboard flow — click a card, press a
+  // discard key, press Space — the focused card would otherwise eat the
+  // confirmation the player is being prompted for. A pending confirmation is
+  // unambiguous, so it outranks the focused element.
+  if (environment.hasArmedDiscard) {
+    return false;
+  }
+
+  return environment.isActivatable && (event.code === 'Space' || event.code === 'Enter');
+}
+
 export type KeyboardIntent =
   | { kind: 'select'; source: 'hand' | 'stock' | 'discard'; index: number; discardPileIndex?: number }
   | { kind: 'clearSelection' }
