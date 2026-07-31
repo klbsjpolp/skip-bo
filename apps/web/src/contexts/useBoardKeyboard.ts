@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-import { FALLBACK_KEY_LABELS } from '@/game/keyboardActions';
+import { FALLBACK_KEY_LABELS, LOCAL_PLAYER_INDEX } from '@/game/keyboardActions';
 
 export interface BoardKeyboardContextValue {
   /** Discard pile awaiting a Space confirmation, or `null`. */
@@ -25,7 +25,6 @@ export const useBoardKeyboard = (): BoardKeyboardContextValue => useContext(Boar
 /** True when this discard pile is the one waiting on a Space confirmation. */
 export const useIsDiscardPileArmed = (pileIndex: number, playerIndex: number): boolean => {
   const { armedDiscardPile } = useBoardKeyboard();
-  // The keyboard only ever drives the local seat, which both boards re-centre
-  // to index 0 — an opponent's pile at the same index must not light up.
-  return playerIndex === 0 && armedDiscardPile === pileIndex;
+  // An opponent's pile at the same index must not light up.
+  return playerIndex === LOCAL_PLAYER_INDEX && armedDiscardPile === pileIndex;
 };

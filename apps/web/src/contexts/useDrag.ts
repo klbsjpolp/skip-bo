@@ -17,6 +17,13 @@ export interface DragSession {
   hovered: DragTargetId | null;
 }
 
+/**
+ * Body attribute set for the duration of a drag. CSS uses it to light up drop
+ * targets globally; non-React readers use it to answer "is a drag running?"
+ * without subscribing to the session, which changes on every pointermove.
+ */
+export const DRAG_ACTIVE_ATTRIBUTE = 'data-drag-active';
+
 export interface DragContextValue {
   session: DragSession | null;
   beginDrag: (init: Omit<DragSession, 'hovered'> & { hovered?: DragTargetId | null }) => void;

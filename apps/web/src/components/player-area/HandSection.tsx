@@ -58,19 +58,15 @@ export function HandSection({
       <div className={cn('hand-area', handOverlaps && 'overlap-hand')}>
         {player.hand.map((card, index) => (
           <div
-            // `relative` only while the hand is NOT overlapping. In overlap mode
-            // the cards are absolutely positioned against `.hand-area`, so making
-            // the holder a containing block would re-anchor them and break the
-            // fan. The key badge follows the same rule below.
-            className={cn(
-              'card-holder inline-flex flex-nowrap w-[calc(var(--hand-area-width)/5)] h-card',
-              !handOverlaps && 'relative',
-            )}
+            className="card-holder inline-flex flex-nowrap w-[calc(var(--hand-area-width)/5)] h-card"
             key={`hand-${index}`}
             data-card-index={index}
             style={{
               // @ts-expect-error custom var
               '--card-rotate': `${(index - Math.floor(5 / 2)) * 4}deg`,
+              // Declared here so `layout.css` can place the key badge on this
+              // slot's column without the component knowing the fan geometry.
+              '--hand-slot-index': index,
             }}
           >
             {isCardBeingAnimated(playerIndex, 'hand', index) || isCardBeingAnimated(playerIndex, 'deck', index) ? (
@@ -113,25 +109,7 @@ export function HandSection({
                 overlapIndex={handOverlaps ? index : undefined}
               />
             )}
-            {isHuman && playerIndex === 0 ? (
-              // Not overlapping: the holder is the containing block, so the badge
-              // centres itself under the slot. Overlapping: the holder is static
-              // and the badge anchors to `.hand-area`, so it gets the same column
-              // maths the card itself uses.
-              <KeyHint
-                code={HAND_KEYS[index]}
-                style={
-                  handOverlaps
-                    ? {
-                        left: `calc(${index} * (var(--card-width) - 10px))`,
-                        width: 'var(--card-width)',
-                        transform: 'none',
-                        textAlign: 'center',
-                      }
-                    : undefined
-                }
-              />
-            ) : null}
+            <KeyHint code={HAND_KEYS[index]} playerIndex={playerIndex} />
           </div>
         ))}
       </div>

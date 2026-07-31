@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FC, ReactNode } from 'react';
-import { DragContext, type DragContextValue, type DragSession } from '@/contexts/useDrag';
+import { DRAG_ACTIVE_ATTRIBUTE, DragContext, type DragContextValue, type DragSession } from '@/contexts/useDrag';
 
 interface DragProviderProps {
   children: ReactNode;
@@ -32,8 +32,8 @@ export const DragProvider: FC<DragProviderProps> = ({ children }) => {
   // while a drag is active.
   useEffect(() => {
     if (session) {
-      document.body.setAttribute('data-drag-active', 'true');
-      return () => document.body.removeAttribute('data-drag-active');
+      document.body.setAttribute(DRAG_ACTIVE_ATTRIBUTE, 'true');
+      return () => document.body.removeAttribute(DRAG_ACTIVE_ATTRIBUTE);
     }
     return undefined;
   }, [session]);

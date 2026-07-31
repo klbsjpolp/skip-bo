@@ -107,8 +107,7 @@ export function StockPile({
               className="relative z-10"
             />
           )}
-          {/* Only the local seat is keyboard-driven, so only it gets badges. */}
-          {isHuman && playerIndex === 0 ? <KeyHint code={STOCK_KEY} /> : null}
+          <KeyHint code={STOCK_KEY} playerIndex={playerIndex} />
         </div>
       ) : (
         <EmptyCard />

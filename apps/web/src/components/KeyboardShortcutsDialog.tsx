@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { BUILD_KEYS, DISCARD_KEYS, HAND_KEYS, STOCK_KEY } from '@/game/keyboardActions';
 
@@ -31,7 +33,7 @@ const Row = ({ children, label }: { children: React.ReactNode; label: string }) 
  * Labels come from the context rather than being hardcoded, so on a non-QWERTY
  * layout the sheet lists the letters actually printed on the keys.
  */
-export function KeyboardShortcutsDialog({ keyLabels, onOpenChange, open }: KeyboardShortcutsDialogProps) {
+function KeyboardShortcutsDialogComponent({ keyLabels, onOpenChange, open }: KeyboardShortcutsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent data-testid="keyboard-shortcuts-dialog">
@@ -78,3 +80,8 @@ export function KeyboardShortcutsDialog({ keyLabels, onOpenChange, open }: Keybo
     </Dialog>
   );
 }
+
+// The provider renders this on every one of its own renders, and all three props
+// are stable references — memo keeps the closed sheet from re-allocating its
+// element tree each time.
+export const KeyboardShortcutsDialog = memo(KeyboardShortcutsDialogComponent);

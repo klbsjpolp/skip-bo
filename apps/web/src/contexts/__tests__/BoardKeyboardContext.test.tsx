@@ -2,48 +2,25 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { Card, GameConfig, GameState, MoveResult, Player } from '@skipbo/game-core';
+import { initialGameState, type Card, type GameState, type MoveResult } from '@skipbo/game-core';
 
 import { BoardKeyboardProvider } from '@/contexts/BoardKeyboardContext';
 import { CardAnimationProvider } from '@/contexts/CardAnimationContext';
 import { useBoardKeyboard } from '@/contexts/useBoardKeyboard';
 
-const FIXTURE_CONFIG: GameConfig = {
-  DECK_SIZE: 162,
-  SKIP_BO_CARDS: 18,
-  CARD_COPIES_PER_RANK: 12,
-  HAND_SIZE: 5,
-  STOCK_SIZE: 30,
-  BUILD_PILES_COUNT: 4,
-  DISCARD_PILES_COUNT: 4,
-  CARD_VALUES_MIN: 1,
-  CARD_VALUES_MAX: 12,
-  CARD_VALUES_SKIP_BO: 0,
-};
-
 const card = (value: number, isSkipBo = false): Card => ({ value, isSkipBo });
 
-const createPlayer = (overrides: Partial<Player> = {}): Player => ({
-  isAI: false,
-  stockPile: [card(11), card(12)],
-  hand: [card(1), card(4), card(5), card(6), card(7)],
-  discardPiles: [[], [], [], []],
-  ...overrides,
-});
-
-const createGameState = (overrides: Partial<GameState> = {}): GameState => ({
-  deck: [],
-  buildPiles: [[], [], [], []],
-  completedBuildPiles: [],
-  players: [createPlayer(), createPlayer({ isAI: true })],
-  currentPlayerIndex: 0,
-  gameIsOver: false,
-  winnerIndex: null,
-  selectedCard: null,
-  message: { code: 'SELECT_CARD' },
-  config: FIXTURE_CONFIG,
-  ...overrides,
-});
+/** A board on the local player's turn, with a known hand and empty piles. */
+const createGameState = (overrides: Partial<GameState> = {}): GameState => {
+  const state = initialGameState();
+  state.currentPlayerIndex = 0;
+  state.buildPiles = [[], [], [], []];
+  state.selectedCard = null;
+  state.players[0].stockPile = [card(11), card(12)];
+  state.players[0].hand = [card(1), card(4), card(5), card(6), card(7)];
+  state.players[0].discardPiles = [[], [], [], []];
+  return { ...state, ...overrides };
+};
 
 const createHandlers = () => ({
   selectCard: vi.fn() as unknown as (

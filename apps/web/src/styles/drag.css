@@ -45,34 +45,40 @@
     @apply translate-y-0;
   }
 
-  /* Keyboard: a discard pile armed by u/i/o/p and awaiting its Space
-     confirmation. Louder than can-drop on purpose — a discard is irreversible
-     and ends the turn — and labelled with the key that commits it, so the
-     pending state explains itself without a legend. */
+  /* The two "committed target" states share one treatment — a solid ring and a
+     lift — and differ only in their label:
+
+       .is-drag-over  the pile the dragged card is currently over
+       .is-armed      a discard pile picked by u/i/o/p, awaiting its Space
+                      confirmation. It also pulses, because unlike a drag it
+                      persists with no pointer holding it there. */
+  &.is-drag-over,
   &.is-armed {
     @apply -translate-y-1 shadow-can-drop;
 
     &::after {
-      @apply content-['Espace'] absolute -top-4.5 left-1/2 -translate-x-1/2 z-20 text-xs font-bold uppercase tracking-wide text-drop-indicator;
-    }
-
-    &::before {
-      @apply content-[''] absolute z-10 opacity-100 -inset-1 animate-pulse border-solid border-2 border-drop-indicator;
-      border-radius: calc(var(--card-radius) + 4px);
-    }
-  }
-
-  /* Stronger highlight on the target the dragged card is currently over. */
-  &.is-drag-over {
-    @apply -translate-y-1 shadow-can-drop;
-
-    &::after {
-      @apply content-['↓'] absolute -top-6.25 left-1/2 text-lg -translate-x-1/2 font-bold z-20 animate-bounce text-drop-indicator;
+      @apply absolute left-1/2 -translate-x-1/2 z-20 font-bold text-drop-indicator;
     }
 
     &::before {
       @apply content-[''] absolute z-10 opacity-100 -inset-1 border-solid border-2 border-drop-indicator;
       border-radius: calc(var(--card-radius) + 4px);
+    }
+  }
+
+  &.is-drag-over::after {
+    @apply content-['↓'] -top-6.25 text-lg animate-bounce;
+  }
+
+  /* Labelled with the key that commits it, so the pending state explains itself
+     without a legend. */
+  &.is-armed {
+    &::after {
+      @apply content-['Espace'] -top-4.5 text-xs uppercase tracking-wide;
+    }
+
+    &::before {
+      @apply animate-pulse;
     }
   }
 }
