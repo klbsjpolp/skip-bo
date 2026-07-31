@@ -9,6 +9,7 @@ import { AppUpdatedBanner } from '@/components/AppUpdatedBanner';
 import { ForcedUpdateOverlay } from '@/components/ForcedUpdateOverlay';
 import { ResumeGameBanner } from '@/components/ResumeGameBanner';
 import { LocalGameBoard } from '@/components/LocalGameBoard';
+import { BoardKeyboardProvider } from '@/contexts/BoardKeyboardContext';
 import { isSafeToApplyLocalUpdate } from '@/lib/localUpdateGate';
 import { applyPendingUpdateBeforeOnlineStart } from '@/lib/onlineUpdateGate';
 import { canPlayCard } from '@skipbo/game-core';
@@ -118,14 +119,22 @@ function LocalGameScreen({
   }, [isUpdatePending, isSafeToApplyUpdate, applyUpdateWhenSafe]);
 
   const gameBoard = (
-    <LocalGameBoard
+    <BoardKeyboardProvider
       gameState={gameState}
       selectCard={selectCard}
       playCard={playCard}
       discardCard={discardCard}
       clearSelection={clearSelection}
-      canPlayCard={canPlayCard}
-    />
+    >
+      <LocalGameBoard
+        gameState={gameState}
+        selectCard={selectCard}
+        playCard={playCard}
+        discardCard={discardCard}
+        clearSelection={clearSelection}
+        canPlayCard={canPlayCard}
+      />
+    </BoardKeyboardProvider>
   );
 
   return (

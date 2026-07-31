@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 
 import { Card } from '@/components/Card';
 import { EmptyCard } from '@/components/EmptyCard.tsx';
+import { useIsDiscardPileArmed } from '@/contexts/useBoardKeyboard';
 import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
 import { useDrag, useIsDragSource } from '@/contexts/useDrag';
 import { useDraggableCard } from '@/hooks/useDraggableCard';
@@ -80,6 +81,7 @@ function DiscardPile({
 }: DiscardPileProps) {
   const { activeAnimations, isCardBeingAnimated } = useCardAnimation();
   const { session: dragSession } = useDrag();
+  const isArmed = useIsDiscardPileArmed(pileIndex, playerIndex);
   const isHuman = !player.isAI;
   const hasIncomingDiscardAnimation = activeAnimations.some(
     (animation) =>
@@ -137,10 +139,16 @@ function DiscardPile({
 
   return (
     <div
-      className={cn('drop-indicator discard-pile-stack relative', canDrop && 'can-drop', isDragOver && 'is-drag-over')}
+      className={cn(
+        'drop-indicator discard-pile-stack relative',
+        canDrop && 'can-drop',
+        isDragOver && 'is-drag-over',
+        isArmed && 'is-armed',
+      )}
       data-pile-index={pileIndex}
       data-drop-target={canDropFromDrag ? 'discard' : undefined}
       data-drop-index={canDropFromDrag ? pileIndex : undefined}
+      data-armed={isArmed ? 'true' : undefined}
       role={canInteract ? 'button' : undefined}
       tabIndex={canInteract ? 0 : undefined}
       aria-label={`Défausse ${pileIndex + 1}`}
