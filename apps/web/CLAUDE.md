@@ -69,6 +69,49 @@ seat order unless `shuffleSeats: true` — so tests know the host plays first.
   `MOCK_RELAY_PORT`), then `VITE_SKIPBO_API_URL=http://127.0.0.1:8787 pnpm dev`
   and open two tabs.
 
+## Keyboard Layer (desktop)
+
+`BoardKeyboardProvider` (`src/contexts/BoardKeyboardContext.tsx`) mounts a global
+keydown listener over a board. The bindings are **positional** — the digit row
+drives the construction piles, the top letter row the local seat's own zone,
+mirroring the on-screen layout:
+
+```
+        2   3   4   5           construction piles 1-4
+    q   w e r t y   u i o p     talon | main 1-5 | défausses 1-4
+```
+
+- All mapping and legality lives in the pure `resolveKeyboardIntent`
+  (`src/game/keyboardActions.ts`); the provider is a thin listener. Add bindings
+  there, not in the hook.
+- Bind on `event.code`, never `event.key` — the layout is positional, and `code`
+  preserves the finger pattern on AZERTY. `?` is the one exception (no stable
+  code across layouts). Badge labels come from `navigator.keyboard.getLayoutMap()`
+  where it exists, so an AZERTY player is shown their own legends.
+- Build plays commit immediately; **discards arm and wait for Space**, since they
+  are irreversible and end the turn.
+- Mounted **per screen** (`LocalGameScreen`, `OnlineGameScreen`), never inside the
+  board: `GameBoard` is also rendered by `OnlineGameBoard` and as an inert lobby
+  placeholder with stub callbacks. Online it is gated on `hasGameView`, not
+  `roomStatus` (see the placeholder gotcha above).
+- It needs a `CardAnimationProvider` above it (it reads the animation queue to
+  know when the board has settled). Fixtures mount no provider at all.
+
+### Hint badges
+
+`.key-hint-badge` is **always mounted and transparent**, absolutely positioned so
+it takes no layout — that is what keeps the committed visual baselines valid.
+Visibility is a `body[data-key-hints]` attribute, the same trick `DragProvider`
+uses for drop targets. Two reveals: one unprompted per session (sessionStorage,
+`pointer: fine` only, on the first settled local turn), and an on-demand one from
+any key press or a held Alt.
+
+**Trap:** pile containers are targeted by structural CSS (`:only-child`,
+`:nth-last-child(… of …)`). Adding any child to `.discard-pile-stack` or
+`.build-pile` can silently retarget those rules — the badges broke Metro's
+discard collapse until the selectors were scoped to `.card` explicitly. Run
+`test:visual` after touching pile children.
+
 ## AI
 
 Entry point: `src/ai/computeBestMove.ts`  

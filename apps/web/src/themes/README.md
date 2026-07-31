@@ -366,6 +366,15 @@ Tokens read by global code in `styles/*.css` are **universal**. Themes override 
 | `--victory-burst-distance-scale`                        | number      | `0.88` (desktop), `0.72` (mobile)                     | burst geometry                                                 |
 | `--victory-shine-opacity` / `--victory-flyby-opacity`   | number      | `0`                                                   | optional victory layers                                        |
 
+### Keyboard-layer classes
+
+Two utilities in `styles/utilities.css` that themes may restyle but never have to:
+
+| Class             | Where                                | Notes                                                                                                                                                                                                                                                                                                                                                                               |
+| ----------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.key-hint-badge` | under each of the local seat's piles | Borrows the version badge's recipe (`text-xs`, `text-muted-foreground/80`, tabular figures) rather than its `.app-version-badge` class — minecraft and glass restyle that one into a footer chip, which is wrong repeated across the board. Absolute and `opacity-0` at rest; `body[data-key-hints='visible']` fades it in. Must never take layout, or every visual baseline moves. |
+| `.shortcut-key`   | keycaps in the `?` cheat sheet       | `bg-secondary` / `text-secondary-foreground`, so it follows the theme without per-theme work.                                                                                                                                                                                                                                                                                       |
+
 ### Theme-internal tokens (private to one theme)
 
 Each theme can declare additional tokens that are only read inside its own block. Keep a meaningful prefix.
@@ -421,6 +430,7 @@ These all have shown up in past incidents or get debated in review. Skip them.
 - `background:` shorthand on body or anywhere that needs a stable `background-color` (see §4.1).
 - Splitting a theme into multiple sibling `.theme-<name> selector { ... }` rules instead of one nested block (see §3.4).
 - Space-separated multi-layer gradients (see §4.3).
+- Structural selectors (`:only-child`, `:last-child`, `:nth-last-child(… of …)`) that identify a pile's cards by "not the empty placeholder". Say `.card` explicitly. Pile containers hold non-card children too — the keyboard hint badge is one — and a looser set silently hands "topmost card" to one of them. This broke Metro's discard collapse when the badges landed.
 
 ## 11. Readability contract
 
