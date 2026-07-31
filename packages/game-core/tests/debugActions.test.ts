@@ -1,7 +1,28 @@
-import { describe, it, expect } from 'vitest';
-import { initialGameState } from '@skipbo/game-core';
-import { gameReducer } from '@skipbo/game-core';
-import type { Card } from '@skipbo/game-core';
+import { describe, expect, it } from 'vitest';
+
+import { gameReducer } from '../src/state/gameReducer.js';
+import { initialGameState } from '../src/state/initialGameState.js';
+import type { Card } from '../src/types/index.js';
+
+describe('DEBUG_FILL_BUILD_PILE action', () => {
+  it('prepares the first build pile for retreat animation testing', () => {
+    const state = initialGameState();
+    state.selectedCard = {
+      card: { value: 3, isSkipBo: false },
+      source: 'hand',
+      index: 2,
+    };
+
+    const next = gameReducer(state, { type: 'DEBUG_FILL_BUILD_PILE', buildPile: 0 });
+
+    expect(next.buildPiles[0]).toHaveLength(11);
+    expect(next.buildPiles[0][0]).toEqual({ value: 1, isSkipBo: false });
+    expect(next.buildPiles[0][10]).toEqual({ value: 11, isSkipBo: false });
+    expect(next.players[0].hand[0]).toEqual({ value: 12, isSkipBo: false });
+    expect(next.selectedCard).toBeNull();
+    expect(next.message).toEqual({ code: 'DEBUG_BUILD_PILE_READY' });
+  });
+});
 
 describe('DEBUG_SET_AI_HAND action', () => {
   it('sets the AI hand to provided values and pads to hand size', () => {

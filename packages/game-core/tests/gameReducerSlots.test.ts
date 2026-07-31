@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import { gameReducer, initialGameState } from '@skipbo/game-core';
-import type { GameState, Card } from '@skipbo/game-core';
+
+import { gameReducer } from '../src/state/gameReducer.js';
+import { initialGameState } from '../src/state/initialGameState.js';
+import type { Card, GameState } from '../src/types/index.js';
 
 describe('Game Reducer - Hand Slots', () => {
   let state: GameState;
