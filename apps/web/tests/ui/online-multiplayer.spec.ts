@@ -120,6 +120,54 @@ test.describe('Online multiplayer', () => {
     }
   });
 
+  test('@desktop the keyboard drives a move that reaches the other seat', async ({ browser }) => {
+    const hostContext = await browser.newContext();
+    const guestContext = await browser.newContext();
+    const hostPage = await hostContext.newPage();
+    const guestPage = await guestContext.newPage();
+
+    try {
+      await openApp(hostPage);
+      await hostPage.getByTestId('new-game-trigger').click();
+      await hostPage.getByTestId('new-game-mode-create-online').click();
+      await hostPage.getByTestId('new-game-create-online').click();
+      await expect(hostPage.getByRole('heading', { name: "Salle d'attente" })).toBeVisible();
+      const roomCode = [...relay.rooms.keys()].at(-1)!;
+
+      await openApp(guestPage);
+      await guestPage.getByTestId('new-game-trigger').click();
+      await guestPage.getByTestId('new-game-mode-join-online').click();
+      await guestPage.getByTestId('new-game-room-code-input').fill(roomCode);
+      await guestPage.getByTestId('new-game-join-online').click();
+
+      await readyUp(guestPage, GUEST_NAME);
+      await readyUp(hostPage, HOST_NAME);
+      await hostPage.getByRole('button', { name: 'Démarrer la partie' }).click();
+      await expect(hostPage.getByTestId('game-message')).toHaveText("C'est votre tour");
+
+      const hostArea = hostPage.getByTestId('human-player-area');
+      const cardValue = (await hostArea.getByLabel('Hand card 1').locator('.card-number').innerText()).trim();
+
+      // Select with `w`, arm défausse 1 with `u`, confirm with Space.
+      await hostPage.keyboard.press('w');
+      await expect(hostPage.getByTestId('game-message')).toHaveText('Sélectionnez une destination');
+
+      await hostPage.keyboard.press('u');
+      await expect(hostArea.locator('[data-pile-index="0"]')).toHaveAttribute('data-armed', 'true');
+
+      await hostPage.keyboard.press('Space');
+
+      // The keyboard move goes through the host runtime and lands on the guest.
+      await expect(hostPage.getByTestId('game-message')).toHaveText(new RegExp(`Tour de ${GUEST_NAME}`));
+      await expect(
+        guestPage.locator('[data-testid="ai-player-area"] .discard-pile-stack[data-pile-index="0"] .card-number'),
+      ).toHaveText(cardValue);
+    } finally {
+      await hostContext.close();
+      await guestContext.close();
+    }
+  });
+
   test('@desktop guest cannot join a started game', async ({ browser, page }) => {
     const hostContext = await browser.newContext();
     const guestContext = await browser.newContext();

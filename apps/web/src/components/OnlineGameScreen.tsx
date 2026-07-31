@@ -8,6 +8,7 @@ import { LobbyDialog, LobbyRemovedDialog } from '@/components/LobbyDialog';
 import { LocalGameBoard } from '@/components/LocalGameBoard';
 import { OnlineGameBoard } from '@/components/OnlineGameBoard';
 import { OnlineStatusStrip } from '@/components/OnlineStatusStrip';
+import { BoardKeyboardProvider } from '@/contexts/BoardKeyboardContext';
 import { useLocalSkipBoGame } from '@/hooks/useLocalSkipBoGame';
 import { useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
 import { buildGameStatsSnapshot, shouldRecordOnlineStats, useGameStatsRecorder } from '@/hooks/useGameStatsRecorder';
@@ -145,14 +146,26 @@ function OnlineGameScreen({
         canPlayCard={canPlayCard}
       />
     ) : (
-      <OnlineGameBoard
+      // Gated on a real game view: `useOnlineSkipBoGame` hands back a seat-capacity
+      // placeholder state until the first view is ingested, and driving the
+      // keyboard against that would resolve moves on cards nobody holds.
+      <BoardKeyboardProvider
+        enabled={hasGameView}
         gameState={gameState}
         selectCard={selectCard}
         playCard={playCard}
         discardCard={discardCard}
         clearSelection={clearSelection}
-        canPlayCard={canPlayCard}
-      />
+      >
+        <OnlineGameBoard
+          gameState={gameState}
+          selectCard={selectCard}
+          playCard={playCard}
+          discardCard={discardCard}
+          clearSelection={clearSelection}
+          canPlayCard={canPlayCard}
+        />
+      </BoardKeyboardProvider>
     );
 
   return (
