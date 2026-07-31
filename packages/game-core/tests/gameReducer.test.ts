@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { gameReducer } from '@skipbo/game-core';
-import { initialGameState } from '@skipbo/game-core';
-import type { GameState } from '@skipbo/game-core';
+
+import { gameReducer } from '../src/state/gameReducer.js';
+import { initialGameState } from '../src/state/initialGameState.js';
+import type { GameState } from '../src/types/index.js';
 
 describe('gameReducer', () => {
   let initialState: GameState;
