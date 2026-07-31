@@ -1,5 +1,7 @@
 import { canPlayCard, type GameState } from '@skipbo/game-core';
 
+import { resolvePileIntent, type BoardIntent } from '@/game/pileIntents';
+
 /**
  * Desktop keyboard layer. The physical key rows mirror the board rows: the digit
  * row drives the construction piles (rendered above), the top letter row drives
@@ -111,14 +113,28 @@ export function shouldIgnoreKeyEvent(event: KeyEventFlags, environment: KeyEvent
   return environment.isActivatable && (event.code === 'Space' || event.code === 'Enter');
 }
 
+/**
+ * Pile presses reuse the board-wide {@link BoardIntent} outcomes; the rest are
+ * keyboard-only. `discard` is deliberately excluded — a click discards on the
+ * spot, but the keyboard arms first and commits on Space (see
+ * {@link toKeyboardIntent}).
+ */
 export type KeyboardIntent =
-  | { kind: 'select'; source: 'hand' | 'stock' | 'discard'; index: number; discardPileIndex?: number }
-  | { kind: 'clearSelection' }
+  | Exclude<BoardIntent, { kind: 'discard' }>
   | { kind: 'play'; buildPile: number }
   | { kind: 'armDiscard'; discardPile: number }
   | { kind: 'confirmDiscard'; discardPile: number }
   | { kind: 'disarm' }
   | { kind: 'help' };
+
+/**
+ * The keyboard's only departure from the click behaviour: an immediate discard
+ * becomes an armed one. A discard is irreversible and ends the turn, and a
+ * mistyped letter is far easier than a mis-aimed click, so it waits for a Space
+ * confirmation. Every other pile outcome passes through untouched.
+ */
+const toKeyboardIntent = (intent: BoardIntent | null): KeyboardIntent | null =>
+  intent?.kind === 'discard' ? { kind: 'armDiscard', discardPile: intent.discardPile } : intent;
 
 export interface KeyboardEventLike {
   /** Physical key identity — what every board binding matches on. */
@@ -177,62 +193,26 @@ export function resolveKeyboardIntent(
     return null;
   }
 
+  // Every pile binding below defers to `resolvePileIntent`, so a key press and a
+  // click on the same pile can no longer disagree.
   if (code === STOCK_KEY) {
-    const topIndex = player.stockPile.length - 1;
-
-    if (topIndex < 0) {
-      return null;
-    }
-
-    // Mirrors the click behaviour in StockPile: pressing the pile you already
-    // have selected deselects it.
-    if (selectedCard?.source === 'stock') {
-      return { kind: 'clearSelection' };
-    }
-
-    return { kind: 'select', source: 'stock', index: topIndex };
+    return toKeyboardIntent(resolvePileIntent({ kind: 'stock', playerIndex: LOCAL_PLAYER_INDEX }, gameState));
   }
 
   const handIndex = HAND_KEYS.indexOf(code);
 
   if (handIndex >= 0) {
-    // Hands are fixed-length with `null` holes, so an in-range index is not
-    // proof of a card.
-    if (handIndex >= player.hand.length || !player.hand[handIndex]) {
-      return null;
-    }
-
-    if (selectedCard?.source === 'hand' && selectedCard.index === handIndex) {
-      return { kind: 'clearSelection' };
-    }
-
-    return { kind: 'select', source: 'hand', index: handIndex };
+    return toKeyboardIntent(
+      resolvePileIntent({ kind: 'hand', playerIndex: LOCAL_PLAYER_INDEX, index: handIndex }, gameState),
+    );
   }
 
   const discardIndex = DISCARD_KEYS.indexOf(code);
 
   if (discardIndex >= 0) {
-    if (discardIndex >= player.discardPiles.length) {
-      return null;
-    }
-
-    // Contextual, exactly as the pile behaves under the mouse: with a hand card
-    // in hand it is a discard target, otherwise it is a card source.
-    if (selectedCard?.source === 'hand') {
-      return { kind: 'armDiscard', discardPile: discardIndex };
-    }
-
-    const pile = player.discardPiles[discardIndex];
-
-    if (pile.length === 0) {
-      return null;
-    }
-
-    if (selectedCard?.source === 'discard' && selectedCard.discardPileIndex === discardIndex) {
-      return { kind: 'clearSelection' };
-    }
-
-    return { kind: 'select', source: 'discard', index: pile.length - 1, discardPileIndex: discardIndex };
+    return toKeyboardIntent(
+      resolvePileIntent({ kind: 'discard', playerIndex: LOCAL_PLAYER_INDEX, index: discardIndex }, gameState),
+    );
   }
 
   const buildIndex = BUILD_KEYS.indexOf(code);

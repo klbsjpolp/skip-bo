@@ -6,6 +6,7 @@ import { EmptyCard } from '@/components/EmptyCard.tsx';
 import { KeyHint } from '@/components/KeyHint';
 import { useIsDiscardPileArmed } from '@/contexts/useBoardKeyboard';
 import { DISCARD_KEYS } from '@/game/keyboardActions';
+import { applyBoardIntent, canDiscardFromSource, resolvePileIntent } from '@/game/pileIntents';
 import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
 import { useDrag, useIsDragSource } from '@/contexts/useDrag';
 import { useDraggableCard } from '@/hooks/useDraggableCard';
@@ -113,22 +114,15 @@ function DiscardPile({
   const canInteract = isHuman && isCurrentPlayer;
 
   const handleDiscardPilePress = () => {
-    if (isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand') {
-      void discardCard(pileIndex);
-    } else if (isHuman && isCurrentPlayer) {
-      if (
-        gameState.selectedCard?.source === 'discard' &&
-        gameState.selectedCard.discardPileIndex === pileIndex &&
-        gameState.currentPlayerIndex === playerIndex
-      ) {
-        clearSelection();
-      } else {
-        selectCard('discard', pile.length - 1, pileIndex);
-      }
-    }
+    applyBoardIntent(resolvePileIntent({ kind: 'discard', playerIndex, index: pileIndex }, gameState), {
+      selectCard,
+      clearSelection,
+      discardCard,
+    });
   };
 
-  const canDropFromSelection = isHuman && isCurrentPlayer && gameState.selectedCard?.source === 'hand';
+  const canDropFromSelection =
+    isHuman && isCurrentPlayer && !!gameState.selectedCard && canDiscardFromSource(gameState.selectedCard.source);
   const isDragActive = dragSession !== null;
   const canDropFromDrag =
     isDragActive &&

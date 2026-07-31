@@ -6,6 +6,7 @@ import { KeyHint } from '@/components/KeyHint';
 import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
 import { useIsDragSource } from '@/contexts/useDrag';
 import { HAND_KEYS } from '@/game/keyboardActions';
+import { applyBoardIntent, resolvePileIntent } from '@/game/pileIntents';
 import { useDraggableCard } from '@/hooks/useDraggableCard';
 import { cn } from '@/lib/utils';
 import { HAND_Y_OFFSETS } from '@/utils/cardPositions';
@@ -38,18 +39,16 @@ export function HandSection({
   const handCardOnClick: MouseEventHandler = (e) => {
     e.stopPropagation();
 
-    if (isHuman && isCurrentPlayer) {
-      const index = parseInt(e.currentTarget.parentElement?.getAttribute('data-card-index') || '');
-      if (
-        gameState.selectedCard?.source === 'hand' &&
-        gameState.selectedCard.index === index &&
-        gameState.currentPlayerIndex === playerIndex
-      ) {
-        clearSelection();
-      } else {
-        selectCard('hand', index);
-      }
-    }
+    // The only DOM-derived part of the decision; everything after it is the
+    // shared, pure resolver. A missing or malformed attribute yields `NaN`,
+    // which resolves to an empty slot and so to no intent at all.
+    const index = parseInt(e.currentTarget.parentElement?.getAttribute('data-card-index') || '');
+
+    applyBoardIntent(resolvePileIntent({ kind: 'hand', playerIndex, index }, gameState), {
+      selectCard,
+      clearSelection,
+      discardCard,
+    });
   };
 
   return (

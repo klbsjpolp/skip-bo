@@ -6,6 +6,7 @@ import { EmptyCard } from '@/components/EmptyCard.tsx';
 import { KeyHint } from '@/components/KeyHint';
 import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
 import { STOCK_KEY } from '@/game/keyboardActions';
+import { applyBoardIntent, resolvePileIntent } from '@/game/pileIntents';
 import { useIsDragSource } from '@/contexts/useDrag';
 import { useDraggableCard } from '@/hooks/useDraggableCard';
 import { cn } from '@/lib/utils';
@@ -49,13 +50,11 @@ export function StockPile({
   const stockPileOnClick: MouseEventHandler = (e) => {
     e.stopPropagation();
 
-    if (isHuman && isCurrentPlayer) {
-      if (gameState.selectedCard?.source === 'stock' && gameState.currentPlayerIndex === playerIndex) {
-        clearSelection();
-      } else {
-        selectCard('stock', player.stockPile.length - 1);
-      }
-    }
+    applyBoardIntent(resolvePileIntent({ kind: 'stock', playerIndex }, gameState), {
+      selectCard,
+      clearSelection,
+      discardCard,
+    });
   };
 
   return (
