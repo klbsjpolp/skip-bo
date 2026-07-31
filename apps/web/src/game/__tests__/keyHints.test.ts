@@ -94,6 +94,12 @@ describe('hasKeyboardPointer', () => {
 
     expect(hasKeyboardPointer()).toBe(false);
   });
+
+  it('is false where matchMedia does not exist, rather than throwing', () => {
+    vi.stubGlobal('matchMedia', undefined);
+
+    expect(hasKeyboardPointer()).toBe(false);
+  });
 });
 
 describe('resolveKeyLabels', () => {

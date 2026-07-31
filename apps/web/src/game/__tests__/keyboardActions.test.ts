@@ -84,6 +84,51 @@ describe('resolveKeyboardIntent — selection', () => {
     expect(resolve(state, 'KeyW')).toEqual({ kind: 'clearSelection' });
   });
 
+  it('deselects the stock when q is pressed twice', () => {
+    const state = boardOnLocalTurn();
+    state.selectedCard = { card: card(9), source: 'stock', index: 1 };
+
+    expect(resolve(state, 'KeyQ')).toEqual({ kind: 'clearSelection' });
+  });
+
+  it('deselects a discard pile when its own key is pressed again', () => {
+    const state = boardOnLocalTurn();
+    state.selectedCard = { card: card(6), source: 'discard', index: 0, discardPileIndex: 0 };
+
+    expect(resolve(state, 'KeyU')).toEqual({ kind: 'clearSelection' });
+  });
+
+  it('moves the selection to another discard pile rather than deselecting', () => {
+    const state = boardOnLocalTurn();
+    state.players[0].discardPiles = [[card(6)], [card(2)], [], []];
+    state.selectedCard = { card: card(6), source: 'discard', index: 0, discardPileIndex: 0 };
+
+    expect(resolve(state, 'KeyI')).toEqual({
+      kind: 'select',
+      source: 'discard',
+      index: 0,
+      discardPileIndex: 1,
+    });
+  });
+
+  it('ignores a discard key pointing past the last pile', () => {
+    const state = boardOnLocalTurn();
+    // A board configured with fewer discard piles than there are keys.
+    state.players[0].discardPiles = [[card(6)], []];
+
+    expect(resolve(state, 'KeyO')).toBeNull();
+    expect(resolve(state, 'KeyP')).toBeNull();
+  });
+
+  it('ignores a build key pointing past the last pile', () => {
+    const state = boardOnLocalTurn();
+    state.buildPiles = [[], []];
+    state.selectedCard = { card: card(1), source: 'hand', index: 0 };
+
+    expect(resolve(state, 'Digit4')).toBeNull();
+    expect(resolve(state, 'Digit5')).toBeNull();
+  });
+
   it('moves the selection when a different hand key is pressed', () => {
     const state = boardOnLocalTurn();
     state.selectedCard = { card: card(1), source: 'hand', index: 0 };

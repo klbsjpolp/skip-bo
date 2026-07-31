@@ -1,12 +1,13 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { initialGameState, type Card, type GameState, type MoveResult } from '@skipbo/game-core';
 
 import { BoardKeyboardProvider } from '@/contexts/BoardKeyboardContext';
 import { CardAnimationProvider } from '@/contexts/CardAnimationContext';
 import { useBoardKeyboard } from '@/contexts/useBoardKeyboard';
+import { ACTIVITY_REVEAL_MS, AUTO_REVEAL_DELAY_MS, AUTO_REVEAL_MS, markKeyHintsSeenThisSession } from '@/game/keyHints';
 
 const card = (value: number, isSkipBo = false): Card => ({ value, isSkipBo });
 
@@ -84,8 +85,19 @@ const mount = (gameState: GameState, enabled = true) => {
 const pressOnWindow = (code: string, init: Partial<KeyboardEventInit> = {}) =>
   fireEvent.keyDown(window, { code, key: '', ...init });
 
+const hintsAreVisible = () => document.body.getAttribute('data-key-hints') === 'visible';
+
 beforeEach(() => {
   handlers = createHandlers();
+  sessionStorage.clear();
+  // A desktop pointer, so the unprompted reveal is allowed to fire.
+  vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }));
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+  document.body.removeAttribute('data-key-hints');
 });
 
 describe('BoardKeyboardProvider', () => {
@@ -196,5 +208,123 @@ describe('BoardKeyboardProvider', () => {
     pressOnWindow('KeyW');
 
     expect(handlers.selectCard).not.toHaveBeenCalled();
+  });
+
+  it('opens the cheat sheet on ?, listing every binding', () => {
+    mount(createGameState());
+
+    fireEvent.keyDown(window, { code: 'Slash', key: '?' });
+
+    const sheet = screen.getByTestId('keyboard-shortcuts-dialog');
+    // 4 build + 1 talon + 5 hand + 4 discard, plus Space, Enter, Escape and Alt.
+    expect(sheet.querySelectorAll('kbd')).toHaveLength(18);
+    expect(screen.getByText('Raccourcis clavier')).toBeTruthy();
+  });
+
+  it('does not act on the board while the cheat sheet is open', () => {
+    mount(createGameState());
+
+    fireEvent.keyDown(window, { code: 'Slash', key: '?' });
+    pressOnWindow('KeyW');
+
+    expect(handlers.selectCard).not.toHaveBeenCalled();
+  });
+});
+
+describe('BoardKeyboardProvider — hint reveal', () => {
+  it('reveals the badges unprompted on the first settled turn, then hides them', () => {
+    vi.useFakeTimers();
+    mount(createGameState());
+
+    expect(hintsAreVisible()).toBe(false);
+
+    // A short delay lets the first interactive frame settle before fading in.
+    act(() => void vi.advanceTimersByTime(AUTO_REVEAL_DELAY_MS));
+    expect(hintsAreVisible()).toBe(true);
+
+    act(() => void vi.advanceTimersByTime(AUTO_REVEAL_MS));
+    expect(hintsAreVisible()).toBe(false);
+  });
+
+  it('fires the unprompted reveal only once per session', () => {
+    markKeyHintsSeenThisSession();
+    vi.useFakeTimers();
+    mount(createGameState());
+
+    act(() => void vi.advanceTimersByTime(AUTO_REVEAL_DELAY_MS + AUTO_REVEAL_MS));
+
+    expect(hintsAreVisible()).toBe(false);
+  });
+
+  it('leaves the badges down on a touch-primary device', () => {
+    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: false }));
+    vi.useFakeTimers();
+    mount(createGameState());
+
+    act(() => void vi.advanceTimersByTime(AUTO_REVEAL_DELAY_MS));
+
+    expect(hintsAreVisible()).toBe(false);
+  });
+
+  it('waits for the local turn before revealing', () => {
+    vi.useFakeTimers();
+    mount(createGameState({ currentPlayerIndex: 1 }));
+
+    act(() => void vi.advanceTimersByTime(AUTO_REVEAL_DELAY_MS));
+
+    expect(hintsAreVisible()).toBe(false);
+  });
+
+  it('brings the badges back on any key press, then hides them again when idle', () => {
+    markKeyHintsSeenThisSession();
+    vi.useFakeTimers();
+    mount(createGameState());
+
+    // An unbound key still counts — pressing one is exactly the signal that the
+    // player wants the keyboard and does not know the map.
+    act(() => pressOnWindow('KeyK'));
+    expect(hintsAreVisible()).toBe(true);
+
+    act(() => void vi.advanceTimersByTime(ACTIVITY_REVEAL_MS));
+    expect(hintsAreVisible()).toBe(false);
+  });
+
+  it('holds the badges up for as long as Alt is down, without acting on the board', () => {
+    markKeyHintsSeenThisSession();
+    mount(createGameState());
+
+    act(() => void fireEvent.keyDown(window, { code: 'AltLeft', key: 'Alt' }));
+    expect(hintsAreVisible()).toBe(true);
+    expect(handlers.selectCard).not.toHaveBeenCalled();
+
+    // Releasing some other key mid-hold must not drop the badges.
+    act(() => void fireEvent.keyUp(window, { code: 'KeyW', key: 'w' }));
+    expect(hintsAreVisible()).toBe(true);
+
+    act(() => void fireEvent.keyUp(window, { code: 'AltLeft', key: 'Alt' }));
+    expect(hintsAreVisible()).toBe(false);
+  });
+
+  it('releases the Alt hold when the window loses focus', () => {
+    // Alt-Tabbing away never delivers the keyup, which would otherwise strand
+    // the badges on until the next Alt press.
+    markKeyHintsSeenThisSession();
+    mount(createGameState());
+
+    act(() => void fireEvent.keyDown(window, { code: 'AltLeft', key: 'Alt' }));
+    expect(hintsAreVisible()).toBe(true);
+
+    act(() => void fireEvent.blur(window));
+    expect(hintsAreVisible()).toBe(false);
+  });
+
+  it('keeps the badges down entirely while disabled', () => {
+    vi.useFakeTimers();
+    mount(createGameState(), false);
+
+    act(() => void vi.advanceTimersByTime(AUTO_REVEAL_DELAY_MS));
+    act(() => void fireEvent.keyDown(window, { code: 'AltLeft', key: 'Alt' }));
+
+    expect(hintsAreVisible()).toBe(false);
   });
 });
