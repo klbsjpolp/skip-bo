@@ -3,6 +3,7 @@ import type { PointerEvent as ReactPointerEvent } from 'react';
 import type { Card, GameState, MoveResult } from '@skipbo/game-core';
 import { canPlayCard } from '@skipbo/game-core';
 import { useDrag, type DragSource, type DragTargetId } from '@/contexts/useDrag';
+import { canDiscardFromSource } from '@/game/pileIntents';
 import { setDragCommitOverride } from '@/services/dragCommitOverride';
 
 const DRAG_THRESHOLD_PX = 5;
@@ -24,7 +25,9 @@ const computeValidTargets = (card: Card, source: DragSource, gameState: GameStat
     if (canPlayCard(card, i, gameState)) validBuildPiles.add(i);
   }
   const validDiscardPiles = new Set<number>();
-  if (source.kind === 'hand') {
+  // Same rule the click and keyboard paths resolve through — a discard pile
+  // accepts a hand card and nothing else.
+  if (canDiscardFromSource(source.kind)) {
     for (let i = 0; i < gameState.config.DISCARD_PILES_COUNT; i++) {
       validDiscardPiles.add(i);
     }
