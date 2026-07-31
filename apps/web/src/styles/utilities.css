@@ -19,6 +19,30 @@
   @apply text-sm text-muted-foreground;
 }
 
+/*
+  Keyboard shortcut badge under a pile.
+
+  Deliberately absolute and always mounted: at rest it is transparent and takes
+  no layout, so the board is pixel-identical with the hints down and the
+  committed visual baselines never have to account for it. Visibility is driven
+  by a body attribute the BoardKeyboardProvider toggles, the same way
+  `data-drag-active` lights up drop targets.
+
+  It borrows the version badge's recipe (`text-xs`, muted foreground, tabular
+  figures) rather than its `.app-version-badge` class: 15 of 17 themes leave that
+  class to those utilities, but minecraft and glass restyle it into a chunky
+  footer chip that would be wrong repeated thirteen times across the board. A
+  theme that wants its own treatment can target `.key-hint-badge` directly.
+*/
+@utility key-hint-badge {
+  @apply pointer-events-none absolute left-1/2 -bottom-4 z-30 -translate-x-1/2 text-xs font-semibold uppercase tabular-nums text-muted-foreground/80;
+  @apply opacity-0 transition-opacity duration-200 ease-out motion-reduce:transition-none;
+
+  body[data-key-hints='visible'] & {
+    @apply opacity-100;
+  }
+}
+
 @utility vertical-text {
   /* Lock the perpendicular extent so themes can change font-size / font-family
      without shifting cards next to vertical labels. Width is fixed; the box is

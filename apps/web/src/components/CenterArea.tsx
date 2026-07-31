@@ -1,6 +1,8 @@
 import type { Card as CardType, GameState } from '@skipbo/game-core';
 import { Card } from '@/components/Card';
 import { EmptyCard } from '@/components/EmptyCard.tsx';
+import { KeyHint } from '@/components/KeyHint';
+import { BUILD_KEYS } from '@/game/keyboardActions';
 import { cn } from '@/lib/utils';
 import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
 import { useDrag } from '@/contexts/useDrag';
@@ -195,6 +197,7 @@ export function CenterArea({ gameState, playCard, canPlayCard }: CenterAreaProps
                       className={cn('drop-indicator', canDropSelectedCard && 'can-drop')}
                     />
                   )}
+                  <KeyHint code={BUILD_KEYS[index]} />
                 </div>
               );
             })}
