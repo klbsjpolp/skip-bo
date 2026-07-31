@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.14.0](https://github.com/klbsjpolp/skip-bo/compare/v2.13.7...v2.14.0) (2026-07-31)
+
+### Features
+
+* **web:** add key hint badges with a two-part reveal ([a623555](https://github.com/klbsjpolp/skip-bo/commit/a623555589b3a1695e41e43f2f249f593145dd3b))
+* **web:** add keyboard intent resolver ([9bc465a](https://github.com/klbsjpolp/skip-bo/commit/9bc465a75cc27b7240788554f985054d3c82c8f6))
+* **web:** add the ? keyboard cheat sheet ([4833307](https://github.com/klbsjpolp/skip-bo/commit/4833307305417a68b366db6c15c0055378b6582f))
+* **web:** enable keyboard play in online games ([5fb60ca](https://github.com/klbsjpolp/skip-bo/commit/5fb60ca6c3e21e58a6c8234b133a5ef6b698700b))
+* **web:** play the board from the keyboard ([12aed7d](https://github.com/klbsjpolp/skip-bo/commit/12aed7d5eda3e3782a2c51b91b50adba1583a2b2))
 ## [2.13.7](https://github.com/klbsjpolp/skip-bo/compare/v2.13.6...v2.13.7) (2026-07-30)
 ## [2.13.6](https://github.com/klbsjpolp/skip-bo/compare/v2.13.5...v2.13.6) (2026-07-30)
 
