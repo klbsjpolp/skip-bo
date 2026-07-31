@@ -140,7 +140,9 @@ export function LobbyDialog({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground">Code de partie</p>
-              <p className="font-mono text-2xl font-bold tracking-[0.25em]">{roomCode}</p>
+              <p className="font-mono text-2xl font-bold tracking-[0.25em]" data-testid="lobby-room-code">
+                {roomCode}
+              </p>
             </div>
             {import.meta.env.DEV && (
               <Button type="button" size="sm" variant="outline" onClick={() => void handleCopy()}>

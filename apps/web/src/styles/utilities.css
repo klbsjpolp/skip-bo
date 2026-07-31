@@ -41,6 +41,19 @@
   body[data-key-hints='visible'] & {
     @apply opacity-100;
   }
+
+  /* Fanned hand: the holder must stay static, because the cards inside it are
+     absolutely positioned against `.hand-area` (see layout.css). The badge
+     therefore anchors to `.hand-area` too, and is placed on its slot's column
+     from the index the holder declares — the component never states the fan
+     geometry itself.
+
+     This lives here rather than in layout.css because that file is `@layer
+     base`, and the utilities layer's own `left-1/2` would win over it. */
+  .overlap-hand & {
+    @apply w-card translate-x-0 text-center;
+    left: calc(var(--hand-slot-index) * (var(--card-width) - 10px));
+  }
 }
 
 /* Keycap in the shortcuts cheat sheet. */

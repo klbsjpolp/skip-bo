@@ -41,6 +41,47 @@ test.describe('Online multiplayer', () => {
     await page.getByRole('button', { name: 'Je suis prêt' }).click();
   };
 
+  /**
+   * Creates a room and returns its code, read from the host's own lobby rather
+   * than from `relay.rooms` — these specs run in parallel against one relay, so
+   * "the most recently created room" can belong to a different test.
+   */
+  const createRoom = async (hostPage: Page): Promise<string> => {
+    await openApp(hostPage);
+    await hostPage.getByTestId('new-game-trigger').click();
+    await hostPage.getByTestId('new-game-mode-create-online').click();
+    await hostPage.getByTestId('new-game-create-online').click();
+    await expect(hostPage.getByRole('heading', { name: "Salle d'attente" })).toBeVisible();
+
+    const roomCode = (await hostPage.getByTestId('lobby-room-code').innerText()).trim();
+    expect(roomCode).not.toBe('');
+    return roomCode;
+  };
+
+  const joinRoom = async (guestPage: Page, roomCode: string) => {
+    await openApp(guestPage);
+    await guestPage.getByTestId('new-game-trigger').click();
+    await guestPage.getByTestId('new-game-mode-join-online').click();
+    await guestPage.getByTestId('new-game-room-code-input').fill(roomCode);
+    await guestPage.getByTestId('new-game-join-online').click();
+  };
+
+  /**
+   * Lobby to first move. The mock relay does not shuffle seats, so the host
+   * always plays first once this resolves.
+   */
+  const startTwoSeatGame = async (hostPage: Page, guestPage: Page): Promise<string> => {
+    const roomCode = await createRoom(hostPage);
+    await joinRoom(guestPage, roomCode);
+
+    await readyUp(guestPage, GUEST_NAME);
+    await readyUp(hostPage, HOST_NAME);
+    await hostPage.getByRole('button', { name: 'Démarrer la partie' }).click();
+    await expect(hostPage.getByTestId('game-message')).toHaveText("C'est votre tour");
+
+    return roomCode;
+  };
+
   /** Selects the first hand card and discards it onto the first discard pile. */
   const discardFirstHandCard = async (page: Page): Promise<string> => {
     const localArea = page.getByTestId('human-player-area');
@@ -67,8 +108,9 @@ test.describe('Online multiplayer', () => {
 
       const hostLobby = hostPage.getByRole('dialog', { name: "Salle d'attente" });
       await expect(hostLobby).toBeVisible();
-      const roomCode = [...relay.rooms.keys()].at(-1)!;
-      await expect(hostLobby.getByText(roomCode, { exact: true })).toBeVisible();
+      const roomCode = (await hostLobby.getByTestId('lobby-room-code').innerText()).trim();
+      // The relay really did create this room — the code on screen is not a stub.
+      expect(relay.rooms.has(roomCode)).toBe(true);
 
       // --- Guest joins with the room code ---------------------------------
       await openApp(guestPage);
@@ -127,23 +169,7 @@ test.describe('Online multiplayer', () => {
     const guestPage = await guestContext.newPage();
 
     try {
-      await openApp(hostPage);
-      await hostPage.getByTestId('new-game-trigger').click();
-      await hostPage.getByTestId('new-game-mode-create-online').click();
-      await hostPage.getByTestId('new-game-create-online').click();
-      await expect(hostPage.getByRole('heading', { name: "Salle d'attente" })).toBeVisible();
-      const roomCode = [...relay.rooms.keys()].at(-1)!;
-
-      await openApp(guestPage);
-      await guestPage.getByTestId('new-game-trigger').click();
-      await guestPage.getByTestId('new-game-mode-join-online').click();
-      await guestPage.getByTestId('new-game-room-code-input').fill(roomCode);
-      await guestPage.getByTestId('new-game-join-online').click();
-
-      await readyUp(guestPage, GUEST_NAME);
-      await readyUp(hostPage, HOST_NAME);
-      await hostPage.getByRole('button', { name: 'Démarrer la partie' }).click();
-      await expect(hostPage.getByTestId('game-message')).toHaveText("C'est votre tour");
+      await startTwoSeatGame(hostPage, guestPage);
 
       const hostArea = hostPage.getByTestId('human-player-area');
       const cardValue = (await hostArea.getByLabel('Hand card 1').locator('.card-number').innerText()).trim();
@@ -175,23 +201,7 @@ test.describe('Online multiplayer', () => {
     const firstGuestPage = await guestContext.newPage();
 
     try {
-      await openApp(hostPage);
-      await hostPage.getByTestId('new-game-trigger').click();
-      await hostPage.getByTestId('new-game-mode-create-online').click();
-      await hostPage.getByTestId('new-game-create-online').click();
-      await expect(hostPage.getByRole('heading', { name: "Salle d'attente" })).toBeVisible();
-      const roomCode = [...relay.rooms.keys()].at(-1)!;
-
-      await openApp(firstGuestPage);
-      await firstGuestPage.getByTestId('new-game-trigger').click();
-      await firstGuestPage.getByTestId('new-game-mode-join-online').click();
-      await firstGuestPage.getByTestId('new-game-room-code-input').fill(roomCode);
-      await firstGuestPage.getByTestId('new-game-join-online').click();
-
-      await readyUp(firstGuestPage, GUEST_NAME);
-      await readyUp(hostPage, HOST_NAME);
-      await hostPage.getByRole('button', { name: 'Démarrer la partie' }).click();
-      await expect(hostPage.getByTestId('game-message')).toHaveText("C'est votre tour");
+      const roomCode = await startTwoSeatGame(hostPage, firstGuestPage);
 
       // A latecomer is rejected because the room is no longer WAITING.
       await openApp(page);

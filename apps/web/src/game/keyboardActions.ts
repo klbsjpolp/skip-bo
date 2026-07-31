@@ -15,42 +15,35 @@ import { canPlayCard, type GameState } from '@skipbo/game-core';
  * twice over: AZERTY digits need Shift, and its letters sit elsewhere.
  */
 export const STOCK_KEY = 'KeyQ';
-export const HAND_KEYS = ['KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY'] as const;
-export const DISCARD_KEYS = ['KeyU', 'KeyI', 'KeyO', 'KeyP'] as const;
-export const BUILD_KEYS = ['Digit2', 'Digit3', 'Digit4', 'Digit5'] as const;
+export const HAND_KEYS: readonly string[] = ['KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY'];
+export const DISCARD_KEYS: readonly string[] = ['KeyU', 'KeyI', 'KeyO', 'KeyP'];
+export const BUILD_KEYS: readonly string[] = ['Digit2', 'Digit3', 'Digit4', 'Digit5'];
+
+/** Every pile binding, in board order. The single list new bindings are added to. */
+const BOARD_CODES: readonly string[] = [STOCK_KEY, ...HAND_KEYS, ...DISCARD_KEYS, ...BUILD_KEYS];
 
 /** Every code the board layer claims. Used to decide whether to preventDefault. */
-export const BOUND_CODES: ReadonlySet<string> = new Set<string>([
-  STOCK_KEY,
-  ...HAND_KEYS,
-  ...DISCARD_KEYS,
-  ...BUILD_KEYS,
-  'Space',
-  'Enter',
-  'Escape',
-]);
+export const BOUND_CODES: ReadonlySet<string> = new Set<string>([...BOARD_CODES, 'Space', 'Enter', 'Escape']);
 
 /**
- * QWERTY labels for the badges. Overridden at runtime by the real layout via
+ * QWERTY labels for the badges, derived from the codes themselves so a new
+ * binding is labelled automatically rather than needing a second list kept in
+ * sync. Overridden at runtime by the real layout via
  * `navigator.keyboard.getLayoutMap()` where that API exists (Chromium only), so
  * an AZERTY player sees `a z e r t y u i o p` rather than a confident lie.
  */
-export const FALLBACK_KEY_LABELS: Readonly<Record<string, string>> = {
-  KeyQ: 'q',
-  KeyW: 'w',
-  KeyE: 'e',
-  KeyR: 'r',
-  KeyT: 't',
-  KeyY: 'y',
-  KeyU: 'u',
-  KeyI: 'i',
-  KeyO: 'o',
-  KeyP: 'p',
-  Digit2: '2',
-  Digit3: '3',
-  Digit4: '4',
-  Digit5: '5',
-};
+export const FALLBACK_KEY_LABELS: Readonly<Record<string, string>> = Object.fromEntries(
+  BOARD_CODES.map((code) => [code, code.replace(/^(?:Key|Digit)/, '').toLowerCase()]),
+);
+
+/**
+ * The seat the keyboard drives, and the only one whose piles carry hint badges.
+ * Both boards re-centre the local human here — `GameBoard` renders `players[0]`
+ * as the bottom area, and `OnlineGameBoard` renders `players[0]` locally with
+ * every other seat remote — so nothing downstream needs to know which mode it is
+ * in.
+ */
+export const LOCAL_PLAYER_INDEX = 0;
 
 /** What the DOM looked like when the key was pressed, reduced to decisions. */
 export interface KeyEventEnvironment {
@@ -135,14 +128,6 @@ export interface KeyboardEventLike {
 }
 
 /**
- * The seat the keyboard drives. Both boards re-centre the local human to index 0
- * — `GameBoard` renders `players[0]` as the bottom area, and `OnlineGameBoard`
- * renders `players[0]` locally with every other seat remote — so the keyboard
- * never needs to know which mode it is in.
- */
-const LOCAL_PLAYER_INDEX = 0;
-
-/**
  * Maps a key press onto a board intent, or `null` when the press is not
  * actionable (wrong turn, empty slot, illegal target, unbound key).
  *
@@ -208,7 +193,7 @@ export function resolveKeyboardIntent(
     return { kind: 'select', source: 'stock', index: topIndex };
   }
 
-  const handIndex = HAND_KEYS.indexOf(code as (typeof HAND_KEYS)[number]);
+  const handIndex = HAND_KEYS.indexOf(code);
 
   if (handIndex >= 0) {
     // Hands are fixed-length with `null` holes, so an in-range index is not
@@ -224,7 +209,7 @@ export function resolveKeyboardIntent(
     return { kind: 'select', source: 'hand', index: handIndex };
   }
 
-  const discardIndex = DISCARD_KEYS.indexOf(code as (typeof DISCARD_KEYS)[number]);
+  const discardIndex = DISCARD_KEYS.indexOf(code);
 
   if (discardIndex >= 0) {
     if (discardIndex >= player.discardPiles.length) {
@@ -250,7 +235,7 @@ export function resolveKeyboardIntent(
     return { kind: 'select', source: 'discard', index: pile.length - 1, discardPileIndex: discardIndex };
   }
 
-  const buildIndex = BUILD_KEYS.indexOf(code as (typeof BUILD_KEYS)[number]);
+  const buildIndex = BUILD_KEYS.indexOf(code);
 
   if (buildIndex >= 0) {
     if (buildIndex >= gameState.buildPiles.length || !selectedCard) {

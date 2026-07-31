@@ -6,10 +6,11 @@ import type { GameState, MoveResult } from '@skipbo/game-core';
 import { KeyboardShortcutsDialog } from '@/components/KeyboardShortcutsDialog';
 import { BoardKeyboardContext, type BoardKeyboardContextValue } from '@/contexts/useBoardKeyboard';
 import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
-import { useDrag } from '@/contexts/useDrag';
+import { DRAG_ACTIVE_ATTRIBUTE } from '@/contexts/useDrag';
 import {
   BOUND_CODES,
   FALLBACK_KEY_LABELS,
+  LOCAL_PLAYER_INDEX,
   resolveKeyboardIntent,
   shouldIgnoreKeyEvent,
   type KeyEventEnvironment,
@@ -85,7 +86,6 @@ export const BoardKeyboardProvider: FC<BoardKeyboardProviderProps> = ({
   // selection consumed, or end the turn, and a stale highlight would invite a
   // Space that discards something else entirely.
   const [armed, setArmed] = useState<{ pile: number; handIndex: number } | null>(null);
-  const { session: dragSession } = useDrag();
   const { activeAnimations } = useCardAnimation();
 
   // Two independent reveals: `isAltHeld` while the recall gesture is down, and
@@ -106,7 +106,7 @@ export const BoardKeyboardProvider: FC<BoardKeyboardProviderProps> = ({
   useEffect(() => () => clearTimeout(hideTimer.current), []);
 
   const selectedCard = gameState.selectedCard;
-  const isLocalTurn = gameState.currentPlayerIndex === 0 && !gameState.gameIsOver;
+  const isLocalTurn = gameState.currentPlayerIndex === LOCAL_PLAYER_INDEX && !gameState.gameIsOver;
   const armedDiscardPile =
     armed && isLocalTurn && selectedCard?.source === 'hand' && selectedCard.index === armed.handIndex
       ? armed.pile
@@ -115,26 +115,11 @@ export const BoardKeyboardProvider: FC<BoardKeyboardProviderProps> = ({
   // The listener reads the live board through a ref rather than closing over it,
   // so a rebind isn't needed on every state change — and, more importantly, so a
   // key pressed mid-move can never act on a stale board.
-  const latest = useRef({
-    gameState,
-    armedDiscardPile,
-    isDragActive: dragSession !== null,
-    selectCard,
-    playCard,
-    discardCard,
-    clearSelection,
-  });
+  const current = { gameState, armedDiscardPile, selectCard, playCard, discardCard, clearSelection };
+  const latest = useRef(current);
 
   useEffect(() => {
-    latest.current = {
-      gameState,
-      armedDiscardPile,
-      isDragActive: dragSession !== null,
-      selectCard,
-      playCard,
-      discardCard,
-      clearSelection,
-    };
+    latest.current = current;
   });
 
   useEffect(() => {
@@ -149,7 +134,11 @@ export const BoardKeyboardProvider: FC<BoardKeyboardProviderProps> = ({
         isTextEntry: isTextEntryElement(target),
         isActivatable: isActivatableElement(target),
         hasOpenOverlay: document.querySelector(OVERLAY_SELECTOR) !== null,
-        isDragActive: current.isDragActive,
+        // Read from the attribute DragProvider already publishes rather than
+        // subscribing to the drag context: the session object changes on every
+        // pointermove, which would re-render this provider ~60 times a second
+        // for a boolean that flips twice per drag.
+        isDragActive: document.body.hasAttribute(DRAG_ACTIVE_ATTRIBUTE),
         hasArmedDiscard: current.armedDiscardPile !== null,
       };
 
@@ -241,10 +230,13 @@ export const BoardKeyboardProvider: FC<BoardKeyboardProviderProps> = ({
   // `canAutoReveal` to false the moment the flag was written, and the effect
   // cleanup would cancel the very timer that was about to show the badges.
   const [hasSeenHints, setHasSeenHints] = useState(hasSeenKeyHintsThisSession);
+  // Lazy initialiser: the pointer kind cannot change for the life of the page,
+  // and matchMedia allocates a live MediaQueryList on every call.
+  const [isKeyboardPointer] = useState(hasKeyboardPointer);
   const canAutoReveal = shouldAutoRevealKeyHints({
     isEnabled: enabled,
     hasSeenThisSession: hasSeenHints,
-    hasKeyboardPointer: hasKeyboardPointer(),
+    hasKeyboardPointer: isKeyboardPointer,
     isLocalTurn,
     isAnimating: activeAnimations.length > 0,
   });

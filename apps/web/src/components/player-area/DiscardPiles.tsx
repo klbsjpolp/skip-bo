@@ -204,7 +204,7 @@ function DiscardPile({
           />
         );
       })}
-      {isHuman && playerIndex === 0 ? <KeyHint code={DISCARD_KEYS[pileIndex]} /> : null}
+      <KeyHint code={DISCARD_KEYS[pileIndex]} playerIndex={playerIndex} />
     </div>
   );
 }

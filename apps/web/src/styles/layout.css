@@ -30,6 +30,12 @@
 
     &:not(.overlap-hand) {
       @apply flex justify-center gap-2.5;
+
+      /* Flat hand: the holder is a plain flex item, so it can be the badge's
+         containing block and the badge just centres itself under the slot. */
+      .card-holder {
+        @apply relative;
+      }
     }
 
     &.overlap-hand {
