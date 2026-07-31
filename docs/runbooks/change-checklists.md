@@ -42,6 +42,8 @@
 - Run the desktop theme-contract suite for shared board or fixture-visible layout changes.
 - Refresh visual baselines with `pnpm test:visual:update` when the visual change is intentional.
 - Update [../architecture/runtime-invariants.md](../architecture/runtime-invariants.md) if player-order or animation ownership assumptions changed.
+- Adding a child to a pile container (`.discard-pile-stack`, `.build-pile`) can retarget structural CSS that identifies the pile's cards — scope those selectors to `.card` and run the full `pnpm test:visual`, not just theme-contract.
+- New board input paths belong in the pure resolvers (`src/game/keyboardActions.ts` for keyboard) so they clear `codecov/patch` without a render test, and must go through the existing `selectCard` → `playCard`/`discardCard` callbacks rather than dispatching directly.
 
 ## Realtime Protocol Checklist
 

@@ -75,6 +75,7 @@ Use this decision tree, not guesswork:
 ## Common Traps
 
 - `players[0]` and `players[1]` are state order; the rendered board order is different.
+- Adding a child to a pile container (`.discard-pile-stack`, `.build-pile`) can silently retarget structural CSS (`:only-child`, `:nth-last-child(… of …)`) that identifies "the pile's cards". Scope those selectors to `.card`, and run `test:visual`.
 - `END_TURN` is not the place to add start-of-turn draw logic.
 - Removing a hand card means writing `null`, not splicing.
 - Online play is host-authoritative: the server relays opaque messages and never sees game state; the host seat owns the game and redacts hidden information.
