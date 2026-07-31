@@ -172,6 +172,35 @@ test.describe('@desktop keyboard shortcuts', () => {
     await expect(hintsUp).toHaveCount(0);
   });
 
+  test('opens the cheat sheet with ?, on either turn', async ({ page }) => {
+    await gotoApp(page);
+    await waitForHumanTurn(page);
+
+    await page.keyboard.press('?');
+
+    const sheet = page.getByTestId('keyboard-shortcuts-dialog');
+    await expect(sheet).toBeVisible();
+    await expect(sheet.getByRole('heading', { name: 'Raccourcis clavier' })).toBeVisible();
+
+    // Every binding is listed: 4 build + 1 talon + 5 hand + 4 discard, plus
+    // Space, Enter, Escape and Alt.
+    await expect(sheet.locator('kbd')).toHaveCount(18);
+
+    await page.keyboard.press('Escape');
+    await expect(sheet).toHaveCount(0);
+  });
+
+  test('does not let the board act while the cheat sheet is open', async ({ page }) => {
+    await gotoApp(page);
+    await waitForHumanTurn(page);
+
+    await page.keyboard.press('?');
+    await expect(page.getByTestId('keyboard-shortcuts-dialog')).toBeVisible();
+
+    await page.keyboard.press('w');
+    expect(await selectedCardCount(page)).toBe(0);
+  });
+
   test('leaves the board alone while the New Game dialog is open', async ({ page }) => {
     await gotoApp(page);
     await waitForHumanTurn(page);

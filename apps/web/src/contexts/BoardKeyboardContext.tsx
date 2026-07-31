@@ -3,6 +3,7 @@ import type { FC, ReactNode } from 'react';
 
 import type { GameState, MoveResult } from '@skipbo/game-core';
 
+import { KeyboardShortcutsDialog } from '@/components/KeyboardShortcutsDialog';
 import { BoardKeyboardContext, type BoardKeyboardContextValue } from '@/contexts/useBoardKeyboard';
 import { useCardAnimation } from '@/contexts/useCardAnimation.ts';
 import { useDrag } from '@/contexts/useDrag';
@@ -93,6 +94,7 @@ export const BoardKeyboardProvider: FC<BoardKeyboardProviderProps> = ({
   const [isAltHeld, setIsAltHeld] = useState(false);
   const [isTimedVisible, setIsTimedVisible] = useState(false);
   const [keyLabels, setKeyLabels] = useState<Record<string, string>>(FALLBACK_KEY_LABELS);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const revealTemporarily = useCallback((durationMs: number) => {
@@ -207,7 +209,7 @@ export const BoardKeyboardProvider: FC<BoardKeyboardProviderProps> = ({
           setArmed(null);
           break;
         case 'help':
-          // Wired to the cheat sheet in a later change.
+          setIsHelpOpen(true);
           break;
       }
     };
@@ -296,5 +298,10 @@ export const BoardKeyboardProvider: FC<BoardKeyboardProviderProps> = ({
     [armedDiscardPile, keyLabels],
   );
 
-  return <BoardKeyboardContext.Provider value={value}>{children}</BoardKeyboardContext.Provider>;
+  return (
+    <BoardKeyboardContext.Provider value={value}>
+      {children}
+      <KeyboardShortcutsDialog keyLabels={keyLabels} onOpenChange={setIsHelpOpen} open={isHelpOpen} />
+    </BoardKeyboardContext.Provider>
+  );
 };
