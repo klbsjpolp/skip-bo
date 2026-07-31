@@ -20,7 +20,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@hookform/resolvers": "^5.5.1",
+    "@hookform/resolvers": "^5.5.7",
     "@klbsjpolp/realtime-core": "^0.1.0",
     "@radix-ui/react-dialog": "^1.1.23",
     "@radix-ui/react-select": "^2.3.7",
