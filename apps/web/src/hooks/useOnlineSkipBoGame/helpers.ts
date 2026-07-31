@@ -146,6 +146,69 @@ export const collectDrawTransitions = (previousState: GameState, nextState: Game
   });
 };
 
+/**
+ * An opponent's play/discard and the refill of the slot it freed arrive in the
+ * same authoritative view, so `collectDrawTransitions` — which only compares
+ * null slots — misses that one card: the slot was occupied before and after.
+ * Splice it into the opponent's transition (in hand order, so the draw
+ * animation stays left-to-right), or create one if they had no other refill.
+ *
+ * Mutates `drawTransitions` in place and returns it.
+ */
+export const mergeOpponentRefillTransition = (
+  drawTransitions: DrawTransition[],
+  previousState: GameState,
+  nextState: GameState,
+): DrawTransition[] => {
+  if (previousState.selectedCard?.source !== 'hand' || previousState.currentPlayerIndex === 0) {
+    return drawTransitions;
+  }
+
+  const opponentIndex = previousState.currentPlayerIndex;
+  const playedSlotIndex = previousState.selectedCard.index;
+  const refilledCard = nextState.players[opponentIndex]?.hand[playedSlotIndex];
+  if (!refilledCard) {
+    return drawTransitions;
+  }
+
+  const existing = drawTransitions.find((t) => t.playerIndex === opponentIndex);
+  if (existing?.handIndices.includes(playedSlotIndex)) {
+    return drawTransitions;
+  }
+
+  if (existing) {
+    const insertAt = existing.handIndices.findIndex((i) => i > playedSlotIndex);
+    const position = insertAt === -1 ? existing.handIndices.length : insertAt;
+    existing.cards.splice(position, 0, { ...refilledCard });
+    existing.handIndices.splice(position, 0, playedSlotIndex);
+  } else {
+    drawTransitions.push({
+      cards: [{ ...refilledCard }],
+      handIndices: [playedSlotIndex],
+      playerIndex: opponentIndex,
+    });
+  }
+
+  return drawTransitions;
+};
+
+/** The card a `SELECT_CARD` on `source` would pick up, or null/undefined if there is none. */
+export const resolveSelectableCard = (
+  player: GameState['players'][number],
+  source: 'hand' | 'stock' | 'discard',
+  index: number,
+  discardPileIndex?: number,
+): Card | null | undefined => {
+  if (source === 'hand') {
+    return player.hand[index];
+  }
+  if (source === 'stock') {
+    return player.stockPile[player.stockPile.length - 1];
+  }
+
+  return discardPileIndex === undefined ? null : player.discardPiles[discardPileIndex]?.at(-1);
+};
+
 export const inferOpponentTransition = (previousState: GameState, nextState: GameState): OpponentTransition | null => {
   if (previousState.players.length !== nextState.players.length) {
     return null;

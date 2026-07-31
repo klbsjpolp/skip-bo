@@ -1,15 +1,9 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 
-import { canPlayCard, type Card, type GameAction, type MoveResult } from '@skipbo/game-core';
+import { canPlayCard, type GameAction, type MoveResult } from '@skipbo/game-core';
 
 import type { GameStatsRecord } from '@/monitoring/gameStats';
-import {
-  type CreateRoomResponse,
-  type DisconnectedSeatInfo,
-  type LobbyReadyState,
-  type LobbySeatInfo,
-  type RoomSummary,
-} from '@klbsjpolp/realtime-core';
+import { type CreateRoomResponse, type RoomSummary } from '@klbsjpolp/realtime-core';
 import { isDebugAction, type ClientGameView, type HostRoomMeta, type SkipboHost } from '@skipbo/skipbo-runtime';
 
 import { useCardAnimation } from '@/contexts/useCardAnimation';
@@ -23,10 +17,14 @@ import {
   createPlaceholderGameState,
   getMaxDrawAnimationDuration,
   inferOpponentTransition,
+  mergeOpponentRefillTransition,
+  resolveSelectableCard,
   scheduleDrawAnimations,
   type OpponentTransition,
   type TurnPresentationOverride,
 } from '@/hooks/useOnlineSkipBoGame/helpers';
+import { deriveLobbyState } from '@/hooks/useOnlineSkipBoGame/lobbyState';
+import { createViewEchoTracker } from '@/hooks/useOnlineSkipBoGame/viewEchoes';
 import { useDebugActions } from '@/game/debugActions';
 import { preparePlayCardIntent, prepareDiscardCardIntent } from '@/game/moveIntents';
 import { startDiscardCardAnimation, startPlayCardAnimation } from '@/game/moveAnimations';
@@ -63,15 +61,9 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   // is held back by this much so the acting player sees the same sequence
   // (own move first, then the next player drawing) that remote players see.
   const pendingLocalActionAnimationRef = useRef(0);
-  // Guest only: number of authoritative view echoes the host still owes us for
-  // moves already applied optimistically. The host answers every relayed move
-  // with exactly one view (the new state on success, a correction on
-  // rejection). While more than one echo is outstanding — e.g. a drag sends
-  // SELECT_CARD then PLAY_CARD within a round-trip — the earlier echoes are
-  // stale snapshots taken before the latest local action: rendering them would
-  // briefly revert the optimistic play and make the reappearing hand card look
-  // like a deck→hand draw. Only the final echo is rendered.
-  const pendingViewEchoesRef = useRef(0);
+  // Guest only: tracks the authoritative view echoes the host still owes us for
+  // moves already applied optimistically. See viewEchoes.ts for the rules.
+  const viewEchoesRef = useRef(createViewEchoTracker());
   const { driver } = useCardAnimation();
 
   const isHost = session != null && session.seatIndex === session.hostSeatIndex;
@@ -157,29 +149,8 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       const nextState = cloneGameStateFromView(incomingView);
       const drawTransitions = collectDrawTransitions(previousState, nextState);
       const opponentTransition = inferOpponentTransition(previousState, nextState);
-      if (
-        opponentTransition &&
-        previousState.selectedCard?.source === 'hand' &&
-        previousState.currentPlayerIndex !== 0
-      ) {
-        const opponentIndex = previousState.currentPlayerIndex;
-        const playedSlotIndex = previousState.selectedCard.index;
-        const refilledCard = nextState.players[opponentIndex].hand[playedSlotIndex];
-        const existing = drawTransitions.find((t) => t.playerIndex === opponentIndex);
-        if (refilledCard && (!existing || !existing.handIndices.includes(playedSlotIndex))) {
-          if (existing) {
-            const insertAt = existing.handIndices.findIndex((i) => i > playedSlotIndex);
-            const position = insertAt === -1 ? existing.handIndices.length : insertAt;
-            existing.cards.splice(position, 0, { ...refilledCard });
-            existing.handIndices.splice(position, 0, playedSlotIndex);
-          } else {
-            drawTransitions.push({
-              cards: [{ ...refilledCard }],
-              handIndices: [playedSlotIndex],
-              playerIndex: opponentIndex,
-            });
-          }
-        }
+      if (opponentTransition) {
+        mergeOpponentRefillTransition(drawTransitions, previousState, nextState);
       }
       const turnChanged = previousView.currentPlayerIndex !== incomingView.currentPlayerIndex;
       const holdPreviousTurnPresentation = () => {
@@ -255,18 +226,15 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   );
 
   // Guest entry point for views relayed by the host. Drops stale echoes (see
-  // pendingViewEchoesRef); everything else flows into ingestView unchanged.
+  // viewEchoes.ts); everything else flows into ingestView unchanged.
   const ingestRelayedView = useCallback(
     (incomingView: ClientGameView): void => {
-      if (pendingViewEchoesRef.current > 0) {
-        pendingViewEchoesRef.current -= 1;
-        if (pendingViewEchoesRef.current > 0) {
-          // Stale echo: a newer view reflecting our latest move is on its way.
-          // Record it as the authoritative fallback (actionRejected recovery)
-          // without rendering it.
-          authoritativeViewRef.current = incomingView;
-          return;
-        }
+      if (!viewEchoesRef.current.shouldRender()) {
+        // Stale echo: a newer view reflecting our latest move is on its way.
+        // Record it as the authoritative fallback (actionRejected recovery)
+        // without rendering it.
+        authoritativeViewRef.current = incomingView;
+        return;
       }
 
       ingestView(incomingView);
@@ -274,11 +242,8 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     [ingestView],
   );
 
-  // Outstanding echoes belong to a socket + host lifetime: after a reconnect or
-  // a server-side rejection the missing echoes will never arrive, and the next
-  // view (resync or correction) must not be swallowed.
   const resetPendingViewEchoes = useCallback((): void => {
-    pendingViewEchoesRef.current = 0;
+    viewEchoesRef.current.reset();
   }, []);
 
   // ---------------------------------------------------------------------------
@@ -352,7 +317,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
       } else if (sendRelay('move', action)) {
         // The host will echo exactly one view for this move; count it so
         // ingestRelayedView can skip echoes that predate later local moves.
-        pendingViewEchoesRef.current += 1;
+        viewEchoesRef.current.expectEcho();
       }
     },
     [applyHostAction, isHost, sendRelay],
@@ -425,15 +390,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
         return;
       }
 
-      let card: Card | null | undefined;
-      if (source === 'hand') {
-        card = player.hand[index];
-      } else if (source === 'stock') {
-        card = player.stockPile[player.stockPile.length - 1];
-      } else {
-        card = discardPileIndex === undefined ? null : player.discardPiles[discardPileIndex]?.at(-1);
-      }
-
+      const card = resolveSelectableCard(player, source, index, discardPileIndex);
       if (!card) {
         return;
       }
@@ -559,36 +516,19 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     sendRaw({ type: 'leaveLobby' });
   }, [sendRaw]);
 
-  // Ignore a summary left over from a previous room (session change before the
-  // first presence of the new room arrives).
-  const room = view?.room ?? (roomSummary && roomSummary.roomCode === session?.roomCode ? roomSummary : null);
-  const playersBySeatIndex: Record<number, { displayName: string; seatIndex: number }> = {};
-  view?.players.forEach((player) => {
-    if (typeof player.seatIndex === 'number') {
-      playersBySeatIndex[player.seatIndex] = { displayName: player.displayName, seatIndex: player.seatIndex };
-    }
-  });
-  room?.lobbySeats.forEach((seat) => {
-    if (!playersBySeatIndex[seat.seatIndex] && seat.displayName) {
-      playersBySeatIndex[seat.seatIndex] = { displayName: seat.displayName, seatIndex: seat.seatIndex };
-    }
-  });
-
-  const seatCapacity = room?.seatCapacity ?? session?.seatCapacity ?? 4;
-  const hostSeatIndex = room?.hostSeatIndex ?? session?.hostSeatIndex ?? 0;
-  const connectedSeats = room?.connectedSeats ?? [];
-  const disconnectedSeats: DisconnectedSeatInfo[] = room?.disconnectedSeats ?? [];
-  const lobbySeats: LobbySeatInfo[] = room?.lobbySeats ?? [];
-  const roomStatus = room?.status ?? 'WAITING';
-  const isLocalHost = session?.seatIndex === hostSeatIndex;
-  const myReadyState: LobbyReadyState =
-    lobbySeats.find((s) => s.seatIndex === session?.seatIndex)?.readyState ?? 'never-ready';
-  const canStartGame = Boolean(
-    isLocalHost &&
-    roomStatus === 'WAITING' &&
-    connectedSeats.length >= 2 &&
-    connectedSeats.every((seatIndex) => lobbySeats.find((s) => s.seatIndex === seatIndex)?.readyState === 'ready'),
-  );
+  const {
+    canStartGame,
+    connectedSeats,
+    disconnectedSeats,
+    hostSeatIndex,
+    isLocalHost,
+    lobbySeats,
+    myReadyState,
+    playersBySeatIndex,
+    roomCode,
+    roomStatus,
+    seatCapacity,
+  } = deriveLobbyState(view, roomSummary, session);
 
   return {
     broadcastGameStats,
@@ -616,7 +556,7 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     myReadyState,
     playCard,
     playersBySeatIndex,
-    roomCode: room?.roomCode ?? session?.roomCode ?? '',
+    roomCode,
     roomStatus,
     seatCapacity,
     selectCard,
