@@ -1839,7 +1839,7 @@ describe('useOnlineSkipBoGame', () => {
     /** Drive a host session up to a finished game (via the debug win action). */
     const renderFinishedHostGame = async () => {
       const session = createHostSession();
-      const { result } = renderHook(() => useOnlineSkipBoGame(session));
+      const { result, unmount } = renderHook(() => useOnlineSkipBoGame(session));
 
       await act(async () => {
         vi.runOnlyPendingTimers();
@@ -1858,12 +1858,20 @@ describe('useOnlineSkipBoGame', () => {
         await Promise.resolve();
       });
 
+      // A move that does not end the game: authority is pushed with no endGame
+      // in sight, so the deferral only kicks in on the winning move below.
+      await act(async () => {
+        result.current.debugFillBuildPile(0);
+        await Promise.resolve();
+      });
+      expect(parseSent(socket).some((m) => m.type === 'endGame')).toBe(false);
+
       await act(async () => {
         result.current.debugWin();
         await Promise.resolve();
       });
 
-      return { result, socket };
+      return { result, socket, unmount };
     };
 
     it('holds endGame back until the record has been relayed', async () => {
@@ -1906,6 +1914,18 @@ describe('useOnlineSkipBoGame', () => {
       });
 
       expect(parseSent(socket).filter((m) => m.type === 'endGame')).toHaveLength(1);
+    });
+
+    it('cancels the pending grace timer when the screen unmounts', async () => {
+      const { socket, unmount } = await renderFinishedHostGame();
+
+      unmount();
+      await act(async () => {
+        vi.advanceTimersByTime(END_GAME_STATS_GRACE_MS + 50);
+      });
+
+      // The socket is gone with the screen; the timer must not outlive it.
+      expect(parseSent(socket).some((m) => m.type === 'endGame')).toBe(false);
     });
   });
 
