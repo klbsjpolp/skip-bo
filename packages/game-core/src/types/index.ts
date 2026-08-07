@@ -80,9 +80,9 @@ export interface MoveResult {
 export type ThemeStatus = 'NEW' | 'UPDATED' | null;
 
 export const themes = [
-  // `status` is widened to ThemeStatus here so the 'UPDATED' badge stays a
-  // valid capability even while no theme currently uses it.
-  { value: 'theme-rummy' as const, label: 'Rummy', icon: 'Star', status: 'NEW' as ThemeStatus },
+  // `status` is widened to ThemeStatus here so the 'NEW' and 'UPDATED' badges
+  // stay valid capabilities even while no theme currently uses them.
+  { value: 'theme-rummy' as const, label: 'Rummy', icon: 'Star', status: null as ThemeStatus },
   { value: 'theme-paper' as const, label: 'Papier', icon: 'NotebookPen', status: null },
   { value: 'theme-midnight' as const, label: 'Minuit', icon: 'Moon', status: null },
   { value: 'theme-origami' as const, label: 'Origami', icon: 'Bird', status: null },
