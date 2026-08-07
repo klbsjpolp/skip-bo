@@ -29,22 +29,13 @@ afterEach(() => {
 });
 
 describe('ThemeSwitcher', () => {
-  test('flags the rummy theme as new in the dropdown', () => {
+  test('no longer flags the rummy, f1 or cinema themes', () => {
     renderSwitcher();
 
     fireEvent.click(screen.getByTestId('theme-switcher-trigger'));
 
     const rummyOption = screen.getByTestId('theme-option-theme-rummy');
-    expect(within(rummyOption).getByText('Nouveau')).toBeTruthy();
-
-    const paperOption = screen.getByTestId('theme-option-theme-paper');
-    expect(within(paperOption).queryByText('Nouveau')).toBeNull();
-  });
-
-  test('no longer flags the f1 or cinema themes', () => {
-    renderSwitcher();
-
-    fireEvent.click(screen.getByTestId('theme-switcher-trigger'));
+    expect(within(rummyOption).queryByText('Nouveau')).toBeNull();
 
     const f1Option = screen.getByTestId('theme-option-theme-f1');
     expect(within(f1Option).queryByText('Nouveau')).toBeNull();
