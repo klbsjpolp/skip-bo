@@ -5,7 +5,7 @@ import { gameReducer, initialGameState, type Card, type GameState } from '@skipb
 import type { CreateRoomResponse, LobbySeatInfo, RoomSummary, ServerMessage } from '@klbsjpolp/realtime-core';
 import { serializeClientGameView, type ClientGameView } from '@skipbo/skipbo-runtime';
 
-import { inferOpponentTransition, useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
+import { END_GAME_STATS_GRACE_MS, inferOpponentTransition, useOnlineSkipBoGame } from '@/hooks/useOnlineSkipBoGame';
 import { WEBSOCKET_PING_INTERVAL_MS } from '@/config/timing';
 import type { GameStatsRecord } from '@/monitoring/gameStats';
 
@@ -1834,6 +1834,78 @@ describe('useOnlineSkipBoGame', () => {
       });
 
       expect(result.current.receivedGameStats).toBeNull();
+    });
+
+    /** Drive a host session up to a finished game (via the debug win action). */
+    const renderFinishedHostGame = async () => {
+      const session = createHostSession();
+      const { result } = renderHook(() => useOnlineSkipBoGame(session));
+
+      await act(async () => {
+        vi.runOnlyPendingTimers();
+      });
+
+      const socket = MockWebSocket.instances[0];
+      await act(async () => {
+        socket.open();
+        socket.emitMessage({ type: 'presence', room: waitingRoomSummary([0, 1], 1) });
+        socket.emitMessage({
+          type: 'gameStarted',
+          activeSeatIndices: [0, 1],
+          currentSeatIndex: 0,
+          gameConfig: { stockSize: 10 },
+        });
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        result.current.debugWin();
+        await Promise.resolve();
+      });
+
+      return { result, socket };
+    };
+
+    it('holds endGame back until the record has been relayed', async () => {
+      const { result, socket } = await renderFinishedHostGame();
+
+      // A finished room rejects relays, so endGame must not go out yet.
+      expect(parseSent(socket).some((m) => m.type === 'endGame')).toBe(false);
+
+      act(() => {
+        result.current.broadcastGameStats(statsRecord);
+      });
+
+      const sent = parseSent(socket);
+      const statsIndex = sent.findIndex((m) => m.type === 'relay' && m.kind === 'event');
+      const endGameIndex = sent.findIndex((m) => m.type === 'endGame');
+      expect(statsIndex).toBeGreaterThanOrEqual(0);
+      expect(endGameIndex).toBeGreaterThan(statsIndex);
+    });
+
+    it('sends endGame anyway when no record arrives within the grace delay', async () => {
+      const { socket } = await renderFinishedHostGame();
+
+      expect(parseSent(socket).some((m) => m.type === 'endGame')).toBe(false);
+
+      await act(async () => {
+        vi.advanceTimersByTime(END_GAME_STATS_GRACE_MS + 50);
+      });
+
+      expect(parseSent(socket).filter((m) => m.type === 'endGame')).toHaveLength(1);
+    });
+
+    it('sends endGame exactly once even if the record arrives after the grace delay', async () => {
+      const { result, socket } = await renderFinishedHostGame();
+
+      await act(async () => {
+        vi.advanceTimersByTime(END_GAME_STATS_GRACE_MS + 50);
+      });
+      act(() => {
+        result.current.broadcastGameStats(statsRecord);
+      });
+
+      expect(parseSent(socket).filter((m) => m.type === 'endGame')).toHaveLength(1);
     });
   });
 

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { canPlayCard, type GameAction, type MoveResult } from '@skipbo/game-core';
 
@@ -33,6 +33,13 @@ import { useOnlineConnection } from '@/hooks/useOnlineSkipBoGame/useOnlineConnec
 
 export { inferOpponentTransition, type OpponentTransition };
 
+/**
+ * How long the host waits for its own end-of-game stats record before sending
+ * `endGame` anyway. The record normally arrives on the very next render; this
+ * is only the safety net that guarantees the room reaches FINISHED.
+ */
+export const END_GAME_STATS_GRACE_MS = 3000;
+
 export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const [view, setView] = useState<ClientGameView | null>(null);
   // Latest room/lobby summary. During WAITING there is no game view yet, so the
@@ -56,6 +63,12 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
   const activeSeatIndicesRef = useRef<number[]>([]);
   const roomMetaRef = useRef<HostRoomMeta | null>(null);
   const lastBroadcastTurnRef = useRef<number | null>(null);
+  // Host only: the `endGame` message held back until the end-of-game stats have
+  // been relayed (a finished room rejects relays), plus the fallback timer that
+  // sends it anyway if the record never materializes.
+  const pendingEndGameRef = useRef<{ winnerSeatIndex: number | null } | null>(null);
+  const endGameTimeoutRef = useRef<number | null>(null);
+  const endGameSentRef = useRef(false);
   // Duration (ms) of the local play/discard animation that the user just
   // started. When that action ends the turn, the next player's draw animation
   // is held back by this much so the acting player sees the same sequence
@@ -106,16 +119,44 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     [sendRaw],
   );
 
+  // Send the deferred `endGame` (see `pushAuthority`), at most once per game.
+  const flushEndGame = useCallback((): void => {
+    const pending = pendingEndGameRef.current;
+    if (!pending) return;
+    pendingEndGameRef.current = null;
+    if (endGameTimeoutRef.current !== null) {
+      window.clearTimeout(endGameTimeoutRef.current);
+      endGameTimeoutRef.current = null;
+    }
+    endGameSentRef.current = true;
+    sendRaw({ type: 'endGame', winnerSeatIndex: pending.winnerSeatIndex });
+  }, [sendRaw]);
+
+  useEffect(
+    () => () => {
+      if (endGameTimeoutRef.current !== null) {
+        window.clearTimeout(endGameTimeoutRef.current);
+        endGameTimeoutRef.current = null;
+      }
+    },
+    [],
+  );
+
   // The host computes end-of-game stats from its own state — no network delay,
   // no risk of missing an intermediate view — so it is the only trustworthy
   // source. Broadcast the finalized record to every other seat (defaults to
   // all other seats) so guests display and persist the same numbers instead of
   // reconstructing an approximation from asynchronously-delivered views.
+  //
+  // This must reach the guests *before* the room turns FINISHED: the relay
+  // server rejects every relay in a finished room (409), so the deferred
+  // `endGame` is only released once the record is on the wire.
   const broadcastGameStats = useCallback(
     (record: GameStatsRecord): void => {
       sendRelay('event', { gameStats: record });
+      flushEndGame();
     },
-    [sendRelay],
+    [flushEndGame, sendRelay],
   );
 
   // ---------------------------------------------------------------------------
@@ -280,10 +321,22 @@ export function useOnlineSkipBoGame(session: CreateRoomResponse | null) {
     };
     sendRaw({ type: 'snapshot', payload: snapshot });
 
-    if (host.gameIsOver) {
-      sendRaw({ type: 'endGame', winnerSeatIndex: host.winnerSeatIndex() });
+    if (host.gameIsOver && !endGameSentRef.current && pendingEndGameRef.current === null) {
+      // Hold `endGame` back until the stats record has been relayed: the server
+      // marks the room FINISHED on `endGame` and then rejects every relay, so
+      // sending it here would strand the guests without the final statistics.
+      // The record is produced one render later (the recorder observes the view
+      // we just ingested), hence the deferral rather than an ordering swap.
+      // The timer is the safety net for a game that ends without a record
+      // (e.g. the recorder never opened one after a host reconnect) — the room
+      // must always reach FINISHED.
+      pendingEndGameRef.current = { winnerSeatIndex: host.winnerSeatIndex() };
+      endGameTimeoutRef.current = window.setTimeout(() => {
+        endGameTimeoutRef.current = null;
+        flushEndGame();
+      }, END_GAME_STATS_GRACE_MS);
     }
-  }, [sendRaw, sendRelay, session]);
+  }, [flushEndGame, sendRaw, sendRelay, session]);
 
   const applyHostAction = useCallback(
     (action: GameAction): void => {

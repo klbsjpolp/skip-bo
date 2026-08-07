@@ -49,6 +49,7 @@ decision is recorded in [decision-log.md](decision-log.md).
 - On `startGame` the server shuffles the connected seats into `activeSeatIndices`, sets the first turn, and broadcasts `gameStarted`. The host then builds the game and pushes the first views.
 - Turn order follows the locked active-seat list; the host advances it with `setTurn`.
 - The host disconnecting during `ACTIVE` pauses the game under the disconnect grace; on return it rebuilds from its `snapshotRestore` blob and re-pushes views. A guest reconnecting requests a resync from the host.
+- **`endGame` closes the relay.** The server flips the room to `FINISHED` and rejects every subsequent relay (409), so anything the host still owes the guests must be on the wire first. The host therefore holds `endGame` back until it has relayed the end-of-game statistics record (`END_GAME_STATS_GRACE_MS` is the fallback that sends it anyway, so the room always reaches `FINISHED`).
 
 ## Redaction Model
 

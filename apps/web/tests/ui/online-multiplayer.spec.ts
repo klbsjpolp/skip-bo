@@ -156,6 +156,23 @@ test.describe('Online multiplayer', () => {
       await hostPage.getByTestId('debug-win-button').click();
       await expect(hostPage.getByTestId('game-message')).toHaveText('Vous avez gagné !');
       await expect(guestPage.getByTestId('game-message')).toHaveText(`${HOST_NAME} a gagné.`);
+
+      // --- Both seats see the host's statistics for the finished game -------
+      // The record is computed by the host and relayed; the guest must get it
+      // before the room turns FINISHED (a finished room rejects every relay).
+      for (const page of [hostPage, guestPage]) {
+        await page.getByTestId('game-stats-button').click();
+        const dialog = page.getByTestId('game-stats-dialog');
+        await expect(dialog).toBeVisible();
+        await expect(dialog.getByTestId('game-stats-players').locator('tbody tr')).toHaveCount(2);
+        await expect(dialog).toContainText(HOST_NAME);
+        await expect(dialog).toContainText(GUEST_NAME);
+      }
+
+      // Same numbers on both seats: turns are what the host counted.
+      const readTurns = (page: Page) =>
+        page.getByTestId('game-stats-players').locator('tbody tr td:nth-child(2)').allInnerTexts();
+      expect(await readTurns(guestPage)).toEqual(await readTurns(hostPage));
     } finally {
       await hostContext.close();
       await guestContext.close();

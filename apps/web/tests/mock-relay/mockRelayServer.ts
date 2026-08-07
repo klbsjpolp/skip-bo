@@ -296,6 +296,14 @@ export const startMockRelayServer = async (options: MockRelayServerOptions = {})
         }
         case 'relay': {
           const kind: RelayKind = message.kind;
+          if (room.status !== 'ACTIVE') {
+            // Faithful to the real relay: a room that is not ACTIVE (notably a
+            // FINISHED one) rejects every relay, so anything the host still
+            // wants to hand out — e.g. the end-of-game stats record — has to
+            // go out before `endGame`.
+            send(socket, { type: 'actionRejected', code: 'invalid_state', reason: 'La partie n’est pas active.' });
+            return;
+          }
           if (kind === 'move' && seatIndex !== room.currentSeatIndex) {
             send(socket, { type: 'actionRejected', code: 'not_your_turn', reason: 'Ce n’est pas votre tour.' });
             return;
