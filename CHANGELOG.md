@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.14.10](https://github.com/klbsjpolp/skip-bo/compare/v2.14.9...v2.14.10) (2026-08-07)
+
+### Bug Fixes
+
+* **web:** relay end-game stats before closing the room ([fdfe1d5](https://github.com/klbsjpolp/skip-bo/commit/fdfe1d5908666c8bcf1c43f0bc1ae854aa365669))
 ## [2.14.9](https://github.com/klbsjpolp/skip-bo/compare/v2.14.8...v2.14.9) (2026-08-07)
 ## [2.14.8](https://github.com/klbsjpolp/skip-bo/compare/v2.14.7...v2.14.8) (2026-08-07)
 ## [2.14.7](https://github.com/klbsjpolp/skip-bo/compare/v2.14.6...v2.14.7) (2026-08-07)
