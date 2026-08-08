@@ -6,7 +6,7 @@ export function DragGhost() {
   const { session } = useDrag();
   if (!session) return null;
 
-  const { card, pointer } = session;
+  const { card, pointer, ghostOffsetY } = session;
 
   return createPortal(
     <div
@@ -16,7 +16,7 @@ export function DragGhost() {
         position: 'fixed',
         left: 0,
         top: 0,
-        transform: `translate3d(${pointer.x}px, ${pointer.y}px, 0) translate(-50%, -50%)`,
+        transform: `translate3d(${pointer.x}px, ${pointer.y + ghostOffsetY}px, 0) translate(-50%, -50%)`,
         pointerEvents: 'none',
         zIndex: 1100,
         willChange: 'transform',

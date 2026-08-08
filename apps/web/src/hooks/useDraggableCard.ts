@@ -3,10 +3,25 @@ import type { PointerEvent as ReactPointerEvent } from 'react';
 import type { Card, GameState, MoveResult } from '@skipbo/game-core';
 import { canPlayCard } from '@skipbo/game-core';
 import { useDrag, type DragSource, type DragTargetId } from '@/contexts/useDrag';
+import { createEdgeAutoScroller } from '@/game/dragAutoScroll';
+import {
+  dragProbePoints,
+  dragThresholdFor,
+  dropToleranceFor,
+  ghostLiftFor,
+  readCardHeightPx,
+  resolveDropTarget,
+} from '@/game/dragTargeting';
 import { canDiscardFromSource } from '@/game/pileIntents';
 import { setDragCommitOverride } from '@/services/dragCommitOverride';
 
-const DRAG_THRESHOLD_PX = 5;
+/**
+ * Only one card is ever in the air. iPadOS happily delivers a `pointerdown`
+ * for a second finger landing on another card, and two concurrent drags would
+ * then fight over the same `selectedCard` — the second one wins the selection
+ * and the first one commits it to the wrong pile.
+ */
+let gestureInFlight = false;
 
 interface UseDraggableCardOptions {
   source: DragSource;
@@ -35,28 +50,6 @@ const computeValidTargets = (card: Card, source: DragSource, gameState: GameStat
   return { validBuildPiles, validDiscardPiles };
 };
 
-const hitTest = (
-  x: number,
-  y: number,
-  validBuild: ReadonlySet<number>,
-  validDiscard: ReadonlySet<number>,
-): DragTargetId | null => {
-  // Guard: jsdom-based unit tests don't implement elementFromPoint.
-  if (typeof document.elementFromPoint !== 'function') return null;
-  const el = document.elementFromPoint(x, y);
-  if (!el) return null;
-  const target = (el as HTMLElement).closest<HTMLElement>('[data-drop-target]');
-  if (!target) return null;
-  const kind = target.getAttribute('data-drop-target');
-  const idxAttr = target.getAttribute('data-drop-index');
-  if (idxAttr === null) return null;
-  const index = Number.parseInt(idxAttr, 10);
-  if (Number.isNaN(index)) return null;
-  if (kind === 'build' && validBuild.has(index)) return { kind: 'build', index };
-  if (kind === 'discard' && validDiscard.has(index)) return { kind: 'discard', index };
-  return null;
-};
-
 export interface DraggableCardBindings {
   onPointerDown: (event: ReactPointerEvent<HTMLElement>) => void;
   'data-drag-source': string;
@@ -76,6 +69,8 @@ export function useDraggableCard(options: UseDraggableCardOptions): DraggableCar
     (event: ReactPointerEvent<HTMLElement>) => {
       if (!enabled || !card) return;
       if (event.button !== 0 && event.pointerType === 'mouse') return;
+      // A second finger, or a second card grabbed while one is already flying.
+      if (gestureInFlight) return;
       if (isInteractionBlocked?.()) return;
 
       // Stop the browser from starting a native text-selection drag from the card.
@@ -86,10 +81,18 @@ export function useDraggableCard(options: UseDraggableCardOptions): DraggableCar
       const startX = event.clientX;
       const startY = event.clientY;
       const pointerId = event.pointerId;
+      const pointerType = event.pointerType || 'mouse';
+      const isTouch = pointerType === 'touch';
+      const dragThreshold = dragThresholdFor(pointerType);
+      const dropTolerance = dropToleranceFor(pointerType);
+      const ghostLift = ghostLiftFor(pointerType, readCardHeightPx());
       const targetEl = event.currentTarget;
       let started = false;
       let validBuild: Set<number> = new Set();
       let validDiscard: Set<number> = new Set();
+      let lastX = startX;
+      let lastY = startY;
+      gestureInFlight = true;
       wasDraggingRef.current = false;
 
       // Selection is deferred until the drag actually begins (movement crosses
@@ -98,18 +101,46 @@ export function useDraggableCard(options: UseDraggableCardOptions): DraggableCar
       // card is selected discards the hand card to that pile, which is the
       // intended click affordance. Only a real drag swaps the selection.
 
+      const resolveTarget = (x: number, y: number): DragTargetId | null =>
+        resolveDropTarget(dragProbePoints(x, y, ghostLift), validBuild, validDiscard, dropTolerance);
+
       try {
         targetEl.setPointerCapture(pointerId);
       } catch {
         /* safari/iOS sometimes throws on capture; fall back to document listeners */
       }
 
+      // `touch-action: none` on the card is supposed to hand us the whole
+      // gesture, and on iPadOS it often doesn't: Safari re-evaluates the
+      // gesture a few frames in and gives it to the page scroller instead,
+      // which fires `pointercancel` and kills the drag mid-flight — the "it
+      // starts and then the page scrolls" failure. Cancelling the touch stream
+      // outright is the only thing that reliably keeps the drag alive. It is
+      // scoped to this one gesture, so touches that start anywhere else still
+      // scroll and pinch normally.
+      const blockTouchScroll = (touchEvent: TouchEvent) => {
+        if (touchEvent.cancelable) touchEvent.preventDefault();
+      };
+      if (isTouch) {
+        document.addEventListener('touchmove', blockTouchScroll, { passive: false });
+      }
+
+      // The page cannot be panned by hand during a drag (see above), so a
+      // pile scrolled off-screen is only reachable by holding the card near
+      // the edge and letting the board come to it.
+      const autoScroller = createEdgeAutoScroller(() => {
+        if (!started) return;
+        updateDrag({ x: lastX, y: lastY }, resolveTarget(lastX, lastY));
+      });
+
       const onMove = (moveEvent: PointerEvent) => {
         if (moveEvent.pointerId !== pointerId) return;
-        const dx = moveEvent.clientX - startX;
-        const dy = moveEvent.clientY - startY;
+        lastX = moveEvent.clientX;
+        lastY = moveEvent.clientY;
+        const dx = lastX - startX;
+        const dy = lastY - startY;
         if (!started) {
-          if (Math.hypot(dx, dy) < DRAG_THRESHOLD_PX) return;
+          if (Math.hypot(dx, dy) < dragThreshold) return;
           // Now we know it's a real drag — select the source so a mid-air release
           // leaves the card in the .selected state and lets the click flow
           // finish the move.
@@ -122,21 +153,26 @@ export function useDraggableCard(options: UseDraggableCardOptions): DraggableCar
             card,
             validBuildPiles: validBuild,
             validDiscardPiles: validDiscard,
-            pointer: { x: moveEvent.clientX, y: moveEvent.clientY },
+            pointer: { x: lastX, y: lastY },
+            ghostOffsetY: -ghostLift,
             hovered: null,
           });
           started = true;
           wasDraggingRef.current = true;
         }
-        const hovered = hitTest(moveEvent.clientX, moveEvent.clientY, validBuild, validDiscard);
-        updateDrag({ x: moveEvent.clientX, y: moveEvent.clientY }, hovered);
+        updateDrag({ x: lastX, y: lastY }, resolveTarget(lastX, lastY));
+        autoScroller.update(lastY);
       };
 
       const cleanup = () => {
+        gestureInFlight = false;
+        autoScroller.stop();
         window.removeEventListener('pointermove', onMove);
         window.removeEventListener('pointerup', onUp);
         window.removeEventListener('pointercancel', onCancel);
         window.removeEventListener('keydown', onKey);
+        window.removeEventListener('blur', onWindowBlur);
+        document.removeEventListener('touchmove', blockTouchScroll);
         try {
           targetEl.releasePointerCapture(pointerId);
         } catch {
@@ -165,14 +201,15 @@ export function useDraggableCard(options: UseDraggableCardOptions): DraggableCar
           endDrag();
           return;
         }
-        const hovered = hitTest(upEvent.clientX, upEvent.clientY, validBuild, validDiscard);
+        const hovered = resolveTarget(upEvent.clientX, upEvent.clientY);
         endDrag();
         swallowNextClick();
         if (!hovered) return;
-        // Start the play/discard animation from where the user dropped the
-        // ghost rather than from the source DOM position.
+        // Start the play/discard animation from where the ghost was released
+        // rather than from the source DOM position — which on touch is the
+        // lifted card, not the fingertip.
         setDragCommitOverride({
-          startPosition: { x: upEvent.clientX, y: upEvent.clientY },
+          startPosition: { x: upEvent.clientX, y: upEvent.clientY - ghostLift },
         });
         if (hovered.kind === 'build') {
           void playCard(hovered.index);
@@ -181,24 +218,38 @@ export function useDraggableCard(options: UseDraggableCardOptions): DraggableCar
         }
       }
 
-      function onCancel(cancelEvent: PointerEvent) {
-        if (cancelEvent.pointerId !== pointerId) return;
+      // iOS still cancels the odd gesture (a system edge swipe, a call
+      // banner). The source stays selected, so the move is one tap on the
+      // destination away rather than lost.
+      function abortGesture() {
         cleanup();
         if (started) swallowNextClick();
         endDrag();
       }
 
+      function onCancel(cancelEvent: PointerEvent) {
+        if (cancelEvent.pointerId !== pointerId) return;
+        abortGesture();
+      }
+
+      // Backgrounding the app mid-drag — an app switch, Control Center, a
+      // notification — can end the pointer stream without ever delivering an
+      // up or a cancel. Nothing would then release the single-drag guard or
+      // the `touchmove` block, and the board would come back inert.
+      function onWindowBlur() {
+        abortGesture();
+      }
+
       function onKey(keyEvent: KeyboardEvent) {
         if (keyEvent.key !== 'Escape') return;
-        cleanup();
-        if (started) swallowNextClick();
-        endDrag();
+        abortGesture();
       }
 
       window.addEventListener('pointermove', onMove);
       window.addEventListener('pointerup', onUp);
       window.addEventListener('pointercancel', onCancel);
       window.addEventListener('keydown', onKey);
+      window.addEventListener('blur', onWindowBlur);
     },
     [
       enabled,

@@ -90,6 +90,49 @@ discard" invariant true for every input method. The drag path shares rule 1 thro
 Do not re-derive any of this in a component. These rules used to be restated per
 input method, and the copies drifted.
 
+## Drag And Drop (pointer + touch)
+
+`useDraggableCard` binds `onPointerDown` on every draggable card; `DragProvider`
+holds the live session and `DragGhost` renders the floating card. Drops are
+resolved by `src/game/dragTargeting.ts` and edge scrolling by
+`src/game/dragAutoScroll.ts` — both pure enough to unit test, which is where new
+behavior belongs.
+
+A drag never commits a move by itself: crossing the threshold calls `selectCard`,
+and the release calls `playCard` / `discardCard`. That is deliberate — a drag
+released in mid-air leaves the card selected, so the move finishes with one tap.
+It is also what keeps drag inside the "selection first, then play or discard"
+invariant.
+
+**Touch is not a small mouse.** These four exist only because of it, and each one
+fixed a real iPad failure — do not "simplify" them away:
+
+1. **The gesture is taken from the page.** `touch-action: none` on
+   `[data-drag-source]` is advisory on iOS: Safari re-decides a few frames in and
+   can hand the gesture back to the scroller, killing the drag with a
+   `pointercancel`. The hook therefore also cancels `touchmove` (non-passive) for
+   the whole gesture, from the first move, before the threshold is crossed —
+   once WebKit has begun a scroll, the moves stop being cancelable.
+2. **The page must not be scrollable when the board fits.** The safe-area padding
+   sits on `#root`, _outside_ `main`, so a `min-h-svh` on `main` makes every iOS
+   document taller than its viewport. Height comes from the `#main` rule in
+   `styles/layout.css`, which subtracts the insets; `overscroll-behavior: none`
+   kills the rubber band. Putting a `min-h-*` utility back on `main` reintroduces
+   the stray scroll a drag turns into.
+3. **The ghost floats above the fingertip**, because a card under the hand
+   holding it is invisible. A release is then probed at _both_ the ghost and the
+   fingertip (`dragProbePoints`), so aiming with either reads as correct, and
+   near-misses inside `TOUCH_DROP_TOLERANCE_PX` still land. Drop resolution is
+   rect-based rather than `elementFromPoint` — the piles never overlap, so paint
+   order buys nothing and rects allow the tolerance.
+4. **Holding a card at a viewport edge scrolls the board** (`dragAutoScroll`).
+   Since (1) means the page cannot be panned by hand mid-drag, this is the only
+   way to reach a pile that is off-screen when the board doesn't fit.
+
+Only one card is in the air at a time — a module-level pointer-id guard in
+`useDraggableCard`. iPadOS delivers a `pointerdown` for a second finger, and two
+concurrent drags fight over the same `selectedCard`.
+
 ## Keyboard Layer (desktop)
 
 `BoardKeyboardProvider` (`src/contexts/BoardKeyboardContext.tsx`) mounts a global
