@@ -3,9 +3,52 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/u
 import type { ThemeDetail } from '@skipbo/game-core';
 import { themes } from '@skipbo/game-core';
 import { Button } from '@/components/ui/button';
-import * as Lucide from 'lucide-react';
-import type { ComponentType, SVGProps } from 'react';
+import {
+  Bird,
+  Blocks,
+  Building2,
+  Candy,
+  Cog,
+  Film,
+  Flag,
+  Moon,
+  NotebookPen,
+  Radio,
+  Rainbow,
+  Rocket,
+  Shuffle,
+  Spool,
+  Squircle,
+  Star,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react';
 import { trackThemeSelection } from '@/monitoring/themeAnalytics';
+
+// Themes name their icon as a string, so the icons have to be resolved by name.
+// This map does that resolution with named imports; a `import * as Lucide` +
+// `Lucide[name]` lookup reads better but pulls all ~1750 icon modules into the
+// bundle, since nothing static tells the bundler which ones are reachable.
+// `Record<ThemeDetail['icon'], …>` makes an unmapped icon a compile error rather
+// than a blank space in the picker.
+const THEME_ICONS: Record<ThemeDetail['icon'], LucideIcon> = {
+  Bird,
+  Blocks,
+  Building2,
+  Candy,
+  Cog,
+  Film,
+  Flag,
+  Moon,
+  NotebookPen,
+  Radio,
+  Rainbow,
+  Rocket,
+  Spool,
+  Squircle,
+  Star,
+  Zap,
+};
 
 /** Picks a theme other than `current`, or `null` when none is available. */
 function pickRandomTheme(current: ThemeDetail['value']): ThemeDetail['value'] | null {
@@ -20,9 +63,9 @@ export function ThemeSwitcher() {
   const { setTheme, theme } = useTheme();
   const activeTheme: ThemeDetail = themes.find(({ value }) => value === theme) ?? themes[0];
 
-  const getIcon = (iconName: string) => {
-    const IconComponent = Lucide[iconName as keyof typeof Lucide] as unknown as ComponentType<SVGProps<SVGSVGElement>>;
-    return IconComponent ? <IconComponent className="mr-2 w-4 h-4" /> : null;
+  const getIcon = (iconName: ThemeDetail['icon']) => {
+    const IconComponent = THEME_ICONS[iconName];
+    return <IconComponent className="mr-2 w-4 h-4" />;
   };
 
   const setRandomTheme = () => {
@@ -82,7 +125,7 @@ export function ThemeSwitcher() {
         title="Thème aléatoire"
         data-testid="theme-randomizer-button"
       >
-        <Lucide.Shuffle className="h-4 w-4" />
+        <Shuffle className="h-4 w-4" />
       </Button>
     </div>
   );
