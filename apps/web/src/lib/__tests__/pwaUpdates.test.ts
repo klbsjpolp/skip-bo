@@ -292,6 +292,26 @@ describe('pwaUpdates', () => {
       }
     });
 
+    it('keeps the message of an error-like throw that carries no name', async () => {
+      const { initializePwaUpdates, getPwaUpdateSnapshot } = await loadPwaUpdates();
+      initializePwaUpdates();
+
+      registerOptions.onRegisterError?.({ message: 'registration rejected' });
+
+      expect(sentryCaptureException).toHaveBeenCalledWith(expect.any(Error));
+      expect(getPwaUpdateSnapshot().registrationError?.name).toBe('Error');
+      expect(getPwaUpdateSnapshot().registrationError?.message).toBe('registration rejected');
+    });
+
+    it('falls back to a generic message when the throw carries nothing usable', async () => {
+      const { initializePwaUpdates, getPwaUpdateSnapshot } = await loadPwaUpdates();
+      initializePwaUpdates();
+
+      registerOptions.onRegisterError?.(undefined);
+
+      expect(getPwaUpdateSnapshot().registrationError?.message).toBe('Service worker registration failed.');
+    });
+
     it('still reports an unexpected registration failure as an error', async () => {
       const { initializePwaUpdates, getPwaUpdateSnapshot } = await loadPwaUpdates();
       initializePwaUpdates();
