@@ -247,6 +247,63 @@ describe('pwaUpdates', () => {
     expect(sentryCaptureMessage).toHaveBeenCalledWith('pwa.apply-update.install-timeout', 'warning');
   });
 
+  describe('registration errors', () => {
+    it('reports a Safari SecurityError as an environment warning, not an error', async () => {
+      const { initializePwaUpdates, getPwaUpdateSnapshot } = await loadPwaUpdates();
+      initializePwaUpdates();
+
+      // Safari reports a blocked or unloadable `sw.js` this way.
+      registerOptions.onRegisterError?.(
+        new DOMException('Script https://example.test/sw.js load failed', 'SecurityError'),
+      );
+
+      expect(sentryCaptureException).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'SecurityError',
+          message: 'Script https://example.test/sw.js load failed',
+        }),
+        {
+          level: 'warning',
+          fingerprint: ['pwa', 'register-sw', 'environment-blocked'],
+          tags: { 'pwa.register_sw': 'environment-blocked' },
+        },
+      );
+      expect(getPwaUpdateSnapshot().registrationError?.name).toBe('SecurityError');
+    });
+
+    it('reports a registration failure while offline as an environment warning', async () => {
+      Object.defineProperty(window.navigator, 'onLine', {
+        configurable: true,
+        value: false,
+      });
+
+      try {
+        const { initializePwaUpdates } = await loadPwaUpdates();
+        initializePwaUpdates();
+
+        registerOptions.onRegisterError?.(new TypeError('Failed to fetch'));
+
+        expect(sentryCaptureException).toHaveBeenCalledWith(
+          expect.any(TypeError),
+          expect.objectContaining({ level: 'warning' }),
+        );
+      } finally {
+        Reflect.deleteProperty(window.navigator, 'onLine');
+      }
+    });
+
+    it('still reports an unexpected registration failure as an error', async () => {
+      const { initializePwaUpdates, getPwaUpdateSnapshot } = await loadPwaUpdates();
+      initializePwaUpdates();
+
+      registerOptions.onRegisterError?.('sw.js is not valid JavaScript');
+
+      expect(sentryCaptureException).toHaveBeenCalledTimes(1);
+      expect(sentryCaptureException).toHaveBeenCalledWith(expect.any(Error));
+      expect(getPwaUpdateSnapshot().registrationError?.message).toBe('sw.js is not valid JavaScript');
+    });
+  });
+
   describe('forceReloadIfNotStaged', () => {
     const originalLocation = window.location;
     const reloadMock = vi.fn();
