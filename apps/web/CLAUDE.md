@@ -119,12 +119,18 @@ fixed a real iPad failure — do not "simplify" them away:
    `styles/layout.css`, which subtracts the insets; `overscroll-behavior: none`
    kills the rubber band. Putting a `min-h-*` utility back on `main` reintroduces
    the stray scroll a drag turns into.
-3. **The ghost floats above the fingertip**, because a card under the hand
-   holding it is invisible. A release is then probed at _both_ the ghost and the
-   fingertip (`dragProbePoints`), so aiming with either reads as correct, and
-   near-misses inside `TOUCH_DROP_TOLERANCE_PX` still land. Drop resolution is
-   rect-based rather than `elementFromPoint` — the piles never overlap, so paint
-   order buys nothing and rects allow the tolerance.
+3. **A near-miss still lands**, within `TOUCH_DROP_TOLERANCE_PX` of the pile,
+   because a fingertip is a contact patch and the piles sit further apart than
+   the tolerance. Drop resolution is rect-based rather than `elementFromPoint` —
+   the piles never overlap, so paint order buys nothing and rects are what allow
+   a tolerance at all.
+
+   **The card rides directly under the pointer, with no offset.** Floating it
+   above the fingertip so the hand doesn't cover it was tried and reverted: the
+   card then shows somewhere other than where it will land, and players aim at
+   the card they see, so they start targeting below the pile. If you reintroduce
+   a lift to make the card visible, the drop point has to move with it.
+
 4. **Holding a card at a viewport edge scrolls the board** (`dragAutoScroll`).
    Since (1) means the page cannot be panned by hand mid-drag, this is the only
    way to reach a pile that is off-screen when the board doesn't fit.

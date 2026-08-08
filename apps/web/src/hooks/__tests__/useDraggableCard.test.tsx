@@ -182,29 +182,23 @@ describe('useDraggableCard on touch', () => {
     windowPointerEvent('pointerup', { pointerId: 1, pointerType: 'mouse', clientX: 300, clientY: 300 });
   });
 
-  test('the ghost floats above the fingertip so the hand does not cover it', () => {
+  // The card rides the pointer with no offset, for a finger exactly as for a
+  // cursor. A lifted ghost was tried and reverted: showing the card somewhere
+  // other than where it would land made players aim below their target.
+  test.each([['touch'], ['mouse']])('the card rides directly under a %s pointer', (pointerType) => {
     renderHarness();
-    pointerDown('hand-card', { pointerId: 1, pointerType: 'touch', clientX: 300, clientY: 300 });
-    windowPointerEvent('pointermove', { pointerId: 1, pointerType: 'touch', clientX: 300, clientY: 320 });
-
-    // 66 px fallback card height × 0.6 lift = 40 px above the pointer.
-    expect(screen.getByTestId('drag-ghost').style.transform).toContain('translate3d(300px, 280px, 0)');
-  });
-
-  test('the ghost sits under a cursor', () => {
-    renderHarness();
-    pointerDown('hand-card', { pointerId: 1, pointerType: 'mouse', clientX: 300, clientY: 300 });
-    windowPointerEvent('pointermove', { pointerId: 1, pointerType: 'mouse', clientX: 300, clientY: 320 });
+    pointerDown('hand-card', { pointerId: 1, pointerType, clientX: 300, clientY: 300 });
+    windowPointerEvent('pointermove', { pointerId: 1, pointerType, clientX: 300, clientY: 320 });
 
     expect(screen.getByTestId('drag-ghost').style.transform).toContain('translate3d(300px, 320px, 0)');
 
-    windowPointerEvent('pointerup', { pointerId: 1, pointerType: 'mouse', clientX: 300, clientY: 320 });
+    windowPointerEvent('pointerup', { pointerId: 1, pointerType, clientX: 300, clientY: 320 });
   });
 
   test('a release that misses the pile by a few pixels still plays the card', () => {
     const handlers = renderHarness();
     pointerDown('hand-card', { pointerId: 1, pointerType: 'touch', clientX: 300, clientY: 300 });
-    // Finger 12 px below the pile, so the lifted ghost is well inside it.
+    // 12 px below the pile — inside the touch tolerance, outside the pile.
     windowPointerEvent('pointermove', { pointerId: 1, pointerType: 'touch', clientX: 135, clientY: 212 });
     windowPointerEvent('pointerup', { pointerId: 1, pointerType: 'touch', clientX: 135, clientY: 212 });
 
@@ -214,8 +208,8 @@ describe('useDraggableCard on touch', () => {
   test('a release over a discard pile discards rather than plays', () => {
     const handlers = renderHarness();
     pointerDown('hand-card', { pointerId: 1, pointerType: 'touch', clientX: 300, clientY: 300 });
-    windowPointerEvent('pointermove', { pointerId: 1, pointerType: 'touch', clientX: 335, clientY: 190 });
-    windowPointerEvent('pointerup', { pointerId: 1, pointerType: 'touch', clientX: 335, clientY: 190 });
+    windowPointerEvent('pointermove', { pointerId: 1, pointerType: 'touch', clientX: 335, clientY: 150 });
+    windowPointerEvent('pointerup', { pointerId: 1, pointerType: 'touch', clientX: 335, clientY: 150 });
 
     expect(handlers.discardCard).toHaveBeenCalledWith(2);
     expect(handlers.playCard).not.toHaveBeenCalled();
@@ -223,8 +217,8 @@ describe('useDraggableCard on touch', () => {
 
   test('Escape drops the card back without committing it', () => {
     const handlers = renderHarness();
-    pointerDown('hand-card', { pointerId: 1, pointerType: 'touch', clientX: 135, clientY: 190 });
-    windowPointerEvent('pointermove', { pointerId: 1, pointerType: 'touch', clientX: 135, clientY: 212 });
+    pointerDown('hand-card', { pointerId: 1, pointerType: 'touch', clientX: 135, clientY: 120 });
+    windowPointerEvent('pointermove', { pointerId: 1, pointerType: 'touch', clientX: 135, clientY: 150 });
     expect(screen.getByTestId('hovered').textContent).toBe('build-0');
 
     act(() => {
@@ -233,7 +227,7 @@ describe('useDraggableCard on touch', () => {
     expect(screen.queryByTestId('drag-ghost')).toBeNull();
 
     // Releasing after the escape must not still commit the move.
-    windowPointerEvent('pointerup', { pointerId: 1, pointerType: 'touch', clientX: 135, clientY: 212 });
+    windowPointerEvent('pointerup', { pointerId: 1, pointerType: 'touch', clientX: 135, clientY: 150 });
     expect(handlers.playCard).not.toHaveBeenCalled();
   });
 
@@ -292,7 +286,8 @@ describe('useDraggableCard on touch', () => {
 
   test('holding a card at the bottom edge brings an off-screen pile up to it', () => {
     vi.useFakeTimers();
-    // Off-screen below the fold: out of reach of a stationary finger at y=760.
+    // Off-screen below the fold: out of reach of a stationary finger at y=760,
+    // tolerance included.
     buildPileTop = 800;
     renderHarness();
 
