@@ -50,10 +50,13 @@ export function AppShell({
 }: AppShellProps) {
   useThemeUsageGameGate(isGameOver);
 
+  // The full-viewport height lives in the `#main` rule in layout.css rather
+  // than a `min-h-svh` utility here: it has to discount the safe-area padding
+  // `#root` adds *around* this box, which a plain 100svh would stack on top of.
   return (
     <main
       id="main"
-      className="min-h-svh px-4 pb-4 pt-1 lg:px-10 lg:pb-10 lg:pt-2"
+      className="px-4 pb-4 pt-1 lg:px-10 lg:pb-10 lg:pt-2"
       data-testid="app-main"
       data-ui-fixture={fixtureName}
     >
