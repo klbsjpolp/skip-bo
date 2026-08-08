@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.15.5](https://github.com/klbsjpolp/skip-bo/compare/v2.15.4...v2.15.5) (2026-08-08)
+
+### Bug Fixes
+
+* **web:** report blocked sw registrations as warnings ([20c703d](https://github.com/klbsjpolp/skip-bo/commit/20c703d559922f2dac0c85930edffd91015d7915))
 ## [2.15.4](https://github.com/klbsjpolp/skip-bo/compare/v2.15.3...v2.15.4) (2026-08-08)
 ## [2.15.3](https://github.com/klbsjpolp/skip-bo/compare/v2.15.2...v2.15.3) (2026-08-08)
 ## [2.15.2](https://github.com/klbsjpolp/skip-bo/compare/v2.15.1...v2.15.2) (2026-08-08)
