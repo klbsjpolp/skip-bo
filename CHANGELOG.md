@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.15.0](https://github.com/klbsjpolp/skip-bo/compare/v2.14.10...v2.15.0) (2026-08-08)
+
+### Features
+
+* **themes:** remove the NEW badge from the rummy theme ([ccc7045](https://github.com/klbsjpolp/skip-bo/commit/ccc70452e10dc416e54b489daf7460503ba17e7b))
 ## [2.14.10](https://github.com/klbsjpolp/skip-bo/compare/v2.14.9...v2.14.10) (2026-08-07)
 
 ### Bug Fixes

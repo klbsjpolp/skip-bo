@@ -1,7 +1,7 @@
 {
   "name": "skip-bo-workspace",
   "private": true,
-  "version": "2.14.10",
+  "version": "2.15.0",
   "license": "GPL-3.0-only",
   "type": "module",
   "engines": {
