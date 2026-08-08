@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.15.7](https://github.com/klbsjpolp/skip-bo/compare/v2.15.6...v2.15.7) (2026-08-08)
+
+### Bug Fixes
+
+* **web:** drop the card back under the pointer during a drag ([f262719](https://github.com/klbsjpolp/skip-bo/commit/f2627193c682442b94b8e438118cbf05e7a20f55))
 ## [2.15.6](https://github.com/klbsjpolp/skip-bo/compare/v2.15.5...v2.15.6) (2026-08-08)
 
 ### Bug Fixes
