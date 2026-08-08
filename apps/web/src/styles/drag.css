@@ -97,7 +97,7 @@
    under-pointer card doesn't flash hoverable states. */
 body[data-drag-active='true'] {
   /* Stop the browser from selecting page text when the user drags a card. */
-  @apply cursor-grabbing select-none;
+  @apply cursor-grabbing select-none touch-none;
 }
 
 body[data-drag-active='true'] .hoverable-card:hover {
@@ -110,9 +110,22 @@ body[data-drag-active='true'] .hoverable-card:hover {
    horizontally because horizontal pan-x isn't a default scroll axis). With
    `touch-action: none` we own every touch gesture that originates on a
    draggable card; the user can still scroll the page by starting the touch
-   on any non-draggable area. */
+   on any non-draggable area.
+
+   The two WebKit properties below close the rest of the hole. iPadOS answers
+   a press-and-hold on ordinary content with its own gestures — the selection
+   callout and the system-wide drag-and-drop session — and either of them
+   takes the pointer stream away from us mid-drag with a `pointercancel`.
+   `touch-action` alone does not suppress them.
+
+   `touch-action` is also only advisory on iOS: Safari re-decides a few frames
+   in and can still hand the gesture to the page scroller, which is why
+   `useDraggableCard` additionally cancels `touchmove` for the duration of a
+   touch drag. */
 [data-drag-source] {
-  @apply touch-none;
+  @apply touch-none select-none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
 }
 
 .card-drag-ghost {

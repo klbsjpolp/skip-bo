@@ -111,6 +111,16 @@
     @apply relative;
   }
 
+  /* The safe-area padding lives on `#root`, *outside* this element's box, so a
+     plain `min-height: 100svh` here makes the document taller than the viewport
+     by the inset — every iOS device ends up with a permanently scrollable page
+     even when the whole board is visible and there is nothing to scroll to. On
+     a touch screen that stray scroll is what a drag turns into. Subtract the
+     insets so the page is exactly as tall as it needs to be. */
+  #main {
+    min-height: calc(100svh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  }
+
   .game-status {
     @apply flex flex-col items-center justify-center gap-2;
   }

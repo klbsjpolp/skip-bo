@@ -14,6 +14,12 @@ export interface DragSession {
   validBuildPiles: ReadonlySet<number>;
   validDiscardPiles: ReadonlySet<number>;
   pointer: { x: number; y: number };
+  /**
+   * Vertical offset of the ghost from the pointer, in CSS pixels. Negative on
+   * touch, where the card floats above the fingertip so the hand doesn't cover
+   * what it is carrying; 0 for a cursor, which the card can sit right under.
+   */
+  ghostOffsetY: number;
   hovered: DragTargetId | null;
 }
 

@@ -90,6 +90,15 @@
     }
   }
 
+  /* The board is a single screen, not a document: there is nothing above or
+     below it to reveal. Without this, iOS rubber-bands the whole page on any
+     downward flick — including one that started as a card drag — which reads
+     as the board sliding out from under the player's finger. */
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+
   body {
     /* Themes may tint the safe-area gutter separately from the board via
        `--theme-color` (iOS Safari also samples this for the status bar).
