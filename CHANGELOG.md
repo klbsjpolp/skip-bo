@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.15.6](https://github.com/klbsjpolp/skip-bo/compare/v2.15.5...v2.15.6) (2026-08-08)
+
+### Bug Fixes
+
+* **web:** make card drags reliable on touch devices ([a655be1](https://github.com/klbsjpolp/skip-bo/commit/a655be1651dd1a11a2fec954677b52250183e225))
 ## [2.15.5](https://github.com/klbsjpolp/skip-bo/compare/v2.15.4...v2.15.5) (2026-08-08)
 
 ### Bug Fixes
