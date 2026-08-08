@@ -4,14 +4,7 @@ import type { Card, GameState, MoveResult } from '@skipbo/game-core';
 import { canPlayCard } from '@skipbo/game-core';
 import { useDrag, type DragSource, type DragTargetId } from '@/contexts/useDrag';
 import { createEdgeAutoScroller } from '@/game/dragAutoScroll';
-import {
-  dragProbePoints,
-  dragThresholdFor,
-  dropToleranceFor,
-  ghostLiftFor,
-  readCardHeightPx,
-  resolveDropTarget,
-} from '@/game/dragTargeting';
+import { dragThresholdFor, dropToleranceFor, resolveDropTarget } from '@/game/dragTargeting';
 import { canDiscardFromSource } from '@/game/pileIntents';
 import { setDragCommitOverride } from '@/services/dragCommitOverride';
 
@@ -85,7 +78,6 @@ export function useDraggableCard(options: UseDraggableCardOptions): DraggableCar
       const isTouch = pointerType === 'touch';
       const dragThreshold = dragThresholdFor(pointerType);
       const dropTolerance = dropToleranceFor(pointerType);
-      const ghostLift = ghostLiftFor(pointerType, readCardHeightPx());
       const targetEl = event.currentTarget;
       let started = false;
       let validBuild: Set<number> = new Set();
@@ -102,7 +94,7 @@ export function useDraggableCard(options: UseDraggableCardOptions): DraggableCar
       // intended click affordance. Only a real drag swaps the selection.
 
       const resolveTarget = (x: number, y: number): DragTargetId | null =>
-        resolveDropTarget(dragProbePoints(x, y, ghostLift), validBuild, validDiscard, dropTolerance);
+        resolveDropTarget({ x, y }, validBuild, validDiscard, dropTolerance);
 
       try {
         targetEl.setPointerCapture(pointerId);
@@ -154,7 +146,6 @@ export function useDraggableCard(options: UseDraggableCardOptions): DraggableCar
             validBuildPiles: validBuild,
             validDiscardPiles: validDiscard,
             pointer: { x: lastX, y: lastY },
-            ghostOffsetY: -ghostLift,
             hovered: null,
           });
           started = true;
@@ -205,11 +196,10 @@ export function useDraggableCard(options: UseDraggableCardOptions): DraggableCar
         endDrag();
         swallowNextClick();
         if (!hovered) return;
-        // Start the play/discard animation from where the ghost was released
-        // rather than from the source DOM position — which on touch is the
-        // lifted card, not the fingertip.
+        // Start the play/discard animation from where the user released the
+        // card rather than from the source DOM position.
         setDragCommitOverride({
-          startPosition: { x: upEvent.clientX, y: upEvent.clientY - ghostLift },
+          startPosition: { x: upEvent.clientX, y: upEvent.clientY },
         });
         if (hovered.kind === 'build') {
           void playCard(hovered.index);

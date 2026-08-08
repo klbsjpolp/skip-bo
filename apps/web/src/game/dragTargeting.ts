@@ -1,12 +1,13 @@
 /**
  * Geometry of a card drag: how far the pointer must travel before a press
- * becomes a drag, where the ghost sits relative to the pointer, and which pile
- * a release lands on.
+ * becomes a drag, and which pile a release lands on.
  *
- * All of it is parameterised by `pointerType` because a fingertip and a mouse
- * cursor are not the same instrument. A cursor is a single pixel the user can
- * see; a fingertip is a ~10 mm contact patch whose reported centre is hidden
- * under the finger itself. Everything below exists to close that gap.
+ * Both are parameterised by `pointerType` because a fingertip and a mouse
+ * cursor are not the same instrument: a cursor is a single pixel the user aims
+ * exactly, a fingertip is a ~10 mm contact patch reported as its centre. The
+ * card itself always rides directly under the pointer, whichever it is — an
+ * offset ghost would show the card somewhere other than where it will land,
+ * and players aim at the card they can see.
  */
 import type { DragTargetId } from '@/contexts/useDrag';
 
@@ -33,17 +34,6 @@ export const PRECISE_DROP_TOLERANCE_PX = 0;
  */
 export const TOUCH_DROP_TOLERANCE_PX = 28;
 
-/**
- * Fraction of a card's height the ghost floats above a fingertip. Without a
- * lift the dragged card is entirely hidden under the hand holding it, which is
- * most of why touch drags "fail": the player cannot see what they are carrying
- * or where it is about to land.
- */
-const TOUCH_GHOST_LIFT_RATIO = 0.6;
-
-/** Used when `--card-height` cannot be read (jsdom, very early paint). */
-export const FALLBACK_CARD_HEIGHT_PX = 66;
-
 const isCoarse = (pointerType: string): boolean => pointerType === 'touch';
 
 export const dragThresholdFor = (pointerType: string): number =>
@@ -51,36 +41,6 @@ export const dragThresholdFor = (pointerType: string): number =>
 
 export const dropToleranceFor = (pointerType: string): number =>
   isCoarse(pointerType) ? TOUCH_DROP_TOLERANCE_PX : PRECISE_DROP_TOLERANCE_PX;
-
-export const ghostLiftFor = (pointerType: string, cardHeightPx: number): number =>
-  isCoarse(pointerType) ? Math.round(cardHeightPx * TOUCH_GHOST_LIFT_RATIO) : 0;
-
-/** Live `--card-height`, so the lift tracks the responsive card size. */
-export const readCardHeightPx = (): number => {
-  if (typeof window === 'undefined' || typeof window.getComputedStyle !== 'function') {
-    return FALLBACK_CARD_HEIGHT_PX;
-  }
-  const raw = window.getComputedStyle(document.documentElement).getPropertyValue('--card-height');
-  const parsed = Number.parseFloat(raw);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : FALLBACK_CARD_HEIGHT_PX;
-};
-
-/**
- * The points a release is tested against, most-intentional first.
- *
- * With the ghost lifted, a player can aim two ways and both read as correct:
- * put the *card* on the pile, or put the *finger* on the pile. Probing both
- * means neither aim misses. The lifted point comes first so that when the two
- * land on different valid piles, the drop matches the card the player can
- * actually see — which is also the pile lit up as `is-drag-over`.
- */
-export const dragProbePoints = (x: number, y: number, ghostLiftPx: number): DragPoint[] =>
-  ghostLiftPx > 0
-    ? [
-        { x, y: y - ghostLiftPx },
-        { x, y },
-      ]
-    : [{ x, y }];
 
 interface Bounds {
   left: number;
@@ -118,30 +78,26 @@ const parseDropTarget = (
  * tested without a layout engine.
  */
 export const resolveDropTarget = (
-  points: readonly DragPoint[],
+  point: DragPoint,
   validBuild: ReadonlySet<number>,
   validDiscard: ReadonlySet<number>,
   tolerancePx: number,
   root: ParentNode = document,
 ): DragTargetId | null => {
-  const candidates = Array.from(root.querySelectorAll<HTMLElement>('[data-drop-target][data-drop-index]'));
   let nearest: { target: DragTargetId; distance: number } | null = null;
 
-  for (const point of points) {
-    for (const element of candidates) {
-      const target = parseDropTarget(element, validBuild, validDiscard);
-      if (!target) continue;
-      const rect = element.getBoundingClientRect();
-      // A collapsed rect has no meaningful position; in jsdom every rect is
-      // collapsed, which is what keeps drag unit tests from matching anything.
-      if (rect.width <= 0 || rect.height <= 0) continue;
-      const distance = distanceToBounds(point, rect);
-      // A pile actually under the point always wins over any near-miss, and
-      // the earlier probe point wins over the later one.
-      if (distance === 0) return target;
-      if (distance <= tolerancePx && (nearest === null || distance < nearest.distance)) {
-        nearest = { target, distance };
-      }
+  for (const element of root.querySelectorAll<HTMLElement>('[data-drop-target][data-drop-index]')) {
+    const target = parseDropTarget(element, validBuild, validDiscard);
+    if (!target) continue;
+    const rect = element.getBoundingClientRect();
+    // A collapsed rect has no meaningful position; in jsdom every rect is
+    // collapsed, which is what keeps drag unit tests from matching anything.
+    if (rect.width <= 0 || rect.height <= 0) continue;
+    const distance = distanceToBounds(point, rect);
+    // A pile actually under the pointer always wins over any near-miss.
+    if (distance === 0) return target;
+    if (distance <= tolerancePx && (nearest === null || distance < nearest.distance)) {
+      nearest = { target, distance };
     }
   }
 

@@ -16,7 +16,6 @@ export const DragProvider: FC<DragProviderProps> = ({ children }) => {
       validBuildPiles: init.validBuildPiles,
       validDiscardPiles: init.validDiscardPiles,
       pointer: init.pointer,
-      ghostOffsetY: init.ghostOffsetY,
       hovered: init.hovered ?? null,
     });
   }, []);
