@@ -14,7 +14,26 @@ onlyBuiltDependencies:
   - '@tailwindcss/oxide'
   - esbuild
 
+# Every entry below is a transitive dependency of the build/test toolchain
+# (vite, postcss, tailwind, eslint, playwright) -- none reach the shipped
+# bundle. They are pinned anyway so `pnpm audit` stays quiet and a genuinely
+# alarming advisory is visible when it lands, instead of being lost in noise.
+# Drop an entry once the direct dependency ships a version that resolves past
+# it on its own.
 overrides:
   esbuild: 0.27.7
   lodash: '>=4.17.23'
   tmp: '>=0.2.6'
+  #
+  # Keep the upper bound on every entry below. An override value is a range,
+  # and pnpm installs the highest version satisfying it -- a bare `>=1.1.18`
+  # is happily satisfied by 5.x, which is how minimatch@3 (which asks for
+  # `^1.1.7`) ended up resolving brace-expansion to a 5.x major.
+  '@babel/core': '>=7.29.1 <8'
+  # Patched separately per major line; each consumer stays on its own.
+  brace-expansion@1: '>=1.1.18 <2'
+  brace-expansion@2: '>=2.1.4 <3'
+  brace-expansion@5: '>=5.0.9 <6'
+  fast-uri: '>=3.1.5 <4'
+  js-yaml: '>=4.3.1 <5'
+  nanoid@3: '>=3.3.17 <4'
