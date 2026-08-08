@@ -25,7 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      # write, not read: the review is delivered as a PR comment, which the
+      # action cannot post with a read-only pull-requests scope.
+      pull-requests: write
       issues: read
       id-token: write
 
