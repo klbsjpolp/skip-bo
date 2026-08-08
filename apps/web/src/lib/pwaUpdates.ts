@@ -34,8 +34,58 @@ const updateSnapshot = (partialSnapshot: Partial<PwaUpdateSnapshot>) => {
   emitSnapshot();
 };
 
-const toRegistrationError = (error: unknown): Error =>
-  error instanceof Error ? error : new Error(typeof error === 'string' ? error : 'Service worker registration failed.');
+const isErrorLike = (error: unknown): error is { name?: string; message: string } =>
+  typeof error === 'object' && error !== null && typeof (error as { message?: unknown }).message === 'string';
+
+const toRegistrationError = (error: unknown): Error => {
+  if (error instanceof Error) {
+    return error;
+  }
+
+  if (typeof error === 'string') {
+    return new Error(error);
+  }
+
+  // `DOMException` — how Safari reports a blocked or unloadable `sw.js` — does
+  // not extend `Error` everywhere. Carry its name and message across rather than
+  // flattening every non-`Error` throw into one anonymous failure.
+  if (isErrorLike(error)) {
+    const registrationError = new Error(error.message);
+    if (error.name) {
+      registrationError.name = error.name;
+    }
+    return registrationError;
+  }
+
+  return new Error('Service worker registration failed.');
+};
+
+// Registration fails for reasons that live entirely in the client's
+// environment: Safari raises `SecurityError` (DOMException code 18) when
+// storage is blocked (private browsing, "block all cookies", a content
+// blocker) or when the `sw.js` fetch itself fails, and any browser fails while
+// offline. Nothing in this codebase can fix those, and the app degrades
+// gracefully — it runs without a precache and updates fall back to the
+// runtime-config channel.
+const isEnvironmentRegistrationError = (error: Error): boolean =>
+  error.name === 'SecurityError' || globalThis.navigator?.onLine === false;
+
+// Keep environmental failures visible without one error-level issue per
+// affected visitor: report them as warnings under their own fingerprint (the
+// default grouping keys off a message that carries the deploy's origin), so the
+// rate stays trackable while genuine registration bugs still surface as errors.
+const captureRegistrationError = (error: Error) => {
+  if (!isEnvironmentRegistrationError(error)) {
+    Sentry.captureException(error);
+    return;
+  }
+
+  Sentry.captureException(error, {
+    level: 'warning',
+    fingerprint: ['pwa', 'register-sw', 'environment-blocked'],
+    tags: { 'pwa.register_sw': 'environment-blocked' },
+  });
+};
 
 export const initializePwaUpdates = () => {
   if (initialized || typeof window === 'undefined') {
@@ -59,7 +109,7 @@ export const initializePwaUpdates = () => {
     },
     onRegisterError(error) {
       const registrationError = toRegistrationError(error);
-      Sentry.captureException(registrationError);
+      captureRegistrationError(registrationError);
       updateSnapshot({ registrationError });
     },
   });
