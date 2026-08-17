@@ -53,6 +53,18 @@
   &[data-side='left'] {
     --popper-translate-from: 0.5rem 0;
   }
+
+  /* Reduced motion keeps the transition — it is what tells you the popover
+     opened — but drops the directional slide and the scale for a plain
+     cross-fade. */
+  @media (prefers-reduced-motion: reduce) {
+    &[data-state='open'] {
+      animation-name: popper-content-in-reduced;
+    }
+    &[data-state='closed'] {
+      animation-name: popper-content-out-reduced;
+    }
+  }
 }
 
 @keyframes popper-content-in {
@@ -74,6 +86,24 @@
   to {
     opacity: 0;
     transform: translate(var(--popper-translate-from, 0 0)) scale(0.95);
+  }
+}
+
+@keyframes popper-content-in-reduced {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popper-content-out-reduced {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 
