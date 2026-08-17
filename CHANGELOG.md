@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.16.0](https://github.com/klbsjpolp/skip-bo/compare/v2.15.9...v2.16.0) (2026-08-17)
+
+### Features
+
+* **ui:** press feedback, symmetric lift, a11y media queries ([4d1d963](https://github.com/klbsjpolp/skip-bo/commit/4d1d9634c0e391ce8322a0e9232f1be5f2cb7d12))
+
+### Bug Fixes
+
+* **ui:** review follow-ups on the design-polish pass ([503bbac](https://github.com/klbsjpolp/skip-bo/commit/503bbacbd55904914aa278e41b4f57dadaf6faee))
 ## [2.15.9](https://github.com/klbsjpolp/skip-bo/compare/v2.15.8...v2.15.9) (2026-08-14)
 ## [2.15.8](https://github.com/klbsjpolp/skip-bo/compare/v2.15.7...v2.15.8) (2026-08-14)
 ## [2.15.7](https://github.com/klbsjpolp/skip-bo/compare/v2.15.6...v2.15.7) (2026-08-08)
