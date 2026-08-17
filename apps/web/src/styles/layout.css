@@ -55,9 +55,25 @@
            of snapping, since draw animations portal into this hand-area and
            inherit the rule. */
         @apply absolute top-0;
-        transition-property: left, top, transform;
+        /* `box-shadow` is listed so the hover/select/press shadow keeps easing
+           here too. This rule replaces the base `.card` transition wholesale
+           (higher specificity, same layer), and `overlap-hand` applies to any
+           hand over four cards — i.e. essentially every hand in play — so
+           omitting it left the shadow snapping in the one place cards are
+           looked at most. It is safe to add for the reason the list exists:
+           the properties being kept out are colour ones. */
+        transition-property: left, top, transform, box-shadow;
         transition-duration: 200ms;
         transition-timing-function: ease-in-out;
+
+        /* Fanned cards overlap by 10px with the later card on top, so a focus
+           ring drawn on a card's right edge lands under its neighbour and
+           reads as "focus didn't move". Lift the focused card the way hover
+           already does. A selected card needs no rule: its own z-index (101)
+           already clears every sibling in the fan. */
+        &:focus-visible {
+          z-index: 999;
+        }
 
         &.selected {
           z-index: 101 !important;

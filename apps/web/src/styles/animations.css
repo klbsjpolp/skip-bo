@@ -57,11 +57,13 @@
   /* Reduced motion keeps the transition — it is what tells you the popover
      opened — but drops the directional slide and the scale for a plain
      cross-fade. */
-  @media (prefers-reduced-motion: reduce) {
-    &[data-state='open'] {
+  &[data-state='open'] {
+    @variant motion-reduce {
       animation-name: popper-content-in-reduced;
     }
-    &[data-state='closed'] {
+  }
+  &[data-state='closed'] {
+    @variant motion-reduce {
       animation-name: popper-content-out-reduced;
     }
   }
