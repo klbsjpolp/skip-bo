@@ -49,6 +49,11 @@
 @import './themes/wool.css';
 
 @custom-variant dark (&:is(.dark *));
+/* Tailwind ships `motion-reduce` and `contrast-more` but has no variant for
+   `prefers-reduced-transparency`. Declared here rather than hand-writing the
+   media query at each use, so `styles/base.css` can follow the `@variant`
+   idiom themes/README.md §3.5 requires for every accessibility override. */
+@custom-variant transparency-reduce (@media (prefers-reduced-transparency: reduce));
 
 @theme {
   --color-border: var(--border);

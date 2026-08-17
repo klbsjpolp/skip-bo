@@ -49,8 +49,16 @@
      composes with every scale already in play (the fanned hand's 1.08 hover,
      any theme's own) instead of fighting them on specificity. A theme that
      replaces `transform` outright on `:active` — Metro's tile-tilt — keeps its
-     own treatment untouched. */
-  .card.hoverable-card:active {
+     own treatment untouched.
+
+     The second selector is not redundant. `transition-duration` here ties on
+     specificity (0,3,0) with `.hand-area.overlap-hand .card`'s own 200ms in
+     layout.css, so inside a fanned hand the press would win only by virtue of
+     this file being imported later — an implicit dependency that a reordered
+     `index.css` import would silently revert, with no visual signal. Spelling
+     the hand case out buys the specificity margin that makes it explicit. */
+  .card.hoverable-card:active,
+  .overlap-hand .card.hoverable-card:active {
     --card-press: 0.95;
     transition-duration: 100ms;
   }

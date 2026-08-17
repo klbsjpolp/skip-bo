@@ -148,34 +148,42 @@
   `.translucent-scrim` / `.translucent-surface` are markers carried by the
   dialog and the forced-update overlay; they name the role rather than the
   component so a future translucent panel opts in by adding the class.
+
+  Both preferences go through `@variant` per themes/README.md §3.5 rather than
+  a hand-written `@media`. `contrast-more` ships with Tailwind; the
+  transparency one does not, so `index.css` declares a `transparency-reduce`
+  `@custom-variant` beside `dark` — it is a project-wide accessibility
+  preference, which is exactly what that file is for.
 */
 
-@media (prefers-reduced-transparency: reduce) {
-  /* Blur is both the expensive half and the illegible half. Dropped globally
-     rather than per-theme: sixteen themes reach for `backdrop-filter`
-     independently, and one added later must not be able to miss this quietly.
+/* Blur is both the expensive half and the illegible half. Dropped globally
+   rather than per-theme: sixteen themes reach for `backdrop-filter`
+   independently, and one added later must not be able to miss this quietly.
 
-     Standard property only — Lightning CSS emits the `-webkit-` form itself.
-     Writing both by hand makes it collapse the pair down to the prefixed one,
-     which silently exempts every non-WebKit browser. */
-  *,
-  *::before,
-  *::after {
+   Standard property only — Lightning CSS emits the `-webkit-` form itself.
+   Writing both by hand makes it collapse the pair down to the prefixed one,
+   which silently exempts every non-WebKit browser. */
+*,
+*::before,
+*::after {
+  @variant transparency-reduce {
     backdrop-filter: none !important;
   }
+}
 
-  /* Chrome the player reads *through* goes solid, not merely unblurred — an
-     unblurred translucent panel is less legible than either extreme. Board
-     decoration (a theme's tinted play area) keeps its wash; it carries no text
-     of its own and losing the blur is enough there. */
-  .translucent-scrim,
-  .translucent-surface {
+/* Chrome the player reads *through* goes solid, not merely unblurred — an
+   unblurred translucent panel is less legible than either extreme. Board
+   decoration (a theme's tinted play area) keeps its wash; it carries no text
+   of its own and losing the blur is enough there. */
+.translucent-scrim,
+.translucent-surface {
+  @variant transparency-reduce {
     background-color: var(--background);
   }
 }
 
-@media (prefers-contrast: more) {
-  .translucent-surface {
+.translucent-surface {
+  @variant contrast-more {
     background-color: var(--background);
     border-color: var(--foreground);
   }
