@@ -136,3 +136,47 @@
     }
   }
 }
+
+/*
+  Transparency and contrast preferences.
+
+  Deliberately unlayered. The surfaces below are painted by Tailwind utilities
+  (`bg-background/60`, `backdrop-blur-xs`) that live in the `utilities` layer,
+  which an `@layer base` rule can never outrank — `drag.css` reaches for the
+  same escape hatch for the same reason.
+
+  `.translucent-scrim` / `.translucent-surface` are markers carried by the
+  dialog and the forced-update overlay; they name the role rather than the
+  component so a future translucent panel opts in by adding the class.
+*/
+
+@media (prefers-reduced-transparency: reduce) {
+  /* Blur is both the expensive half and the illegible half. Dropped globally
+     rather than per-theme: sixteen themes reach for `backdrop-filter`
+     independently, and one added later must not be able to miss this quietly.
+
+     Standard property only — Lightning CSS emits the `-webkit-` form itself.
+     Writing both by hand makes it collapse the pair down to the prefixed one,
+     which silently exempts every non-WebKit browser. */
+  *,
+  *::before,
+  *::after {
+    backdrop-filter: none !important;
+  }
+
+  /* Chrome the player reads *through* goes solid, not merely unblurred — an
+     unblurred translucent panel is less legible than either extreme. Board
+     decoration (a theme's tinted play area) keeps its wash; it carries no text
+     of its own and losing the blur is enough there. */
+  .translucent-scrim,
+  .translucent-surface {
+    background-color: var(--background);
+  }
+}
+
+@media (prefers-contrast: more) {
+  .translucent-surface {
+    background-color: var(--background);
+    border-color: var(--foreground);
+  }
+}

@@ -16,7 +16,6 @@
   }
 
   .hoverable-card:hover {
-    @apply transition-all duration-200 ease-in-out;
     --card-translate-y: -2px;
     --card-scale: 1.05;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
@@ -26,6 +25,43 @@
      accidentally start a text-selection drag from a card label. */
   .card {
     @apply select-none;
+
+    /* The lift transition belongs on the resting state, not inside `:hover`.
+       Declared there it only existed in the after-change style of the pointer
+       arriving, so the card animated up and snapped back down; and `.selected`,
+       which has no `:hover` rule to borrow it from, never animated at all
+       outside the fanned hand (layout.css declares its own there).
+
+       Deliberately scoped to transform + box-shadow: `top`/`left` carry the
+       discard-stack and hand-slot geometry, and those must keep snapping —
+       `transition-all` here would animate a card sliding between stack
+       positions. `.card.is-drag-source` already opts out entirely (drag.css). */
+    transition:
+      transform 200ms ease-in-out,
+      box-shadow 200ms ease-in-out;
+  }
+
+  /* Press feedback. `:active` latches on pointer-down, which is the only
+     feedback a touch device can get — hover does not exist there, so a tap on
+     a card used to be silent until the selection state rendered.
+
+     Expressed as a multiplier rather than a `--card-scale` override so it
+     composes with every scale already in play (the fanned hand's 1.08 hover,
+     any theme's own) instead of fighting them on specificity. A theme that
+     replaces `transform` outright on `:active` — Metro's tile-tilt — keeps its
+     own treatment untouched. */
+  .card.hoverable-card:active {
+    --card-press: 0.95;
+    transition-duration: 100ms;
+  }
+
+  /* Cards are focusable (`role="button"`, `tabIndex=0`) but had no designed
+     focus state, leaving keyboard players the UA default ring over seventeen
+     very different card surfaces. Reuses the selection accent every theme
+     already defines. */
+  .card:focus-visible {
+    outline: 2px solid var(--selected-border-color);
+    outline-offset: 2px;
   }
 }
 
@@ -38,7 +74,11 @@
   --card-rotate: inherit;
   --card-translate-y: 0px;
   --card-scale: 1;
-  transform: translate3d(0, var(--card-translate-y), 0) scale(var(--card-scale)) rotate(var(--card-rotate));
+  /* `--card-press` is the pointer-down multiplier (see the `:active` rule
+     above); its inline fallback keeps the resting transform identical, so no
+     rule other than `:active` needs to know it exists. */
+  transform: translate3d(0, var(--card-translate-y), 0) scale(calc(var(--card-scale) * var(--card-press, 1)))
+    rotate(var(--card-rotate));
 
   &::before,
   &::after {

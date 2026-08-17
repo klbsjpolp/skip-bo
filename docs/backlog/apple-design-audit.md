@@ -16,6 +16,12 @@
 Findings are numbered `A1…A18` so they can be cited in issues and commits. Section references
 (§1…§17) point at the skill rubric.
 
+**Fixed alongside this note:** A1, A2, A7.2, A7.3 and A17 — the subset that is CSS-only, changes no
+input behaviour and no duration the state machine reads, and provably moves no visual baseline
+(`stable-screenshot.css` disables transitions and animations wholesale, Playwright sets no
+`reducedMotion`, and screenshots never press or keyboard-focus a card). Each carries a **Status**
+line below. Everything else is still open.
+
 ---
 
 ## Summary
@@ -40,7 +46,7 @@ indicators, popovers — ignores every accessibility media query.
 
 | Rubric area                       | State                                                                           |
 | --------------------------------- | ------------------------------------------------------------------------------- |
-| §1 Response                       | ✗ no press feedback; render-blocking font imports                               |
+| §1 Response                       | ◐ press feedback added (A1); render-blocking font imports remain                |
 | §2 Direct manipulation            | ◐ 1:1 tracking is correct; grab offset deliberately discarded (see A3)          |
 | §3 Interruptibility               | ✗ input hard-locked during every animation                                      |
 | §4 Springs / behavior             | ✗ no springs anywhere                                                           |
@@ -49,11 +55,11 @@ indicators, popovers — ignores every accessibility media query.
 | §7 Spatial consistency            | ✓ flights start and land on real element rects; release-point override is right |
 | §8 Directional hinting            | ✗ targets light up statically                                                   |
 | §9 Rubber-banding                 | ✗ hard rect test                                                                |
-| §10 Gesture feel checklist        | ◐ hysteresis and hit tolerance are good; commit-on-down feedback missing        |
+| §10 Gesture feel checklist        | ✓ hysteresis, hit tolerance, and press-on-down feedback all present             |
 | §11 Frame-level smoothness        | ◐ `will-change` applied backwards; `filter:` on every in-flight card            |
 | §12 Materials & depth             | ◐ blur used, but light-on-light stacking in dialogs                             |
 | §13 Multimodal feedback           | ✗ no sound, no haptics                                                          |
-| §14 Reduced motion / transparency | ◐ themes yes, interaction layer no; no transparency/contrast queries at all     |
+| §14 Reduced motion / transparency | ◐ indicators, popovers, transparency, contrast done; card flights still exempt  |
 | §15 Typography                    | ✗ size-agnostic tracking; the declared body font is never loaded                |
 | §16 Foundations                   | ✓ strong — wayfinding, mapping, and labelling are good                          |
 
@@ -80,6 +86,11 @@ base treatment every theme inherits.
 > `:active` still latches on desktop; if not, set a `data-pressed` attribute in the same handler and
 > style that instead.
 
+**Status: fixed.** Shipped as a `--card-press` multiplier folded into `.card`'s transform rather than
+a `--card-scale` override, so it composes with every scale already in play — the fanned hand's 1.08
+hover, a theme's own — instead of fighting them on specificity. A theme that replaces `transform`
+outright on `:active`, as Metro does, keeps its own treatment untouched.
+
 ### A2 — The hover lift animates in and snaps out (§7, §16 craft)
 
 [card.css:18](../../apps/web/src/styles/card.css) declares the transition _inside_ the `:hover`
@@ -97,6 +108,10 @@ build-pile card is a hard jump.
 > it from `:hover`. This makes selection and hover symmetric everywhere and lets `.overlap-hand`'s
 > rule keep only the `left`/`top` part it actually needs. Run `test:visual` — this touches every
 > theme's card.
+
+**Status: fixed**, scoped to `transform` and `box-shadow` exactly. `transition-all` on the base rule
+would also animate `top`/`left`, which carry the discard-stack and hand-slot geometry — a card would
+slide between stack positions instead of snapping.
 
 ### A3 — The drag ghost snaps to the pointer centre, discarding the grab offset (§2)
 
@@ -233,6 +248,24 @@ matches either query, while glass ([glass.css:77, 194](../../apps/web/src/themes
 > 3. Add a `@media (prefers-reduced-transparency: reduce)` block that raises the translucent
 >    surfaces to solid and drops the blur, and a `prefers-contrast: more` block that gives them a
 >    defined border. One block in `base.css` targeting the shared surface tokens covers most of it.
+
+**Status: (2) and (3) fixed; (1) still open** — the card flights need A5's animation path first.
+
+Two things about (3) came out differently from the sketch above. There is no shared surface token to
+target, so the dialog and the forced-update overlay now carry `.translucent-scrim` /
+`.translucent-surface` marker classes and a future panel opts in by adding one. And the blur is
+dropped with a universal selector rather than per surface: sixteen themes reach for `backdrop-filter`
+independently, and a seventeenth must not be able to miss the preference silently. Board decoration —
+a theme's tinted play area — keeps its translucent wash and loses only the blur; it carries no text
+of its own.
+
+The block is deliberately **unlayered**. These surfaces are painted by Tailwind utilities
+(`bg-background/60`, `backdrop-blur-xs`) in the `utilities` layer, which an `@layer base` rule can
+never outrank — `drag.css` uses the same escape hatch for the same reason.
+
+One trap worth recording: writing `backdrop-filter` and `-webkit-backdrop-filter` by hand makes
+Lightning CSS collapse the pair down to the **prefixed one only**, silently exempting every
+non-WebKit browser. Write the standard property alone and let the build prefix it.
 
 ---
 
@@ -373,6 +406,10 @@ wildly varying card surfaces — while the app otherwise treats keyboard players
 (`BoardKeyboardProvider`, positional bindings, hint badges). A themed focus ring reusing
 `--selected-border-color` would close the gap in one rule.
 
+**Status: fixed**, minus one theme surface. Cards are focusable via `role="button"` + `tabIndex`, so
+the ring is on `.card:focus-visible` using `--selected-border-color`. The `.placeholder` empty-slot
+affordance is still bare.
+
 ### A18 — The AI pacing delays are correct; leave them
 
 `beforeMove: 300`, `afterCardSelection: 400` ([aiConfig.ts:84-87](../../apps/web/src/ai/aiConfig.ts))
@@ -411,20 +448,20 @@ Worth recording so a future change does not regress it:
 
 ## Suggested order
 
-Roughly by value ÷ risk. The first three are small, self-contained, and cover the two largest gaps.
+Roughly by value ÷ risk. ~~A1, A2, A7.2, A7.3, A17~~ are done; what remains:
 
-1. **A1** press feedback — two lines, largest single gap.
-2. **A2** symmetric hover/selection transition — one rule moved.
-3. **A12** load a font that exists — one line, currently a real bug.
-4. **A7.2 / A7.3** `motion-reduce` on drop indicators; transparency/contrast queries — additive, low risk.
-5. **A14 / A15** `will-change` and `filter` — measure first.
-6. **A4 → A5** velocity tracking, then springs with handoff. The big one; do it as one arc, since
+1. **A12** load a font that exists — one line, currently a real bug. Needs `pnpm test:visual:update`
+   on macOS, since it changes the resting look of every default board.
+2. **A14 / A15** `will-change` and `filter` — measure first. A14 looks free and is not:
+   `will-change: transform` creates a stacking context _and_ a containing block, so removing it from
+   `.card-inner*` can silently retarget theme layering.
+3. **A4 → A5** velocity tracking, then springs with handoff. The big one; do it as one arc, since
    velocity without a spring to receive it has nowhere to go.
-7. **A7.1** reduced-motion card flights — depends on A5's animation path.
-8. **A8** ghost off the React render path.
-9. **A6** narrow the interaction lock.
-10. **A3** grab offset — prototype first; it contradicts a documented decision and deserves a real test.
-11. **A16, A9, A10, A11, A17** — polish.
+4. **A7.1** reduced-motion card flights — depends on A5's animation path.
+5. **A8** ghost off the React render path.
+6. **A6** narrow the interaction lock.
+7. **A3** grab offset — prototype first; it contradicts a documented decision and deserves a real test.
+8. **A16, A9, A10, A11, A13** — polish.
 
 Any of these that touch card geometry, theme surfaces, or `.player-area` / `.center-area` require
 `pnpm test:visual` for both projects and refreshed baselines per
