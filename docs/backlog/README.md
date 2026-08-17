@@ -17,5 +17,6 @@
 ## Current Notes
 
 - [ai-discard-strategy.md](ai-discard-strategy.md)
+- [apple-design-audit.md](apple-design-audit.md)
 - [architecture-revision-2026-07.md](architecture-revision-2026-07.md)
 - [online-multiplayer-ui.md](online-multiplayer-ui.md)

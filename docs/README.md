@@ -55,6 +55,7 @@
 
 - [backlog/README.md](backlog/README.md): rules for non-normative design docs.
 - [backlog/ai-discard-strategy.md](backlog/ai-discard-strategy.md): AI discard-strategy backlog note.
+- [backlog/apple-design-audit.md](backlog/apple-design-audit.md): review of the web UI's interaction, motion, and typography layers against Apple's fluid-interface design guidance.
 - [backlog/architecture-revision-2026-07.md](backlog/architecture-revision-2026-07.md): whole-of-game architecture review and phased revision plan.
 
 ## Role Boundaries
