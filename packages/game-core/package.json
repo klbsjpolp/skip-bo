@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "immer": "^11.1.16"
+    "immer": "^11.1.17"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.10",
