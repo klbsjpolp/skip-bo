@@ -15,10 +15,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "immer": "^11.1.17"
+    "immer": "^11.1.18"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/coverage-v8": "^4.1.11",
     "vite": "^8.2.1",
     "vitest": "^4.1.10"
   }
