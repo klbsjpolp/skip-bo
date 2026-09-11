@@ -17,7 +17,7 @@
   "dependencies": {
     "@skipbo/game-core": "workspace:*",
     "@klbsjpolp/realtime-core": "^0.1.0",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.11",
