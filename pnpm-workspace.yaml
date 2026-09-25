@@ -2,6 +2,21 @@ packages:
   - apps/*
   - packages/*
 
+# Vitest and its @vitest/* add-ons peer-depend on the exact same version.
+# Declare them once here (packages reference them as `catalog:`) so a bump
+# can never move one without the others.
+catalog:
+  '@vitest/coverage-v8': 5.0.1
+  '@vitest/ui': 5.0.1
+  vitest: 5.0.1
+
+# CI runs `pnpm peers check`; these silence known false positives only.
+peerDependencyRules:
+  allowedVersions:
+    # @tailwindcss/typography declares `>=3.0.0 || >=4.0.0 || insiders`; pnpm
+    # cannot parse the `insiders` tag and flags every tailwindcss 4.x.
+    '@tailwindcss/typography>tailwindcss': '4'
+
 allowBuilds:
   '@sentry/cli': true
   esbuild: true

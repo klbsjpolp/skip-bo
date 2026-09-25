@@ -29,6 +29,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      # Fail on unmet peer dependencies (e.g. a partial vitest/@vitest/* bump)
+      # instead of letting them surface later as obscure runtime errors.
+      - name: Check peer dependencies
+        run: pnpm peers check
+
       - name: Run lint
         run: pnpm lint
 
