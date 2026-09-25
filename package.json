@@ -31,12 +31,12 @@
     "typecheck": "pnpm --filter @skipbo/game-core typecheck && pnpm --filter @skipbo/skipbo-runtime typecheck && pnpm --filter @skipbo/web typecheck"
   },
   "devDependencies": {
-    "@commitlint/cli": "^21.2.2",
-    "@commitlint/config-conventional": "^21.2.2",
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
     "@eslint/js": "^10.0.1",
-    "@types/node": "^26.5.1",
-    "@typescript-eslint/eslint-plugin": "^8.70.0",
-    "@typescript-eslint/parser": "^8.70.0",
+    "@types/node": "^26.6.2",
+    "@typescript-eslint/eslint-plugin": "^8.70.1",
+    "@typescript-eslint/parser": "^8.70.1",
     "commit-and-tag-version": "^13.2.1",
     "commitizen": "^4.3.2",
     "cz-conventional-changelog": "^3.3.0",
@@ -45,7 +45,7 @@
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17.12.0",
     "husky": "^9.1.7",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.8",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.0"
   },
