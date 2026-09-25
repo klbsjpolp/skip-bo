@@ -26,7 +26,7 @@ The default experience is local play against the built-in AI. The same web app c
 
 ### Prerequisites
 
-- Node.js `>=22.12.0`
+- Node.js `^22.12.0 || ^24.0.0 || >=26.0.0` (Vitest 5 skips odd-numbered Node releases)
 - `pnpm`
 
 ### Install
