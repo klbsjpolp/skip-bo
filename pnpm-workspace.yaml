@@ -6,9 +6,9 @@ packages:
 # Declare them once here (packages reference them as `catalog:`) so a bump
 # can never move one without the others.
 catalog:
-  '@vitest/coverage-v8': 5.0.1
-  '@vitest/ui': 5.0.1
-  vitest: 5.0.1
+  '@vitest/coverage-v8': 5.0.2
+  '@vitest/ui': 5.0.2
+  vitest: 5.0.2
 
 # CI runs `pnpm peers check`; these silence known false positives only.
 peerDependencyRules:
