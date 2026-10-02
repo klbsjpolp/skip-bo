@@ -47,7 +47,7 @@
     "husky": "^9.1.7",
     "prettier": "^3.9.8",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.70.1"
+    "typescript-eslint": "^8.71.0"
   },
   "config": {
     "commitizen": {
