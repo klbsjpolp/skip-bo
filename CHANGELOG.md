@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.16.15](https://github.com/klbsjpolp/skip-bo/compare/v2.16.14...v2.16.15) (2026-10-10)
+
 ## [2.16.14](https://github.com/klbsjpolp/skip-bo/compare/v2.16.13...v2.16.14) (2026-10-09)
 
 ## [2.16.13](https://github.com/klbsjpolp/skip-bo/compare/v2.16.12...v2.16.13) (2026-10-03)
