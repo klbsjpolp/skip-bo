@@ -10,7 +10,8 @@ if (sentryDsn) {
     environment: import.meta.env.MODE,
     release: import.meta.env.VITE_APP_VERSION, // inject at build time
 
-    sendDefaultPii: true,
+    // v11 dropped `sendDefaultPii` and `enableLogs`: `dataCollection` defaults
+    // already collect user info, headers and cookies, and logs are always on.
 
     integrations: [
       Sentry.browserTracingIntegration(),
@@ -27,8 +28,6 @@ if (sentryDsn) {
     // Session Replay
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
-
-    enableLogs: true,
   });
 } else if (import.meta.env.DEV) {
   console.info('[sentry] disabled: VITE_SENTRY_DSN is not set');
