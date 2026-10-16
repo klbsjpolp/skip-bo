@@ -8,6 +8,14 @@ updates:
       # typescript-eslint ne supporte pas encore TypeScript 6/7 (peer: <6.1.0)
       - dependency-name: 'typescript'
         update-types: ['version-update:semver-major']
+      # vitest and its @vitest/* add-ons peer-depend on the exact same version
+      # (pinned together via the pnpm catalog). Dependabot resolves each one
+      # on its own: the add-ons' hard peer on vitest blocks them, vitest's
+      # optional peers do not, so it ships a vitest-only bump that fails
+      # `pnpm peers check`. Bump the family by hand instead:
+      #   pnpm update -r --latest vitest '@vitest/*'
+      - dependency-name: 'vitest'
+      - dependency-name: '@vitest/*'
     # pnpm rejects lockfile entries younger than its 24h minimumReleaseAge;
     # hold updates a few days so CI can install what Dependabot proposes.
     cooldown:
@@ -24,8 +32,6 @@ updates:
           - 'vite'
           - '@vitejs/*'
           - 'vite-plugin-*'
-          - '@vitest/*'
-          - 'vitest'
           - 'esbuild'
           - 'rollup'
       typescript-eslint:
