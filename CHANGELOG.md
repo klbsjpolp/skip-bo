@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.16.17](https://github.com/klbsjpolp/skip-bo/compare/v2.16.16...v2.16.17) (2026-10-16)
+
+### Bug Fixes
+
+* **web:** drop sentry options removed in v11 ([795f99e](https://github.com/klbsjpolp/skip-bo/commit/795f99ef7ca9b2ff4df603b850eeeeafc477d206))
+
 ## [2.16.16](https://github.com/klbsjpolp/skip-bo/compare/v2.16.15...v2.16.16) (2026-10-10)
 
 ## [2.16.15](https://github.com/klbsjpolp/skip-bo/compare/v2.16.14...v2.16.15) (2026-10-10)
