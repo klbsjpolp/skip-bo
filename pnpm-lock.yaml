@@ -144,8 +144,8 @@ importers:
         specifier: ^5.33.2
         version: 5.33.2
       zod:
-        specifier: ^4.6.6
-        version: 4.6.6
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@axe-core/playwright':
         specifier: ^4.13.0
@@ -233,8 +233,8 @@ importers:
         specifier: workspace:*
         version: link:../game-core
       zod:
-        specifier: ^4.6.6
-        version: 4.6.6
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@vitest/coverage-v8':
         specifier: 'catalog:'
@@ -4554,8 +4554,8 @@ packages:
   zod@4.4.3:
     resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
-  zod@4.6.6:
-    resolution: {integrity: sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==}
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
 
 snapshots:
 
@@ -5591,7 +5591,7 @@ snapshots:
 
   '@klbsjpolp/realtime-core@0.1.0':
     dependencies:
-      zod: 4.6.6
+      zod: 4.6.7
 
   '@nodable/entities@3.1.0': {}
 
@@ -9056,4 +9056,4 @@ snapshots:
 
   zod@4.4.3: {}
 
-  zod@4.6.6: {}
+  zod@4.6.7: {}
