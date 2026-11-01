@@ -136,10 +136,8 @@ export const getAccessibleSkipBoCount = (player: Player): number => {
     }
   });
 
-  if (getTopStockCard(player)?.isSkipBo) {
-    count++;
-  }
-
+  // A Skip-Bo on top of the stock is deliberately not counted: it is not a
+  // resource to keep but the card the player most wants to get rid of.
   return count;
 };
 

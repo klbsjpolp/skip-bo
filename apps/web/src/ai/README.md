@@ -27,6 +27,7 @@
 
 - The AI still acts in two machine ticks when selection and resolution are separate.
 - `Skip-Bo` cards are never discarded.
+- A playable top stock card is never given up: while one is playable, the search drops discard moves (they end the turn) and plays that would leave it unplayable. A stock `Skip-Bo` does not count toward the Skip-Bo retention bonus.
 - Hands are fixed-length arrays with `null` holes.
 - The app ships one advanced AI profile and no difficulty selector.
 - AI animations are orchestrated outside this directory by the state machine and animation services.
