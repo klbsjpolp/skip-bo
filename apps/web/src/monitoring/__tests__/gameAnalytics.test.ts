@@ -66,6 +66,7 @@ describe('reportGameCompleted', () => {
       'game.completed',
       expect.objectContaining({
         level: 'info',
+        fingerprint: ['game.completed'],
         tags: {
           'game.mode': 'local',
           'game.player_count': '2',
