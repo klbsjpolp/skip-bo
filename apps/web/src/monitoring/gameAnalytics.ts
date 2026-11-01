@@ -6,7 +6,7 @@ import type { GameStatsRecord } from './gameStats';
  * stats" half of the feature (the per-device browsable log lives in
  * {@link import('@/state/gameStatsHistory')}). Mirrors the theme analytics:
  *
- * - A `game.completed` {@link Sentry.captureMessage} carries low-cardinality
+ * - A `game.completed` {@link Sentry.captureEvent} carries low-cardinality
  *   **tags** (mode, player count, winner kind, stock size, version). Sentry
  *   groups every game into one issue whose tag distribution is the categorical
  *   breakdown ("how many games, % won by AI, 2p vs 3p, which versions").
@@ -22,12 +22,14 @@ import type { GameStatsRecord } from './gameStats';
 export function reportGameCompleted(record: GameStatsRecord): void {
   const winnerKind = record.winnerIndex === null ? 'none' : record.winnerIsAI ? 'ai' : 'human';
 
-  Sentry.captureMessage('game.completed', {
+  // captureEvent, not captureMessage: the SDK turns a message into a
+  // synthetic exception carrying the caller's stack, so the issue was titled
+  // with the minified name of this function (`$w`) and grouped by it. A plain
+  // event keeps the title `game.completed`, and the fixed fingerprint keeps
+  // every game in that one issue whatever the build renames.
+  Sentry.captureEvent({
+    message: 'game.completed',
     level: 'info',
-    // Without a fingerprint Sentry groups the message by its attached stack
-    // trace, whose top frame is a minified function name that a rebuild can
-    // rename — every game then lands in a new issue per release, and no
-    // single issue's tag distribution covers them all.
     fingerprint: ['game.completed'],
     tags: {
       'game.mode': record.mode,

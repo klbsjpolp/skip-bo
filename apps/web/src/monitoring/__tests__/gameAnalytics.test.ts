@@ -6,11 +6,11 @@ import type { GameStatsRecord } from '../gameStats';
 const endSpan = vi.fn();
 
 vi.mock('@sentry/react', () => ({
-  captureMessage: vi.fn(),
+  captureEvent: vi.fn(),
   startInactiveSpan: vi.fn(() => ({ end: endSpan })),
 }));
 
-const captureMessage = vi.mocked(Sentry.captureMessage);
+const captureEvent = vi.mocked(Sentry.captureEvent);
 const startInactiveSpan = vi.mocked(Sentry.startInactiveSpan);
 
 const baseRecord = (overrides: Partial<GameStatsRecord> = {}): GameStatsRecord => ({
@@ -62,9 +62,9 @@ describe('reportGameCompleted', () => {
   it('emits a tagged game.completed message', () => {
     reportGameCompleted(baseRecord());
 
-    expect(captureMessage).toHaveBeenCalledWith(
-      'game.completed',
+    expect(captureEvent).toHaveBeenCalledWith(
       expect.objectContaining({
+        message: 'game.completed',
         level: 'info',
         fingerprint: ['game.completed'],
         tags: {
@@ -100,14 +100,12 @@ describe('reportGameCompleted', () => {
 
   it('tags the winner kind as ai and none', () => {
     reportGameCompleted(baseRecord({ winnerIsAI: true }));
-    expect(captureMessage).toHaveBeenLastCalledWith(
-      'game.completed',
+    expect(captureEvent).toHaveBeenLastCalledWith(
       expect.objectContaining({ tags: expect.objectContaining({ 'game.winner_kind': 'ai' }) }),
     );
 
     reportGameCompleted(baseRecord({ winnerIndex: null, winnerName: null, winnerIsAI: null }));
-    expect(captureMessage).toHaveBeenLastCalledWith(
-      'game.completed',
+    expect(captureEvent).toHaveBeenLastCalledWith(
       expect.objectContaining({ tags: expect.objectContaining({ 'game.winner_kind': 'none' }) }),
     );
   });
@@ -115,7 +113,7 @@ describe('reportGameCompleted', () => {
   it('skips the span when the timestamps are unparseable', () => {
     reportGameCompleted(baseRecord({ startedAt: 'not-a-date', endedAt: 'not-a-date' }));
 
-    expect(captureMessage).toHaveBeenCalledTimes(1);
+    expect(captureEvent).toHaveBeenCalledTimes(1);
     expect(startInactiveSpan).not.toHaveBeenCalled();
   });
 });
