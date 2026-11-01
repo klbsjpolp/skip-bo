@@ -59,6 +59,13 @@ Read it before making cross-cutting changes.
 
 Commitlint enforces a 72-character max on the header (first line). Keep titles short; put detail in the body.
 
+## Pull Requests
+
+CodeRabbit does not review this repo automatically (fewer than 10 stars). After opening a PR,
+wait for its `coderabbitai[bot]` comment and tick the **Trigger review** checkbox by editing that
+comment (`- [ ]` → `- [x]` on the line with the `Trigger review` label). Leave the other checkboxes
+(e.g. Autofix) unchecked.
+
 ## Key Environment Variables
 
 ```
