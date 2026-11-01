@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.16.30](https://github.com/klbsjpolp/skip-bo/compare/v2.16.29...v2.16.30) (2026-11-01)
+
+### Bug Fixes
+
+* **ai:** never give up a playable stock card ([3031e5a](https://github.com/klbsjpolp/skip-bo/commit/3031e5a7aadad48676578cd1f23adec8748e0bbb))
+
 ## [2.16.29](https://github.com/klbsjpolp/skip-bo/compare/v2.16.28...v2.16.29) (2026-10-30)
 
 ## [2.16.28](https://github.com/klbsjpolp/skip-bo/compare/v2.16.27...v2.16.28) (2026-10-30)
