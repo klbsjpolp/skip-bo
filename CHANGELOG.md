@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.16.31](https://github.com/klbsjpolp/skip-bo/compare/v2.16.30...v2.16.31) (2026-11-01)
+
+### Bug Fixes
+
+* **web:** keep every finished game in one sentry issue ([88b2dce](https://github.com/klbsjpolp/skip-bo/commit/88b2dceed757ec1565d9838008b52d664a666abd))
+
 ## [2.16.30](https://github.com/klbsjpolp/skip-bo/compare/v2.16.29...v2.16.30) (2026-11-01)
 
 ### Bug Fixes
