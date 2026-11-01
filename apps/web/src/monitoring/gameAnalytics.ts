@@ -24,6 +24,11 @@ export function reportGameCompleted(record: GameStatsRecord): void {
 
   Sentry.captureMessage('game.completed', {
     level: 'info',
+    // Without a fingerprint Sentry groups the message by its attached stack
+    // trace, whose top frame is a minified function name that a rebuild can
+    // rename — every game then lands in a new issue per release, and no
+    // single issue's tag distribution covers them all.
+    fingerprint: ['game.completed'],
     tags: {
       'game.mode': record.mode,
       'game.player_count': String(record.playerCount),
