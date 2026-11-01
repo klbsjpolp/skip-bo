@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.16.32](https://github.com/klbsjpolp/skip-bo/compare/v2.16.31...v2.16.32) (2026-11-01)
+
+### Bug Fixes
+
+* **web:** title the finished-game event game.completed ([4277955](https://github.com/klbsjpolp/skip-bo/commit/4277955dd4d598dda0f708ecf92bc0382ef7027e))
+
 ## [2.16.31](https://github.com/klbsjpolp/skip-bo/compare/v2.16.30...v2.16.31) (2026-11-01)
 
 ### Bug Fixes
