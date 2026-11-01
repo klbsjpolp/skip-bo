@@ -271,4 +271,76 @@ describe('computeBestMove', () => {
       plannedBuildPileIndex: 0,
     });
   });
+  it('ne termine jamais son tour par une défausse quand le Skip-Bo du talon est jouable', async () => {
+    for (let run = 0; run < 25; run++) {
+      const state = initialGameState();
+
+      state.currentPlayerIndex = 1;
+      state.deck = [];
+      state.completedBuildPiles = [];
+      state.selectedCard = null;
+      // Every build pile is far from the AI's next stock card, and placing the
+      // Skip-Bo on pile 0 opens the human's stock 4 — the configuration where the
+      // heuristics used to prefer a "safe" discard over the stock play.
+      state.buildPiles = [
+        [
+          { value: 1, isSkipBo: false },
+          { value: 2, isSkipBo: false },
+        ],
+        [],
+        [],
+        [],
+      ];
+      state.players[0] = {
+        ...state.players[0],
+        stockPile: [{ value: 4, isSkipBo: false }],
+        discardPiles: [[{ value: 5, isSkipBo: false }], [], [], []],
+      };
+      state.players[1] = {
+        ...state.players[1],
+        isAI: true,
+        stockPile: [
+          { value: 11, isSkipBo: false },
+          { value: 0, isSkipBo: true },
+        ],
+        hand: [
+          { value: 9, isSkipBo: false },
+          { value: 10, isSkipBo: false },
+          { value: 7, isSkipBo: false },
+          { value: 12, isSkipBo: false },
+          { value: 8, isSkipBo: false },
+        ],
+        discardPiles: [[], [], [], []],
+      };
+
+      const finalState = await runAITurn(state, 12);
+
+      expect(finalState.players[1].stockPile).toHaveLength(1);
+    }
+  });
+  it('ne recouvre pas la pile visée par son talon avec une carte de sa main', async () => {
+    for (let run = 0; run < 25; run++) {
+      const state = initialGameState();
+
+      state.currentPlayerIndex = 1;
+      state.deck = [];
+      state.completedBuildPiles = [];
+      state.selectedCard = null;
+      state.buildPiles = [Array.from({ length: 4 }, (_, index) => ({ value: index + 1, isSkipBo: false })), [], [], []];
+      state.players[1] = {
+        ...state.players[1],
+        isAI: true,
+        stockPile: [
+          { value: 12, isSkipBo: false },
+          { value: 5, isSkipBo: false },
+        ],
+        hand: [{ value: 5, isSkipBo: false }, { value: 9, isSkipBo: false }, null, null, null],
+        discardPiles: [[], [], [], []],
+      };
+
+      const finalState = await runAITurn(state, 12);
+
+      expect(finalState.players[1].stockPile).toHaveLength(1);
+    }
+  });
 });

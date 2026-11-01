@@ -143,6 +143,11 @@ const hasNaturalAlternativeForBuild = (gameState: GameState, move: MoveEvaluatio
   return false;
 };
 
+const isTopStockPlayable = (gameState: GameState, playerIndex: number): boolean => {
+  const stockCard = getTopStockCard(getAIPlayer(gameState, playerIndex));
+  return stockCard !== null && getPlayableBuildPiles(stockCard, gameState).length > 0;
+};
+
 const generatePlayMoves = (gameState: GameState): MoveEvaluation[] => {
   const aiPlayer = getAIPlayer(gameState);
   const moves: MoveEvaluation[] = [];
@@ -455,8 +460,16 @@ const searchTurn = (gameState: GameState, aiPlayerIndex: number, depth: number):
     return { score: evaluateState(gameState, aiPlayerIndex), move: null };
   }
 
-  const playMoves = generatePlayMoves(gameState);
-  const discardMoves = generateDiscardMoves(gameState);
+  const stockIsPlayable = isTopStockPlayable(gameState, aiPlayerIndex);
+  // A playable stock card is never given up: discarding ends the turn with it
+  // still on the stock, and covering its build pile with another card throws
+  // the play away. Neither is ever better than simply playing the stock card.
+  const playMoves = stockIsPlayable
+    ? generatePlayMoves(gameState).filter(
+        (move) => move.source === 'stock' || isTopStockPlayable(simulateResolvedMove(gameState, move), aiPlayerIndex),
+      )
+    : generatePlayMoves(gameState);
+  const discardMoves = stockIsPlayable ? [] : generateDiscardMoves(gameState);
 
   const rankedDiscardMoves = discardMoves
     .map((move) => {
