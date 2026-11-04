@@ -16,6 +16,13 @@ updates:
       #   pnpm update -r --latest vitest '@vitest/*'
       - dependency-name: 'vitest'
       - dependency-name: '@vitest/*'
+      # axe-core 4.14 adds a label-content-name-mismatch finding on the cards
+      # and piles (visible value text missing from their aria-labels), which
+      # fails the axe e2e checks. Hold at 4.13 until the labels are reworked.
+      - dependency-name: '@axe-core/playwright'
+        versions: ['>=4.14.0']
+      - dependency-name: 'axe-core'
+        versions: ['>=4.14.0']
     # pnpm rejects lockfile entries younger than its 24h minimumReleaseAge;
     # hold updates a few days so CI can install what Dependabot proposes.
     cooldown:
