@@ -134,7 +134,7 @@
      a touch screen that stray scroll is what a drag turns into. Subtract the
      insets so the page is exactly as tall as it needs to be. */
   #main {
-    min-height: calc(100svh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    min-height: calc(100svh - var(--inset-top) - env(safe-area-inset-bottom, 0px));
   }
 
   .game-status {

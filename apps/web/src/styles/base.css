@@ -79,7 +79,33 @@
        or texture on `body` — glass, rainbow, cinema… — need this to stay
        transparent so that artwork still shows through the board. */
     background-color: var(--board-bg, transparent);
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    padding: var(--inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* Installed to the home screen, iOS and iPadOS 26 draw a Liquid Glass edge
+     effect under the status bar: a blur about 38pt deep that smears and
+     reflects whatever sits there, so the toolbar looked half-hidden under the
+     bar. Nothing turns it off — no meta tag or CSS property, and
+     `env(safe-area-inset-top)` stays 0 because the default status bar style
+     already insets the page. The only fix is to put nothing with detail in
+     that band, so an installed app starts 2.5rem lower. Safari pays nothing;
+     a landscape phone is exempt, since iOS hides the status bar there.
+     `#main` discounts the same `--inset-top`, so the page still fits. */
+  :root {
+    --top-clear: 0px;
+    --inset-top: calc(env(safe-area-inset-top, 0px) + var(--top-clear));
+  }
+
+  @media (display-mode: standalone) {
+    :root {
+      --top-clear: 2.5rem;
+    }
+  }
+
+  @media (display-mode: standalone) and (orientation: landscape) and (max-height: 640px) {
+    :root {
+      --top-clear: 0px;
+    }
   }
 
   :root {
