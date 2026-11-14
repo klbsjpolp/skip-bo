@@ -110,7 +110,9 @@ describe('CSS Visual Behavior', () => {
       document.body.appendChild(div);
 
       const computedStyle = window.getComputedStyle(div);
-      expect(computedStyle.boxShadow).toContain('rgba(0,0,0,0.2)');
+      // jsdom 31 re-serializes the colour as `rgba(0, 0, 0, 0.2)`; older
+      // versions echo the stylesheet's spacing. Compare without whitespace.
+      expect(computedStyle.boxShadow.replace(/\s/g, '')).toContain('rgba(0,0,0,0.2)');
 
       document.body.removeChild(div);
     });

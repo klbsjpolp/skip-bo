@@ -190,7 +190,8 @@ describe('useDraggableCard on touch', () => {
     pointerDown('hand-card', { pointerId: 1, pointerType, clientX: 300, clientY: 300 });
     windowPointerEvent('pointermove', { pointerId: 1, pointerType, clientX: 300, clientY: 320 });
 
-    expect(screen.getByTestId('drag-ghost').style.transform).toContain('translate3d(300px, 320px, 0)');
+    // jsdom 31 normalizes the unitless `0` to `0px`; older versions keep it.
+    expect(screen.getByTestId('drag-ghost').style.transform).toMatch(/translate3d\(300px, 320px, 0(px)?\)/);
 
     windowPointerEvent('pointerup', { pointerId: 1, pointerType, clientX: 300, clientY: 320 });
   });
